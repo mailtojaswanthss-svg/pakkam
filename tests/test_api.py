@@ -199,3 +199,16 @@ def test_web_page_is_served_and_api_routes_still_win(service: FakeService, tmp_p
     assert page.status_code == 200
     assert "Pakkam" in page.text
     assert health.json() == {"status": "ok"}
+
+
+def test_webp_photos_are_served_as_images(service: FakeService, tmp_path: Path) -> None:
+    web = tmp_path / "web"
+    web.mkdir()
+    (web / "index.html").write_text("<!doctype html>", encoding="utf-8")
+    (web / "photo.webp").write_bytes(b"RIFF\x00\x00\x00\x00WEBP")
+    app = create_app(lambda: service, log_dir=tmp_path, web_dir=web)
+
+    with TestClient(app) as client:
+        response = client.get("/photo.webp")
+
+    assert response.headers["content-type"] == "image/webp"

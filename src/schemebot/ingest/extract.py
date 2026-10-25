@@ -49,6 +49,16 @@ MIN_LETTER_SHARE = 0.5
 """Prose is ~90% letters. When a font's glyphs have no Unicode mapping they vanish from the
 text layer, leaving pages of punctuation and numbers such as 'ii) . iii) .2.5 .'."""
 
+TABLE_ALNUM_SHARE = 0.8
+"""A page under MIN_LETTER_SHARE is still kept as text when letters plus digits make up at
+least this share: that is a table, not residue. Measured on the corpus: broken-font residue
+pages 0.45-0.74, real table pages 0.84-1.00. Tesseract cannot read tables, so sending them
+to OCR lost their content."""
+
+MIN_OCR_YIELD = 0.25
+"""If OCR returns less than this share of the text layer's letters and digits (on a page
+not set in a known legacy font), the OCR failed and the text layer is kept."""
+
 # Pre-Unicode Tamil and Hindi font families. Text set in them is unreadable without OCR.
 # Compared case-insensitively against the font name with its subset tag ("ABCDEE+") removed.
 LEGACY_FONT_PREFIXES = (
@@ -150,7 +160,9 @@ def needs_ocr(text: str) -> bool:
     if sum(_is_bad_char(char) for char in visible) / len(visible) > MAX_BAD_CHAR_SHARE:
         return True
 
-    if sum(char.isalpha() for char in visible) / len(visible) < MIN_LETTER_SHARE:
+    letter_share = sum(char.isalpha() for char in visible) / len(visible)
+    alnum_share = sum(char.isalnum() for char in visible) / len(visible)
+    if letter_share < MIN_LETTER_SHARE and alnum_share < TABLE_ALNUM_SHARE:
         return True
 
     if _has_abnormal_i_sign_share(visible):
@@ -214,7 +226,8 @@ def extract_pages(
         for index, page in enumerate(document):
             page_number = index + 1
             text = normalize_text(page.get_text("text"))
-            if not (force_ocr or uses_legacy_font(page) or needs_ocr(text)):
+            legacy_font = uses_legacy_font(page)
+            if not (force_ocr or legacy_font or needs_ocr(text)):
                 pages.append(PageText(page_number, replace_symbol_bullets(text), "text"))
                 continue
 
@@ -229,5 +242,19 @@ def extract_pages(
                 logger.warning("%s p%d OCR failed: %s", pdf_path.name, page_number, error)
                 pages.append(PageText(page_number, text, "text-unverified"))
                 continue
+            if not (force_ocr or legacy_font) and _content(ocr_text) < MIN_OCR_YIELD * _content(
+                text
+            ):
+                # OCR read far less than the text layer holds (tables are the usual case):
+                # never let a failed OCR wipe out good text.
+                logger.info(
+                    "%s p%d: OCR yielded little, keeping text layer", pdf_path.name, page_number
+                )
+                pages.append(PageText(page_number, replace_symbol_bullets(text), "text"))
+                continue
             pages.append(PageText(page_number, ocr_text, "ocr"))
     return pages
+
+
+def _content(text: str) -> int:
+    return sum(char.isalnum() for char in text)

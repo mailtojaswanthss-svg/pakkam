@@ -5,6 +5,7 @@ reranker models load once at startup; requests then reuse them.
 """
 
 import logging
+import mimetypes
 import threading
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
@@ -23,6 +24,9 @@ from schemebot.generate.answer import Answer
 from schemebot.ingest.models import SourceDoc
 
 SOURCES_NAME = "sources.json"
+
+# Windows' MIME table has no entry for WebP, so photos would be served as octet-stream.
+mimetypes.add_type("image/webp", ".webp")
 
 logger = logging.getLogger(__name__)
 

@@ -61,7 +61,7 @@ uv run python -m schemebot.ingest     # PDFs in data/raw + data/sources.json -> 
 uv run python -m schemebot.index      # chunks -> search index in data/index/
 uv run python -m schemebot.retrieve "PM Kisan ku evlo panam kidaikum?"   # passages only
 uv run python -m schemebot.generate "PM Kisan ku evlo panam kidaikum?"   # cited answer
-uv run fastapi run                    # HTTP API on http://localhost:8000 (docs at /docs)
+uv run fastapi run                    # site + API on http://localhost:8000 (chat at /chat/, API docs at /docs)
 ```
 
 `schemebot.generate` and the API need a Claude API key to answer: set
@@ -94,7 +94,8 @@ src/schemebot/   ingest/ index/ retrieve/ generate/ api/   pipeline stages
 data/            raw/ (not committed), processed/ (rebuilt), eval/questions.jsonl,
                  sources.json (documents), contacts.json (official helplines/websites)
 docs/            data sources, results, technical report
-web/             Pakkam, the chat UI (plain HTML/CSS/JS, no build step)
+web/             Pakkam: home page (index.html) and chat app (chat/), plain HTML/CSS/JS,
+                 photos in assets/img/ (Unsplash License, see CREDITS.md)
 tests/           unit tests per module
 ```
 

@@ -76,7 +76,9 @@ def is_tanglish(text: str) -> bool:
     words = _WORD_RE.findall(text.lower())
     if not words:
         return False
-    hits = sum(word in TANGLISH_WORDS for word in words)
+    # Distinct words, not occurrences: a scheme name repeated in English text ("Naan
+    # Mudhalvan" twice) is one hit, while real Tanglish uses several different words.
+    hits = len({word for word in words if word in TANGLISH_WORDS})
     return hits >= TANGLISH_MIN_HITS or (hits > 0 and hits / len(words) >= TANGLISH_MIN_SHARE)
 
 

@@ -5,104 +5,175 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pakkam: scheme answers with the page they come from</title>
 <meta name="description" content="Ask about Indian government schemes in Tamil, Hindi, English or Tanglish. Every answer shows the official document and page it comes from.">
-<meta name="theme-color" content="#EBEFE6">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='3' width='19' height='26' rx='2.5' fill='%23F7F9F3' stroke='%231A2230' stroke-width='2'/%3E%3Cpath d='M9 10h11M9 15h11M9 20h7' stroke='%231A2230' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='23' r='6' fill='%235A36A3'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#EEF1EA">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='3' width='19' height='26' rx='2.5' fill='%23FBFCF9' stroke='%231B2130' stroke-width='2'/%3E%3Cpath d='M9 10h11M9 15h11M9 20h7' stroke='%231B2130' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='23' r='6' fill='%235A36A3'/%3E%3C/svg%3E">
 <!-- DEPLOY STEP: add og:url and og:image with absolute URLs of the live site. -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Pakkam">
-<meta property="og:description" content="Ask about government schemes in Tamil, Hindi, English or Tanglish. Every answer shows its page.">
+<meta property="og:description" content="Somewhere in a government order, there is a line about you. Pakkam finds it.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@100..112,400..700&family=Anek+Tamil:wdth,wght@100,400..600&family=Anek+Devanagari:wdth,wght@100,400..600&display=swap">
-<link rel="stylesheet" href="assets/styles.css">
-<script src="assets/app.js" defer></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Baloo+Thambi+2:wght@600;800&family=Hind:wght@400;500;600&family=Hind+Madurai:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/home.css">
+<link rel="preload" as="image" href="assets/img/forward-phone.webp">
+<script>document.documentElement.classList.add('js');</script>
+<script src="assets/home.js" defer></script>
 </head>
 <body>
-<a class="skip" href="#q">Skip to the question box</a>
-<div class="ledger" aria-hidden="true"></div>
+<a class="skip" href="#main">Skip to content</a>
 
-<header class="top">
-  <nav class="nav wrap" aria-label="Main">
-    <a class="mark" href="#main">
-      <svg class="mark-icon" viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="2.5"/><path d="M9 10h11M9 15h11M9 20h7"/><circle cx="24" cy="23" r="6"/></svg>
+<header class="nav-bar">
+  <nav class="nav" aria-label="Main">
+    <a class="mark" href="./" aria-label="Pakkam home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="2.5"/><path d="M9 10h11M9 15h11M9 20h7"/><circle cx="24" cy="23" r="6"/></svg>
       Pakkam
     </a>
-    <ul class="links">
-      <li><a href="#how">About</a></li>
-      <li><a href="#sources">Sources</a></li>
+    <ul class="nav-links">
+      <li><a href="#story">Story</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#results">Results</a></li>
     </ul>
+    <a class="btn btn-primary nav-cta" href="chat/">Open Pakkam</a>
   </nav>
 </header>
 
 <main id="main" tabindex="-1">
-  <section class="intro wrap" aria-labelledby="intro-h">
-    <div class="intro-copy">
-      <h1 id="intro-h">Ask about a government scheme in your own words.</h1>
-      <p class="sub">Tamil, Hindi, English or Tanglish. Every answer shows the official document and page it comes from. If the documents don't say, Pakkam tells you.</p>
-      <ul class="tabs" aria-label="Languages you can ask in">
+
+  <!-- Hero -->
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="hero-copy">
+      <p class="badge"><span class="badge-dot" aria-hidden="true"></span>Student research project, Tamil Nadu</p>
+      <h1 id="hero-h">Somewhere in a government order, there is a line about you.</h1>
+      <p class="lead">Pakkam finds it. Ask in Tamil, Hindi, English or Tanglish, and see the exact page your answer comes from.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="chat/">Ask Pakkam</a>
+        <a class="btn btn-quiet" href="#demo">See it answer</a>
+      </div>
+      <ul class="scripts" aria-label="Languages you can ask in">
         <li lang="ta">தமிழ்</li>
         <li lang="hi">हिन्दी</li>
         <li lang="en">English</li>
         <li lang="ta-Latn">Tanglish</li>
       </ul>
     </div>
-    <figure class="art" aria-hidden="true">
-      <svg viewBox="0 0 420 320">
-        <rect class="pg" x="24" y="16" width="232" height="288" rx="6"/>
-        <line class="margin" x1="44" y1="16" x2="44" y2="304"/>
-        <g class="lines">
-          <line x1="56" y1="58" x2="232" y2="58"/>
-          <line x1="56" y1="78" x2="220" y2="78"/>
-          <line x1="56" y1="98" x2="232" y2="98"/>
-          <line x1="56" y1="118" x2="206" y2="118"/>
-          <line x1="56" y1="158" x2="228" y2="158"/>
-          <line x1="56" y1="178" x2="214" y2="178"/>
-          <line x1="56" y1="198" x2="232" y2="198"/>
-          <line x1="56" y1="218" x2="190" y2="218"/>
-          <line x1="56" y1="238" x2="224" y2="238"/>
-          <line x1="56" y1="258" x2="168" y2="258"/>
-        </g>
-        <rect class="hl" x="50" y="129" width="188" height="18" rx="3"/>
-        <line class="hl-line" x1="56" y1="138" x2="226" y2="138"/>
-        <text class="pno" x="232" y="292" text-anchor="end">9</text>
-        <path class="link" pathLength="1" d="M238 138 C 300 138, 352 158, 352 204"/>
-        <g class="card">
-          <rect class="card-box" x="236" y="190" width="164" height="92" rx="12"/>
-          <line class="card-line" x1="256" y1="220" x2="372" y2="220"/>
-          <line class="card-line" x1="256" y1="240" x2="330" y2="240"/>
-          <line class="card-line" x1="256" y1="260" x2="350" y2="260"/>
-          <g class="dot">
-            <circle cx="352" cy="240" r="11"/>
-            <text x="352" y="244.5" text-anchor="middle">1</text>
-          </g>
-        </g>
-      </svg>
-    </figure>
-  </section>
-
-  <section class="chat wrap" aria-labelledby="chat-h">
-    <h2 id="chat-h" class="vh">Ask Pakkam</h2>
-    <div class="sheet">
-      <div class="empty" id="empty">
-        <p>Try one of these, or type your own question.</p>
-        <ul class="examples">
-          <li><button type="button" class="ex" lang="ta">மகளிர் உரிமைத் தொகை பெற யார் தகுதியானவர்?</button></li>
-          <li><button type="button" class="ex" lang="hi">पीएम किसान में साल में कितना पैसा मिलता है?</button></li>
-          <li><button type="button" class="ex" lang="en">What is the age limit for Atal Pension Yojana?</button></li>
-          <li><button type="button" class="ex" lang="ta-Latn">ujjwala gas connection ku enna documents venum</button></li>
-        </ul>
+    <div class="hero-art">
+      <figure class="arch">
+        <img src="assets/img/forward-phone.webp" width="1000" height="1502" alt="A woman in a pink sari reading a message on her phone">
+      </figure>
+      <div class="float float-forward" aria-hidden="true">
+        <p class="float-label">Forwarded many times</p>
+        <p class="float-main">₹1,000 every month for women. Apply fast!</p>
       </div>
-      <ol class="log" id="log" aria-live="polite"></ol>
-      <form class="ask" id="ask" novalidate>
-        <label class="vh" for="q">Your question</label>
-        <textarea id="q" name="question" rows="1" autocomplete="off"></textarea>
-        <button class="send" type="submit">Ask</button>
-        <p class="form-msg" id="form-msg" role="status"></p>
-      </form>
+      <div class="float float-slip" aria-hidden="true">
+        <span class="chip-mini">page 9</span>
+        <p lang="ta">ஆண்டுக்கு 12 ஆயிரம் ரூபாய்</p>
+        <p class="float-sub">G.O.(Ms) No.15, the official order</p>
+      </div>
     </div>
   </section>
 
-  <section id="how" class="how wrap" aria-labelledby="how-h">
+  <!-- The story -->
+  <section id="story" class="section story" aria-labelledby="story-h">
+    <div class="section-head">
+      <h2 id="story-h">The help is written down. Finding it is the hard part.</h2>
+      <p class="lead">Schemes live in long official documents. People ask in their own language, on WhatsApp, at the ration shop. Somewhere in between, the answer gets lost.</p>
+    </div>
+    <div class="bento">
+      <article class="tile tile-forward">
+        <h3>It starts with a forward.</h3>
+        <div class="bubble" aria-hidden="true">
+          <p class="bubble-label">Forwarded many times</p>
+          <p class="bubble-main">₹1,000 every month for women. Apply fast!</p>
+        </div>
+        <p>Is it real? Is it meant for you? The message doesn't say.</p>
+      </article>
+      <article class="tile tile-paper">
+        <img src="assets/img/government-files.webp" width="1400" height="934" loading="lazy" alt="Tall stacks of government files and folders in an office">
+        <div class="tile-paper-copy">
+          <p class="big-number">43 <span>pages</span></p>
+          <h3>The real answer sits in a government order.</h3>
+          <p>Written in formal Tamil and official English. Few people have the time to read it.</p>
+        </div>
+      </article>
+      <article class="tile tile-guess">
+        <h3>So people guess.</h3>
+        <p>Or they pay someone who says they know. Or they never apply at all.</p>
+        <ul class="guesses" aria-label="What people do instead">
+          <li>Guess</li>
+          <li>Pay someone</li>
+          <li>Never apply</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- Live demo -->
+  <section id="demo" class="section demo" aria-labelledby="demo-h">
+    <div class="demo-copy">
+      <h2 id="demo-h">Pakkam reads the pages for you.</h2>
+      <p class="lead">Ask the way you would ask at home. Pakkam finds the pages, reads them, checks every sentence, and shows you the line it used.</p>
+      <div class="demo-tabs" role="tablist" aria-label="Example language">
+        <button type="button" role="tab" class="demo-tab" data-demo="ta" lang="ta" aria-selected="true">தமிழ்</button>
+        <button type="button" role="tab" class="demo-tab" data-demo="hi" lang="hi" aria-selected="false">हिन्दी</button>
+        <button type="button" role="tab" class="demo-tab" data-demo="tl" lang="ta-Latn" aria-selected="false">Tanglish</button>
+      </div>
+      <p class="demo-note">Example answers built from the real documents. Try your own question in the chat.</p>
+    </div>
+    <div class="demo-window" id="demo-window" aria-live="polite">
+      <div class="demo-bar" aria-hidden="true"><span></span><span></span><span></span><p>Pakkam</p></div>
+      <div class="demo-body">
+        <p class="demo-q" id="demo-q"></p>
+        <ol class="demo-steps" id="demo-steps">
+          <li>Finding the pages</li>
+          <li id="demo-read">Reading the page</li>
+          <li>Checking every sentence</li>
+        </ol>
+        <div class="demo-a" id="demo-a">
+          <p class="demo-a-text"><span id="demo-a-text"></span> <span class="chip-mini chip-cite">1</span></p>
+          <div class="demo-slip">
+            <p class="demo-slip-title" id="demo-slip-title"></p>
+            <p class="demo-slip-line" id="demo-slip-line"></p>
+          </div>
+        </div>
+        <button type="button" class="demo-replay" id="demo-replay">Play again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Who it's for -->
+  <section class="section people" aria-labelledby="people-h">
+    <div class="section-head">
+      <h2 id="people-h">Help that is already written down</h2>
+      <p class="lead">Every one of these is in an official document Pakkam can read today.</p>
+    </div>
+    <ul class="people-grid">
+      <li class="person">
+        <img src="assets/img/farmers-field.webp" width="1400" height="934" loading="lazy" alt="Two women in saris standing in a green farm field">
+        <div class="person-copy">
+          <p class="person-who">Farm families</p>
+          <p><strong>PM-KISAN:</strong> ₹6,000 a year, paid in three instalments of ₹2,000.</p>
+        </div>
+      </li>
+      <li class="person">
+        <img src="assets/img/students-classroom.webp" width="1400" height="934" loading="lazy" alt="Schoolgirls in white uniforms listening in a classroom">
+        <div class="person-copy">
+          <p class="person-who">Girl students</p>
+          <p><strong>Pudhumai Penn:</strong> ₹1,000 a month, paid into the student's bank account.</p>
+        </div>
+      </li>
+      <li class="person">
+        <img src="assets/img/elder-woman.webp" width="1000" height="1250" loading="lazy" alt="An elderly woman in a green blouse and pink sari, smiling">
+        <div class="person-copy">
+          <p class="person-who">Older age</p>
+          <p><strong>Atal Pension Yojana:</strong> a guaranteed ₹1,000 to ₹5,000 a month after 60.</p>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- How it works -->
+  <section id="how" class="section how" aria-labelledby="how-h">
     <h2 id="how-h">How an answer is made</h2>
     <ol class="steps">
       <li>
@@ -120,20 +191,39 @@
     </ol>
   </section>
 
-  <section id="sources" class="sources wrap" aria-labelledby="src-h">
-    <div class="src-head">
-      <h2 id="src-h">What the documents cover</h2>
-      <p>Official public documents from Tamil Nadu and central government websites.</p>
-    </div>
-    <ul class="src-list" id="src-list">
-      <li class="src-note">Loading the document list</li>
-    </ul>
+  <!-- Results -->
+  <section id="results" class="section results" aria-labelledby="results-h">
+    <h2 id="results-h">Measured, not claimed</h2>
+    <dl class="stats">
+      <div class="stat"><dt>Official documents</dt><dd>18</dd></div>
+      <div class="stat"><dt>Passages searched for every question</dt><dd>2,785</dd></div>
+      <div class="stat"><dt>Ways to ask</dt><dd>4</dd></div>
+      <div class="stat"><dt>Test questions with the right page in the top five</dt><dd>36 of 36</dd></div>
+    </dl>
+    <p class="footnote">From a development test on 48 draft questions across Tamil, Hindi, English and Tanglish. Answer quality is measured next, and the numbers will be updated here as they come in.</p>
+  </section>
+
+  <!-- Call to action -->
+  <section class="cta-band" aria-labelledby="cta-h">
+    <h2 id="cta-h">Your question, in your own words.</h2>
+    <p>Free to use. No sign-up. Your question text is never logged.</p>
+    <a class="btn btn-light" href="chat/">Ask your first question</a>
   </section>
 </main>
 
-<footer class="foot">
-  <div class="wrap">
-    <p>Pakkam is an independent student project. It is not an official service and is not affiliated with any government body. Answers are for information only: check the official source before you act on them.</p>
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <a class="mark" href="./">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="2.5"/><path d="M9 10h11M9 15h11M9 20h7"/><circle cx="24" cy="23" r="6"/></svg>
+        Pakkam
+      </a>
+      <p class="footer-note">An independent student project. Not an official service and not affiliated with any government body. Answers are for information only: check the official source before you act on them.</p>
+    </div>
+    <div class="credits">
+      <p class="credits-h">Photos</p>
+      <p>From Unsplash, under the Unsplash License: Rosario Fernandes, Wesley Tingey, EqualStock, Yogendra Singh, Himanshu Kiradiya.</p>
+    </div>
   </div>
 </footer>
 </body>

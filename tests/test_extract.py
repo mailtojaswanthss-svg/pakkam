@@ -182,3 +182,35 @@ def test_private_use_characters_still_count_towards_ocr_detection() -> None:
     garbled = "Eligibility " + chr(0xE012) * 3 + " "
 
     assert needs_ocr(garbled * 5)
+
+
+# Real text layer of the health policy note's district table (p289). Under half letters,
+# but nearly all letters and digits: a table, which must keep its text.
+DISTRICT_TABLE = (
+    "287 2 Chengalpattu 4,767 5,693 3 Coimbatore 3,698 7,257 4 Cuddalore 6,722 10,634 "
+    "5 Dharmapuri 1,534 2,811 6 Dindigul 3,045 6,120 7 Erode 2,987 5,402 "
+)
+
+
+def test_number_table_keeps_its_text_layer() -> None:
+    assert not needs_ocr(DISTRICT_TABLE * 2)
+
+
+def test_page_where_ocr_reads_almost_nothing_keeps_its_text_layer(tmp_path: Path) -> None:
+    # A page flagged for OCR (letters under half, and not a dense table) whose OCR fails
+    # to read it must not lose the text it had.
+    layout = "Table 4.2 | 12 | 345 | 6,789 | 10 | 11 | 2,000 | 3.5 | 41 | 9,000 |\n" * 6
+    pdf = make_pdf(tmp_path / "table.pdf", [layout])
+
+    [page] = extract_pages(pdf, ocr=lambda page: "287")
+
+    assert page.method == "text"
+    assert "6,789" in page.text
+
+
+def test_successful_ocr_still_replaces_a_broken_text_layer(tmp_path: Path) -> None:
+    pdf = make_pdf(tmp_path / "scanned.pdf", [""])
+
+    [page] = extract_pages(pdf, ocr=lambda page: "தகுதி: தமிழ்நாட்டில் வசிப்பவர் " * 3)
+
+    assert page.method == "ocr"

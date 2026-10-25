@@ -14,6 +14,7 @@ from schemebot.ingest.chunk import chunk_document
 from schemebot.ingest.extract import OcrFn, extract_pages
 from schemebot.ingest.langid import Language, detect_language
 from schemebot.ingest.models import Chunk, SourceDoc
+from schemebot.ingest.ocr_cache import CACHE_DIR_NAME, cached_ocr
 
 OcrFactory = Callable[[Language], OcrFn]
 """Builds an OCR function for a document's language."""
@@ -80,6 +81,8 @@ def run_ingest(settings: Settings, ocr_factory: OcrFactory | None) -> IngestRepo
             continue
 
         ocr = ocr_factory(doc.language) if ocr_factory else None
+        if ocr is not None:
+            ocr = cached_ocr(ocr, settings.processed_dir / CACHE_DIR_NAME, pdf_path, doc.language)
         try:
             pages = extract_pages(pdf_path, ocr=ocr, force_ocr=doc.force_ocr)
         except pymupdf.FileDataError as error:

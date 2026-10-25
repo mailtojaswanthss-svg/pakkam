@@ -57,3 +57,15 @@ def test_script_counts_ignores_digits_and_punctuation() -> None:
 )
 def test_spoken_tanglish_queries(query: str) -> None:
     assert detect_language(query) == "ta-Latn"
+
+
+def test_scheme_name_repeated_in_english_is_not_tanglish() -> None:
+    # Real chunk from the Higher Education policy note: "naan" is a Tanglish word, but here
+    # it is part of a scheme name used twice.
+    text = (
+        "3.10. NAAN MUDHALVAN Naan Mudhalvan is an ambitious scheme which aims at imparting "
+        "employability skills to students of colleges across the state through industry "
+        "partnerships, internships and short courses run by the department every year."
+    )
+
+    assert detect_language(text) == "en"

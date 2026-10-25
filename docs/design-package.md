@@ -1,5 +1,9 @@
 # Pakkam: design package
 
+> **Superseded in part by [frontend-plan.md](frontend-plan.md) (v2):** the site is now a home
+> page (`/`) plus a chat app (`/chat/`), with Baloo + Hind type and Unsplash photos. The
+> premise, palette roles, story facts and copy rules below still apply.
+
 The single source for the web UI. Every viewer-facing line below ships verbatim.
 
 ## 1. Premise
@@ -142,6 +146,42 @@ Easing tokens: `--ease-out: cubic-bezier(.22,.8,.24,1)`, `--ease-in-out: cubic-b
 - Footer: Pakkam is an independent student project. It is not an official service and is
   not affiliated with any government body. Answers are for information only: check the
   official source before you act on them.
+
+## 7b. The story (scroll chapters)
+
+The page tells why Pakkam exists before it asks anything of the visitor. Told in the second
+person so the reader is the person in it; no invented characters or testimonials. Grounded
+in what is reported about scheme access (people unsure if they are eligible or how to
+apply; official language that confuses; fake scheme forwards; middlemen asking fees). Every
+number is from our own documents: the Magalir Urimai G.O. is 43 pages, and its Tamil
+page 9 states ஆண்டுக்கு 12 ஆயிரம் ரூபாய் (₹12,000 a year).
+
+Hero (replaces the earlier headline):
+- Headline: Somewhere in a government order, there is a line about you.
+- Sub: Pakkam finds it. Ask in Tamil, Hindi, English or Tanglish, and see the exact page
+  your answer comes from.
+- Button: Ask a question
+
+Chapters, each paired with one scene of the sticky illustration:
+
+| # | Heading (verbatim) | Body (verbatim) | Scene |
+|---|---|---|---|
+| 1 | It starts with a forward. | “₹1,000 every month for women. Apply fast!” Is it real? Is it meant for you? The message doesn't say. | A forwarded message bubble |
+| 2 | The real answer is on paper. | It sits in a 43-page government order, written in formal Tamil and official English. Few people have the time to read it. | The bubble shrinks away; pages fan out; a counter rolls to 43 |
+| 3 | So people guess. | Or they pay someone who says they know. Or they never apply at all. | Pages dim; three dashed paths lead off to "guess", "pay someone", "give up" |
+| 4 | Pakkam reads the pages for you. | Ask the way you would ask at home, in Tamil, Hindi, English or Tanglish. | Pages square up; a Tamil question appears; a scan line reads the top page |
+| 5 | Then it shows you the line. | Page 9 of the order: ₹12,000 a year for women who head their families and meet its conditions. The government's own words, so you can check them yourself. | One line lights up; a slip lifts out: "page 9", the Tamil line, "₹12,000 a year" |
+| 6 | And when the pages don't say, it tells you. | No guessing. You get the official website or helpline instead. | A blank page: "Not in the documents", and an "Official contact" pill |
+
+Chat heading (now visible): Your question, in your own words.
+
+Mechanics: chapters scroll normally; an IntersectionObserver sets the active scene on the
+sticky stage (fully reversible on scroll-up). Scene changes are transform and opacity
+transitions only; the scan line loops only while scene 4 is active; the counter rolls only
+on entering scene 2. Desktop: chapters left, stage sticky right, inactive chapters dimmed.
+Phones: stage sticky at the top half, chapters scroll beneath as paper cards. Reduced
+motion: scenes switch instantly, the counter shows 43, no scan loop. The stage is
+decorative (`aria-hidden`); the chapters carry the story for screen readers.
 
 ## 8. Engineering list
 

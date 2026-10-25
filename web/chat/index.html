@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<title>Ask Pakkam</title>
+<meta name="description" content="Ask about Indian government schemes in Tamil, Hindi, English or Tanglish, with the official page every answer comes from.">
+<meta name="theme-color" content="#FBFCF9">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='3' width='19' height='26' rx='2.5' fill='%23FBFCF9' stroke='%231B2130' stroke-width='2'/%3E%3Cpath d='M9 10h11M9 15h11M9 20h7' stroke='%231B2130' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='23' r='6' fill='%235A36A3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Baloo+Thambi+2:wght@600;800&family=Hind:wght@400;500;600&family=Hind+Madurai:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/chat.css">
+<script src="../assets/chat.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#q">Skip to the question box</a>
+
+<div class="app" id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" aria-label="Pakkam menu">
+    <div class="side-top">
+      <a class="mark" href="../" aria-label="Pakkam home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="2.5"/><path d="M9 10h11M9 15h11M9 20h7"/><circle cx="24" cy="23" r="6"/></svg>
+        Pakkam
+      </a>
+      <button type="button" class="icon-btn side-close" id="side-close" aria-label="Close the menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <button type="button" class="btn btn-primary new-chat" data-new-chat>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      New conversation
+    </button>
+
+    <div class="side-block">
+      <p class="side-h">Ask in any of these</p>
+      <ul class="side-scripts">
+        <li lang="ta">தமிழ்</li>
+        <li lang="hi">हिन्दी</li>
+        <li lang="en">English</li>
+        <li lang="ta-Latn">Tanglish</li>
+      </ul>
+    </div>
+
+    <div class="side-block side-schemes">
+      <p class="side-h">Schemes Pakkam can read</p>
+      <ul class="scheme-list" id="scheme-list">
+        <li class="scheme-note">Loading the document list</li>
+      </ul>
+    </div>
+
+    <div class="side-foot">
+      <a href="../#how">How Pakkam works</a>
+      <p>An independent student project, not an official service. Check the official source before you act.</p>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <!-- Conversation -->
+  <main class="main" id="main">
+    <header class="topbar">
+      <button type="button" class="icon-btn" id="side-open" aria-label="Open the menu" aria-controls="sidebar" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <a class="mark mark-small" href="../">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="2.5"/><path d="M9 10h11M9 15h11M9 20h7"/><circle cx="24" cy="23" r="6"/></svg>
+        Pakkam
+      </a>
+      <button type="button" class="icon-btn" data-new-chat aria-label="New conversation">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </header>
+
+    <div class="thread" id="thread">
+      <div class="thread-inner">
+        <section class="welcome" id="welcome" aria-labelledby="welcome-h">
+          <p class="greeting" aria-hidden="true">
+            <span lang="ta" class="on">வணக்கம்</span>
+            <span lang="hi">नमस्ते</span>
+            <span lang="en">Hello</span>
+            <span lang="ta-Latn">Vanakkam</span>
+          </p>
+          <h1 id="welcome-h">What would you like to know about a scheme?</h1>
+          <p class="welcome-sub">Ask in Tamil, Hindi, English or Tanglish. Every answer shows the page it comes from.</p>
+          <ul class="suggestions">
+            <li><button type="button" class="suggest" data-q><span class="suggest-topic">Women's entitlement</span><span class="suggest-q" lang="ta">மகளிர் உரிமைத் தொகை பெற யார் தகுதியானவர்?</span></button></li>
+            <li><button type="button" class="suggest" data-q><span class="suggest-topic">Farmers</span><span class="suggest-q" lang="hi">पीएम किसान में साल में कितना पैसा मिलता है?</span></button></li>
+            <li><button type="button" class="suggest" data-q><span class="suggest-topic">Pension</span><span class="suggest-q" lang="en">What is the age limit to join Atal Pension Yojana?</span></button></li>
+            <li><button type="button" class="suggest" data-q><span class="suggest-topic">Cooking gas</span><span class="suggest-q" lang="ta-Latn">ujjwala gas connection ku enna documents venum</span></button></li>
+            <li><button type="button" class="suggest" data-q><span class="suggest-topic">Girl students</span><span class="suggest-q" lang="ta">புதுமைப் பெண் திட்டத்தில் மாதம் எவ்வளவு உதவித்தொகை?</span></button></li>
+            <li><button type="button" class="suggest" data-q><span class="suggest-topic">School breakfast</span><span class="suggest-q" lang="ta-Latn">breakfast scheme endha class pasangalukku</span></button></li>
+          </ul>
+        </section>
+        <ol class="log" id="log" aria-live="polite" aria-label="Conversation"></ol>
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <form class="composer" id="ask" novalidate>
+        <label class="vh" for="q">Your question</label>
+        <textarea id="q" name="question" rows="1" autocomplete="off" placeholder="Ask about a scheme, in your own words"></textarea>
+        <button type="submit" class="send" id="send" aria-label="Ask">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </form>
+      <p class="form-msg" id="form-msg" role="status"></p>
+      <p class="composer-hint">Answers come from official documents only. For information, not official advice.</p>
+    </div>
+  </main>
+
+  <!-- Sources panel -->
+  <aside class="sources" id="sources" aria-labelledby="sources-h" hidden>
+    <div class="sources-head">
+      <h2 id="sources-h" tabindex="-1">Sources</h2>
+      <button type="button" class="icon-btn" id="sources-close" aria-label="Close the sources">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <ol class="source-list" id="source-list"></ol>
+  </aside>
+</div>
+</body>
+</html>
