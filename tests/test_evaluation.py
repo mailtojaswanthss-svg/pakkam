@@ -19,6 +19,7 @@ from schemebot.evaluation.metrics import (
 from schemebot.evaluation.report import render
 from schemebot.evaluation.runner import evaluate
 from schemebot.generate.answer import Answer, AnswerSentence, Citation
+from schemebot.generate.llm import LlmUnavailableError
 from schemebot.index.store import build_index, open_client
 from schemebot.ingest.models import Chunk
 from schemebot.retrieve.hybrid import HybridRetriever
@@ -198,6 +199,25 @@ def test_full_run_records_citations_and_judged_sentences(retriever: Retriever) -
     assert res.sentences_supported == [True]
     assert res.total_ms == 1200.0
     assert "Aged 18 to 40." in judge_llm.messages[0]  # the judge sees the cited passage
+
+
+class FailingJudgeLlm:
+    def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
+        raise LlmUnavailableError("quota exhausted")
+
+
+def test_a_failed_judge_call_is_recorded_not_fatal(retriever: Retriever) -> None:
+    [res] = evaluate(
+        [question("q1", "Who can join Atal Pension Yojana aged 18 to 40?")],
+        retriever,
+        refusal_threshold=0.3,
+        answerer=FakeAnswerer(),  # type: ignore[arg-type]
+        judge=FaithfulnessJudge(FailingJudgeLlm()),
+    )
+
+    assert res.judge_failed
+    assert res.sentences_supported == []  # left out of faithfulness, not counted as false
+    assert res.citations_relevant == [True]
 
 
 def test_judge_counts_skipped_sentences_as_unsupported() -> None:

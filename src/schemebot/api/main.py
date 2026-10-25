@@ -5,6 +5,7 @@ reranker models load once at startup; requests then reuse them.
 """
 
 import logging
+import math
 import mimetypes
 import threading
 import uuid
@@ -13,11 +14,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Protocol
 
-from fastapi import Depends, FastAPI, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import TypeAdapter
 
 from schemebot.api.audit import AuditLog
+from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import AskRequest, AskResponse, HealthResponse, SourceOut
 from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer
@@ -62,6 +64,11 @@ def get_state(request: Request) -> AppState:
 StateDep = Annotated[AppState, Depends(get_state)]
 
 
+def _default_limiter() -> AskLimiter:
+    settings = get_settings()
+    return AskLimiter(settings.ask_limit_per_client_per_minute, settings.ask_limit_total_per_day)
+
+
 def configure_logging() -> None:
     """Send the app's own INFO+ logs to stderr alongside uvicorn's; safe to call twice."""
     app_logger = logging.getLogger("schemebot")
@@ -82,7 +89,20 @@ def create_app(
     build_service: Callable[[], AnswerService] = _default_service,
     log_dir: Path | None = None,
     web_dir: Path | None = None,
+    limiter: AskLimiter | None = None,
 ) -> FastAPI:
+    ask_limiter = limiter or _default_limiter()
+
+    def limit_asks(request: Request) -> None:
+        client = request.client.host if request.client else "unknown"
+        wait = ask_limiter.check(client)
+        if wait is not None:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many questions. Wait a little and ask again.",
+                headers={"Retry-After": str(math.ceil(wait))},
+            )
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         configure_logging()
@@ -129,7 +149,7 @@ def create_app(
     def health() -> HealthResponse:
         return HealthResponse(status="ok")
 
-    @app.post("/ask")
+    @app.post("/ask", dependencies=[Depends(limit_asks)])
     def ask(body: AskRequest, state: StateDep, request: Request) -> AskResponse:
         # Plain `def`: model inference blocks, so FastAPI runs this in its threadpool.
         with state.lock:

@@ -1,0 +1,35 @@
+# Pakkam on http://localhost:8000 (chat at /chat/, API docs at /docs).
+#
+# Before the first start, build the index on the host (README, "Run it"): the container reads
+# data/ from this folder. Put SCHEMEBOT_ANTHROPIC_API_KEY in .env; without it every question
+# that reaches the LLM is refused.
+#
+# GPU: needs the NVIDIA Container Toolkit. On a machine without an NVIDIA GPU, delete the
+# `deploy` block; the models then run on the CPU, several times slower.
+# Linux hosts: the app runs as uid 10001 and needs write access to data/index (Qdrant's lock
+# file) and logs/. Either `chown -R 10001 data/index logs` or add `user: "${UID}:${GID}"`.
+
+services:
+  pakkam:
+    build: .
+    image: pakkam:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - models:/app/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  models:

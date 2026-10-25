@@ -36,6 +36,7 @@ body { overflow: hidden; background: var(--panel); }
   border-right: 1px solid var(--line);
 }
 .side-top { display: flex; align-items: center; justify-content: space-between; padding-inline: var(--s-2); }
+.side-actions { display: flex; align-items: center; gap: var(--s-2); }
 .side-close { display: none; }
 .new-chat { width: 100%; }
 .side-block { padding-inline: var(--s-2); }
@@ -100,8 +101,8 @@ body { overflow: hidden; background: var(--panel); }
 .msg.q { justify-self: end; max-width: min(600px, 88%); }
 .msg.q p {
   padding: 10px 16px;
-  background: var(--ink);
-  color: var(--panel);
+  background: var(--bubble);
+  color: var(--on-bubble);
   border-radius: 18px 18px 4px 18px;
   overflow-wrap: anywhere;
 }
@@ -146,7 +147,7 @@ body { overflow: hidden; background: var(--panel); }
   cursor: pointer;
   transition: background-color .16s var(--ease-out), color .16s var(--ease-out);
 }
-.chip:hover, .chip[aria-expanded="true"] { background: var(--stamp); color: #fff; }
+.chip:hover, .chip[aria-expanded="true"] { background: var(--stamp); color: var(--on-stamp); }
 
 .a-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); margin-top: var(--s-3); }
 .sources-btn {
@@ -172,7 +173,7 @@ body { overflow: hidden; background: var(--panel); }
   border-left: 4px solid var(--border);
   border-radius: var(--r-md);
 }
-.error-msg { padding: 12px 14px; color: var(--tape); background: rgba(158, 47, 58, .07); border-radius: var(--r-md); }
+.error-msg { padding: 12px 14px; color: var(--tape); background: var(--tape-soft); border-radius: var(--r-md); }
 
 .pending .a-body { display: grid; gap: var(--s-2); }
 .wait { color: var(--ink-2); }
@@ -227,7 +228,7 @@ body { overflow: hidden; background: var(--panel); }
   width: 42px;
   height: 42px;
   background: var(--stamp);
-  color: #fff;
+  color: var(--on-stamp);
   border: 0;
   border-radius: 50%;
   cursor: pointer;
@@ -272,7 +273,7 @@ body { overflow: hidden; background: var(--panel); }
   min-width: 1.7em;
   height: 1.7em;
   background: var(--stamp);
-  color: #fff;
+  color: var(--on-stamp);
   border-radius: 6px;
   font-size: .8125rem;
   font-weight: 600;
@@ -314,7 +315,7 @@ body { overflow: hidden; background: var(--panel); }
   }
   .app.menu-open .sidebar { transform: none; }
   .side-close { display: inline-flex; }
-  .scrim { position: fixed; inset: 0; z-index: 35; background: rgba(27, 33, 48, .35); }
+  .scrim { position: fixed; inset: 0; z-index: 35; background: var(--scrim); }
   .topbar {
     display: flex;
     align-items: center;

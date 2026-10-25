@@ -24,6 +24,8 @@ class QuestionResult:
     answer: str | None = None
     citations_relevant: list[bool] = field(default_factory=list)
     sentences_supported: list[bool] = field(default_factory=list)
+    judge_failed: bool = False
+    """The judge call failed; this answer's sentences are left out of faithfulness."""
     total_ms: float | None = None
 
 

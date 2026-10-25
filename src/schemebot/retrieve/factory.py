@@ -12,7 +12,10 @@ class IndexMissingError(RuntimeError):
     pass
 
 
-def build_retriever(settings: Settings, use_reranker: bool = True) -> Retriever:
+def build_retriever(
+    settings: Settings, use_reranker: bool = True, gloss_tanglish: bool | None = None
+) -> Retriever:
+    """`gloss_tanglish=None` follows the setting; the evaluation can force it off."""
     client = open_client(settings.index_dir)
     if not client.collection_exists(settings.qdrant_collection):
         raise IndexMissingError(
@@ -29,4 +32,5 @@ def build_retriever(settings: Settings, use_reranker: bool = True) -> Retriever:
         BgeReranker(settings.reranker_model) if use_reranker else None,
         candidates=settings.retrieval_top_k,
         keep=settings.rerank_top_k,
+        gloss_tanglish=settings.gloss_tanglish if gloss_tanglish is None else gloss_tanglish,
     )

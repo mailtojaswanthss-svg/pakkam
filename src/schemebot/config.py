@@ -14,7 +14,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 Effort = Literal["low", "medium", "high", "xhigh", "max"]
-"""Claude reasoning effort: how much the model thinks before answering."""
+"""Reasoning effort: how much the model thinks before answering (a thinking level on Gemini)."""
+
+LlmProvider = Literal["claude", "gemini"]
 
 SUPPORTED_LANGUAGES = ("en", "ta", "hi", "ta-Latn")
 """English, Tamil, Hindi, and Tamil written in Latin script (Tanglish)."""
@@ -33,7 +35,10 @@ class Settings(BaseSettings):
     data_dir: Path = PROJECT_ROOT / "data"
     log_dir: Path = PROJECT_ROOT / "logs"
 
-    # LLM. With no key set, the SDK falls back to ANTHROPIC_API_KEY or an `ant auth login` profile.
+    # LLM provider for answers, the verifier and the evaluation judge
+    llm_provider: LlmProvider = "claude"
+
+    # Claude. With no key set, the SDK falls back to ANTHROPIC_API_KEY or `ant auth login`.
     anthropic_api_key: SecretStr | None = None
     llm_model: str = "claude-opus-5-5"
     llm_effort: Effort = "medium"
@@ -42,6 +47,13 @@ class Settings(BaseSettings):
     verifier_model: str = "claude-haiku-5-5"
     judge_model: str = "claude-opus-5-5"
     """Evaluation only: grades faithfulness independently of the in-pipeline verifier."""
+
+    # Gemini (llm_provider = "gemini"). With no key set, the SDK falls back to GEMINI_API_KEY.
+    gemini_api_key: SecretStr | None = None
+    gemini_model: str = "gemini-3.8-flash"
+    gemini_verifier_model: str = "gemini-3.5-flash-lite"
+    gemini_judge_model: str = "gemini-3.6-flash"
+    """A different model from the one answering, so it is not grading its own output."""
 
     # Models
     embedding_model: str = "BAAI/bge-m3"
@@ -55,6 +67,12 @@ class Settings(BaseSettings):
     retrieval_top_k: int = Field(default=20, ge=1, le=100)
     rerank_top_k: int = Field(default=5, ge=1, le=20)
     refusal_threshold: float = Field(default=0.35, ge=0.0, le=1.0)
+    gloss_tanglish: bool = True
+    """Give the reranker an English gloss of Tanglish questions (retrieve/tanglish.py)."""
+
+    # Public demo limits on POST /ask (each question can cost two LLM calls)
+    ask_limit_per_client_per_minute: int = Field(default=10, ge=1)
+    ask_limit_total_per_day: int = Field(default=500, ge=1)
 
     # OCR
     tesseract_cmd: str | None = None

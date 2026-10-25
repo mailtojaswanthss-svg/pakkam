@@ -9,6 +9,7 @@
     tooLong: 'Keep it under 500 characters.',
     network: 'Pakkam could not reach the server. Check your connection and ask again.',
     server: 'Something went wrong on the server. Ask again in a moment.',
+    tooMany: 'Pakkam is getting a lot of questions. Wait a minute, then ask again.',
     waiting: 'Finding the pages, reading them and checking every sentence',
     chip: 'Show the source',
     sources: (n) => (n === 1 ? '1 source' : `${n} sources`),
@@ -35,7 +36,12 @@
   const sourceList = $('#source-list');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
-  class ServerError extends Error {}
+  class ServerError extends Error {
+    constructor(status) {
+      super(`HTTP ${status}`);
+      this.status = status;
+    }
+  }
 
   function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -249,12 +255,13 @@
       } catch {
         throw new Error('network');
       }
-      if (!response.ok) throw new ServerError(String(response.status));
+      if (!response.ok) throw new ServerError(response.status);
       const data = await response.json();
       setLang(bubble, data.language);
       pending.replaceWith(renderAnswer(data));
     } catch (error) {
-      const message = error instanceof ServerError ? TEXT.server : TEXT.network;
+      let message = TEXT.network;
+      if (error instanceof ServerError) message = error.status === 429 ? TEXT.tooMany : TEXT.server;
       pending.replaceWith(assistantItem('', [el('p', 'error-msg', message)]));
     } finally {
       busy = false;

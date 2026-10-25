@@ -1,0 +1,21 @@
+# Keep the build context small and secrets out of the image.
+.env
+.env.*
+.git
+.github
+.claude
+.venv
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+*.log
+
+# Mounted at run time, not baked in
+data
+logs
+
+# Not needed to run the app
+docs
+tests

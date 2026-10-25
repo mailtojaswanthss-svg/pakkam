@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from schemebot.api.audit import question_hash
 from schemebot.api.main import REQUEST_ID_HEADER, create_app
+from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import MAX_QUESTION_CHARS
 from schemebot.generate.answer import Answer, AnswerSentence, Citation
 
@@ -212,3 +213,20 @@ def test_webp_photos_are_served_as_images(service: FakeService, tmp_path: Path) 
         response = client.get("/photo.webp")
 
     assert response.headers["content-type"] == "image/webp"
+
+
+def test_too_many_questions_get_429_with_retry_after(service: FakeService, tmp_path: Path) -> None:
+    limiter = AskLimiter(per_client_per_minute=2, total_per_day=100)
+    app = create_app(lambda: service, log_dir=tmp_path, limiter=limiter)
+    with TestClient(app) as test_client:
+        for _ in range(2):
+            assert test_client.post("/ask", json={"question": QUESTION}).status_code == 200
+
+        response = test_client.post("/ask", json={"question": QUESTION})
+        health = test_client.get("/health")
+
+    assert response.status_code == 429
+    assert int(response.headers["Retry-After"]) > 0
+    assert "Too many questions" in response.json()["detail"]
+    assert len(service.questions) == 2
+    assert health.status_code == 200

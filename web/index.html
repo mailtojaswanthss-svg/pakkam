@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pakkam: scheme answers with the page they come from</title>
 <meta name="description" content="Ask about Indian government schemes in Tamil, Hindi, English or Tanglish. Every answer shows the official document and page it comes from.">
-<meta name="theme-color" content="#EEF1EA">
+<meta name="theme-color" content="#EEF1EA" data-light="#EEF1EA" data-dark="#12151C">
+<script src="assets/theme.js"></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='3' width='19' height='26' rx='2.5' fill='%23FBFCF9' stroke='%231B2130' stroke-width='2'/%3E%3Cpath d='M9 10h11M9 15h11M9 20h7' stroke='%231B2130' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='23' r='6' fill='%235A36A3'/%3E%3C/svg%3E">
 <!-- DEPLOY STEP: add og:url and og:image with absolute URLs of the live site. -->
 <meta property="og:type" content="website">
@@ -34,7 +35,13 @@
       <li><a href="#how">How it works</a></li>
       <li><a href="#results">Results</a></li>
     </ul>
-    <a class="btn btn-primary nav-cta" href="chat/">Open Pakkam</a>
+    <div class="nav-actions">
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Dark theme" title="Switch between light and dark" hidden>
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <a class="btn btn-primary nav-cta" href="chat/">Open Pakkam</a>
+    </div>
   </nav>
 </header>
 
@@ -198,9 +205,9 @@
       <div class="stat"><dt>Official documents</dt><dd>18</dd></div>
       <div class="stat"><dt>Passages searched for every question</dt><dd>2,785</dd></div>
       <div class="stat"><dt>Ways to ask</dt><dd>4</dd></div>
-      <div class="stat"><dt>Test questions with the right page in the top five</dt><dd>36 of 36</dd></div>
+      <div class="stat"><dt>Test questions with the right page in the top five</dt><dd>81 of 82</dd></div>
     </dl>
-    <p class="footnote">From a development test on 48 draft questions across Tamil, Hindi, English and Tanglish. Answer quality is measured next, and the numbers will be updated here as they come in.</p>
+    <p class="footnote">From a development test on 110 draft questions across Tamil, Hindi, English and Tanglish, 28 of them about things the documents do not cover. Answer quality is measured next, and the numbers will be updated here as they come in.</p>
   </section>
 
   <!-- Call to action -->

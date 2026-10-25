@@ -39,6 +39,13 @@ class JsonLlm(Protocol):
     ) -> dict[str, Any]: ...
 
 
+class ConfiguredJsonLlm(JsonLlm, Protocol):
+    @property
+    def configured(self) -> bool:
+        """Whether the client found credentials it can call the API with."""
+        ...
+
+
 ReplyT = TypeVar("ReplyT", bound=BaseModel)
 
 

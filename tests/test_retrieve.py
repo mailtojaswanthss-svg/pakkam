@@ -41,6 +41,32 @@ def test_reranker_reorders_and_keeps_only_the_best(first_stage: HybridRetriever)
     assert result.confidence == result.passages[0].relevance
 
 
+def test_reranker_reads_tanglish_questions_with_an_english_gloss(
+    first_stage: HybridRetriever,
+) -> None:
+    retriever = Retriever(first_stage, FakeReranker(), candidates=5, keep=2)
+
+    assert retriever.rerank_query("PM kisan la evlo panam kidaikum") == (
+        "PM kisan la evlo panam kidaikum (PM kisan in how much money will get)"
+    )
+    # Missed by language detection (one Tanglish word in seven), still glossed.
+    assert retriever.rerank_query("tamil pudhalvan scheme la pasangalukku evlo panam") == (
+        "tamil pudhalvan scheme la pasangalukku evlo panam "
+        "(tamil pudhalvan scheme in for children how much money)"
+    )
+    assert retriever.rerank_query("How much money under PM-KISAN?") == (
+        "How much money under PM-KISAN?"
+    )
+
+
+def test_tanglish_gloss_can_be_switched_off(first_stage: HybridRetriever) -> None:
+    retriever = Retriever(first_stage, FakeReranker(), candidates=5, keep=2, gloss_tanglish=False)
+
+    assert retriever.rerank_query("PM kisan la evlo panam kidaikum") == (
+        "PM kisan la evlo panam kidaikum"
+    )
+
+
 def test_without_reranker_first_stage_order_is_kept(first_stage: HybridRetriever) -> None:
     retriever = Retriever(first_stage, None, candidates=5, keep=3)
 
