@@ -1,0 +1,199 @@
+"""Page-level text extraction from PDFs, with an OCR fallback for pages that extract badly.
+
+Many Tamil government PDFs are either scanned images or typeset in legacy (pre-Unicode)
+Tamil fonts. Both extract as empty or garbage text, so every page goes through a quality
+check and bad pages are sent to Tesseract instead.
+"""
+
+import logging
+import os
+import re
+import unicodedata
+from collections.abc import Callable
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Literal
+
+import pymupdf
+
+from schemebot.ingest.langid import Language
+
+logger = logging.getLogger(__name__)
+
+ExtractionMethod = Literal["text", "ocr", "text-unverified"]
+"""text-unverified: the page needed OCR but OCR was unavailable; the text may be garbage."""
+
+MIN_PAGE_CHARS = 40
+"""A page with fewer real characters than this is treated as a scanned image."""
+
+MAX_ODD_TOKEN_SHARE = 0.25
+"""Legacy-font Tamil extracts as Latin tokens full of symbols, e.g. 'jkpo;ehL'."""
+
+MAX_BAD_CHAR_SHARE = 0.01
+"""Replacement characters or private-use code points point to a broken font mapping."""
+
+MAX_ORPHAN_MARK_SHARE = 0.03
+"""Share of words allowed to start with a vowel sign (e.g. 'ि', 'ா'). Unicode never does
+this, but broken Devanagari/Tamil font maps do: 'कृषि' extracts as 'िृषि'."""
+
+MIN_LETTER_SHARE = 0.5
+"""Prose is ~90% letters. When a font's glyphs have no Unicode mapping they vanish from the
+text layer, leaving pages of punctuation and numbers such as 'ii) . iii) .2.5 .'."""
+
+# Pre-Unicode Tamil and Hindi font families. Text set in them is unreadable without OCR.
+# Compared case-insensitively against the font name with its subset tag ("ABCDEE+") removed.
+LEGACY_FONT_PREFIXES = (
+    "tau-", "tam-", "tab-", "tscu", "tsc_", "bamini", "vanavil", "suntommy", "elango",
+    "kruti", "devlys", "chanakya", "walkman-chanakya",
+)  # fmt: skip
+
+OCR_DPI = 300
+
+# Tesseract models per document language. Loading Tamil and Hindi together makes Tesseract
+# read Devanagari words as Tamil, so each document only gets its own script plus English.
+OCR_LANGUAGES: dict[Language, str] = {
+    "ta": "tam+eng",
+    "hi": "hin+eng",
+    "en": "eng",
+    "ta-Latn": "eng",
+    "unknown": "tam+hin+eng",
+}
+
+NO_BREAK_SPACE = 0x00A0
+REPLACEMENT_CHAR = 0xFFFD
+ZERO_WIDTH_CHARS = (0x200B, 0x200C, 0x200D)  # space, non-joiner, joiner
+_ZERO_WIDTH = re.compile("[" + "".join(map(chr, ZERO_WIDTH_CHARS)) + "]")
+_ODD_INNER_CHARS = re.compile(r"[;\[\]{}\\`~^|<>=+]")
+_LOWER_THEN_UPPER = re.compile(r"[a-z][A-Z]")
+
+
+class OcrUnavailableError(RuntimeError):
+    """Raised when Tesseract (or one of its language packs) is not installed."""
+
+
+OcrFn = Callable[[pymupdf.Page], str]
+
+
+@dataclass(frozen=True)
+class PageText:
+    page: int
+    """1-based page number, as shown in a PDF viewer and used in citations."""
+    text: str
+    method: ExtractionMethod
+
+
+def normalize_text(text: str) -> str:
+    """NFC-normalise and tidy whitespace without changing the words."""
+    text = unicodedata.normalize("NFC", text)
+    text = text.replace(chr(NO_BREAK_SPACE), " ")
+    # Zero-width space / non-joiner / joiner: OCR inserts them after Tamil virama, and they
+    # silently break keyword matching while changing nothing a reader can see.
+    text = _ZERO_WIDTH.sub("", text)
+    # Re-join English words hyphenated across a line break.
+    text = re.sub(r"([a-z])-\n([a-z])", r"\1\2", text)
+    lines = [re.sub(r"[ \t]+", " ", line).strip() for line in text.splitlines()]
+    text = "\n".join(lines)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+def _is_bad_char(char: str) -> bool:
+    return ord(char) == REPLACEMENT_CHAR or 0xE000 <= ord(char) <= 0xF8FF
+
+
+def _starts_with_mark(token: str) -> bool:
+    """True for a word starting with a combining vowel sign or virama (Unicode Mn/Mc)."""
+    return unicodedata.category(token[0]) in ("Mn", "Mc")
+
+
+def _is_odd_token(token: str) -> bool:
+    inner = token[1:-1]
+    return bool(_ODD_INNER_CHARS.search(inner) or _LOWER_THEN_UPPER.search(token))
+
+
+def needs_ocr(text: str) -> bool:
+    """True if the text layer looks empty, scanned or produced by a legacy font."""
+    visible = [char for char in text if not char.isspace()]
+    if len(visible) < MIN_PAGE_CHARS:
+        return True
+
+    if sum(_is_bad_char(char) for char in visible) / len(visible) > MAX_BAD_CHAR_SHARE:
+        return True
+
+    if sum(char.isalpha() for char in visible) / len(visible) < MIN_LETTER_SHARE:
+        return True
+
+    tokens = [token for token in text.split() if any(char.isalpha() for char in token)]
+    if not tokens:
+        return True
+    orphan_share = sum(_starts_with_mark(token) for token in tokens) / len(tokens)
+    if orphan_share > MAX_ORPHAN_MARK_SHARE:
+        return True
+    odd_share = sum(_is_odd_token(token) for token in tokens) / len(tokens)
+    return odd_share > MAX_ODD_TOKEN_SHARE
+
+
+def is_legacy_font(font_name: str) -> bool:
+    base = font_name.split("+", 1)[-1].lower()
+    return base.startswith(LEGACY_FONT_PREFIXES)
+
+
+def uses_legacy_font(page: pymupdf.Page) -> bool:
+    # get_fonts() rows are (xref, ext, type, basefont, name, encoding, ...).
+    return any(is_legacy_font(font[3]) for font in page.get_fonts())
+
+
+def make_tesseract_ocr(
+    language: Language,
+    tesseract_cmd: str | None = None,
+    tessdata_dir: Path | None = None,
+) -> OcrFn:
+    """Build a Tesseract OCR function for documents in `language`."""
+    import pytesseract
+    from PIL import Image
+
+    if tesseract_cmd:
+        pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+    if tessdata_dir:
+        # Passed via the environment: pytesseract's `config` string mangles quoted Windows paths.
+        os.environ["TESSDATA_PREFIX"] = str(tessdata_dir)
+
+    def ocr_page(page: pymupdf.Page) -> str:
+        pixmap = page.get_pixmap(dpi=OCR_DPI)
+        image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
+        try:
+            return str(pytesseract.image_to_string(image, lang=OCR_LANGUAGES[language]))
+        except (pytesseract.TesseractNotFoundError, pytesseract.TesseractError) as error:
+            raise OcrUnavailableError(str(error)) from error
+
+    return ocr_page
+
+
+def extract_pages(
+    pdf_path: Path, ocr: OcrFn | None = None, force_ocr: bool = False
+) -> list[PageText]:
+    """Extract normalised text for every page, falling back to OCR where needed.
+
+    `force_ocr` is for documents known to use a legacy font that slips past the heuristic.
+    """
+    pages: list[PageText] = []
+    with pymupdf.open(pdf_path) as document:
+        for index, page in enumerate(document):
+            page_number = index + 1
+            text = normalize_text(page.get_text("text"))
+            if not (force_ocr or uses_legacy_font(page) or needs_ocr(text)):
+                pages.append(PageText(page_number, text, "text"))
+                continue
+
+            if ocr is None:
+                logger.warning("%s p%d needs OCR but none configured", pdf_path.name, page_number)
+                pages.append(PageText(page_number, text, "text-unverified"))
+                continue
+
+            try:
+                ocr_text = normalize_text(ocr(page))
+            except OcrUnavailableError as error:
+                logger.warning("%s p%d OCR failed: %s", pdf_path.name, page_number, error)
+                pages.append(PageText(page_number, text, "text-unverified"))
+                continue
+            pages.append(PageText(page_number, ocr_text, "ocr"))
+    return pages

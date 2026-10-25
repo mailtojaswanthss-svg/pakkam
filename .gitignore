@@ -1,0 +1,24 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Data: raw documents are re-downloadable from docs/data_sources.md;
+# processed chunks are rebuilt by the ingestion script. The eval set is committed.
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Logs and model caches
+logs/
+*.log
+.cache/
+qdrant_storage/

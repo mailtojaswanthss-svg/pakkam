@@ -1,0 +1,32 @@
+[
+  {
+    "doc_id": "kmut-go15-2023-ta",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "file": "kmut-go15-2023-ta.pdf",
+    "source_url": "https://tncdw.org/frontend/gos/Mahalir_Urimai_Thittam-GO.pdf",
+    "language": "ta",
+    "doc_date": "2023-07-10",
+    "accessed": "2026-10-25",
+    "force_ocr": false
+  },
+  {
+    "doc_id": "pmkisan-guidelines-2020-en",
+    "scheme": "PM-KISAN",
+    "file": "pmkisan-guidelines-2020-en.pdf",
+    "source_url": "https://pmkisan.gov.in/Documents/RevisedPM-KISANOperationalGuidelines(English).pdf",
+    "language": "en",
+    "doc_date": "2020-03-29",
+    "accessed": "2026-10-25",
+    "force_ocr": false
+  },
+  {
+    "doc_id": "pmkisan-ekyc-note-2023-hi",
+    "scheme": "PM-KISAN",
+    "file": "pmkisan-ekyc-note-2023-hi.pdf",
+    "source_url": "https://pmkisan.gov.in/Documents/Note-on-Modes-and-processes-of-ekyc-13th-Nov-Hindi.pdf",
+    "language": "hi",
+    "doc_date": "2023-11-13",
+    "accessed": "2026-10-25",
+    "force_ocr": false
+  }
+]
