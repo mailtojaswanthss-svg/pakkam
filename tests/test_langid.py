@@ -44,3 +44,16 @@ def test_one_lexicon_hit_in_a_long_english_sentence_is_not_tanglish() -> None:
 
 def test_script_counts_ignores_digits_and_punctuation() -> None:
     assert script_counts("ab 12, கா!") == {"tamil": 2, "devanagari": 0, "latin": 2}
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        "husband govt job la irukaru, eligible ah",
+        "ration card illa, apply panna mudiyuma",
+        "thogai eppo varum",
+        "PM kisan ku epdi apply panradhu",
+    ],
+)
+def test_spoken_tanglish_queries(query: str) -> None:
+    assert detect_language(query) == "ta-Latn"

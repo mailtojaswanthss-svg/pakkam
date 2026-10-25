@@ -80,3 +80,30 @@ def test_manifest_rejects_bad_doc_id(data_dir: Path) -> None:
 
     with pytest.raises(ValueError):
         load_manifest(data_dir / "sources.json")
+
+
+def test_corrupt_pdf_is_reported_and_other_documents_still_ingested(data_dir: Path) -> None:
+    (data_dir / "raw" / "corrupt.pdf").write_bytes(b"this is not a pdf")
+    write_manifest(
+        data_dir,
+        [
+            make_entry("corrupt-en", "corrupt.pdf"),
+            make_entry("test-guidelines-en", "guidelines.pdf"),
+        ],
+    )
+    settings = Settings(_env_file=None, data_dir=data_dir)
+
+    report = run_ingest(settings, ocr_factory=None)
+
+    assert list(report.unreadable_files) == ["corrupt.pdf"]
+    assert report.has_errors
+    assert report.total_chunks == 2
+
+
+def test_report_counts_pages_by_language(data_dir: Path) -> None:
+    write_manifest(data_dir, [make_entry("test-guidelines-en", "guidelines.pdf")])
+    settings = Settings(_env_file=None, data_dir=data_dir)
+
+    report = run_ingest(settings, ocr_factory=None)
+
+    assert report.documents[0].pages_by_language == {"en": 1}

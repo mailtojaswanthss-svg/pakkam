@@ -19,7 +19,8 @@ SUPPORTED_LANGUAGES = ("en", "ta", "hi", "ta-Latn")
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="SCHEMEBOT_",
-        env_file=".env",
+        # Anchored to the project root so commands work from any working directory.
+        env_file=PROJECT_ROOT / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )

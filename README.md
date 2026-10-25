@@ -53,10 +53,14 @@ Requires [uv](https://docs.astral.sh/uv/) and Docker. Tesseract (with `tam` and 
 is needed for OCR during ingestion.
 
 ```bash
-cp .env.example .env          # then add your API key
-uv sync --all-extras          # creates .venv with Python 3.12
+cp .env.example .env          # then fill in the Tesseract paths (and later your API key)
+uv sync --extra ingest        # creates .venv with Python 3.12 + ingestion deps
 uv run pytest
+uv run python -m schemebot.ingest   # PDFs in data/raw + data/sources.json -> data/processed/
 ```
+
+Each pipeline stage has its own extra (`ingest`, `index`, `generate`, `api`, `eval`), so you
+only install the heavy ML libraries once you reach the stage that needs them.
 
 ## Project layout
 

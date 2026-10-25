@@ -45,6 +45,8 @@ TANGLISH_WORDS = frozenset(
         "nanga", "naanga", "avanga", "ivanga", "ku", "kku", "ah", "aa", "dhaan", "thaan",
         "kooda", "mattum", "ellam", "romba", "konjam", "mudiyuma", "mudiyum",
         "eligible-aa", "apply-panna", "apply-pannanum",
+        "irukaru", "irukkaru", "irukanga", "irukkanga", "panradhu", "panrathu",
+        "poganum", "varum", "varala", "varudhu", "aagum", "aaguma",
     }
 )
 # fmt: on

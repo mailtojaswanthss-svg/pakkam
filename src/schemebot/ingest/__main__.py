@@ -30,7 +30,7 @@ def main() -> int:
             tessdata_dir=settings.tessdata_dir,
         )
     report = run_ingest(settings, ocr_factory)
-    if not report.documents and not report.missing_files:
+    if not report.documents and not report.has_errors:
         print(f"{manifest} lists no documents. See docs/data_sources.md.", file=sys.stderr)
         return 1
 
@@ -45,8 +45,9 @@ def main() -> int:
         print(f"WARNING: {unverified} pages needed OCR but did not get it", file=sys.stderr)
     if report.missing_files:
         print(f"ERROR: missing files: {', '.join(report.missing_files)}", file=sys.stderr)
-        return 1
-    return 0
+    for file, error in report.unreadable_files.items():
+        print(f"ERROR: cannot read {file}: {error}", file=sys.stderr)
+    return 1 if report.has_errors else 0
 
 
 if __name__ == "__main__":

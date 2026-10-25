@@ -6,12 +6,13 @@ from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
 
-from pydantic import BaseModel, TypeAdapter
+import pymupdf
+from pydantic import BaseModel, Field, TypeAdapter
 
 from schemebot.config import Settings
 from schemebot.ingest.chunk import chunk_document
 from schemebot.ingest.extract import OcrFn, extract_pages
-from schemebot.ingest.langid import Language
+from schemebot.ingest.langid import Language, detect_language
 from schemebot.ingest.models import Chunk, SourceDoc
 
 OcrFactory = Callable[[Language], OcrFn]
@@ -28,6 +29,7 @@ class DocReport(BaseModel):
     doc_id: str
     pages: int
     pages_by_method: dict[str, int]
+    pages_by_language: dict[str, int]
     chunks: int
     chunks_by_language: dict[str, int]
 
@@ -35,7 +37,12 @@ class DocReport(BaseModel):
 class IngestReport(BaseModel):
     documents: list[DocReport]
     missing_files: list[str]
+    unreadable_files: dict[str, str] = Field(description="file name -> error message")
     total_chunks: int
+
+    @property
+    def has_errors(self) -> bool:
+        return bool(self.missing_files or self.unreadable_files)
 
 
 def load_manifest(path: Path) -> list[SourceDoc]:
@@ -63,6 +70,7 @@ def run_ingest(settings: Settings, ocr_factory: OcrFactory | None) -> IngestRepo
     all_chunks: list[Chunk] = []
     reports: list[DocReport] = []
     missing: list[str] = []
+    unreadable: dict[str, str] = {}
 
     for doc in docs:
         pdf_path = settings.raw_dir / doc.file
@@ -72,7 +80,14 @@ def run_ingest(settings: Settings, ocr_factory: OcrFactory | None) -> IngestRepo
             continue
 
         ocr = ocr_factory(doc.language) if ocr_factory else None
-        pages = extract_pages(pdf_path, ocr=ocr, force_ocr=doc.force_ocr)
+        try:
+            pages = extract_pages(pdf_path, ocr=ocr, force_ocr=doc.force_ocr)
+        except pymupdf.FileDataError as error:
+            # One corrupt download should not stop the rest of the corpus from being ingested.
+            logger.error("cannot read %s: %s", pdf_path.name, error)
+            unreadable[doc.file] = str(error)
+            continue
+
         chunks = chunk_document(doc, pages)
         all_chunks.extend(chunks)
         reports.append(
@@ -80,6 +95,7 @@ def run_ingest(settings: Settings, ocr_factory: OcrFactory | None) -> IngestRepo
                 doc_id=doc.doc_id,
                 pages=len(pages),
                 pages_by_method=dict(Counter(page.method for page in pages)),
+                pages_by_language=dict(Counter(detect_language(page.text) for page in pages)),
                 chunks=len(chunks),
                 chunks_by_language=dict(Counter(chunk.language for chunk in chunks)),
             )
@@ -87,7 +103,12 @@ def run_ingest(settings: Settings, ocr_factory: OcrFactory | None) -> IngestRepo
         logger.info("%s: %d pages -> %d chunks", doc.doc_id, len(pages), len(chunks))
 
     write_chunks(all_chunks, settings.processed_dir / CHUNKS_NAME)
-    report = IngestReport(documents=reports, missing_files=missing, total_chunks=len(all_chunks))
+    report = IngestReport(
+        documents=reports,
+        missing_files=missing,
+        unreadable_files=unreadable,
+        total_chunks=len(all_chunks),
+    )
     (settings.processed_dir / REPORT_NAME).write_text(
         json.dumps(report.model_dump(), indent=2, ensure_ascii=False), encoding="utf-8"
     )

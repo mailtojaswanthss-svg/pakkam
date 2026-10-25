@@ -53,3 +53,15 @@ def test_derived_paths_live_under_data_dir(tmp_path: Path) -> None:
 
     assert settings.raw_dir == settings.data_dir / "raw"
     assert settings.eval_questions_path.name == "questions.jsonl"
+
+
+def test_env_file_is_found_from_any_working_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    env_file = Settings.model_config.get("env_file")
+
+    assert isinstance(env_file, Path)
+    assert env_file.is_absolute()
+    assert env_file.name == ".env"
