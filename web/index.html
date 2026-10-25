@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pakkam: scheme answers with the page they come from</title>
+<meta name="description" content="Ask about Indian government schemes in Tamil, Hindi, English or Tanglish. Every answer shows the official document and page it comes from.">
+<meta name="theme-color" content="#EBEFE6">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='3' width='19' height='26' rx='2.5' fill='%23F7F9F3' stroke='%231A2230' stroke-width='2'/%3E%3Cpath d='M9 10h11M9 15h11M9 20h7' stroke='%231A2230' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='23' r='6' fill='%235A36A3'/%3E%3C/svg%3E">
+<!-- DEPLOY STEP: add og:url and og:image with absolute URLs of the live site. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pakkam">
+<meta property="og:description" content="Ask about government schemes in Tamil, Hindi, English or Tanglish. Every answer shows its page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@100..112,400..700&family=Anek+Tamil:wdth,wght@100,400..600&family=Anek+Devanagari:wdth,wght@100,400..600&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#q">Skip to the question box</a>
+<div class="ledger" aria-hidden="true"></div>
+
+<header class="top">
+  <nav class="nav wrap" aria-label="Main">
+    <a class="mark" href="#main">
+      <svg class="mark-icon" viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="2.5"/><path d="M9 10h11M9 15h11M9 20h7"/><circle cx="24" cy="23" r="6"/></svg>
+      Pakkam
+    </a>
+    <ul class="links">
+      <li><a href="#how">About</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main" tabindex="-1">
+  <section class="intro wrap" aria-labelledby="intro-h">
+    <div class="intro-copy">
+      <h1 id="intro-h">Ask about a government scheme in your own words.</h1>
+      <p class="sub">Tamil, Hindi, English or Tanglish. Every answer shows the official document and page it comes from. If the documents don't say, Pakkam tells you.</p>
+      <ul class="tabs" aria-label="Languages you can ask in">
+        <li lang="ta">தமிழ்</li>
+        <li lang="hi">हिन्दी</li>
+        <li lang="en">English</li>
+        <li lang="ta-Latn">Tanglish</li>
+      </ul>
+    </div>
+    <figure class="art" aria-hidden="true">
+      <svg viewBox="0 0 420 320">
+        <rect class="pg" x="24" y="16" width="232" height="288" rx="6"/>
+        <line class="margin" x1="44" y1="16" x2="44" y2="304"/>
+        <g class="lines">
+          <line x1="56" y1="58" x2="232" y2="58"/>
+          <line x1="56" y1="78" x2="220" y2="78"/>
+          <line x1="56" y1="98" x2="232" y2="98"/>
+          <line x1="56" y1="118" x2="206" y2="118"/>
+          <line x1="56" y1="158" x2="228" y2="158"/>
+          <line x1="56" y1="178" x2="214" y2="178"/>
+          <line x1="56" y1="198" x2="232" y2="198"/>
+          <line x1="56" y1="218" x2="190" y2="218"/>
+          <line x1="56" y1="238" x2="224" y2="238"/>
+          <line x1="56" y1="258" x2="168" y2="258"/>
+        </g>
+        <rect class="hl" x="50" y="129" width="188" height="18" rx="3"/>
+        <line class="hl-line" x1="56" y1="138" x2="226" y2="138"/>
+        <text class="pno" x="232" y="292" text-anchor="end">9</text>
+        <path class="link" pathLength="1" d="M238 138 C 300 138, 352 158, 352 204"/>
+        <g class="card">
+          <rect class="card-box" x="236" y="190" width="164" height="92" rx="12"/>
+          <line class="card-line" x1="256" y1="220" x2="372" y2="220"/>
+          <line class="card-line" x1="256" y1="240" x2="330" y2="240"/>
+          <line class="card-line" x1="256" y1="260" x2="350" y2="260"/>
+          <g class="dot">
+            <circle cx="352" cy="240" r="11"/>
+            <text x="352" y="244.5" text-anchor="middle">1</text>
+          </g>
+        </g>
+      </svg>
+    </figure>
+  </section>
+
+  <section class="chat wrap" aria-labelledby="chat-h">
+    <h2 id="chat-h" class="vh">Ask Pakkam</h2>
+    <div class="sheet">
+      <div class="empty" id="empty">
+        <p>Try one of these, or type your own question.</p>
+        <ul class="examples">
+          <li><button type="button" class="ex" lang="ta">மகளிர் உரிமைத் தொகை பெற யார் தகுதியானவர்?</button></li>
+          <li><button type="button" class="ex" lang="hi">पीएम किसान में साल में कितना पैसा मिलता है?</button></li>
+          <li><button type="button" class="ex" lang="en">What is the age limit for Atal Pension Yojana?</button></li>
+          <li><button type="button" class="ex" lang="ta-Latn">ujjwala gas connection ku enna documents venum</button></li>
+        </ul>
+      </div>
+      <ol class="log" id="log" aria-live="polite"></ol>
+      <form class="ask" id="ask" novalidate>
+        <label class="vh" for="q">Your question</label>
+        <textarea id="q" name="question" rows="1" autocomplete="off"></textarea>
+        <button class="send" type="submit">Ask</button>
+        <p class="form-msg" id="form-msg" role="status"></p>
+      </form>
+    </div>
+  </section>
+
+  <section id="how" class="how wrap" aria-labelledby="how-h">
+    <h2 id="how-h">How an answer is made</h2>
+    <ol class="steps">
+      <li>
+        <h3>It finds the pages.</h3>
+        <p>Your question is matched against 18 official documents in Tamil, Hindi and English, whatever language you asked in.</p>
+      </li>
+      <li>
+        <h3>It answers from those pages only.</h3>
+        <p>Each sentence cites the page it uses. Numbers are copied from the document, not worked out.</p>
+      </li>
+      <li>
+        <h3>It checks, or it stops.</h3>
+        <p>Sentences the pages don't back are removed. If nothing is left, you get the official contact instead of a guess.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="sources" class="sources wrap" aria-labelledby="src-h">
+    <div class="src-head">
+      <h2 id="src-h">What the documents cover</h2>
+      <p>Official public documents from Tamil Nadu and central government websites.</p>
+    </div>
+    <ul class="src-list" id="src-list">
+      <li class="src-note">Loading the document list</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Pakkam is an independent student project. It is not an official service and is not affiliated with any government body. Answers are for information only: check the official source before you act on them.</p>
+  </div>
+</footer>
+</body>
+</html>

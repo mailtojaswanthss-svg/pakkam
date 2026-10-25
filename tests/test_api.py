@@ -18,7 +18,15 @@ CITED = Answer(
     text="Citizens aged 18 to 40 can join. [1]",
     sentences=[AnswerSentence("Citizens aged 18 to 40 can join.", [1])],
     citations=[
-        Citation(1, "apy-brochure-en", "Atal Pension Yojana", 1, 1, "https://pfrda.org.in/apy")
+        Citation(
+            1,
+            "apy-brochure-en",
+            "Atal Pension Yojana",
+            1,
+            1,
+            "https://pfrda.org.in/apy",
+            "Citizens aged 18 to 40 can join the Atal Pension Yojana.",
+        )
     ],
     refused=False,
     refusal_reason=None,
@@ -158,3 +166,36 @@ def test_models_are_built_once_at_startup(tmp_path: Path) -> None:
         client.post("/ask", json={"question": QUESTION})
 
     assert len(builds) == 1
+
+
+def test_citation_carries_excerpt_language_and_readable_title(client: TestClient) -> None:
+    citation = client.post("/ask", json={"question": QUESTION}).json()["citations"][0]
+
+    assert citation["excerpt"] == "Citizens aged 18 to 40 can join the Atal Pension Yojana."
+    assert citation["language"] == "unknown"
+    assert citation["document"] == "Subscriber information brochure"  # from data/sources.json
+
+
+def test_sources_lists_every_document_with_a_title(client: TestClient) -> None:
+    response = client.get("/sources")
+
+    assert response.status_code == 200
+    docs = response.json()
+    assert len(docs) >= 10
+    assert all(doc["title"] and doc["source_url"].startswith("https://") for doc in docs)
+    assert {"en", "ta", "hi"} <= {doc["language"] for doc in docs}
+
+
+def test_web_page_is_served_and_api_routes_still_win(service: FakeService, tmp_path: Path) -> None:
+    web = tmp_path / "web"
+    web.mkdir()
+    (web / "index.html").write_text("<!doctype html><title>Pakkam</title>", encoding="utf-8")
+    app = create_app(lambda: service, log_dir=tmp_path, web_dir=web)
+
+    with TestClient(app) as client:
+        page = client.get("/")
+        health = client.get("/health")
+
+    assert page.status_code == 200
+    assert "Pakkam" in page.text
+    assert health.json() == {"status": "ok"}

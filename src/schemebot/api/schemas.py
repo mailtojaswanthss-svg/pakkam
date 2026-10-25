@@ -1,5 +1,6 @@
 """Public request and response shapes of the HTTP API."""
 
+from collections.abc import Mapping
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, StringConstraints
@@ -28,9 +29,12 @@ class CitationOut(BaseModel):
     number: int
     scheme: str
     doc_id: str
+    document: str = Field(description="Readable document title, e.g. 'G.O.(Ms) No.15'.")
     page_start: int
     page_end: int
     source_url: str
+    excerpt: str = Field(description="The cited passage, as extracted from the document.")
+    language: Language
 
 
 class SentenceOut(BaseModel):
@@ -50,7 +54,8 @@ class AskResponse(BaseModel):
     latency_ms: float
 
     @classmethod
-    def from_answer(cls, answer: Answer) -> "AskResponse":
+    def from_answer(cls, answer: Answer, titles: Mapping[str, str] | None = None) -> "AskResponse":
+        titles = titles or {}
         return cls(
             answer=answer.text,
             language=answer.language,
@@ -62,9 +67,12 @@ class AskResponse(BaseModel):
                     number=c.number,
                     scheme=c.scheme,
                     doc_id=c.doc_id,
+                    document=titles.get(c.doc_id, c.doc_id),
                     page_start=c.page_start,
                     page_end=c.page_end,
                     source_url=c.source_url,
+                    excerpt=c.text,
+                    language=c.language,
                 )
                 for c in answer.citations
             ],
@@ -76,3 +84,12 @@ class AskResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: Literal["ok"]
+
+
+class SourceOut(BaseModel):
+    doc_id: str
+    scheme: str
+    title: str
+    language: Language
+    source_url: str
+    doc_date: str | None

@@ -165,3 +165,20 @@ def test_hindi_with_normal_i_sign_share_does_not_need_ocr() -> None:
 def test_short_hindi_text_skips_the_i_sign_check() -> None:
     # A single short line has too few characters for the share to mean anything.
     assert not needs_ocr("अटल पेंशन योजना भारत सरकार द्वारा न्यूनतम मासिक पेंशन गारंटी योजना")
+
+
+def test_symbol_font_bullets_become_plain_bullets() -> None:
+    from schemebot.ingest.extract import replace_symbol_bullets
+
+    wingdings_bullet = chr(0xF0B7)  # how a Symbol-font bullet extracts from the APY brochure
+
+    assert (
+        replace_symbol_bullets(f"{wingdings_bullet} APY chat bot") == f"{chr(0x2022)} APY chat bot"
+    )
+
+
+def test_private_use_characters_still_count_towards_ocr_detection() -> None:
+    # The bullet replacement must not hide broken fonts from needs_ocr.
+    garbled = "Eligibility " + chr(0xE012) * 3 + " "
+
+    assert needs_ocr(garbled * 5)

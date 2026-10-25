@@ -10,10 +10,16 @@ import logging
 import time
 from dataclasses import dataclass, field
 
+from schemebot.generate.contacts import Contact
 from schemebot.generate.guardrails import DraftSentence, RejectedSentence, check_answer
-from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError
-from schemebot.generate.messages import RefusalReason, disclaimer, refusal_text
-from schemebot.generate.prompt import ANSWER_SCHEMA, SYSTEM_PROMPT, build_user_message
+from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError, parse_reply
+from schemebot.generate.messages import RefusalReason, contact_text, disclaimer, refusal_text
+from schemebot.generate.prompt import (
+    ANSWER_SCHEMA,
+    SYSTEM_PROMPT,
+    AnswerReply,
+    build_user_message,
+)
 from schemebot.ingest.langid import Language, detect_language
 from schemebot.retrieve.retriever import RetrievedPassage, Retriever
 
@@ -28,6 +34,10 @@ class Citation:
     page_start: int
     page_end: int
     source_url: str
+    text: str
+    """The cited passage itself, for showing the source and for faithfulness checks."""
+    language: Language = "unknown"
+    """Language of the passage, so the UI can tag and render it correctly."""
 
 
 @dataclass(frozen=True)
@@ -61,6 +71,8 @@ def _citation(number: int, passage: RetrievedPassage) -> Citation:
         page_start=chunk.page_start,
         page_end=chunk.page_end,
         source_url=str(chunk.source_url),
+        text=chunk.text,
+        language=chunk.language,
     )
 
 
@@ -71,11 +83,13 @@ class Answerer:
         llm: JsonLlm,
         verifier: JsonLlm | None,
         refusal_threshold: float,
+        contacts: dict[str, Contact] | None = None,
     ) -> None:
         self._retriever = retriever
         self._llm = llm
         self._verifier = verifier
         self._refusal_threshold = refusal_threshold
+        self._contacts = contacts or {}
 
     def answer(self, question: str) -> Answer:
         timings: dict[str, float] = {}
@@ -89,10 +103,20 @@ class Answerer:
         def refuse(reason: RefusalReason, rejected: list[RejectedSentence] | None = None) -> Answer:
             timings["total"] = (time.perf_counter() - started) * 1000
             logger.info("refused (%s), confidence %.3f", reason, confidence)
+            text = refusal_text(reason, language)
+            # Past the confidence check the question is about a scheme we hold documents
+            # for, so point to that scheme's official contact. Below it we don't know which
+            # scheme (if any) the question is about, so the generic advice stays.
+            if reason != "low_confidence" and retrieval.passages:
+                contact = self._contacts.get(retrieval.passages[0].chunk.scheme)
+                if contact:
+                    text += " " + contact_text(
+                        contact.scheme, contact.helpline, str(contact.website), language
+                    )
             return Answer(
                 question=question,
                 language=language,
-                text=refusal_text(reason, language),
+                text=text,
                 sentences=[],
                 citations=[],
                 refused=True,
@@ -110,13 +134,14 @@ class Answerer:
         passage_texts = [passage.chunk.text for passage in passages]
         generation_started = time.perf_counter()
         try:
-            raw = self._llm.complete_json(
-                SYSTEM_PROMPT, build_user_message(question, language, passages), ANSWER_SCHEMA
+            reply = parse_reply(
+                AnswerReply,
+                self._llm.complete_json(
+                    SYSTEM_PROMPT, build_user_message(question, language, passages), ANSWER_SCHEMA
+                ),
             )
-            drafts = [
-                DraftSentence(s["text"].strip(), list(s["sources"])) for s in raw["sentences"]
-            ]
-            if not raw["answerable"] or not drafts:
+            drafts = [DraftSentence(s.text.strip(), s.sources) for s in reply.sentences]
+            if not reply.answerable or not drafts:
                 return refuse("not_in_documents")
             checked = check_answer(drafts, passage_texts, self._verifier)
         except LlmDeclinedError:

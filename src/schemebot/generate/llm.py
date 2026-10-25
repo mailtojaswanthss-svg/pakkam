@@ -6,7 +6,9 @@ model provider can be swapped without touching it.
 
 import json
 import logging
-from typing import Any, Protocol
+from typing import Any, Protocol, TypeVar
+
+from pydantic import BaseModel, ValidationError
 
 from schemebot.config import Effort
 
@@ -37,6 +39,18 @@ class JsonLlm(Protocol):
     ) -> dict[str, Any]: ...
 
 
+ReplyT = TypeVar("ReplyT", bound=BaseModel)
+
+
+def parse_reply(model: type[ReplyT], raw: dict[str, Any]) -> ReplyT:
+    """Validate a JSON reply. Structured output should guarantee the shape, but a reply
+    that still doesn't match is treated as a service failure rather than a crash."""
+    try:
+        return model.model_validate(raw)
+    except ValidationError as error:
+        raise LlmUnavailableError("the reply did not match the expected schema") from error
+
+
 def has_credentials(client: Any) -> bool:
     """True if the SDK client resolved an API key, auth token or `ant auth login` profile."""
     return bool(client.api_key or client.auth_token or client.credentials is not None)
@@ -56,6 +70,11 @@ class ClaudeJsonLlm:
                 "No Claude API credentials found; questions that reach the LLM will be "
                 "refused. Set SCHEMEBOT_ANTHROPIC_API_KEY in .env."
             )
+
+    @property
+    def configured(self) -> bool:
+        """Whether the client found credentials it can call the API with."""
+        return has_credentials(self._client)
 
     def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
         from anthropic.types.beta import BetaMessageParam, BetaOutputConfigParam

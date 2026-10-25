@@ -90,24 +90,28 @@ only install the heavy ML libraries once you reach the stage that needs them.
 
 ```
 src/schemebot/   ingest/ index/ retrieve/ generate/ api/   pipeline stages
-eval/            evaluation scripts and metrics
-data/            raw/ (not committed), processed/ (rebuilt), eval/questions.jsonl
+                 evaluation/   question set loader, metrics, judge, runner, report
+data/            raw/ (not committed), processed/ (rebuilt), eval/questions.jsonl,
+                 sources.json (documents), contacts.json (official helplines/websites)
 docs/            data sources, results, technical report
-web/             chat UI
+web/             Pakkam, the chat UI (plain HTML/CSS/JS, no build step)
 tests/           unit tests per module
 ```
 
 ## Status
 
 - [x] Phase 1: scaffold, config, data-source list
-- [x] Phase 2: ingestion of 10 official PDFs (Tamil, Hindi, English; 4 language pairs)
+- [x] Phase 2: ingestion of 18 official PDFs (Tamil, Hindi, English; 8 language pairs)
 - [x] Phase 3: indexing (bge-m3 dense + sparse in Qdrant) and hybrid retrieval with reranking
 - [x] Phase 4: cited answers in the question's language, refusal on low confidence, and a
   three-layer guardrail (valid citation, numbers match the source, second-model support check);
   not yet run against the live API
 - [x] Phase 5: FastAPI service (`/ask`, `/health`), audit log without personal data
-- [ ] Phase 6: per-language evaluation
-- [ ] Phase 7: UI, Docker, CI, write-up
+- [~] Phase 6: evaluation pipeline done (`python -m schemebot.evaluation`, see
+  [docs/evaluation.md](docs/evaluation.md)); 48 draft questions, to be verified and grown to ~200
+- [~] Phase 7: web chat UI **Pakkam** done (`web/`, served by `uv run fastapi run` at
+  http://localhost:8000; design in [docs/design-package.md](docs/design-package.md));
+  Docker, CI and the write-up still to do
 
 ## Limitations
 

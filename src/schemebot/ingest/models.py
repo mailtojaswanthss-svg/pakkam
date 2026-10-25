@@ -22,6 +22,7 @@ class SourceDoc(BaseModel):
     doc_date: date | None = Field(default=None, description="Date printed on the document")
     accessed: date
     force_ocr: bool = Field(default=False, description="Set for known legacy-font PDFs")
+    title: str | None = Field(default=None, description="Readable title shown to users")
 
 
 class Chunk(BaseModel):

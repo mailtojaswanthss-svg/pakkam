@@ -7,7 +7,8 @@
     "language": "ta",
     "doc_date": "2023-07-10",
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "G.O.(Ms) No.15, 10 July 2023"
   },
   {
     "doc_id": "pmkisan-guidelines-2020-en",
@@ -17,7 +18,8 @@
     "language": "en",
     "doc_date": "2020-03-29",
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "Operational guidelines, revised 2020"
   },
   {
     "doc_id": "pmkisan-ekyc-note-2023-hi",
@@ -27,7 +29,8 @@
     "language": "hi",
     "doc_date": "2023-11-13",
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "Note on e-KYC, November 2023"
   },
   {
     "doc_id": "pmkisan-ekyc-note-2023-en",
@@ -37,7 +40,8 @@
     "language": "en",
     "doc_date": "2023-11-13",
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "Note on e-KYC, November 2023"
   },
   {
     "doc_id": "apy-brochure-en",
@@ -47,7 +51,8 @@
     "language": "en",
     "doc_date": null,
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "Subscriber information brochure"
   },
   {
     "doc_id": "apy-brochure-hi",
@@ -57,7 +62,8 @@
     "language": "hi",
     "doc_date": null,
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "Subscriber information brochure"
   },
   {
     "doc_id": "pmuy-sop-2023-en",
@@ -67,7 +73,8 @@
     "language": "en",
     "doc_date": "2023-10-10",
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "Procedure for 75 lakh connections, October 2023"
   },
   {
     "doc_id": "tn-swwe-policy-note-2024-en",
@@ -77,7 +84,8 @@
     "language": "en",
     "doc_date": null,
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
   },
   {
     "doc_id": "tn-swwe-policy-note-2024-ta",
@@ -87,7 +95,8 @@
     "language": "ta",
     "doc_date": null,
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
   },
   {
     "doc_id": "cmbfs-go43-2022-ta",
@@ -97,6 +106,95 @@
     "language": "ta",
     "doc_date": "2022-07-27",
     "accessed": "2026-10-25",
-    "force_ocr": false
+    "force_ocr": false,
+    "title": "G.O.(Ms) No.43, 27 July 2022"
+  },
+  {
+    "doc_id": "tn-hfw-policy-note-2024-en",
+    "scheme": "Tamil Nadu Health and Family Welfare schemes (policy note)",
+    "file": "tn-hfw-policy-note-2024-en.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/hfw_e_pn_2024_25.pdf",
+    "language": "en",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
+  },
+  {
+    "doc_id": "tn-hfw-policy-note-2024-ta",
+    "scheme": "Tamil Nadu Health and Family Welfare schemes (policy note)",
+    "file": "tn-hfw-policy-note-2024-ta.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/hfw_t_pn_2024_25.pdf",
+    "language": "ta",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
+  },
+  {
+    "doc_id": "tn-hedu-policy-note-2024-en",
+    "scheme": "Tamil Nadu Higher Education schemes (policy note)",
+    "file": "tn-hedu-policy-note-2024-en.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/hedu_e_pn_2024_25.pdf",
+    "language": "en",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
+  },
+  {
+    "doc_id": "tn-hedu-policy-note-2024-ta",
+    "scheme": "Tamil Nadu Higher Education schemes (policy note)",
+    "file": "tn-hedu-policy-note-2024-ta.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/hedu_t_pn_2024_25.pdf",
+    "language": "ta",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
+  },
+  {
+    "doc_id": "tn-adtw-policy-note-2024-en",
+    "scheme": "Tamil Nadu Adi Dravidar and Tribal Welfare schemes (policy note)",
+    "file": "tn-adtw-policy-note-2024-en.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/adtw_e_pn_2024_25.pdf",
+    "language": "en",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
+  },
+  {
+    "doc_id": "tn-adtw-policy-note-2024-ta",
+    "scheme": "Tamil Nadu Adi Dravidar and Tribal Welfare schemes (policy note)",
+    "file": "tn-adtw-policy-note-2024-ta.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/adtw_t_pn_2024_25.pdf",
+    "language": "ta",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
+  },
+  {
+    "doc_id": "tn-bcmbc-policy-note-2024-en",
+    "scheme": "Tamil Nadu BC, MBC and Minorities Welfare schemes (policy note)",
+    "file": "tn-bcmbc-policy-note-2024-en.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/bcmbc_e_pn_2024_25.pdf",
+    "language": "en",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
+  },
+  {
+    "doc_id": "tn-bcmbc-policy-note-2024-ta",
+    "scheme": "Tamil Nadu BC, MBC and Minorities Welfare schemes (policy note)",
+    "file": "tn-bcmbc-policy-note-2024-ta.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/bcmbc_t_pn_2024_25.pdf",
+    "language": "ta",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false,
+    "title": "Policy note 2024-25"
   }
 ]

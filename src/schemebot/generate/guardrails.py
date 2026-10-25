@@ -14,7 +14,9 @@ import re
 from dataclasses import dataclass
 from typing import Literal
 
-from schemebot.generate.llm import JsonLlm
+from pydantic import BaseModel
+
+from schemebot.generate.llm import JsonLlm, parse_reply
 from schemebot.text import normalize_for_search
 
 _NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
@@ -77,6 +79,15 @@ VERIFIER_SCHEMA: dict[str, object] = {
 }
 
 
+class Verdict(BaseModel):
+    sentence: int
+    supported: bool
+
+
+class VerifierReply(BaseModel):
+    verdicts: list[Verdict]
+
+
 def _verifier_message(sentences: list[DraftSentence], passages: list[str]) -> str:
     blocks = [f"[{number}]\n{text}" for number, text in enumerate(passages, start=1)]
     claims = [
@@ -111,11 +122,12 @@ def check_answer(
     if verifier is None or not kept:
         return GuardrailResult(kept, rejected)
 
-    verdicts = verifier.complete_json(
-        VERIFIER_SYSTEM, _verifier_message(kept, passages), VERIFIER_SCHEMA
-    )["verdicts"]
+    reply = parse_reply(
+        VerifierReply,
+        verifier.complete_json(VERIFIER_SYSTEM, _verifier_message(kept, passages), VERIFIER_SCHEMA),
+    )
     # A sentence the verifier skipped counts as unsupported: fail closed.
-    supported = {v["sentence"] for v in verdicts if v["supported"]}
+    supported = {v.sentence for v in reply.verdicts if v.supported}
     final: list[DraftSentence] = []
     for index, sentence in enumerate(kept, start=1):
         if index in supported:

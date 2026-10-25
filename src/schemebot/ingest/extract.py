@@ -72,6 +72,9 @@ NO_BREAK_SPACE = 0x00A0
 REPLACEMENT_CHAR = 0xFFFD
 ZERO_WIDTH_CHARS = (0x200B, 0x200C, 0x200D)  # space, non-joiner, joiner
 _ZERO_WIDTH = re.compile("[" + "".join(map(chr, ZERO_WIDTH_CHARS)) + "]")
+PRIVATE_USE_RANGE = (0xE000, 0xF8FF)
+BULLET = chr(0x2022)
+_PRIVATE_USE = re.compile(f"[{chr(PRIVATE_USE_RANGE[0])}-{chr(PRIVATE_USE_RANGE[1])}]")
 _ODD_INNER_CHARS = re.compile(r"[;\[\]{}\\`~^|<>=+]")
 _LOWER_THEN_UPPER = re.compile(r"[a-z][A-Z]")
 
@@ -116,6 +119,16 @@ def _has_abnormal_i_sign_share(visible: list[str]) -> bool:
     share = sum(ord(char) == DEVANAGARI_I_SIGN for char in devanagari) / len(devanagari)
     low, high = I_SIGN_SHARE_RANGE
     return not low <= share <= high
+
+
+def replace_symbol_bullets(text: str) -> str:
+    """Turn private-use characters into a plain bullet.
+
+    Bullets set in Symbol or Wingdings fonts extract as private-use code points that no
+    font can draw, so they would show up as empty boxes in the source slip. Applied only
+    after a page passes `needs_ocr`, which counts these characters to detect broken fonts.
+    """
+    return _PRIVATE_USE.sub(BULLET, text)
 
 
 def _starts_with_mark(token: str) -> bool:
@@ -202,7 +215,7 @@ def extract_pages(
             page_number = index + 1
             text = normalize_text(page.get_text("text"))
             if not (force_ocr or uses_legacy_font(page) or needs_ocr(text)):
-                pages.append(PageText(page_number, text, "text"))
+                pages.append(PageText(page_number, replace_symbol_bullets(text), "text"))
                 continue
 
             if ocr is None:

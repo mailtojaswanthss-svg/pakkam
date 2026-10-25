@@ -6,6 +6,8 @@ of the passages that support it. Keeping citations per sentence (instead of free
 inline markers) is what lets the guardrail check every claim.
 """
 
+from pydantic import BaseModel
+
 from schemebot.ingest.langid import Language
 from schemebot.retrieve.retriever import RetrievedPassage
 
@@ -64,6 +66,18 @@ ANSWER_SCHEMA: dict[str, object] = {
     "required": ["answerable", "sentences"],
     "additionalProperties": False,
 }
+
+
+class ReplySentence(BaseModel):
+    text: str
+    sources: list[int]
+
+
+class AnswerReply(BaseModel):
+    """The reply ANSWER_SCHEMA describes, validated before use."""
+
+    answerable: bool
+    sentences: list[ReplySentence]
 
 
 def format_passages(passages: list[RetrievedPassage]) -> str:

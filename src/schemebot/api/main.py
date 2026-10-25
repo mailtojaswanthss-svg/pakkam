@@ -14,11 +14,15 @@ from typing import Annotated, Protocol
 
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.responses import JSONResponse
+from pydantic import TypeAdapter
 
 from schemebot.api.audit import AuditLog
-from schemebot.api.schemas import AskRequest, AskResponse, HealthResponse
-from schemebot.config import get_settings
+from schemebot.api.schemas import AskRequest, AskResponse, HealthResponse, SourceOut
+from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer
+from schemebot.ingest.models import SourceDoc
+
+SOURCES_NAME = "sources.json"
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +37,17 @@ class AnswerService(Protocol):
 class AppState:
     """Everything built at startup. The lock serialises model use on the single GPU."""
 
-    def __init__(self, service: AnswerService, audit: AuditLog) -> None:
+    def __init__(self, service: AnswerService, audit: AuditLog, titles: dict[str, str]) -> None:
         self.service = service
         self.audit = audit
+        self.titles = titles
         self.lock = threading.Lock()
+
+
+def load_sources() -> list[SourceDoc]:
+    # Read through the model, not the ingest pipeline, so the API needs no PDF libraries.
+    path = get_settings().data_dir / SOURCES_NAME
+    return TypeAdapter(list[SourceDoc]).validate_json(path.read_bytes())
 
 
 def get_state(request: Request) -> AppState:
@@ -66,12 +77,16 @@ def _default_service() -> AnswerService:
 def create_app(
     build_service: Callable[[], AnswerService] = _default_service,
     log_dir: Path | None = None,
+    web_dir: Path | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         configure_logging()
         audit_dir = log_dir or get_settings().log_dir
-        app.state.schemebot = AppState(build_service(), AuditLog(audit_dir / AUDIT_LOG_NAME))
+        titles = {d.doc_id: d.title or d.doc_id for d in load_sources()}
+        app.state.schemebot = AppState(
+            build_service(), AuditLog(audit_dir / AUDIT_LOG_NAME), titles
+        )
         logger.info("models loaded, ready")
         yield
 
@@ -116,7 +131,26 @@ def create_app(
         with state.lock:
             answer = state.service.answer(body.question)
         state.audit.record(request.state.request_id, answer)
-        return AskResponse.from_answer(answer)
+        return AskResponse.from_answer(answer, state.titles)
+
+    @app.get("/sources")
+    def sources() -> list[SourceOut]:
+        return [
+            SourceOut(
+                doc_id=d.doc_id,
+                scheme=d.scheme,
+                title=d.title or d.doc_id,
+                language=d.language,
+                source_url=str(d.source_url),
+                doc_date=d.doc_date.isoformat() if d.doc_date else None,
+            )
+            for d in load_sources()
+        ]
+
+    # The chat UI (web/). Registered last: API routes above always match first.
+    site = web_dir if web_dir is not None else PROJECT_ROOT / "web"
+    if site.is_dir():
+        app.frontend("/", directory=str(site))
 
     return app
 

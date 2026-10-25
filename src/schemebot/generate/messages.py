@@ -68,6 +68,23 @@ DISCLAIMER: dict[MessageLanguage, str] = {
 }
 
 
+CONTACT_WITH_HELPLINE: dict[MessageLanguage, str] = {
+    "en": "For help with {scheme}, call {helpline} (toll free) or visit {website}.",
+    "ta": "{scheme} குறித்த உதவிக்கு {helpline} (கட்டணமில்லா எண்) அழைக்கவும் அல்லது {website} பார்க்கவும்.",
+    "hi": "{scheme} से जुड़ी मदद के लिए {helpline} (टोल फ्री) पर कॉल करें या {website} देखें।",
+    "ta-Latn": (
+        "{scheme} pathi udhavikku {helpline} (toll free) ku call pannunga, illa {website} paarunga."
+    ),
+}
+
+CONTACT_WEBSITE_ONLY: dict[MessageLanguage, str] = {
+    "en": "For help with {scheme}, visit {website}.",
+    "ta": "{scheme} குறித்த உதவிக்கு {website} பார்க்கவும்.",
+    "hi": "{scheme} से जुड़ी मदद के लिए {website} देखें।",
+    "ta-Latn": "{scheme} pathi udhavikku {website} paarunga.",
+}
+
+
 def message_language(language: Language) -> MessageLanguage:
     return "en" if language == "unknown" else language
 
@@ -75,6 +92,13 @@ def message_language(language: Language) -> MessageLanguage:
 def refusal_text(reason: RefusalReason, language: Language) -> str:
     texts = UNAVAILABLE if reason == "service_unavailable" else NOT_FOUND
     return texts[message_language(language)]
+
+
+def contact_text(scheme: str, helpline: str | None, website: str, language: Language) -> str:
+    templates = CONTACT_WITH_HELPLINE if helpline else CONTACT_WEBSITE_ONLY
+    return templates[message_language(language)].format(
+        scheme=scheme, helpline=helpline, website=website
+    )
 
 
 def disclaimer(language: Language) -> str:

@@ -232,3 +232,16 @@ def test_missing_credentials_become_unavailable_error_without_calling_api() -> N
     with pytest.raises(LlmUnavailableError, match="credentials"):
         llm.complete_json("system", "user", {})  # type: ignore[attr-defined]
     assert calls.calls == []
+
+
+@pytest.mark.parametrize(
+    "reply",
+    [{}, {"answerable": True}, {"answerable": True, "sentences": [{"text": "x"}]}],
+)
+def test_reply_with_wrong_shape_becomes_a_refusal(
+    corpus: list[Chunk], reply: dict[str, Any]
+) -> None:
+    answer = answer_with(FakeLlm(reply), corpus, QUESTION)
+
+    assert answer.refused
+    assert answer.refusal_reason == "service_unavailable"

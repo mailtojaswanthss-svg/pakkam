@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     verify_answers: bool = True
     """Run the second-model support check on every answer (one extra, cheap API call)."""
     verifier_model: str = "claude-haiku-5-5"
+    judge_model: str = "claude-opus-5-5"
+    """Evaluation only: grades faithfulness independently of the in-pipeline verifier."""
 
     # Models
     embedding_model: str = "BAAI/bge-m3"

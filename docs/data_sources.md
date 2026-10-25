@@ -53,6 +53,18 @@ Then run `uv run python -m schemebot.ingest` and check `data/processed/ingest_re
 | 6b | Social Welfare & Women Empowerment Dept. policy note 2024-25 (covers Pudhumai Penn, the Breakfast Scheme and other department schemes; not KMUT, which sits under Special Programme Implementation) | https://cms.tn.gov.in | [English](https://cms.tn.gov.in/cms_migrated/document/docfiles/swwe_e_pn_2024_25.pdf), [Tamil](https://cms.tn.gov.in/cms_migrated/document/docfiles/swwe_t_pn_2024_25.pdf) | en, ta | 2024 | 2026-10-25 | downloaded | **Language pair.** Tamil version has no usable text layer and is OCR'd. Other departments follow the same `_e_` / `_t_` file naming. |
 | 7 | TN e-Sevai service list | https://www.tnesevai.tn.gov.in | TODO | ta, en | TODO | TODO | candidate | where-to-apply info |
 
+### Tamil Nadu department policy notes 2024-25 (English + Tamil pairs)
+
+All from `https://cms.tn.gov.in/cms_migrated/document/docfiles/`, accessed 2026-10-25. The
+Tamil versions have no usable text layer and are fully OCR'd.
+
+| Department | English | Tamil | Covers (for example) |
+|---|---|---|---|
+| Health and Family Welfare | `hfw_e_pn_2024_25.pdf` (649 pp) | `hfw_t_pn_2024_25.pdf` (568 pp) | CM's Comprehensive Health Insurance Scheme |
+| Higher Education | `hedu_e_pn_2024_25.pdf` (189 pp) | `hedu_t_pn_2024_25.pdf` (122 pp) | scholarships, Tamil Pudhalvan |
+| Adi Dravidar and Tribal Welfare | `adtw_e_pn_2024_25.pdf` (154 pp) | `adtw_t_pn_2024_25.pdf` (172 pp) | scholarships, hostels |
+| BC, MBC and Minorities Welfare | `bcmbc_e_pn_2024_25.pdf` (87 pp) | `bcmbc_t_pn_2024_25.pdf` (107 pp) | scholarships, free bicycles |
+
 ## Central schemes
 
 | # | Scheme | Portal | Document URL | Lang | Doc date | Accessed | Status | Notes |
