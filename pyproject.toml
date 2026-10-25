@@ -26,8 +26,7 @@ generate = [
     "anthropic>=0.75",
 ]
 api = [
-    "fastapi>=0.115",
-    "uvicorn[standard]>=0.30",
+    "fastapi[standard]>=0.115",
 ]
 eval = [
     "pandas>=2.2",
@@ -47,6 +46,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/schemebot"]
+
+[tool.fastapi]
+entrypoint = "schemebot.api.main:app"
 
 # CUDA build of PyTorch on Windows/Linux (PyPI only has the CPU build for Windows).
 # macOS has no CUDA, so it falls back to the default PyPI wheel.

@@ -189,7 +189,16 @@ def _llm_with_fake_client(model: str, reply: str) -> tuple[object, _RecordingMes
 
     llm = ClaudeJsonLlm(model, api_key="test-key", effort="low")
     messages = _RecordingMessages(reply)
-    llm._client = type("Client", (), {"beta": type("Beta", (), {"messages": messages})()})()
+    llm._client = type(
+        "Client",
+        (),
+        {
+            "beta": type("Beta", (), {"messages": messages})(),
+            "api_key": "test-key",
+            "auth_token": None,
+            "credentials": None,
+        },
+    )()
     return llm, messages
 
 
@@ -212,3 +221,14 @@ def test_invalid_json_reply_becomes_unavailable_error() -> None:
 
     with pytest.raises(LlmUnavailableError):
         llm.complete_json("system", "user", {})  # type: ignore[attr-defined]
+
+
+def test_missing_credentials_become_unavailable_error_without_calling_api() -> None:
+    from schemebot.generate.llm import LlmUnavailableError
+
+    llm, calls = _llm_with_fake_client("claude-opus-5-5", '{"ok": true}')
+    llm._client.api_key = None  # type: ignore[attr-defined]
+
+    with pytest.raises(LlmUnavailableError, match="credentials"):
+        llm.complete_json("system", "user", {})  # type: ignore[attr-defined]
+    assert calls.calls == []

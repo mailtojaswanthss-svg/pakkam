@@ -1,0 +1,78 @@
+"""Public request and response shapes of the HTTP API."""
+
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, Field, StringConstraints
+
+from schemebot.generate.answer import Answer
+from schemebot.generate.messages import RefusalReason
+from schemebot.ingest.langid import Language
+
+MIN_QUESTION_CHARS = 3
+MAX_QUESTION_CHARS = 500
+"""Long enough for a detailed eligibility question; short enough to bound cost and latency."""
+
+Question = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True, min_length=MIN_QUESTION_CHARS, max_length=MAX_QUESTION_CHARS
+    ),
+]
+
+
+class AskRequest(BaseModel):
+    question: Question = Field(examples=["PM Kisan ku evlo panam kidaikum?"])
+
+
+class CitationOut(BaseModel):
+    number: int
+    scheme: str
+    doc_id: str
+    page_start: int
+    page_end: int
+    source_url: str
+
+
+class SentenceOut(BaseModel):
+    text: str
+    citations: list[int] = Field(description="Numbers into `citations`.")
+
+
+class AskResponse(BaseModel):
+    answer: str = Field(description="Full answer with [n] markers, or the refusal message.")
+    language: Language
+    refused: bool
+    refusal_reason: RefusalReason | None
+    sentences: list[SentenceOut]
+    citations: list[CitationOut]
+    confidence: float = Field(description="Relevance of the best retrieved passage, 0-1.")
+    disclaimer: str
+    latency_ms: float
+
+    @classmethod
+    def from_answer(cls, answer: Answer) -> "AskResponse":
+        return cls(
+            answer=answer.text,
+            language=answer.language,
+            refused=answer.refused,
+            refusal_reason=answer.refusal_reason,
+            sentences=[SentenceOut(text=s.text, citations=s.citations) for s in answer.sentences],
+            citations=[
+                CitationOut(
+                    number=c.number,
+                    scheme=c.scheme,
+                    doc_id=c.doc_id,
+                    page_start=c.page_start,
+                    page_end=c.page_end,
+                    source_url=c.source_url,
+                )
+                for c in answer.citations
+            ],
+            confidence=round(answer.confidence, 4),
+            disclaimer=answer.disclaimer,
+            latency_ms=round(answer.timings_ms.get("total", 0.0), 1),
+        )
+
+
+class HealthResponse(BaseModel):
+    status: Literal["ok"]

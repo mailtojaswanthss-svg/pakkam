@@ -55,16 +55,30 @@ is needed for OCR during ingestion.
 
 ```bash
 cp .env.example .env                  # then fill in the Tesseract paths (and later your API key)
-uv sync --extra ingest --extra index --extra generate  # ingestion, PyTorch (CUDA), Claude SDK
+uv sync --extra ingest --extra index --extra generate --extra api  # + PyTorch (CUDA), Claude SDK, FastAPI
 uv run pytest                         # fast tests, no models or API calls
 uv run python -m schemebot.ingest     # PDFs in data/raw + data/sources.json -> data/processed/
 uv run python -m schemebot.index      # chunks -> search index in data/index/
 uv run python -m schemebot.retrieve "PM Kisan ku evlo panam kidaikum?"   # passages only
 uv run python -m schemebot.generate "PM Kisan ku evlo panam kidaikum?"   # cited answer
+uv run fastapi run                    # HTTP API on http://localhost:8000 (docs at /docs)
 ```
 
-`schemebot.generate` needs a Claude API key: set `SCHEMEBOT_ANTHROPIC_API_KEY` in `.env`, or
-`ANTHROPIC_API_KEY` in the environment.
+`schemebot.generate` and the API need a Claude API key to answer: set
+`SCHEMEBOT_ANTHROPIC_API_KEY` in `.env`, or `ANTHROPIC_API_KEY` in the environment. Without one,
+questions are still retrieved and checked, but answerable ones are refused as
+`service_unavailable`.
+
+### API
+
+`POST /ask` with `{"question": "..."}` (3-500 characters, any of the four language groups)
+returns the answer as cited sentences, the citations (document, pages, source URL), whether
+it refused and why, the retrieval confidence, a disclaimer and the latency. A refusal is a
+normal `200` response. `GET /health` returns `{"status": "ok"}` once the models are loaded.
+
+Each request is logged to `logs/requests.jsonl` for audit and evaluation **without the
+question text**: only a hash, its length and language, what was cited, refusals and
+timings. Unexpected errors return a generic `500` with a request ID, never internals.
 
 Each pipeline stage has its own extra (`ingest`, `index`, `generate`, `api`, `eval`), so you
 only install the heavy ML libraries once you reach the stage that needs them.
@@ -89,8 +103,9 @@ tests/           unit tests per module
 - [x] Phase 2: ingestion of 10 official PDFs (Tamil, Hindi, English; 4 language pairs)
 - [x] Phase 3: indexing (bge-m3 dense + sparse in Qdrant) and hybrid retrieval with reranking
 - [x] Phase 4: cited answers in the question's language, refusal on low confidence, and a
-  three-layer guardrail (valid citation, numbers match the source, second-model support check)
-- [ ] Phase 5: FastAPI service
+  three-layer guardrail (valid citation, numbers match the source, second-model support check);
+  not yet run against the live API
+- [x] Phase 5: FastAPI service (`/ask`, `/health`), audit log without personal data
 - [ ] Phase 6: per-language evaluation
 - [ ] Phase 7: UI, Docker, CI, write-up
 

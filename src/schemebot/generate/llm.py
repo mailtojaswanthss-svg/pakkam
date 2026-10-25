@@ -37,6 +37,11 @@ class JsonLlm(Protocol):
     ) -> dict[str, Any]: ...
 
 
+def has_credentials(client: Any) -> bool:
+    """True if the SDK client resolved an API key, auth token or `ant auth login` profile."""
+    return bool(client.api_key or client.auth_token or client.credentials is not None)
+
+
 class ClaudeJsonLlm:
     def __init__(self, model: str, api_key: str | None, effort: Effort) -> None:
         import anthropic
@@ -46,9 +51,20 @@ class ClaudeJsonLlm:
         self._anthropic = anthropic
         self._model = model
         self._effort = effort
+        if not has_credentials(self._client):
+            logger.warning(
+                "No Claude API credentials found; questions that reach the LLM will be "
+                "refused. Set SCHEMEBOT_ANTHROPIC_API_KEY in .env."
+            )
 
     def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
         from anthropic.types.beta import BetaMessageParam, BetaOutputConfigParam
+
+        # Without credentials the SDK raises a bare TypeError at request time; report it as
+        # an unavailable service instead, without catching TypeError (which would also hide
+        # genuine programming errors).
+        if not has_credentials(self._client):
+            raise LlmUnavailableError("no Claude API credentials configured")
 
         anthropic = self._anthropic
         messages: list[BetaMessageParam] = [{"role": "user", "content": user}]
