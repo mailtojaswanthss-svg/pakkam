@@ -28,5 +28,75 @@
     "doc_date": "2023-11-13",
     "accessed": "2026-10-25",
     "force_ocr": false
+  },
+  {
+    "doc_id": "pmkisan-ekyc-note-2023-en",
+    "scheme": "PM-KISAN",
+    "file": "pmkisan-ekyc-note-2023-en.pdf",
+    "source_url": "https://pmkisan.gov.in/Documents/Note-on-Modes-and-processes-of-ekyc-13th-Nov-English.pdf",
+    "language": "en",
+    "doc_date": "2023-11-13",
+    "accessed": "2026-10-25",
+    "force_ocr": false
+  },
+  {
+    "doc_id": "apy-brochure-en",
+    "scheme": "Atal Pension Yojana",
+    "file": "apy-brochure-en.pdf",
+    "source_url": "https://www.pfrda.org.in/documents/33652/307349/APY%20Subscriber%20Information%20Brochure%20English",
+    "language": "en",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false
+  },
+  {
+    "doc_id": "apy-brochure-hi",
+    "scheme": "Atal Pension Yojana",
+    "file": "apy-brochure-hi.pdf",
+    "source_url": "https://www.pfrda.org.in/documents/33652/307086/APY%20Subscriber%20Information%20Brochure%20(Hindi)",
+    "language": "hi",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false
+  },
+  {
+    "doc_id": "pmuy-sop-2023-en",
+    "scheme": "Pradhan Mantri Ujjwala Yojana",
+    "file": "pmuy-sop-2023-en.pdf",
+    "source_url": "https://mopng.gov.in/files/marketing/lpg/75L-PMUY-SoP-10102023-(1).pdf",
+    "language": "en",
+    "doc_date": "2023-10-10",
+    "accessed": "2026-10-25",
+    "force_ocr": false
+  },
+  {
+    "doc_id": "tn-swwe-policy-note-2024-en",
+    "scheme": "Tamil Nadu Social Welfare schemes (policy note)",
+    "file": "tn-swwe-policy-note-2024-en.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/swwe_e_pn_2024_25.pdf",
+    "language": "en",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false
+  },
+  {
+    "doc_id": "tn-swwe-policy-note-2024-ta",
+    "scheme": "Tamil Nadu Social Welfare schemes (policy note)",
+    "file": "tn-swwe-policy-note-2024-ta.pdf",
+    "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/swwe_t_pn_2024_25.pdf",
+    "language": "ta",
+    "doc_date": null,
+    "accessed": "2026-10-25",
+    "force_ocr": false
+  },
+  {
+    "doc_id": "cmbfs-go43-2022-ta",
+    "scheme": "Chief Minister's Breakfast Scheme",
+    "file": "cmbfs-go43-2022-ta.pdf",
+    "source_url": "https://tncdw.org/frontend/gos/Breakfast_GO.43_(1).pdf",
+    "language": "ta",
+    "doc_date": "2022-07-27",
+    "accessed": "2026-10-25",
+    "force_ocr": false
   }
 ]

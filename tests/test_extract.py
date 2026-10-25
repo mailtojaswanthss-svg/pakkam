@@ -139,3 +139,29 @@ def test_correct_devanagari_does_not_need_ocr() -> None:
     correct = "पीएम-किसान योजना कृषि एवं किसान कल्याण मंत्रालय कृषि एवं किसान कल्याण विभाग "
 
     assert not needs_ocr(correct * 3)
+
+
+# Real text from the PFRDA APY brochure. Its font map turned the vowel sign "ि" into
+# consonants, so no word starts with a vowel sign and the orphan-mark check misses it.
+APY_BROKEN = (
+    "अटल पेंशन योजना (एपीवाई) - अभिदाता सूचना भववरभिका अटल पेंशन योजना (एपीवाई), भारत "
+    "सरकार द्वारा 60 वर्ष की आयु के पश्चात् रु.1000 प्रततमाह की न्यूनतम मातसक पेंशन गारंटी "
+)
+APY_CORRECT = (
+    "अटल पेंशन योजना (एपीवाई) - अभिदाता सूचना विवरणिका अटल पेंशन योजना (एपीवाई), भारत "
+    "सरकार द्वारा 60 वर्ष की आयु के पश्चात् रु.1000 प्रतिमाह की न्यूनतम मासिक पेंशन गारंटी "
+    "किसान कल्याण विभाग के लिए नियमित रूप से निवेश किया जाता है। "
+)
+
+
+def test_hindi_with_too_few_i_signs_needs_ocr() -> None:
+    assert needs_ocr(APY_BROKEN * 3)
+
+
+def test_hindi_with_normal_i_sign_share_does_not_need_ocr() -> None:
+    assert not needs_ocr(APY_CORRECT * 3)
+
+
+def test_short_hindi_text_skips_the_i_sign_check() -> None:
+    # A single short line has too few characters for the share to mean anything.
+    assert not needs_ocr("अटल पेंशन योजना भारत सरकार द्वारा न्यूनतम मासिक पेंशन गारंटी योजना")

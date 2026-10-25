@@ -1,0 +1,125 @@
+"""Checks that every sentence of an answer is backed by the passages it cites.
+
+Three layers, cheapest first:
+1. Citation check: the sentence cites at least one passage that was actually shown.
+2. Number check: every number in the sentence (amount, age, income limit, date) appears in
+   a cited passage. Numbers are where a wrong answer hurts most, and this check works the
+   same in every language once digits are normalised.
+3. Support check (optional): a second model reads each sentence with its cited passages
+   and says whether they state it. Catches wrong claims that contain no number.
+A sentence that fails any check is removed; if nothing is left the answer is refused.
+"""
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from schemebot.generate.llm import JsonLlm
+from schemebot.text import normalize_for_search
+
+_NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
+
+FailureReason = Literal["no_valid_citation", "number_not_in_source", "not_supported"]
+
+
+@dataclass(frozen=True)
+class DraftSentence:
+    text: str
+    sources: list[int]
+    """1-based passage numbers, as the model returned them."""
+
+
+@dataclass(frozen=True)
+class RejectedSentence:
+    sentence: DraftSentence
+    reason: FailureReason
+
+
+@dataclass(frozen=True)
+class GuardrailResult:
+    kept: list[DraftSentence]
+    rejected: list[RejectedSentence]
+
+
+def numbers_in(text: str) -> set[str]:
+    """Numbers with thousands separators removed: 'Rs.6,000' and '6000' both give '6000'."""
+    found = set()
+    for match in _NUMBER.findall(normalize_for_search(text)):
+        number = match.replace(",", "").rstrip(".")
+        found.add(number.removesuffix(".00").removesuffix(".0"))
+    return found
+
+
+VERIFIER_SYSTEM = """\
+You check answers written for citizens about government schemes. For each numbered \
+sentence, decide whether the passages it cites state what the sentence says. A sentence \
+is supported only if a reader of those passages would reach the same facts; translation \
+into another language is fine, added or changed facts are not. Be strict."""
+
+VERIFIER_SCHEMA: dict[str, object] = {
+    "type": "object",
+    "properties": {
+        "verdicts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "sentence": {"type": "integer"},
+                    "supported": {"type": "boolean"},
+                },
+                "required": ["sentence", "supported"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["verdicts"],
+    "additionalProperties": False,
+}
+
+
+def _verifier_message(sentences: list[DraftSentence], passages: list[str]) -> str:
+    blocks = [f"[{number}]\n{text}" for number, text in enumerate(passages, start=1)]
+    claims = [
+        f"{index}. {sentence.text}  (cites {', '.join(map(str, sentence.sources))})"
+        for index, sentence in enumerate(sentences, start=1)
+    ]
+    return (
+        "<passages>\n" + "\n\n".join(blocks) + "\n</passages>\n\n"
+        "<sentences>\n" + "\n".join(claims) + "\n</sentences>"
+    )
+
+
+def check_answer(
+    sentences: list[DraftSentence],
+    passages: list[str],
+    verifier: JsonLlm | None = None,
+) -> GuardrailResult:
+    kept: list[DraftSentence] = []
+    rejected: list[RejectedSentence] = []
+
+    for sentence in sentences:
+        valid = [n for n in sentence.sources if 1 <= n <= len(passages)]
+        if not valid:
+            rejected.append(RejectedSentence(sentence, "no_valid_citation"))
+            continue
+        cited_numbers = set().union(*(numbers_in(passages[n - 1]) for n in valid))
+        if not numbers_in(sentence.text) <= cited_numbers:
+            rejected.append(RejectedSentence(sentence, "number_not_in_source"))
+            continue
+        kept.append(DraftSentence(sentence.text, valid))
+
+    if verifier is None or not kept:
+        return GuardrailResult(kept, rejected)
+
+    verdicts = verifier.complete_json(
+        VERIFIER_SYSTEM, _verifier_message(kept, passages), VERIFIER_SCHEMA
+    )["verdicts"]
+    # A sentence the verifier skipped counts as unsupported: fail closed.
+    supported = {v["sentence"] for v in verdicts if v["supported"]}
+    final: list[DraftSentence] = []
+    for index, sentence in enumerate(kept, start=1):
+        if index in supported:
+            final.append(sentence)
+        else:
+            rejected.append(RejectedSentence(sentence, "not_supported"))
+    return GuardrailResult(final, rejected)

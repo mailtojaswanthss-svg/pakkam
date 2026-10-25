@@ -22,3 +22,6 @@ logs/
 *.log
 .cache/
 qdrant_storage/
+
+# Search index (rebuilt by python -m schemebot.index)
+data/index/

@@ -1,0 +1,159 @@
+"""Question -> cited answer, or an honest refusal.
+
+Order of decisions:
+1. Retrieve. If the best passage is not relevant enough, refuse without calling the LLM.
+2. Ask the LLM to answer from the passages only, as cited sentences.
+3. Run the guardrail; drop any sentence the passages do not back. Refuse if none remain.
+"""
+
+import logging
+import time
+from dataclasses import dataclass, field
+
+from schemebot.generate.guardrails import DraftSentence, RejectedSentence, check_answer
+from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError
+from schemebot.generate.messages import RefusalReason, disclaimer, refusal_text
+from schemebot.generate.prompt import ANSWER_SCHEMA, SYSTEM_PROMPT, build_user_message
+from schemebot.ingest.langid import Language, detect_language
+from schemebot.retrieve.retriever import RetrievedPassage, Retriever
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class Citation:
+    number: int
+    doc_id: str
+    scheme: str
+    page_start: int
+    page_end: int
+    source_url: str
+
+
+@dataclass(frozen=True)
+class AnswerSentence:
+    text: str
+    citations: list[int]
+    """Numbers into Answer.citations."""
+
+
+@dataclass(frozen=True)
+class Answer:
+    question: str
+    language: Language
+    text: str
+    sentences: list[AnswerSentence]
+    citations: list[Citation]
+    refused: bool
+    refusal_reason: RefusalReason | None
+    confidence: float
+    disclaimer: str
+    rejected: list[RejectedSentence] = field(default_factory=list)
+    timings_ms: dict[str, float] = field(default_factory=dict)
+
+
+def _citation(number: int, passage: RetrievedPassage) -> Citation:
+    chunk = passage.chunk
+    return Citation(
+        number=number,
+        doc_id=chunk.doc_id,
+        scheme=chunk.scheme,
+        page_start=chunk.page_start,
+        page_end=chunk.page_end,
+        source_url=str(chunk.source_url),
+    )
+
+
+class Answerer:
+    def __init__(
+        self,
+        retriever: Retriever,
+        llm: JsonLlm,
+        verifier: JsonLlm | None,
+        refusal_threshold: float,
+    ) -> None:
+        self._retriever = retriever
+        self._llm = llm
+        self._verifier = verifier
+        self._refusal_threshold = refusal_threshold
+
+    def answer(self, question: str) -> Answer:
+        timings: dict[str, float] = {}
+        started = time.perf_counter()
+        language = detect_language(question)
+
+        retrieval = self._retriever.retrieve(question)
+        timings["retrieval"] = (time.perf_counter() - started) * 1000
+        confidence = retrieval.confidence
+
+        def refuse(reason: RefusalReason, rejected: list[RejectedSentence] | None = None) -> Answer:
+            timings["total"] = (time.perf_counter() - started) * 1000
+            logger.info("refused (%s), confidence %.3f", reason, confidence)
+            return Answer(
+                question=question,
+                language=language,
+                text=refusal_text(reason, language),
+                sentences=[],
+                citations=[],
+                refused=True,
+                refusal_reason=reason,
+                confidence=confidence,
+                disclaimer=disclaimer(language),
+                rejected=rejected or [],
+                timings_ms=timings,
+            )
+
+        if confidence < self._refusal_threshold:
+            return refuse("low_confidence")
+
+        passages = retrieval.passages
+        passage_texts = [passage.chunk.text for passage in passages]
+        generation_started = time.perf_counter()
+        try:
+            raw = self._llm.complete_json(
+                SYSTEM_PROMPT, build_user_message(question, language, passages), ANSWER_SCHEMA
+            )
+            drafts = [
+                DraftSentence(s["text"].strip(), list(s["sources"])) for s in raw["sentences"]
+            ]
+            if not raw["answerable"] or not drafts:
+                return refuse("not_in_documents")
+            checked = check_answer(drafts, passage_texts, self._verifier)
+        except LlmDeclinedError:
+            return refuse("model_declined")
+        except LlmUnavailableError as error:
+            logger.error("LLM unavailable: %s", error)
+            return refuse("service_unavailable")
+        finally:
+            timings["generation"] = (time.perf_counter() - generation_started) * 1000
+
+        if not checked.kept:
+            return refuse("unsupported", checked.rejected)
+
+        # Renumber citations so the user sees [1], [2], ... in order of first use.
+        cited_order: list[int] = []
+        for sentence in checked.kept:
+            for source in sentence.sources:
+                if source not in cited_order:
+                    cited_order.append(source)
+        renumber = {source: new for new, source in enumerate(cited_order, start=1)}
+        citations = [_citation(renumber[s], passages[s - 1]) for s in cited_order]
+        sentences = [
+            AnswerSentence(s.text, sorted(renumber[source] for source in s.sources))
+            for s in checked.kept
+        ]
+        text = " ".join(f"{s.text} {''.join(f'[{n}]' for n in s.citations)}" for s in sentences)
+        timings["total"] = (time.perf_counter() - started) * 1000
+        return Answer(
+            question=question,
+            language=language,
+            text=text,
+            sentences=sentences,
+            citations=citations,
+            refused=False,
+            refusal_reason=None,
+            confidence=confidence,
+            disclaimer=disclaimer(language),
+            rejected=checked.rejected,
+            timings_ms=timings,
+        )

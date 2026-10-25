@@ -49,7 +49,8 @@ Then run `uv run python -m schemebot.ingest` and check `data/processed/ingest_re
 | 3 | Chief Minister's Comprehensive Health Insurance Scheme | https://www.cmchistn.com | TODO | ta, en | TODO | TODO | candidate | |
 | 4 | Naan Mudhalvan | https://www.naanmudhalvan.tn.gov.in | TODO | ta, en | TODO | TODO | candidate | |
 | 5 | Tamil Pudhalvan | TODO (find official G.O.) | TODO | ta, en | TODO | TODO | candidate | |
-| 6 | Chief Minister's Breakfast Scheme | TODO (find official G.O.) | TODO | ta | TODO | TODO | candidate | |
+| 6 | Chief Minister's Breakfast Scheme | https://tncdw.org/pages/go | [G.O.(Ms) No.43](https://tncdw.org/frontend/gos/Breakfast_GO.43_(1).pdf) | ta | 2022-07-27 | 2026-10-25 | downloaded | Scanned, fully OCR'd. |
+| 6b | Social Welfare & Women Empowerment Dept. policy note 2024-25 (covers Pudhumai Penn, the Breakfast Scheme and other department schemes; not KMUT, which sits under Special Programme Implementation) | https://cms.tn.gov.in | [English](https://cms.tn.gov.in/cms_migrated/document/docfiles/swwe_e_pn_2024_25.pdf), [Tamil](https://cms.tn.gov.in/cms_migrated/document/docfiles/swwe_t_pn_2024_25.pdf) | en, ta | 2024 | 2026-10-25 | downloaded | **Language pair.** Tamil version has no usable text layer and is OCR'd. Other departments follow the same `_e_` / `_t_` file naming. |
 | 7 | TN e-Sevai service list | https://www.tnesevai.tn.gov.in | TODO | ta, en | TODO | TODO | candidate | where-to-apply info |
 
 ## Central schemes
@@ -57,12 +58,12 @@ Then run `uv run python -m schemebot.ingest` and check `data/processed/ingest_re
 | # | Scheme | Portal | Document URL | Lang | Doc date | Accessed | Status | Notes |
 |---|---|---|---|---|---|---|---|---|
 | 8 | PM-KISAN | https://pmkisan.gov.in | [Operational Guidelines (revised)](https://pmkisan.gov.in/Documents/RevisedPM-KISANOperationalGuidelines(English).pdf) | en | 2020-03-29 | 2026-10-25 | downloaded | |
-| 8b | PM-KISAN e-KYC | https://pmkisan.gov.in | [e-KYC modes note](https://pmkisan.gov.in/Documents/Note-on-Modes-and-processes-of-ekyc-13th-Nov-Hindi.pdf) | hi | 2023-11-13 | 2026-10-25 | downloaded | Text layer has a broken Devanagari font map, so it is OCR'd. |
+| 8b | PM-KISAN e-KYC | https://pmkisan.gov.in | [Hindi](https://pmkisan.gov.in/Documents/Note-on-Modes-and-processes-of-ekyc-13th-Nov-Hindi.pdf), [English](https://pmkisan.gov.in/Documents/Note-on-Modes-and-processes-of-ekyc-13th-Nov-English.pdf) | hi, en | 2023-11-13 | 2026-10-25 | downloaded | **Language pair.** Hindi text layer has a broken Devanagari font map, so it is OCR'd. |
 | 9 | Ayushman Bharat PM-JAY | https://pmjay.gov.in | TODO | en, hi | TODO | TODO | candidate | |
 | 10 | PM Awas Yojana (Gramin / Urban) | https://pmayg.nic.in, https://pmay-urban.gov.in | TODO | en, hi | TODO | TODO | candidate | |
-| 11 | PM Ujjwala Yojana | https://www.pmuy.gov.in | TODO | en, hi | TODO | TODO | candidate | |
+| 11 | PM Ujjwala Yojana | https://mopng.gov.in/hi/marketing/lpg | [SOP for 75 lakh connections](https://mopng.gov.in/files/marketing/lpg/75L-PMUY-SoP-10102023-(1).pdf) | en | 2023-10-10 | 2026-10-25 | downloaded | Eligibility categories and required documents. No Hindi version found on the ministry site. |
 | 12 | PM Jan Dhan Yojana | https://pmjdy.gov.in | TODO | en, hi | TODO | TODO | candidate | |
-| 13 | Atal Pension Yojana | TODO (PFRDA / NPS Trust) | TODO | en, hi | TODO | TODO | candidate | |
+| 13 | Atal Pension Yojana | https://www.pfrda.org.in | [English](https://www.pfrda.org.in/documents/33652/307349/APY%20Subscriber%20Information%20Brochure%20English), [Hindi](https://www.pfrda.org.in/documents/33652/307086/APY%20Subscriber%20Information%20Brochure%20(Hindi)) | en, hi | undated | 2026-10-25 | downloaded | **Language pair.** Subscriber information brochure. Hindi text layer has wrong letters ("प्रतिमाह" extracts as "प्रततमाह"); the vowel-sign check detects it and sends both pages to OCR. |
 | 14 | Sukanya Samriddhi Yojana | TODO (India Post / DEA notification) | TODO | en, hi | TODO | TODO | candidate | |
 | 15 | PM Vishwakarma | https://pmvishwakarma.gov.in | TODO | en, hi | TODO | TODO | candidate | |
 | 16 | National Scholarship Portal schemes | https://scholarships.gov.in | TODO | en, hi | TODO | TODO | candidate | |

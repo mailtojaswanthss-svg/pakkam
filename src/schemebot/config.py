@@ -6,11 +6,15 @@ so no model name, threshold or secret is hardcoded elsewhere in the code.
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+Effort = Literal["low", "medium", "high", "xhigh", "max"]
+"""Claude reasoning effort: how much the model thinks before answering."""
 
 SUPPORTED_LANGUAGES = ("en", "ta", "hi", "ta-Latn")
 """English, Tamil, Hindi, and Tamil written in Latin script (Tanglish)."""
@@ -29,17 +33,21 @@ class Settings(BaseSettings):
     data_dir: Path = PROJECT_ROOT / "data"
     log_dir: Path = PROJECT_ROOT / "logs"
 
-    # LLM
+    # LLM. With no key set, the SDK falls back to ANTHROPIC_API_KEY or an `ant auth login` profile.
     anthropic_api_key: SecretStr | None = None
-    llm_model: str = "claude-sonnet-5-5"
+    llm_model: str = "claude-opus-5-5"
+    llm_effort: Effort = "medium"
+    verify_answers: bool = True
+    """Run the second-model support check on every answer (one extra, cheap API call)."""
+    verifier_model: str = "claude-haiku-5-5"
 
     # Models
     embedding_model: str = "BAAI/bge-m3"
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
 
-    # Vector store
-    qdrant_url: str = "http://localhost:6333"
+    # Vector store (Qdrant local mode, persisted under data/index/)
     qdrant_collection: str = "schemes"
+    embed_batch_size: int = Field(default=16, ge=1, le=256)
 
     # Retrieval and refusal. The threshold is a starting point, tuned on the dev split later.
     retrieval_top_k: int = Field(default=20, ge=1, le=100)
@@ -64,6 +72,10 @@ class Settings(BaseSettings):
     @property
     def processed_dir(self) -> Path:
         return self.data_dir / "processed"
+
+    @property
+    def index_dir(self) -> Path:
+        return self.data_dir / "index"
 
     @property
     def eval_questions_path(self) -> Path:

@@ -28,11 +28,12 @@ PDF / web page ──► extract + language ID ──► section chunks (+ metad
                                                  │
 query ──► normalise (Unicode, numerals, transliteration) ──► hybrid search ──► rerank
                                                  │
-                         confidence < threshold? ──► refuse + helpline
+                         confidence < threshold? ──► refuse (no LLM call)
                                                  │
-                         LLM answers in user's language with [S1] citations
+                         Claude answers in the user's language, one source list per sentence
                                                  │
-                         NLI guardrail: does each cited passage support its claim?
+                         guardrail: valid citation? numbers in source? second model agrees?
+                         unsupported sentences removed; nothing left ──► refuse
 ```
 
 ## Results
@@ -53,14 +54,23 @@ Requires [uv](https://docs.astral.sh/uv/) and Docker. Tesseract (with `tam` and 
 is needed for OCR during ingestion.
 
 ```bash
-cp .env.example .env          # then fill in the Tesseract paths (and later your API key)
-uv sync --extra ingest        # creates .venv with Python 3.12 + ingestion deps
-uv run pytest
-uv run python -m schemebot.ingest   # PDFs in data/raw + data/sources.json -> data/processed/
+cp .env.example .env                  # then fill in the Tesseract paths (and later your API key)
+uv sync --extra ingest --extra index --extra generate  # ingestion, PyTorch (CUDA), Claude SDK
+uv run pytest                         # fast tests, no models or API calls
+uv run python -m schemebot.ingest     # PDFs in data/raw + data/sources.json -> data/processed/
+uv run python -m schemebot.index      # chunks -> search index in data/index/
+uv run python -m schemebot.retrieve "PM Kisan ku evlo panam kidaikum?"   # passages only
+uv run python -m schemebot.generate "PM Kisan ku evlo panam kidaikum?"   # cited answer
 ```
+
+`schemebot.generate` needs a Claude API key: set `SCHEMEBOT_ANTHROPIC_API_KEY` in `.env`, or
+`ANTHROPIC_API_KEY` in the environment.
 
 Each pipeline stage has its own extra (`ingest`, `index`, `generate`, `api`, `eval`), so you
 only install the heavy ML libraries once you reach the stage that needs them.
+
+`uv run pytest -m models` runs the slower tests that use the real bge-m3 and reranker models
+(about 4.5 GB, downloaded on first use; a GPU makes them much faster).
 
 ## Project layout
 
@@ -76,9 +86,10 @@ tests/           unit tests per module
 ## Status
 
 - [x] Phase 1: scaffold, config, data-source list
-- [x] Phase 2: ingestion code (`python -m schemebot.ingest`); waiting on real documents
-- [ ] Phase 3: indexing and hybrid retrieval
-- [ ] Phase 4: answer generation and guardrails
+- [x] Phase 2: ingestion of 10 official PDFs (Tamil, Hindi, English; 4 language pairs)
+- [x] Phase 3: indexing (bge-m3 dense + sparse in Qdrant) and hybrid retrieval with reranking
+- [x] Phase 4: cited answers in the question's language, refusal on low confidence, and a
+  three-layer guardrail (valid citation, numbers match the source, second-model support check)
 - [ ] Phase 5: FastAPI service
 - [ ] Phase 6: per-language evaluation
 - [ ] Phase 7: UI, Docker, CI, write-up

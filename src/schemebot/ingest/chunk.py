@@ -14,8 +14,8 @@ from schemebot.ingest.langid import detect_language
 from schemebot.ingest.models import Chunk, SourceDoc
 
 MAX_CHUNK_CHARS = 1000
-"""Characters, not tokens. Tamil needs roughly 2-3 characters per token in the bge-m3
-tokenizer, so 1000 characters stays inside the reranker's 512-token window with a query."""
+"""Characters, not tokens. Even Tamil OCR text (the most tokens per character) stays well
+inside the 1024-token passage limit used for embedding and reranking."""
 
 OVERLAP_MAX_CHARS = 250
 """The last paragraph of a chunk is repeated in the next one if it is at most this long."""

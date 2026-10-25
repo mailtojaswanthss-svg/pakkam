@@ -36,6 +36,15 @@ MAX_ORPHAN_MARK_SHARE = 0.03
 """Share of words allowed to start with a vowel sign (e.g. 'ि', 'ா'). Unicode never does
 this, but broken Devanagari/Tamil font maps do: 'कृषि' extracts as 'िृषि'."""
 
+DEVANAGARI_I_SIGN = 0x093F
+I_SIGN_SHARE_RANGE = (0.02, 0.09)
+"""Normal Hindi has the vowel sign 'ि' at ~4-5% of Devanagari characters. Broken font maps
+push it out of range in either direction: 1.0% when the sign became a consonant
+('प्रतिमाह' -> 'प्रततमाह'), 12.5% when a consonant became the sign ('कृषि' -> 'िृषि')."""
+
+MIN_DEVANAGARI_FOR_SIGN_CHECK = 200
+"""Below this many Devanagari characters the share is too noisy to judge."""
+
 MIN_LETTER_SHARE = 0.5
 """Prose is ~90% letters. When a font's glyphs have no Unicode mapping they vanish from the
 text layer, leaving pages of punctuation and numbers such as 'ii) . iii) .2.5 .'."""
@@ -100,6 +109,15 @@ def _is_bad_char(char: str) -> bool:
     return ord(char) == REPLACEMENT_CHAR or 0xE000 <= ord(char) <= 0xF8FF
 
 
+def _has_abnormal_i_sign_share(visible: list[str]) -> bool:
+    devanagari = [char for char in visible if 0x0900 <= ord(char) <= 0x097F]
+    if len(devanagari) < MIN_DEVANAGARI_FOR_SIGN_CHECK:
+        return False
+    share = sum(ord(char) == DEVANAGARI_I_SIGN for char in devanagari) / len(devanagari)
+    low, high = I_SIGN_SHARE_RANGE
+    return not low <= share <= high
+
+
 def _starts_with_mark(token: str) -> bool:
     """True for a word starting with a combining vowel sign or virama (Unicode Mn/Mc)."""
     return unicodedata.category(token[0]) in ("Mn", "Mc")
@@ -120,6 +138,9 @@ def needs_ocr(text: str) -> bool:
         return True
 
     if sum(char.isalpha() for char in visible) / len(visible) < MIN_LETTER_SHARE:
+        return True
+
+    if _has_abnormal_i_sign_share(visible):
         return True
 
     tokens = [token for token in text.split() if any(char.isalpha() for char in token)]
