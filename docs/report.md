@@ -192,8 +192,9 @@ same interface: it requests JSON that follows the same schemas, and maps safety 
 decline and API failures to "unavailable", so the pipeline, guardrail and evaluation run
 unchanged. `SCHEMEBOT_LLM_PROVIDER` switches between them. The answer-quality numbers in
 section 8 were measured with Gemini, because the Claude account had no credit during
-development. On the free tier, rate-limited and overloaded calls are retried with backoff
-for about three minutes, and calls that still fail are counted separately in the results.
+development. On the free tier, rate-limited and overloaded calls were retried with backoff
+for about three minutes (now `SCHEMEBOT_LLM_RETRIES=7`; the app default is 2 retries of at
+most 60 s each, so a visitor is not kept waiting), and calls that still fail are counted separately in the results.
 
 ## 7. Service and interface
 

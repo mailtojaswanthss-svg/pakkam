@@ -8,7 +8,6 @@ import logging
 import math
 import mimetypes
 import re
-import threading
 import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
@@ -53,6 +52,10 @@ mimetypes.add_type("image/webp", ".webp")
 logger = logging.getLogger(__name__)
 
 REQUEST_ID_HEADER = "X-Request-ID"
+TOO_MANY_TEXT = "Too many questions. Wait a minute and ask again."
+DAILY_LIMIT_TEXT = (
+    "Pakkam has answered as many questions as it can today. Please come back tomorrow."
+)
 AUDIT_LOG_NAME = "requests.jsonl"
 
 
@@ -61,7 +64,10 @@ class AnswerService(Protocol):
 
 
 class AppState:
-    """Everything built at startup. The lock serialises model use on the single GPU."""
+    """Everything built at startup.
+
+    No lock here: the retriever makes requests take turns on the GPU itself, and the LLM
+    calls (most of the time per answer) can then run for several users at once."""
 
     def __init__(
         self,
@@ -76,7 +82,6 @@ class AppState:
         self.titles = titles
         self.transcriber = transcriber
         self.speaker = speaker
-        self.lock = threading.Lock()
 
 
 def load_sources() -> list[SourceDoc]:
@@ -138,8 +143,8 @@ def create_app(
         if wait is not None:
             raise HTTPException(
                 status_code=429,
-                detail="Too many questions. Wait a little and ask again.",
-                headers={"Retry-After": str(math.ceil(wait))},
+                detail=DAILY_LIMIT_TEXT if wait.daily else TOO_MANY_TEXT,
+                headers={"Retry-After": str(math.ceil(wait.seconds))},
             )
 
     @asynccontextmanager
@@ -195,8 +200,7 @@ def create_app(
     @app.post("/ask", dependencies=[Depends(limit_asks)])
     def ask(body: AskRequest, state: StateDep, request: Request) -> AskResponse:
         # Plain `def`: model inference blocks, so FastAPI runs this in its threadpool.
-        with state.lock:
-            answer = state.service.answer(body.question)
+        answer = state.service.answer(body.question)
         state.audit.record(request.state.request_id, answer)
         return AskResponse.from_answer(answer, state.titles)
 
@@ -230,8 +234,7 @@ def create_app(
                 status_code=422, detail="Pakkam could not hear a question. Try again."
             ) from error
 
-        with state.lock:
-            answer = state.service.answer(question)
+        answer = state.service.answer(question)
         state.audit.record(request.state.request_id, answer, {"stt": stt_ms})
         response = AskResponse.from_answer(answer, state.titles)
         response.timings_ms["stt"] = round(stt_ms, 1)

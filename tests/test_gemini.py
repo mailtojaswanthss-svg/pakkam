@@ -128,3 +128,25 @@ def test_provider_setting_picks_the_client_and_models() -> None:
     assert model_for(gemini, "verifier") == gemini.gemini_verifier_model
     assert model_for(gemini, "judge") != model_for(gemini, "answer")
     assert model_for(claude, "answer") == claude.llm_model
+
+
+def test_llm_limits_reach_both_clients() -> None:
+    # The SDKs' own defaults (10 minutes for Claude; none for Gemini) are far too long for
+    # a visitor waiting on an answer.
+    limits: dict[str, Any] = {"llm_timeout_seconds": 12, "llm_retries": 1}
+    gemini = build_llm(Settings(llm_provider="gemini", gemini_api_key="k", **limits), "answer")  # type: ignore[arg-type]
+    claude = build_llm(Settings(anthropic_api_key="k", **limits), "verifier")  # type: ignore[arg-type]
+
+    assert isinstance(gemini, GeminiJsonLlm)
+    options = gemini._client._api_client._http_options
+    assert options.timeout == 12_000
+    assert options.retry_options.attempts == 2  # the first try plus one retry
+    assert isinstance(claude, ClaudeJsonLlm)
+    assert claude._client.timeout == 12
+    assert claude._client.max_retries == 1
+
+
+def test_default_llm_limits_keep_one_call_to_a_few_minutes() -> None:
+    settings = Settings()
+
+    assert settings.llm_timeout_seconds * (settings.llm_retries + 1) <= 180
