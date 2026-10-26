@@ -79,7 +79,7 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 2. After the first few real calls, check credit use in the Gnani dashboard and set the daily cap to match.
 3. Read the CSV together and decide Tanglish ta-IN vs en-IN.
 4. Record the 32 eval clips from `script.csv` (plus 1-2 noisy takes) and run `eval` (retrieval-only first, free).
-5. Mic UX polish: mostly done (see Done). Not built from the spec: the one-time mic pre-prompt (3), showing "Pakkam heard" before the answer arrives (6, needs a separate STT step), and a fixed "Playing answer" bar (9; the Listen/Stop button stays on each answer). Try it on a real phone before the video, using docs/PHONE_TEST.md.
+5. Mic UX polish: mostly done (see Done). Not built from the spec: the one-time mic pre-prompt (3), and a fixed "Playing answer" bar (9; the Listen/Stop button stays on each answer). "Pakkam heard" before the answer (6) is now built, see item 7. Try it on a real phone before the video, using docs/PHONE_TEST.md.
 6. Later list (Jaswanth, 26 Oct): the one-time mic pre-prompt; a "Playing answer" bar (needs TTS switched on first); "show the transcript as soon as it is known" (proposal below, not built).
 7. Show the transcript first: **option A built** (26 Oct, see Done). Options as proposed: Today /ask/voice returns the transcript only together with the answer.
    - **A. Two requests (recommended).** Add a new `POST /transcribe` that only runs STT. The page shows "Pakkam heard: …" straight away, then sends that text to `/ask` like a typed question.
