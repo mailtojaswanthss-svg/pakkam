@@ -39,6 +39,11 @@ class CitationOut(BaseModel):
     source_url: str
     excerpt: str = Field(description="The cited passage, as extracted from the document.")
     language: Language
+    ocr_corrected: bool = Field(
+        default=False,
+        description="The excerpt holds an OCR misreading corrected by hand from the printed "
+        "page; the UI should say so.",
+    )
 
 
 class SentenceOut(BaseModel):
@@ -90,6 +95,7 @@ class AskResponse(BaseModel):
                     source_url=c.source_url,
                     excerpt=c.text,
                     language=c.language,
+                    ocr_corrected=c.ocr_corrected,
                 )
                 for c in answer.citations
             ],

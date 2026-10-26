@@ -138,7 +138,9 @@ def _make_chunk(doc: SourceDoc, blocks: list[_Block], index: int) -> Chunk:
     text = "\n\n".join(block.text for block in blocks)
     language = detect_language(text)
     extractions = {block.extraction for block in blocks}
-    worst = next((method for method in ("text-unverified", "ocr") if method in extractions), "text")
+    # "ocr-corrected" wins over plain "ocr", so a chunk holding a hand fix is always marked.
+    order = ("text-unverified", "ocr-corrected", "ocr")
+    worst = next((method for method in order if method in extractions), "text")
     return Chunk(
         chunk_id=f"{doc.doc_id}-p{blocks[0].page}-{index:03d}",
         doc_id=doc.doc_id,

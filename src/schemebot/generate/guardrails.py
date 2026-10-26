@@ -4,7 +4,8 @@ Three layers, cheapest first:
 1. Citation check: the sentence cites at least one passage that was actually shown.
 2. Number check: every number in the sentence (amount, age, income limit, date) appears in
    a cited passage. Numbers are where a wrong answer hurts most, and this check works the
-   same in every language once digits are normalised.
+   same in every language once digits are normalised. A number that is in the passage but
+   known to be an OCR misreading (data/corrections.json) does not count.
 3. Support check (optional): a second model reads each sentence with its cited passages
    and says whether they state it. Catches wrong claims that contain no number.
 A sentence that fails any check is removed; if nothing is left the answer is refused.
@@ -33,7 +34,9 @@ _UNITS = re.compile(
 )
 _FINANCIAL_YEAR = re.compile(r"\b(?P<start>\d{4})\s*[-–/]\s*(?P<end>\d{2})\b")
 
-FailureReason = Literal["no_valid_citation", "number_not_in_source", "not_supported"]
+FailureReason = Literal[
+    "no_valid_citation", "number_not_in_source", "known_ocr_error", "not_supported"
+]
 
 
 @dataclass(frozen=True)
@@ -137,7 +140,10 @@ def check_answer(
     sentences: list[DraftSentence],
     passages: list[str],
     verifier: JsonLlm | None = None,
+    misread_numbers: list[set[str]] | None = None,
 ) -> GuardrailResult:
+    """`misread_numbers[i]`: numbers in passage i+1 known to be OCR misreadings."""
+    misread = misread_numbers or [set() for _ in passages]
     kept: list[DraftSentence] = []
     rejected: list[RejectedSentence] = []
 
@@ -147,8 +153,12 @@ def check_answer(
             rejected.append(RejectedSentence(sentence, "no_valid_citation"))
             continue
         cited_numbers = set().union(*(numbers_in(passages[n - 1]) for n in valid))
-        if not numbers_in(sentence.text) <= cited_numbers:
+        sentence_numbers = numbers_in(sentence.text)
+        if not sentence_numbers <= cited_numbers:
             rejected.append(RejectedSentence(sentence, "number_not_in_source"))
+            continue
+        if any(sentence_numbers & misread[n - 1] for n in valid):
+            rejected.append(RejectedSentence(sentence, "known_ocr_error"))
             continue
         kept.append(DraftSentence(sentence.text, valid))
 

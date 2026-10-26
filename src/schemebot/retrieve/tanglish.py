@@ -44,6 +44,12 @@ GLOSS: dict[str, str] = {
     "padikiravanga": "students", "irukavanga": "people who are",
     "irukkuravanga": "people who are", "irukuravanga": "people who are",
     "irukaru": "is", "irukkaru": "is", "irukanga": "are", "irukkanga": "are",
+    "irukanum": "must be", "irukkanum": "must be",
+    "padicha": "studied", "padichu": "studied", "padikra": "studying", "padikira": "studying",
+    "pona": "goes to", "ponaa": "goes to", "pogum": "goes to",
+    "kudupaanga": "they give", "koduppaanga": "they give", "kuduppanga": "they give",
+    "tharaanga": "they give", "tharanga": "they give",
+    "tharaangala": "do they give", "tharangala": "do they give",
     # pronouns
     "naan": "I", "naa": "I", "enakku": "for me", "enaku": "for me", "ungalukku": "for you",
     "nanga": "we", "naanga": "we", "avanga": "they", "ivanga": "they",
@@ -69,6 +75,13 @@ GLOSS: dict[str, str] = {
     "jaathi": "caste", "jathi": "caste", "puthu": "new", "pudhu": "new",
 }
 
+# Word pairs whose word-by-word gloss reads badly ("age how much"). Applied first.
+PHRASES: dict[str, str] = {
+    "join panna": "to join", "join pannanum": "must join",
+    "apply panna": "to apply", "apply pannanum": "must apply",
+    "age evlo": "what age", "vayasu evlo": "what age",
+}
+
 # Case endings joined to a word ("varushathu-ku", "pasangal-ukku"). Longest first.
 SUFFIXES: tuple[tuple[str, str], ...] = (
     ("ukku", "for"), ("kku", "for"), ("ku", "for"),
@@ -92,7 +105,20 @@ def _gloss_word(word: str) -> str:
     return word
 
 
+_PHRASE_RE = re.compile(
+    r"\b(" + "|".join(re.escape(p) for p in sorted(PHRASES, key=len, reverse=True)) + r")\b",
+    re.IGNORECASE,
+)
+
+
 def gloss_tanglish(text: str) -> str:
     """Replace known Tanglish words with English; everything else is kept as typed."""
-    parts = [_gloss_word(t) if t[0].isalpha() else t for t in _TOKEN_RE.findall(text)]
+    # Phrases first; the word pass only sees the text between them.
+    pieces = _PHRASE_RE.split(text)
+    parts: list[str] = []
+    for index, piece in enumerate(pieces):
+        if index % 2:  # odd pieces are the matched phrases
+            parts.append(PHRASES[piece.lower()])
+        else:
+            parts += [_gloss_word(t) if t[0].isalpha() else t for t in _TOKEN_RE.findall(piece)]
     return _SPACES_RE.sub(" ", "".join(parts)).strip()

@@ -5,7 +5,7 @@ import sys
 import time
 
 from schemebot.config import get_settings
-from schemebot.index.embed import BgeM3Encoder
+from schemebot.index.embed import BgeM3Encoder, model_source
 from schemebot.index.store import build_index, open_client
 from schemebot.ingest.pipeline import CHUNKS_NAME, read_chunks
 
@@ -22,7 +22,10 @@ def main() -> int:
 
     chunks = read_chunks(chunks_path)
     started = time.perf_counter()
-    encoder = BgeM3Encoder(settings.embedding_model, settings.embed_batch_size)
+    encoder = BgeM3Encoder(
+        model_source(settings.embedding_model, settings.embedding_revision),
+        settings.embed_batch_size,
+    )
     count = build_index(
         open_client(settings.index_dir), settings.qdrant_collection, chunks, encoder
     )

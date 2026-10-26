@@ -67,6 +67,10 @@ class Settings(BaseSettings):
     # Models
     embedding_model: str = "BAAI/bge-m3"
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
+    embedding_revision: str | None = Field(default=None, pattern=r"^[0-9a-f]{40}$")
+    reranker_revision: str | None = Field(default=None, pattern=r"^[0-9a-f]{40}$")
+    """Hugging Face commit hashes. Set them so a rebuilt index or a new machine uses exactly
+    the model versions the results were measured with; empty means the latest version."""
 
     # Vector store (Qdrant local mode, persisted under data/index/)
     qdrant_collection: str = "schemes"
@@ -82,6 +86,9 @@ class Settings(BaseSettings):
     # Public demo limits on POST /ask (each question can cost two LLM calls)
     ask_limit_per_client_per_minute: int = Field(default=10, ge=1)
     ask_limit_total_per_day: int = Field(default=500, ge=1)
+    answer_cache_size: int = Field(default=256, ge=0)
+    """Answers kept in memory so a repeated question costs no LLM call; 0 turns it off."""
+    answer_cache_ttl_seconds: float = Field(default=6 * 3600, gt=0)
 
     # Gnani voice (Prisma v2.5 speech to text). The key lives only in .env.
     gnani_api_key: SecretStr | None = None
@@ -115,7 +122,14 @@ class Settings(BaseSettings):
     """Folder holding tam/hin/eng .traineddata, when not the install's own tessdata folder."""
 
     @field_validator(
-        "gnani_api_key", "tts_model", "tts_voice_ta", "tts_voice_hi", "tts_voice_en", mode="before"
+        "gnani_api_key",
+        "tts_model",
+        "tts_voice_ta",
+        "tts_voice_hi",
+        "tts_voice_en",
+        "embedding_revision",
+        "reranker_revision",
+        mode="before",
     )
     @classmethod
     def _empty_means_unset(cls, value: object) -> object:

@@ -101,6 +101,13 @@ Gemini's free tier, set `SCHEMEBOT_LLM_RETRIES=7`. On the free tier Google may
 use the prompts to improve its products, so use a paid key for a public demo. Without a key,
 questions are still retrieved and checked, but answerable ones are refused as
 `service_unavailable`.
+The API keeps up to 256 answers in memory for 6 hours, so a repeated question (same words,
+ignoring case, spaces and a final "?") is answered without calling the LLM
+(`SCHEMEBOT_ANSWER_CACHE_SIZE`, `0` turns it off; `SCHEMEBOT_ANSWER_CACHE_TTL_SECONDS`).
+The key also covers the answer language, the models and settings, and a hash of the index and
+`data/corrections.json`, so a rebuilt index or a new correction starts fresh. Service errors are
+never kept, nothing cached is logged, and a cached answer still counts against the rate limit.
+The evaluation never uses this cache.
 
 ### API
 
@@ -202,6 +209,12 @@ tests/           unit tests per module
 Public documents only. It does not process applications or personal data, it is not an official
 service, and its answers need human verification. Scheme rules change, so answers reflect the
 document dates listed in the data-source file.
+
+OCR misreads some digits in Tamil and Hindi pages (Rs.1,000 read as 4,000). Known misreadings
+are listed in `data/corrections.json`. An answer may never use a listed wrong number from a
+passage covering that page. Only after a person has checked the printed PDF page and filled in `confirmed_by`,
+`confirmed_on` and `page` does ingestion replace the text, and then the citation is flagged
+`ocr_corrected` in the API. Re-run ingestion and indexing after confirming an entry.
 
 ## License
 

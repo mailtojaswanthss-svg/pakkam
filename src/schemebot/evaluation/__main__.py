@@ -12,6 +12,7 @@ from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.evaluation.dataset import load_questions
 from schemebot.evaluation.report import git_revision, per_question_rows, render, run_stamp
 from schemebot.evaluation.runner import evaluate
+from schemebot.evaluation.summary import info_path
 from schemebot.ingest.pipeline import CHUNKS_NAME, read_chunks
 from schemebot.retrieve.factory import IndexMissingError, build_retriever
 
@@ -80,7 +81,8 @@ def main() -> int:
         "Mode": ("full pipeline" if full else "retrieval only")
         + f", {args.mode} search, reranker {'off' if args.no_rerank else 'on'}"
         + ("" if args.no_rerank else f", Tanglish gloss {'off' if args.no_gloss else 'on'}"),
-        "Models": f"{settings.embedding_model}, {settings.reranker_model}"
+        "Models": f"{settings.embedding_model}@{settings.embedding_revision or 'latest'}, "
+        f"{settings.reranker_model}@{settings.reranker_revision or 'latest'}"
         + (llm_models if full else ""),
         "Refusal threshold": f"{settings.refusal_threshold}",
         "Corpus": f"{len({c.doc_id for c in chunks})} documents, {len(chunks)} chunks",
@@ -106,6 +108,10 @@ def main() -> int:
     with detail_path.open("w", encoding="utf-8") as file:
         for row in per_question_rows(results):
             file.write(json.dumps(row, ensure_ascii=False) + "\n")
+    # What produced the run (commit, models, mode), for `python -m schemebot.evaluation.summary`.
+    info_path(detail_path).write_text(
+        json.dumps(run_info, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
 
     print(report)
     print(f"per-question details: {detail_path}")

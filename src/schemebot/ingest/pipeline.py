@@ -11,6 +11,12 @@ from pydantic import BaseModel, Field, TypeAdapter
 
 from schemebot.config import Settings
 from schemebot.ingest.chunk import chunk_document
+from schemebot.ingest.corrections import (
+    CORRECTIONS_NAME,
+    CorrectionError,
+    apply_corrections,
+    load_corrections,
+)
 from schemebot.ingest.extract import OcrFn, extract_pages
 from schemebot.ingest.langid import Language, detect_language
 from schemebot.ingest.models import Chunk, SourceDoc
@@ -40,6 +46,9 @@ class IngestReport(BaseModel):
     missing_files: list[str]
     unreadable_files: dict[str, str] = Field(description="file name -> error message")
     total_chunks: int
+    corrections_applied: list[str] = Field(
+        default_factory=list, description="'doc_id p<page>: wrong -> right', one per fix"
+    )
 
     @property
     def has_errors(self) -> bool:
@@ -68,6 +77,11 @@ def read_chunks(path: Path) -> list[Chunk]:
 
 def run_ingest(settings: Settings, ocr_factory: OcrFactory | None) -> IngestReport:
     docs = load_manifest(settings.data_dir / MANIFEST_NAME)
+    corrections = load_corrections(settings.data_dir / CORRECTIONS_NAME)
+    unknown = {c.doc_id for c in corrections} - {d.doc_id for d in docs}
+    if unknown:
+        raise CorrectionError(f"{CORRECTIONS_NAME} names unknown documents: {sorted(unknown)}")
+    applied: list[str] = []
     all_chunks: list[Chunk] = []
     reports: list[DocReport] = []
     missing: list[str] = []
@@ -91,6 +105,8 @@ def run_ingest(settings: Settings, ocr_factory: OcrFactory | None) -> IngestRepo
             unreadable[doc.file] = str(error)
             continue
 
+        pages, fixed = apply_corrections(doc.doc_id, pages, corrections)
+        applied += [f"{c.doc_id} p{c.page}: {c.ocr_reads} -> {c.pdf_shows}" for c in fixed]
         chunks = chunk_document(doc, pages)
         all_chunks.extend(chunks)
         reports.append(
@@ -111,6 +127,7 @@ def run_ingest(settings: Settings, ocr_factory: OcrFactory | None) -> IngestRepo
         missing_files=missing,
         unreadable_files=unreadable,
         total_chunks=len(all_chunks),
+        corrections_applied=applied,
     )
     (settings.processed_dir / REPORT_NAME).write_text(
         json.dumps(report.model_dump(), indent=2, ensure_ascii=False), encoding="utf-8"
