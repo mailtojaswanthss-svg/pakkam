@@ -9,6 +9,7 @@ import threading
 import time
 from collections import deque
 from collections.abc import Callable
+from dataclasses import dataclass
 
 MAX_TRACKED_CLIENTS = 10_000
 """Above this many remembered clients, forget the ones with no recent requests."""
@@ -50,6 +51,13 @@ class RateLimiter:
             del self._hits[key]
 
 
+@dataclass(frozen=True)
+class Wait:
+    seconds: float
+    daily: bool
+    """True when today's total is used up, not just this visitor's share of the minute."""
+
+
 class AskLimiter:
     """A per-client limit per minute, and a total per day that caps the API bill."""
 
@@ -62,8 +70,10 @@ class AskLimiter:
         self._per_client = RateLimiter(per_client_per_minute, MINUTE_S, clock)
         self._total = RateLimiter(total_per_day, DAY_S, clock)
 
-    def check(self, client: str) -> float | None:
+    def check(self, client: str) -> Wait | None:
+        """Count a request. None when allowed, else how long to wait and which limit hit."""
         wait = self._per_client.check(client)
-        if wait is None:
-            wait = self._total.check(TOTAL_KEY)
-        return wait
+        if wait is not None:
+            return Wait(wait, daily=False)
+        wait = self._total.check(TOTAL_KEY)
+        return None if wait is None else Wait(wait, daily=True)

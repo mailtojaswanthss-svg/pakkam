@@ -51,6 +51,10 @@ mimetypes.add_type("image/webp", ".webp")
 logger = logging.getLogger(__name__)
 
 REQUEST_ID_HEADER = "X-Request-ID"
+TOO_MANY_TEXT = "Too many questions. Wait a minute and ask again."
+DAILY_LIMIT_TEXT = (
+    "Pakkam has answered as many questions as it can today. Please come back tomorrow."
+)
 AUDIT_LOG_NAME = "requests.jsonl"
 
 
@@ -138,8 +142,8 @@ def create_app(
         if wait is not None:
             raise HTTPException(
                 status_code=429,
-                detail="Too many questions. Wait a little and ask again.",
-                headers={"Retry-After": str(math.ceil(wait))},
+                detail=DAILY_LIMIT_TEXT if wait.daily else TOO_MANY_TEXT,
+                headers={"Retry-After": str(math.ceil(wait.seconds))},
             )
 
     @asynccontextmanager
