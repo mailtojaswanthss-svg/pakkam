@@ -64,6 +64,13 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
   - On phones the mic is a 52 px round button. Screen readers hear the timer every 10 s, not every second. A new recording stops any answer playing.
   - Checked in headless Chromium with a fake mic and a mocked /ask/voice. Not tried on a real phone.
 
+- Transcript first (option A, 26 Oct):
+  - New `POST /transcribe` runs speech to text only: 1 Gnani call, same daily cap, its own rate-limit counter, and a numbers-only audit line.
+  - The chat page now calls `/transcribe`, shows "Pakkam heard: …" at once, then sends that text to `/ask`.
+  - Send again after a failed answer resends only the text, with no new Gnani call.
+  - `/ask/voice` stays for scripts and the eval.
+  - Tests: 4 new API tests with fakes (363 pass). Checked in headless Chromium with mocked routes. No real Gnani call.
+
 ## Next
 0. Jaswanth runs the Timbre listening test on his laptop (the key is only there; Claude can't hear audio, so Jaswanth describes what he hears):
    - a. `--cases tamil --models timbre-v2.5 timbre-v3.0` (2 calls), then choose the version and set `SCHEMEBOT_TTS_MODEL`.
@@ -72,7 +79,17 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 2. After the first few real calls, check credit use in the Gnani dashboard and set the daily cap to match.
 3. Read the CSV together and decide Tanglish ta-IN vs en-IN.
 4. Record the 32 eval clips from `script.csv` (plus 1-2 noisy takes) and run `eval` (retrieval-only first, free).
-5. Mic UX polish: mostly done (see Done). Not built from the spec: the one-time mic pre-prompt (3), showing "Pakkam heard" before the answer arrives (6, needs a separate STT step), and a fixed "Playing answer" bar (9; the Listen/Stop button stays on each answer). Try it on a real phone before the video.
+5. Mic UX polish: mostly done (see Done). Not built from the spec: the one-time mic pre-prompt (3), showing "Pakkam heard" before the answer arrives (6, needs a separate STT step), and a fixed "Playing answer" bar (9; the Listen/Stop button stays on each answer). Try it on a real phone before the video, using docs/PHONE_TEST.md.
+6. Later list (Jaswanth, 26 Oct): the one-time mic pre-prompt; a "Playing answer" bar (needs TTS switched on first); "show the transcript as soon as it is known" (proposal below, not built).
+7. Show the transcript first: **option A built** (26 Oct, see Done). Options as proposed: Today /ask/voice returns the transcript only together with the answer.
+   - **A. Two requests (recommended).** Add a new `POST /transcribe` that only runs STT. The page shows "Pakkam heard: …" straight away, then sends that text to `/ask` like a typed question.
+     - Gnani cost: 1 call per question, the same as now.
+     - Extras: one more local HTTP round trip, and it could later let the user fix a wrong transcript before asking.
+     - Work: about 2-3 h. `/transcribe` needs its own rate limit so a voice question isn't counted twice. The stt_ms timing and the language picked must be passed on to `/ask`. Tests use fakes.
+   - **B. Streaming.** `/ask/voice` sends the transcript first, then the answer, in one response.
+     - Gnani cost: also 1 call per question.
+     - Work: about 4-5 h. Errors after the transcript arrive inside a 200 response, so runTurn's error handling (shared with the UI thread) has to change, and the browser must read a stream.
+   - Neither option makes the speech-to-text step itself faster. They only stop the transcript waiting for the answer. The 13-50 s figure in the UI spec is the UI thread's estimate of answer time, not a voice measurement.
 
 ## Blockers
 - Tanglish clips (Jaswanth). The key is in his local `.env` (26 Oct). **Target: recordings done by Wed 28 Oct, no later than Sun 1 Nov.** The result decides whether the roughly 6-hour transliteration work is needed, so a later date makes the plan slip.
