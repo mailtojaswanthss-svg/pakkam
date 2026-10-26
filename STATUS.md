@@ -18,7 +18,18 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
   - `data/voice/` is gitignored: recordings and transcripts are never pushed.
   - 22 more tests with a fake STT. 235 tests pass; ruff and mypy are clean. **Not yet run against real Gnani.**
 
+- Voice out, code side (26 Oct):
+  - `src/schemebot/voice/tts.py` is a Gnani Timbre client (`POST /api/v1/tts/inference`), returning 24 kHz mono WAV.
+  - `POST /speak` takes `{text, language}` and returns WAV. It removes `[n]` markers, caps text at 1200 characters (`SCHEMEBOT_TTS_MAX_CHARS`), and logs neither text nor audio.
+  - Each answer has a **Listen** button that turns into **Stop** while playing. Nothing plays without a tap. Starting a new conversation stops playback.
+  - Voice language: Tamil and Tanglish answers use a ta-IN voice, Hindi uses hi-IN, English uses en-IN.
+  - **TTS stays off until `SCHEMEBOT_TTS_MODEL` is set** to timbre-v2.5 or timbre-v3.0, which Jaswanth confirms from the dashboard. Default voices: v2.5 uses Asmita (ta), Nalini (hi) and Kaveri (en); v3.0 uses Shivani. They can be overridden with `SCHEMEBOT_TTS_VOICE_TA/HI/EN`.
+  - Every TTS call counts in the same daily cap as STT.
+  - Empty values in `.env` (e.g. `SCHEMEBOT_TTS_MODEL=`) now count as not set. This also stops an empty Gnani key from switching voice on.
+  - 24 more tests with a fake TTS. 259 tests pass; ruff and mypy are clean. Checked in a headless browser with a fake TTS only. **No real Timbre audio has been generated yet.**
+
 ## Next
+0. Jaswanth: confirm the Timbre version in the dashboard and set `SCHEMEBOT_TTS_MODEL`. Real audio only after he types yes.
 1. Jaswanth: record clips into `data/voice/tanglish/` (5 to 10 Tanglish, plus a pure Tamil, a pure English and one noisy clip as controls) and run the compare script.
 2. After the first few real calls, check credit use in the Gnani dashboard and set the daily cap to match.
 3. Read the CSV together and decide Tanglish ta-IN vs en-IN.
@@ -36,6 +47,13 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 - Without a Gnani key the server still runs, and `/ask/voice` answers 503.
 - Credits: tests and CI never call Gnani. Only the live app and the clip script do, and both are under the daily cap.
 - The cap's lock is per process, so the app and the script running at exactly the same moment could miss one count. That's fine for one person on one laptop.
+
+## Open questions for TTS (untested)
+- Gnani's docs say to spell out numbers, dates and currency. Our answers contain digits like "Rs. 1,000", and how Timbre reads them is unknown. Test this before the demo.
+- Typed Tanglish questions get Tanglish answers in Latin letters, and a ta-IN voice reading Latin text is untested. Spoken Tanglish goes through ta-IN STT and probably comes back in Tamil script, but that depends on the clip test.
+
+## Synthetic test clips
+- Synthetic voices are for plumbing tests only (pipeline, CSV, counter, errors). File names and outputs carry "synthetic". Clips made with Gnani Timbre for Gnani STT are labelled "synthetic, same vendor". Results from them are never used as evidence in any doc or number.
 
 ## Rules for recording other people
 - Get their verbal consent first, and use made-up questions only. No real names, phone numbers, Aadhaar or PAN.

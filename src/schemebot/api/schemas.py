@@ -88,6 +88,13 @@ class VoiceAskResponse(AskResponse):
     stt_ms: float = Field(description="Time spent on speech to text, in milliseconds.")
 
 
+class SpeakRequest(BaseModel):
+    text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)] = Field(
+        description="Answer text to read aloud; [n] citation markers are removed first."
+    )
+    language: Language = Field(description="The answer's language, from the /ask response.")
+
+
 class HealthResponse(BaseModel):
     status: Literal["ok"]
 

@@ -11,6 +11,7 @@ from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import MAX_QUESTION_CHARS
 from schemebot.generate.answer import Answer, AnswerSentence, Citation
 from schemebot.voice.stt import SttError
+from schemebot.voice.tts import TtsError
 from tests.test_stt import make_wav
 
 QUESTION = "Who can join Atal Pension Yojana? My Aadhaar is 1234 5678 9012"
@@ -339,3 +340,82 @@ def test_voice_rejects_unknown_language(service: FakeService, tmp_path: Path) ->
 
     assert response.status_code == 422
     assert stt.calls == []
+
+
+# ---------- POST /speak ----------
+
+
+class FakeTts:
+    def __init__(self, error: Exception | None = None) -> None:
+        self.calls: list[tuple[str, str]] = []
+        self._error = error
+
+    def speak(self, text: str, language_code: str) -> bytes:
+        self.calls.append((text, language_code))
+        if self._error:
+            raise self._error
+        return b"RIFF-fake-wav"
+
+
+def speak_client(service: FakeService, tts: FakeTts | None, log_dir: Path) -> TestClient:
+    return TestClient(
+        create_app(lambda: service, build_stt=lambda: None, build_tts=lambda: tts, log_dir=log_dir),
+        raise_server_exceptions=False,
+    )
+
+
+def test_speak_returns_wav_without_citation_markers(service: FakeService, tmp_path: Path) -> None:
+    tts = FakeTts()
+    with speak_client(service, tts, tmp_path) as client:
+        response = client.post(
+            "/speak", json={"text": "Citizens aged 18 to 40 can join. [1] [2]", "language": "en"}
+        )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "audio/wav"
+    assert response.content == b"RIFF-fake-wav"
+    assert tts.calls == [("Citizens aged 18 to 40 can join.", "en-IN")]
+
+
+def test_speak_tanglish_uses_a_tamil_voice(service: FakeService, tmp_path: Path) -> None:
+    tts = FakeTts()
+    with speak_client(service, tts, tmp_path) as client:
+        client.post("/speak", json={"text": "PM Kisan la 6000 kidaikum", "language": "ta-Latn"})
+
+    assert tts.calls[0][1] == "ta-IN"
+
+
+def test_speak_is_503_until_tts_is_set_up(service: FakeService, tmp_path: Path) -> None:
+    with speak_client(service, None, tmp_path) as client:
+        response = client.post("/speak", json={"text": "hello", "language": "en"})
+
+    assert response.status_code == 503
+
+
+@pytest.mark.parametrize(("text", "status"), [("[1]", 422), ("", 422), ("word " * 400, 413)])
+def test_speak_rejects_empty_or_long_text(
+    service: FakeService, tmp_path: Path, text: str, status: int
+) -> None:
+    tts = FakeTts()
+    with speak_client(service, tts, tmp_path) as client:
+        response = client.post("/speak", json={"text": text, "language": "en"})
+
+    assert response.status_code == status
+    assert tts.calls == []
+
+
+def test_speak_reports_tts_failure(service: FakeService, tmp_path: Path) -> None:
+    tts = FakeTts(TtsError("Spoken answers have reached today's limit.", 503))
+    with speak_client(service, tts, tmp_path) as client:
+        response = client.post("/speak", json={"text": "hello", "language": "en"})
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Spoken answers have reached today's limit."
+
+
+def test_speak_does_not_log_text(service: FakeService, tmp_path: Path) -> None:
+    with speak_client(service, FakeTts(), tmp_path) as client:
+        client.post("/speak", json={"text": "my secret question text", "language": "en"})
+
+    logged = "".join(path.read_text() for path in tmp_path.rglob("*") if path.is_file())
+    assert "secret" not in logged

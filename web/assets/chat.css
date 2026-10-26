@@ -248,6 +248,7 @@ body { overflow: hidden; background: var(--panel); }
 .voice-row[hidden] { display: none; }
 .voice-status:empty { display: none; }
 .voice-status { color: var(--tape); font-variant-numeric: tabular-nums; }
+.listen-btn[aria-pressed="true"] { color: var(--tape); border-color: var(--tape); }
 .heard { display: block; margin-bottom: 2px; font-size: var(--step--1); opacity: .8; }
 .composer-hint { margin-top: 8px; color: var(--ink-2); font-size: var(--step--1); text-align: center; }
 
