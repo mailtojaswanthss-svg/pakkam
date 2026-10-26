@@ -11,7 +11,9 @@
 
 services:
   pakkam:
-    build: .
+    build:
+      context: .
+      target: runtime
     image: pakkam:latest
     ports:
       - "8000:8000"

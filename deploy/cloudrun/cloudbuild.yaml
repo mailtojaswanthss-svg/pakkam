@@ -1,0 +1,12 @@
+# Builds the `cloudrun` target of the Dockerfile in Google Cloud Build and pushes it to
+# Artifact Registry. Called by deploy.sh with --substitutions=_IMAGE=<registry path:tag>.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    env: ["DOCKER_BUILDKIT=1"]
+    args: ["build", "--target", "cloudrun", "--tag", "${_IMAGE}", "."]
+images: ["${_IMAGE}"]
+options:
+  # CUDA PyTorch plus both models make a ~13 GB image: give the build room and time.
+  machineType: E2_HIGHCPU_8
+  diskSizeGb: 200
+timeout: 3600s

@@ -12,8 +12,11 @@
 .ruff_cache
 *.log
 
-# Mounted at run time, not baked in
-data
+# Mounted at run time by compose. The Cloud Run target copies only data/index,
+# data/sources.json and data/contacts.json, so everything else stays out.
+data/raw
+data/processed
+data/eval
 logs
 
 # Not needed to run the app

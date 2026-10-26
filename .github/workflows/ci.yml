@@ -60,5 +60,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          target: runtime
           push: false
           tags: pakkam:ci

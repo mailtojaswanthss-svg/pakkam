@@ -1,0 +1,21 @@
+# What `gcloud builds submit` uploads (deploy/cloudrun/deploy.sh). Without this file gcloud
+# would follow .gitignore, which leaves out data/index, the search index the image needs.
+.gcloudignore
+.git
+.github
+.claude
+.venv
+.env
+.env.*
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+*.log
+logs/
+docs/
+tests/
+data/raw/
+data/processed/
+data/eval/

@@ -114,6 +114,11 @@ mounts `data/` and `logs/`, keeps the downloaded models in a volume, reads `.env
 for the NVIDIA GPU (delete its `deploy` block to run on the CPU). The CUDA image is about
 8 GB.
 
+To put it online on Google Cloud Run (one L4 GPU, scales to zero), the `cloudrun` build target
+bakes the index and both models into the image, and `deploy/cloudrun/deploy.sh` builds it in
+Cloud Build and deploys it; step-by-step instructions are in
+[deploy/cloudrun/README.md](deploy/cloudrun/README.md).
+
 ### CI
 
 `.github/workflows/ci.yml` runs ruff, the format check, mypy and the fast tests on every push
