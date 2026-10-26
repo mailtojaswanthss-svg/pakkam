@@ -10,6 +10,8 @@ from schemebot.api.main import REQUEST_ID_HEADER, create_app
 from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import MAX_QUESTION_CHARS
 from schemebot.generate.answer import Answer, AnswerSentence, Citation
+from schemebot.voice.stt import SttError
+from tests.test_stt import make_wav
 
 QUESTION = "Who can join Atal Pension Yojana? My Aadhaar is 1234 5678 9012"
 
@@ -230,3 +232,110 @@ def test_too_many_questions_get_429_with_retry_after(service: FakeService, tmp_p
     assert "Too many questions" in response.json()["detail"]
     assert len(service.questions) == 2
     assert health.status_code == 200
+
+
+# ---------- POST /ask/voice ----------
+
+
+class FakeStt:
+    def __init__(self, transcript: str = "APY age limit?", error: Exception | None = None) -> None:
+        self.calls: list[tuple[str, str]] = []
+        self._transcript = transcript
+        self._error = error
+
+    def transcribe(self, audio: bytes, filename: str, language_code: str) -> str:
+        self.calls.append((filename, language_code))
+        if self._error:
+            raise self._error
+        return self._transcript
+
+
+def voice_client(service: FakeService, stt: FakeStt | None, log_dir: Path) -> TestClient:
+    return TestClient(
+        create_app(lambda: service, build_stt=lambda: stt, log_dir=log_dir),
+        raise_server_exceptions=False,
+    )
+
+
+def short_wav() -> bytes:
+    return make_wav(1)
+
+
+def test_voice_question_is_transcribed_then_answered(service: FakeService, tmp_path: Path) -> None:
+    stt = FakeStt("  APY age limit?  ")
+    with voice_client(service, stt, tmp_path) as client:
+        response = client.post(
+            "/ask/voice",
+            files={"audio": ("q.wav", short_wav(), "audio/wav")},
+            data={"language": "hi"},
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["transcript"] == "APY age limit?"
+    assert body["stt_language_code"] == "hi-IN"
+    assert body["citations"][0]["doc_id"] == "apy-brochure-en"
+    assert service.questions == ["APY age limit?"]
+    assert stt.calls == [("q.wav", "hi-IN")]
+
+
+def test_voice_tanglish_uses_tamil_stt(service: FakeService, tmp_path: Path) -> None:
+    stt = FakeStt()
+    with voice_client(service, stt, tmp_path) as client:
+        client.post(
+            "/ask/voice",
+            files={"audio": ("q.wav", short_wav(), "audio/wav")},
+            data={"language": "ta-Latn"},
+        )
+
+    assert stt.calls == [("q.wav", "ta-IN")]
+
+
+def test_voice_is_503_without_a_gnani_key(service: FakeService, tmp_path: Path) -> None:
+    with voice_client(service, None, tmp_path) as client:
+        response = client.post("/ask/voice", files={"audio": ("q.wav", short_wav(), "audio/wav")})
+
+    assert response.status_code == 503
+    assert service.questions == []
+
+
+def test_voice_rejects_unsupported_format_without_calling_gnani(
+    service: FakeService, tmp_path: Path
+) -> None:
+    stt = FakeStt()
+    with voice_client(service, stt, tmp_path) as client:
+        response = client.post("/ask/voice", files={"audio": ("q.webm", b"webm", "audio/webm")})
+
+    assert response.status_code == 415
+    assert stt.calls == []
+
+
+def test_voice_with_no_words_heard_is_422(service: FakeService, tmp_path: Path) -> None:
+    with voice_client(service, FakeStt(""), tmp_path) as client:
+        response = client.post("/ask/voice", files={"audio": ("q.wav", short_wav(), "audio/wav")})
+
+    assert response.status_code == 422
+    assert "could not hear" in response.json()["detail"]
+    assert service.questions == []
+
+
+def test_voice_stt_failure_is_reported(service: FakeService, tmp_path: Path) -> None:
+    stt = FakeStt(error=SttError("The speech service could not read this recording."))
+    with voice_client(service, stt, tmp_path) as client:
+        response = client.post("/ask/voice", files={"audio": ("q.wav", short_wav(), "audio/wav")})
+
+    assert response.status_code == 502
+    assert response.json()["detail"] == "The speech service could not read this recording."
+
+
+def test_voice_rejects_unknown_language(service: FakeService, tmp_path: Path) -> None:
+    stt = FakeStt()
+    with voice_client(service, stt, tmp_path) as client:
+        response = client.post(
+            "/ask/voice",
+            files={"audio": ("q.wav", short_wav(), "audio/wav")},
+            data={"language": "fr"},
+        )
+
+    assert response.status_code == 422
+    assert stt.calls == []
