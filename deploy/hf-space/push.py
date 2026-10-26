@@ -29,6 +29,7 @@ FILES = [
     (ROOT / "data" / "index", "data/index"),
     (ROOT / "data" / "sources.json", "data/sources.json"),
     (ROOT / "data" / "contacts.json", "data/contacts.json"),
+    (ROOT / "data" / "corrections.json", "data/corrections.json"),
 ]
 IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc", ".lock")
 
