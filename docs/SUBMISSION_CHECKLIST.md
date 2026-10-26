@@ -1,6 +1,7 @@
 # Pakkam submission checklist
 
-Gnani AI internship challenge. Final submission closes **10 Nov 2026, 11:59 PM IST**. Target: submit **8 Nov**, post live by **5 Nov**.
+Gnani AI internship challenge. Final submission closes **10 Nov 2026, 11:59 PM IST**. Target: submit **Fri 6 Nov** (Diwali is Sun 8 Nov; Sat 7 Nov may be Deepavali in Tamil Nadu), post live **Tue 3 Nov** (latest Thu 5 Nov), video done **Mon 2 Nov**.
+Teammate tasks stay flexible until Jaswanth confirms their skills.
 This is the master list, built from Jaswanth's checklist (26 Oct) and [WEAKNESS_PLAN.md](weakness/WEAKNESS_PLAN.md). The plan has the schedule, hours and reasoning.
 
 **Who** column:
@@ -20,6 +21,7 @@ Status: ☐ open, ◐ partly done, ☑ done (with evidence).
 | High | Test 5-10 real Tanglish clips on Gnani STT, ta-IN vs en-IN; save both transcripts | Jaswanth (clips, key, OK to spend), then the voice thread (script) | ☐ Blocked on the key and the clips |
 | Med | Gnani dashboard: what credits cover, which Timbre version is current | Jaswanth | ☐ |
 | Med | Ask Gnani (Discord or FAQ contact) what the engagement cutoff time is | Jaswanth | ☐ |
+| High | Interview practice: 20 minutes every day from 26 Oct, rotating through the modules | Jaswanth, Teammate | ☐ |
 | Med | Re-read the challenge page every few days | Jaswanth; Claude can re-check the public page when asked | ◐ Last checked 26 Oct |
 
 ## 2. Make the claims true (27-30 Oct)
@@ -41,7 +43,7 @@ Status: ☐ open, ◐ partly done, ☑ done (with evidence).
 | High | Voice end to end: speech in, answer, Timbre speech out | Voice thread | ◐ STT in code, untested live; no TTS |
 | High | Measure latency for every stage and report the real number | Voice thread (Jaswanth runs it live) | ☐ |
 | High | Voice test of 30-40 clips: transcript accuracy, spoken numbers, per language; include 1-2 noisy or phone-quality clips | Voice thread (script), Jaswanth and Teammate (synthetic clips) | ☐ |
-| High | Decide the LLM budget: paid key, smaller subset, or caching (costs in the plan, section 6) | Jaswanth | ☐ |
+| High | Decide the LLM budget: paid key, smaller subset, or caching (costs in the plan, section 6) | Jaswanth (estimates in the plan, section 6; verify on the pricing pages) | ☐ |
 | High | UI fixes for the video: visible mic, visible source, real loading stages, disclaimer on phones (audit #1, #3, #6, #9) | UI thread (mic itself from the voice thread) | ☐ |
 | Med | Better "I don't know": official site link and the list of covered schemes | UI thread (screen); Claude (docs) can draft the text; Teammate checks Tamil and Hindi | ☐ |
 | Med | 3-person test, 10 minutes each, synthetic questions | Teammate (sheet in the plan, section 7) | ☐ |
@@ -56,7 +58,7 @@ Status: ☐ open, ◐ partly done, ☑ done (with evidence).
 | Med | README with setup steps and a tiny sample, so a reviewer can run it (PDFs and index not in the repo) | Claude (docs) drafts; Jaswanth picks the sample | ☐ |
 | Med | Voice privacy note: audio goes to Gnani, text to the LLM provider; nothing stored by the app | Claude (docs) | ☐ Facts confirmed in Step 1 (A6) |
 
-## 5. Video and post (1-5 Nov)
+## 5. Video and post (30 Oct - 3 Nov; post latest 5 Nov)
 
 | Sev. | Item | Who | Status |
 |---|---|---|---|
@@ -68,13 +70,13 @@ Status: ☐ open, ◐ partly done, ☑ done (with evidence).
 | High | Post live by 5 Nov, then reply to every comment; real people only | Jaswanth, Teammate | ☐ |
 | Med | Both teammates post or reshare from their own accounts | Jaswanth, Teammate | ☐ |
 
-## 6. Submit (6-8 Nov, buffer to 10 Nov)
+## 6. Submit (4-6 Nov; buffer 7 and 9 Nov; deadline 10 Nov)
 
 | Sev. | Item | Who | Status |
 |---|---|---|---|
 | High | Written explanation names the models used and each member's real contribution | Claude (docs) drafts from the contribution log; Jaswanth edits | ☐ |
 | High | Both can explain retrieval, reranker, refusal threshold, guardrails, STT, TTS and the evaluation script | Jaswanth, Teammate. Claude (docs) can write short module notes as a starting point; they must be rewritten in your own words. | ☐ |
-| High | Re-check the page for rule changes, then submit once by 8 Nov (post live first) | Jaswanth only | ☐ |
+| High | Re-check the page for rule changes, then submit once on Fri 6 Nov (post live first) | Jaswanth only | ☐ |
 
 ## Do not claim
 
