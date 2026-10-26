@@ -38,22 +38,23 @@ query ──► normalise (Unicode, numerals) ──► hybrid search ──► 
 
 ## Results
 
-Retrieval on 110 **draft** questions (about 21 answerable and 7 unanswerable per group; 62
+Retrieval on 194 **draft** questions (38-39 answerable and 10 unanswerable per group; 146
 held out), from `python -m schemebot.evaluation --retrieval-only`. Full table in
 [docs/results.md](docs/results.md), ablations and error analysis in the
 [technical report](docs/report.md).
 
 | Language | Recall@5 | MRR | Correct refusal | False refusal | Retrieval p50 / p95 |
 |---|---|---|---|---|---|
-| English | 100% | 0.91 | 86% | 5% | 435 / 523 ms |
-| Tamil | 100% | 1.00 | 86% | 0% | 459 / 543 ms |
-| Hindi | 100% | 0.89 | 100% | 0% | 471 / 545 ms |
-| Tanglish | 95% | 0.92 | 100% | 29% | 420 / 499 ms |
+| English | 100% | 0.91 | 90% | 5% | 495 / 921 ms |
+| Tamil | 100% | 0.96 | 90% | 8% | 532 / 644 ms |
+| Hindi | 100% | 0.88 | 100% | 8% | 578 / 691 ms |
+| Tanglish | 92% | 0.87 | 100% | 44% | 525 / 775 ms |
 
 Answers were checked live on 8 questions with Gemini's free tier (one per language plus the
 hardest cases): 5 correct cited answers, 3 correct refusals, all sentences judged faithful.
 The full answer-quality evaluation needs a paid key. The labels still need checking by native
-speakers.
+speakers: `python -m schemebot.evaluation.review export review.csv` gives them a spreadsheet
+with each question beside its gold-page text, and `import` marks the checked ones verified.
 
 ## Quickstart
 
@@ -143,9 +144,9 @@ tests/           unit tests per module
   **not yet run against the live API** (needs a key in `.env`)
 - [x] Phase 5: FastAPI service (`/ask`, `/health`, `/sources`), audit log without personal
   data, rate limits for a public demo
-- [~] Phase 6: evaluation pipeline and ablations done; 110 draft questions (62 held out),
-  still to be verified by native speakers and grown to ~200; answer-quality metrics wait
-  for the API key
+- [~] Phase 6: evaluation pipeline, ablations and a review sheet done; 194 draft questions
+  (146 held out) to be verified by native speakers; answer quality checked live on 8
+  questions, the full run waits for a paid key
 - [x] Phase 7: web UI **Pakkam** with light and dark themes, Docker image and compose file,
   GitHub Actions CI, [technical report](docs/report.md)
 

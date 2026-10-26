@@ -4,8 +4,8 @@ Citation-grounded answers about Indian government schemes, asked in Tamil, Hindi
 Tanglish, with a per-language evaluation.
 
 > **Status of the numbers.** Every figure below comes from `python -m schemebot.evaluation`
-> on 110 **draft** questions that no second person has checked yet. Retrieval is measured on
-> all 110; answers only in an 8-question live test on Gemini's free tier (section 8), because
+> on 194 **draft** questions that no second person has checked yet. Retrieval is measured on
+> all 194; answers only in an 8-question live test on Gemini's free tier (section 8), because
 > the Claude account had no credit and Gemini's free tier allows 20 requests a day per model.
 > Treat the numbers as development results.
 
@@ -94,8 +94,10 @@ re-running ingestion skips OCR for pages already read.
 **Known damage.** OCR misreads digits, and that matters most here: the Tamil higher-education
 note reads "ரூ.4,000" where the English says Rs.1,000 for Pudhumai Penn, the Tamil health note
 reads "ரூ.4,20,000" for the Rs.1,20,000 insurance income limit, and the Hindi APY brochure
-reads "रु.000". The guardrail's number check cannot catch this, because the wrong number is in
-the cited passage.
+reads "रु.000". In Tamil the error has a pattern: a leading 1 is read as 4 (Rs.1,000 as 4,000,
+Rs.1,20,000 as 4,20,000, the hostel food charge Rs.1,400 as 4400), and the senior-citizen
+helpline 14567 appears as 14167 in the body text under a correct heading. The guardrail's
+number check cannot catch this, because the wrong number is in the cited passage.
 
 ## 5. Retrieval
 
@@ -134,27 +136,34 @@ the threshold), so the question is kept and the gloss appended. That choice was 
 development set; on the held-out set both variants cut false refusals from 58% to 33% without
 answering any unanswerable question.
 
-Language detection missed 6 of the 28 Tanglish questions (e.g. "tamil pudhalvan scheme la
-pasangalukku evlo panam" has one lexicon word in seven), so the gloss is not gated on it. It
-is applied to any romanised question with words to gloss; none of the English questions has
-any, so English is unchanged.
+Language detection missed 6 of the 28 Tanglish questions in the first two batches (e.g.
+"tamil pudhalvan scheme la pasangalukku evlo panam" has one lexicon word in seven), so the
+gloss is not gated on it. It is applied to any romanised question with words to gloss; none
+of the English questions has any, so English is unchanged.
 
-In the full evaluation (section 8) the gloss cut Tanglish false refusals from 57% to 29% and
-left the other three groups exactly as they were. Per question, of the 21 answerable Tanglish
-questions:
+**Detection.** Language detection also decides the answer and refusal language, so it gained a
+second signal: Tamil case and verb endings joined to a word (-ukku, -aanga, -radhu, -chu).
+None of the 1,390 English chunks in the corpus trips it. It now finds 12 of 12 development,
+14 of 16 first held-out and 20 of 21 fresh (second held-out batch) Tanglish questions.
 
-- **Without the gloss**, 9 passed the confidence check, all with a gold page in the top 5.
-- **With it**, 15 passed: 13 with a gold page in the top 5 (6 of them newly rescued, each
-  with the gold page ranked first), and **2 without one**. q039 (Magalir Urimai and
-  government employees) and q040 (PM-KISAN yearly amount) were refused before, with the
-  right page retrieved; now they pass with the wrong pages. That is the worst outcome: only
-  the LLM's "not answerable" judgement and the guardrail stand between them and a wrong
-  answer.
-- Two questions that passed before are now refused (q042, and q103 at 0.349 against 0.35).
+**Effect on all 194 questions** (section 8), false refusal on answerable Tanglish questions:
 
-(After the PM-KISAN label fix in section 8, q040 turned out to have a page stating its answer in the top 5 after all, and the live test answered it correctly and refused q039.) So the gloss trades at most 2 risky passes for 4 more correctly grounded answers. The full-pipeline
-run will show whether the LLM refuses q039 and q040; until then, this is the main open risk of
-the change, and the remaining 29% is still the largest gap between groups.
+| Batch | Without gloss | With gloss |
+|---|---|---|
+| Development (9) | 56% | 22% |
+| Held-out 1 (12) | 58% | 33% |
+| Held-out 2, written after both Tanglish changes (18) | 83% | 61% |
+| **All Tanglish (39)** | **69%** | **44%** |
+
+The other groups are unchanged, and recall@5 is the same with and without the gloss (98%).
+The gloss helps on every batch, but the fresh batch shows it is not enough: most of its
+refused questions have the right page in the top 5 and their scores rise (0.02 to 0.12, say)
+without reaching the threshold. Tanglish is still the largest gap between groups.
+
+Two development questions show the gloss's risk: q039 and q040 were refused with the right
+page retrieved, and with the gloss they pass the check. q040 turned out to have a page stating
+its answer in the top 5 (a label gap, section 8) and was answered correctly in the live test;
+q039 passes without its gold page and was correctly refused by the model.
 
 ## 6. Answers and guardrails
 
@@ -202,12 +211,21 @@ Server text is inserted as text, never HTML.
 
 ### Question set
 
-110 questions in four groups (English, Tamil, Hindi, Tanglish), each about 21 answerable and
-7 unanswerable. q001-q048 are the development set, drafted from the first 10 documents;
-q049-q110 are held out: 12 facts from the 5 policy-note pairs and 4 topics the corpus does
-not cover (crop insurance premium, voter ID, rooftop solar subsidy, duplicate Aadhaar), each
-asked in all four groups and written after the Tanglish word list was fixed. Gold labels are
-pages, listed in both language versions where both state the fact. All 110 are drafts.
+194 questions in four groups (English, Tamil, Hindi, Tanglish), each with 38-39 answerable
+and 10 unanswerable, in three batches:
+
+- **Development (q001-q048):** drafted from the first 10 documents; the Tanglish gloss was
+  designed on these.
+- **Held-out 1 (q049-q110):** 12 facts from the 5 policy-note pairs and 4 out-of-corpus
+  topics, written after the gloss word list was fixed.
+- **Held-out 2 (q111-q194):** 18 more facts (Atal Pension, Ujjwala, marriage assistance,
+  free bus travel, hostels, health and higher-education schemes) and 3 out-of-corpus topics,
+  written after both Tanglish changes.
+
+Each fact is asked in all four groups. Gold labels are pages, listed in both language versions
+where both state the fact. All 194 are drafts; `python -m schemebot.evaluation.review export`
+writes a spreadsheet with each question beside its gold-page text for a native speaker to
+check, and `import` marks the checked ones verified.
 
 Metrics (details in [evaluation.md](evaluation.md)): recall@1 and @5 and MRR of gold pages
 among the 5 reranked passages; correct refusal (unanswerable questions refused) and false
@@ -220,46 +238,63 @@ From [results.md](results.md), hybrid search, reranker and Tanglish gloss on:
 
 | Group | Ans/Unans | Recall@1 | Recall@5 | MRR | Correct refusal | False refusal | Retrieval p50 / p95 ms |
 |---|---|---|---|---|---|---|---|
-| English | 21/7 | 86% | 100% | 0.91 | 86% | 5% | 435 / 523 |
-| Tamil | 20/7 | 100% | 100% | 1.00 | 86% | 0% | 459 / 543 |
-| Hindi | 20/7 | 80% | 100% | 0.89 | 100% | 0% | 471 / 545 |
-| Tanglish | 21/7 | 90% | 95% | 0.92 | 100% | 29% | 420 / 499 |
-| **All** | 82/28 | 89% | 99% | 0.93 | 93% | 9% | 444 / 543 |
+| English | 39/10 | 85% | 100% | 0.91 | 90% | 5% | 495 / 921 |
+| Tamil | 38/10 | 92% | 100% | 0.96 | 90% | 8% | 532 / 644 |
+| Hindi | 38/10 | 79% | 100% | 0.88 | 100% | 8% | 578 / 691 |
+| Tanglish | 39/10 | 82% | 92% | 0.87 | 100% | 44% | 525 / 775 |
+| **All** | 154/40 | 84% | 98% | 0.90 | 95% | 16% | 533 / 720 |
 
-Development and held-out sets separately (all groups): recall@5 97% and 100%, false refusal
-8% and 9%, correct refusal 83% and 100%. The held-out set is not harder for retrieval; its
-unanswerable topics are further from the corpus than the development set's near misses.
+By batch (all groups):
+
+| Batch | Recall@1 | Recall@5 | Correct refusal | False refusal |
+|---|---|---|---|---|
+| Development | 89% | 97% | 83% | 8% |
+| Held-out 1 | 89% | 100% | 100% | 9% |
+| Held-out 2 | 79% | 97% | 100% | 25% |
+
+Retrieval holds up on the fresh batch (recall@5 97%), but its false refusals are higher:
+Tanglish (61%) and several Ujjwala and marriage-assistance questions in Tamil and Hindi score
+just under the threshold with the right page found. The unanswerable questions of the later
+batches are further from the corpus than the development set's near misses, so correct
+refusal there is easier.
+
+**The threshold.** Choosing it on the first 110 questions and testing on held-out 2 shows no
+better operating point: at 0.2, false refusals fall (tuning 9% to 6%, test 25% to 18%) but
+correct refusals fall too (tuning 93% to 79%). The retrieval threshold mainly saves an LLM
+call; the model's own "not answerable" judgement refused every near miss in the live test
+below, so a lower threshold may pay off once answer quality can be measured on all 194
+questions. It stays at 0.35 until then.
 
 ### Ablations
 
-Same 110 questions, one change at a time. These runs predate the PM-KISAN label fix below
-(3 questions), so compare them with the first row, not with the results table above:
+Same 194 questions, one change at a time:
 
 | Configuration | Recall@1 | Recall@5 | MRR | Correct refusal | False refusal | Tanglish false refusal | p50 ms |
 |---|---|---|---|---|---|---|---|
-| **Full** (hybrid, rerank, gloss), before the label fix | 85% | 98% | 0.90 | 93% | 9% | 29% | 526 |
-| No Tanglish gloss | 84% | 99% | 0.90 | 93% | 16% | 57% | 520 |
-| No reranker | 68% | 94% | 0.79 | 0%* | 0%* | 0%* | 321 |
-| Dense only (+ rerank, gloss) | 85% | 99% | 0.91 | 93% | 9% | 29% | 369 |
-| Sparse only (+ rerank, gloss) | 67% | 74% | 0.70 | 93% | 27% | 33% | 491 |
+| **Full** (hybrid, rerank, gloss) | 84% | 98% | 0.90 | 95% | 16% | 44% | 533 |
+| No Tanglish gloss | 84% | 98% | 0.90 | 95% | 23% | 69% | 521 |
+| No reranker | 68% | 94% | 0.78 | 0%* | 0%* | 0%* | 280 |
+| Dense only (+ rerank, gloss) | 84% | 99% | 0.91 | 95% | 16% | 44% | 366 |
+| Sparse only (+ rerank, gloss) | 66% | 72% | 0.68 | 95% | 36% | 49% | 509 |
 
 \* Without the reranker there is no calibrated confidence: every question passes the
-threshold, including all 28 unanswerable ones. Refusal then rests entirely on the LLM.
+threshold, including all 40 unanswerable ones. Refusal then rests entirely on the LLM.
 
 **What the ablations show.**
 
-- **The reranker** is worth its 200 ms: recall@1 rises from 68% to 85%, and it is the only
+- **The reranker** is worth its 250 ms: recall@1 rises from 68% to 84%, and it is the only
   source of a usable refusal signal.
 - **Dense search does the cross-language work.** Sparse search alone finds the gold page in
-  the top 5 for only 30% of Hindi questions (100% with dense), because word-level weights
-  cannot link a Hindi question to English or Tamil text. It does fine for English (100%).
+  the top 5 for 29% of Hindi questions and 76% of Tamil ones (100% for both with dense),
+  because word-level weights cannot link a question to a page in another language or a
+  differently worded OCR page. It does fine for English (97%).
 - **Sparse adds nothing measurable here.** Dense-only matches hybrid (recall@5 99% against
   98%, MRR 0.91 against 0.90) and is faster. Hybrid stays the default because sparse
-  matching should help with exact scheme names, G.O. numbers and amounts that 110 questions
-  barely exercise; a larger verified set should decide. Latency differences between runs of
-  about 50 ms are noise on this laptop.
-- **The Tanglish gloss** halves Tanglish false refusals and changes nothing for the other
-  groups.
+  matching should help with exact scheme names, G.O. numbers and amounts that this question
+  set barely exercises; a larger verified set should decide. Latency differences of about
+  50 ms between runs are noise on this laptop.
+- **The Tanglish gloss** cuts Tanglish false refusals from 69% to 44% and changes nothing for
+  the other groups.
 
 ### Live answers (Gemini, 8 questions)
 
@@ -287,46 +322,47 @@ including retries; a paid tier should be much faster.
 
 The live answers also exposed a **labelling gap**: q025 and q040 cited page 1 of the
 PM-KISAN e-KYC note, which states "Rs 6,000/- per year in three equal instalments" but was
-missing from the draft labels. The label was widened (3 questions) and retrieval re-run; q040
-now counts as found, which is why Tanglish recall@5 is 95%, not 90%. q043 cited page 1 of the
-Ujjwala procedure, not the labelled page 2; that label needs the same check.
+missing from the draft labels. The label was widened (3 questions), so q040 now counts as
+found. q043 cited page 1 of the Ujjwala procedure, not the labelled page 2; page 1 does not
+list the documents, so that label stands and the citation was to a neighbouring passage.
 
 Eight questions are a smoke test, not an evaluation: faithfulness and citation accuracy over
-all 110 questions still need a paid key (Claude, or Gemini with billing).
+all 194 questions still need a paid key (Claude, or Gemini with billing).
 
 ### Error analysis
 
-1. **Tanglish** remains the weakest group (section 5): 29% false refusal, and one question
-   (q039) that passes the confidence check without its gold page (the model refused it).
+1. **Tanglish** remains the weakest group (section 5): 44% false refusal (61% on the fresh
+   batch), mostly with the right page retrieved but scored under the threshold.
 2. **Near misses get through.** The two wrongly passed unanswerable questions are both near
    a covered topic: "When will the next PM-KISAN instalment be paid?" (0.44; the guidelines
    describe instalment periods but give no dates) and "How do I apply for a new ration card?"
    in Tamil (0.85; the Magalir Urimai G.O. discusses ration cards at length). The LLM has to
    refuse these.
-3. **Hindi recall@1 is lowest (80%)** while recall@5 is 100%. Of the 4 top-1 misses, 1
-   ranks the Hindi PM-KISAN e-KYC note above the English guidelines that actually answer the
-   question (the reranker favours a passage in the question's own script); the other 3 put a
-   nearby page of the right document first (page 473 for 474).
-4. **Draft labels were incomplete four times**: the Magalir Urimai amount (also on the Tamil
-   page 9), Pudhumai Penn and the women helpline (widened while writing the held-out set), and
-   the PM-KISAN amount (found by the live answers). Labels need a second reader before the
+3. **Hindi recall@1 is lowest (79%)** while recall@5 is 100%: the reranker sometimes favours
+   a passage in the question's own script (the Hindi PM-KISAN e-KYC note over the English
+   guidelines), or puts a nearby page of the right document first (page 473 for 474).
+4. **Draft labels were incomplete ten times.** The Magalir Urimai amount, Pudhumai Penn,
+   the women helpline, the PM-KISAN amount (found by the live answers), four facts found by an
+   audit that searches for pages stating a fact's numbers outside its labels (the senior and
+   child helplines, the 3,600-unit rule, the transgender self-employment grant), and two
+   Tamil pages the retriever found with high confidence (TAHDCO subsidy, hostel uniforms).
+   Every one made the system look worse than it was. Labels need a second reader before the
    numbers mean much.
 5. **OCR digit errors** (section 4) do not show in retrieval metrics at all; they will show in
    answer accuracy.
 
 ## 9. Limitations
 
-- **Draft labels.** No question has been checked by a second person. One wrong draft label
-  has already been found and fixed (section 8).
+- **Draft labels.** No question has been checked by a second person; ten incomplete labels
+  have already been found and fixed (section 8). The review sheet makes checking quick.
 - **Answer quality on 8 questions only.** The live test passed, but faithfulness and citation
-  accuracy over the full set need a paid key; the free-tier test used small Flash-Lite models,
-  and one model both verified and judged.
+  accuracy over all 194 questions need a paid key (Claude, or Gemini with billing); the
+  free-tier test used small Flash-Lite models, and one model both verified and judged.
 - **OCR digits.** Wrong numbers in Tamil and Hindi OCR text pass the number check.
+- **Tanglish.** 44% of answerable Tanglish questions are still refused; detection misses 3
+  of 49 Tanglish questions, whose answers and refusals would come back in English.
 - **Near misses.** Questions next to a covered topic ("next PM-KISAN instalment date") get
   high retrieval confidence; only the LLM's "not answerable" judgement refuses them.
-- **Tanglish detection.** The lexicon detector missed 6 of 28 Tanglish questions. The answer
-  language follows detection, so those would be answered in English, and refusals shown in
-  English.
 - **Scope.** 18 documents from one state plus three central schemes; rules change, and
   answers reflect the documents' dates.
 - **Not an official service.** It does not process applications or personal data.
@@ -338,14 +374,16 @@ uv sync --extra ingest --extra index --extra generate --extra api --extra eval
 uv run python -m schemebot.ingest         # PDFs listed in data/sources.json
 uv run python -m schemebot.index
 uv run python -m schemebot.evaluation --retrieval-only     # writes docs/results.md
-uv run pytest                              # 172 fast tests
+uv run pytest                              # 190 fast tests (pytest -m models: 10 more)
 ```
 
 ## 11. Next steps
 
 1. With a paid key (Claude, or Gemini with billing), run the full evaluation:
-   `python -m schemebot.evaluation --workers 4`.
-2. Have a Tamil and a Hindi speaker verify the 110 drafts; grow to about 200.
-3. Re-OCR number-dense pages at a higher resolution, or prefer the English version of a
+   `python -m schemebot.evaluation --workers 4`, and re-check the threshold with answer
+   quality in view.
+2. Have Tamil and Hindi speakers verify the 194 drafts with the review sheet.
+3. Tanglish: transliterate to Tamil script before reranking, or fine-tune the reranker on
+   Tanglish question-passage pairs, and test on a fresh batch.
+4. Re-OCR number-dense Tamil pages at a higher resolution, or prefer the English version of a
    paired document when numbers disagree.
-4. Tune the refusal threshold on verified labels, per language if the data supports it.

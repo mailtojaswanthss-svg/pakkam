@@ -54,6 +54,13 @@ TANGLISH_WORDS = frozenset(
 
 _WORD_RE = re.compile(r"[a-z]+(?:-[a-z]+)?")
 
+# Tamil case and verb endings joined to a word ("pasangal-ukku", "kudup-aanga",
+# "vaang-radhu", "poch-u"), which catch Tanglish words the lexicon lacks. None of the 1,390
+# English chunks in the corpus has two of these, so English text is not misread.
+_TANGLISH_ENDING = re.compile(
+    r"^[a-z]{3,}(?:ukku|kku|aanga|anga|radhu|rathu|chu|kuma|kkuma|laam|kanum|kkanum|naanga)$"
+)
+
 
 def _in_range(char: str, block: tuple[int, int]) -> bool:
     return block[0] <= ord(char) <= block[1]
@@ -78,7 +85,7 @@ def is_tanglish(text: str) -> bool:
         return False
     # Distinct words, not occurrences: a scheme name repeated in English text ("Naan
     # Mudhalvan" twice) is one hit, while real Tanglish uses several different words.
-    hits = len({word for word in words if word in TANGLISH_WORDS})
+    hits = len({word for word in words if word in TANGLISH_WORDS or _TANGLISH_ENDING.match(word)})
     return hits >= TANGLISH_MIN_HITS or (hits > 0 and hits / len(words) >= TANGLISH_MIN_SHARE)
 
 

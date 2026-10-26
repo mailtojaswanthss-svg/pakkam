@@ -69,3 +69,21 @@ def test_scheme_name_repeated_in_english_is_not_tanglish() -> None:
     )
 
     assert detect_language(text) == "en"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "tamil pudhalvan scheme la pasangalukku evlo panam",
+        "aadhaar card kaanama pochu, duplicate epdi vaangradhu",
+        "transgender self employment ku evlo subsidy kudupaanga",
+    ],
+)
+def test_tamil_word_endings_catch_tanglish_outside_the_lexicon(text: str) -> None:
+    assert detect_language(text) == "ta-Latn"
+
+
+def test_english_words_with_similar_endings_stay_english() -> None:
+    assert (
+        detect_language("The Ganga basin and the Bangalore office reported strong results.") == "en"
+    )

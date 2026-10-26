@@ -47,23 +47,45 @@ a fact appears in both language versions of a document, list both.
 For each question: open the PDF at the gold pages and confirm (1) the pages really answer
 the question, (2) no other page answers it better (add it if so), (3) the reference answer
 matches the document's wording and numbers, (4) the Tamil/Hindi/Tanglish reads naturally.
-Then set `"status": "verified"`. The report shows how many labels are verified and warns
-while any are drafts.
 
-There are 110 draft questions, about 28 per group (21 answerable and 7 unanswerable in
-English and Tanglish, 20 and 7 in Tamil and Hindi):
+The quickest way is the review sheet, which puts each question next to the text of its gold
+pages so the reviewer does not need the PDFs:
+
+```bash
+uv run python -m schemebot.evaluation.review export docs/review/questions-review.csv
+# open it in Excel or Google Sheets; put "yes" in `verified`, fix wording in
+# `corrected_question` / `corrected_reference`, add missing pages in `notes`
+uv run python -m schemebot.evaluation.review import docs/review/questions-review.csv
+```
+
+Importing marks those rows `verified` and applies the corrections. The report shows how
+many labels are verified and warns while any are drafts.
+
+### The question set
+
+194 draft questions, about 48 per group (38-39 answerable and 10 unanswerable each), in
+three batches:
 
 - **q001-q048, development set.** Drafted from the first 10 documents, 12 per group. The
-  Tanglish fix below was designed while looking at these.
-- **q049-q110, held-out set.** 12 facts from the 5 policy-note pairs (health, higher
-  education, social welfare, Adi Dravidar and tribal welfare, BC/MBC welfare) and 4
-  out-of-corpus topics, each asked in all four groups. Written after the Tanglish gloss
-  word list was fixed, so they test whether it generalises.
+  Tanglish gloss was designed while looking at these.
+- **q049-q110, held-out batch 1.** 12 facts from the 5 policy-note pairs and 4
+  out-of-corpus topics, each asked in all four groups, written after the gloss word list
+  was fixed. The Tanglish word-ending rule in language detection was designed after looking
+  at this batch's misses.
+- **q111-q194, held-out batch 2.** 18 more facts (Atal Pension, Ujjwala, marriage
+  assistance, free bus travel, hostels, health and higher-education schemes) and 3
+  out-of-corpus topics (NMMS scholarship, PPF interest, driving-licence renewal), written
+  after both Tanglish changes, so it tests them fresh.
 
-The abstract's target is about 200 (about 50 per group). Two development labels were widened
-when the held-out set was written: Pudhumai Penn (`penn_amount`) is also stated in the
-higher-education note, and the women helpline (`women_line`) in the Tamil social-welfare
-note.
+That reaches the abstract's target of about 200 (about 50 per group). Labels widened so far:
+Pudhumai Penn (`penn_amount`, also in the higher-education note), the women helpline
+(`women_line`, also in the Tamil note), the PM-KISAN amount (`pmk_amount`, also on page 1 of
+the e-KYC note, found by the live answers), and four found by a page audit that looks for
+pages stating a fact's numbers outside its labels: the senior-citizen helpline, the
+3,600-unit electricity rule, the child helpline 1098 and the transgender self-employment
+grant. The Tamil pages for TAHDCO's subsidy and the hostel uniforms were added after the
+first batch-2 run retrieved them with high confidence; one fact (`evr_income`) still has
+English gold pages only, for the reviewer to complete.
 
 ## Metrics
 
@@ -90,11 +112,13 @@ Findings from development runs on draft labels; to be re-checked on verified lab
    answerable and unanswerable scores overlap. The fix: the reranker reads the question
    plus an English gloss of its Tanglish words ("evlo" becomes "how much"; scheme names stay
    as typed), from a fixed word list in `retrieve/tanglish.py`. See the technical report
-   for the experiment. Language detection still misses some Tanglish (6 of 28 questions),
-   so the gloss is applied to any romanised question that has words to gloss; plain
-   English has none and is unchanged. Side effect to watch: q039 and q040 now pass the
-   confidence check without a gold page in the top 5 (they were refused before), so a
-   full-pipeline run must confirm the LLM refuses them. In the live Gemini test it refused q039, and q040 was answered correctly from a page the labels had missed (now added).
+   for the experiment. The gloss is applied to any romanised question that has words to
+   gloss (plain English has none and is unchanged), because language detection missed some
+   Tanglish; detection now also counts Tamil word endings and finds 46 of 49 Tanglish
+   questions. On all 194 questions the gloss cuts Tanglish false refusals from 69% to 44%,
+   but 61% on the freshest batch shows it is not enough. Side effect: q039 and q040 now pass
+   the confidence check; in the live Gemini test the model refused q039, and q040 was
+   answered correctly from a page the labels had missed (now added).
 2. **OCR corrupts numbers in Tamil and Hindi text.** The Tamil policy note's OCR text reads
    "ரூ.7000" per month for Pudhumai Penn where the English version says Rs.1000; the Hindi
    APY brochure reads "co वर्ष" for 60 years and "रु.000" for Rs.1000. The guardrail's number
