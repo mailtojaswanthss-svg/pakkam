@@ -71,6 +71,8 @@ class Answer:
     timings_ms: dict[str, float] = field(default_factory=dict)
     """Milliseconds per stage: retrieval (= search + rerank), llm_answer, verifier,
     generation (= llm_answer + verifier) and total. A stage that did not run is absent."""
+    contact: Contact | None = None
+    """On a refusal about a scheme we hold documents for: its official contact."""
 
 
 def _citation(number: int, passage: RetrievedPassage) -> Citation:
@@ -140,6 +142,7 @@ class Answerer:
             timings["total"] = (time.perf_counter() - started) * 1000
             logger.info("refused (%s), confidence %.3f", reason, confidence)
             text = refusal_text(reason, language)
+            contact: Contact | None = None
             # Past the confidence check the question is about a scheme we hold documents
             # for, so point to that scheme's official contact. Below it we don't know which
             # scheme (if any) the question is about, so the generic advice stays.
@@ -161,6 +164,7 @@ class Answerer:
                 disclaimer=disclaimer(language),
                 rejected=rejected or [],
                 timings_ms=timings,
+                contact=contact,
             )
 
         if confidence < self._refusal_threshold:

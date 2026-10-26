@@ -2,35 +2,16 @@
 (() => {
   'use strict';
 
-  // Example answers built from the real documents (G.O. p9, e-KYC note p1, PM-KISAN p10),
-  // chosen where the indexed text is clean so the real pipeline can give the same answer.
+  // An example answer written by hand from the documents, labelled "Example answer" on the
+  // page: it is not saved pipeline output. Its source slip is hidden until Jaswanth confirms
+  // the page against the PDF (docs/review/hidden-items.md); add slipTitle/slipLine to show it.
+  // The Hindi example is hidden for the same reason.
   const DEMOS = {
-    ta: {
-      lang: 'ta',
-      question: 'மகளிர் உரிமைத் தொகை ஆண்டுக்கு எவ்வளவு?',
-      read: 'Reading page 9 of G.O.(Ms) No.15',
-      answer: 'கலைஞர் மகளிர் உரிமைத் திட்டத்தில் ஆண்டுக்கு 12 ஆயிரம் ரூபாய் உரிமைத் தொகை வழங்கப்படும்.',
-      slipTitle: 'Kalaignar Magalir Urimai Thittam, page 9',
-      slipLine: 'ஆண்டுக்கு 12 ஆயிரம் ரூபாய் உரிமைத்தொகை…',
-      slipLang: 'ta',
-    },
-    hi: {
-      lang: 'hi',
-      question: 'पीएम किसान के लिए ई-केवाईसी कैसे करें?',
-      read: 'Reading page 1 of the e-KYC note',
-      answer: 'ई-केवाईसी ओटीपी से पीएम-किसान पोर्टल या मोबाइल ऐप पर हो सकता है, या कॉमन सर्विस सेंटर पर बायोमेट्रिक से।',
-      slipTitle: 'PM-KISAN, page 1',
-      slipLine: '(i) ओटीपी आधारित ई-केवाईसी (पीएम-किसान पोर्टल और मोबाइल ऐप पर उपलब्ध)…',
-      slipLang: 'hi',
-    },
     tl: {
       lang: 'ta-Latn',
       question: 'PM kisan la varushathuku evlo panam kidaikum',
-      read: 'Reading page 10 of the PM-KISAN guidelines',
-      answer: 'PM-KISAN la thagudhiyana vivasayigalukku varushathuku Rs.6000 kidaikum, moonu thavanaiyaa Rs.2000 aaga.',
-      slipTitle: 'PM-KISAN, page 10',
-      slipLine: 'The financial benefit of Rs.6000/- per year is to be released to the eligible farmers in three installments of Rs.2000/- each…',
-      slipLang: 'en',
+      read: 'Reading the page',
+      answer: 'PM-KISAN la thagudhiyana vivasayigalukku varushathuku Rs.6000 kidaikum, moonu samamaana thavanaiyaa.',
     },
   };
 
@@ -42,12 +23,14 @@
   const answer = document.getElementById('demo-a-text');
   const slipTitle = document.getElementById('demo-slip-title');
   const slipLine = document.getElementById('demo-slip-line');
+  const slip = win.querySelector('.demo-slip');
+  const citeChip = win.querySelector('.chip-cite');
   const replay = document.getElementById('demo-replay');
   const tabs = Array.from(document.querySelectorAll('.demo-tab'));
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   let timers = [];
-  let current = 'ta';
+  let current = 'tl';
 
   function clearTimers() {
     timers.forEach(clearTimeout);
@@ -64,9 +47,12 @@
     readStep.textContent = demo.read;
     answer.textContent = demo.answer;
     answer.lang = demo.lang;
-    slipTitle.textContent = demo.slipTitle;
-    slipLine.textContent = demo.slipLine;
-    slipLine.lang = demo.slipLang;
+    const hasSlip = Boolean(demo.slipTitle);
+    slip.hidden = !hasSlip;
+    citeChip.hidden = !hasSlip;
+    slipTitle.textContent = demo.slipTitle || '';
+    slipLine.textContent = demo.slipLine || '';
+    if (demo.slipLang) slipLine.lang = demo.slipLang;
   }
 
   function showFinal() {
@@ -100,7 +86,7 @@
   replay.addEventListener('click', () => play(current));
 
   // Play once when the demo first scrolls into view.
-  fill(DEMOS.ta);
+  fill(DEMOS.tl);
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((e) => e.isIntersecting)) {

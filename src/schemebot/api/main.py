@@ -27,6 +27,7 @@ from schemebot.api.schemas import (
     HealthResponse,
     SourceOut,
     SpeakRequest,
+    TranscribeResponse,
     VoiceAskResponse,
 )
 from schemebot.config import PROJECT_ROOT, get_settings
@@ -147,18 +148,54 @@ def create_app(
     log_dir: Path | None = None,
     web_dir: Path | None = None,
     limiter: AskLimiter | None = None,
+    transcribe_limiter: AskLimiter | None = None,
 ) -> FastAPI:
     ask_limiter = limiter or _default_limiter()
+    # Its own counter, so a voice question (/transcribe, then /ask) counts once on each.
+    stt_limiter = transcribe_limiter or _default_limiter()
 
-    def limit_asks(request: Request) -> None:
+    def check_limit(limiter: AskLimiter, request: Request) -> None:
         client = request.client.host if request.client else "unknown"
-        wait = ask_limiter.check(client)
+        wait = limiter.check(client)
         if wait is not None:
             raise HTTPException(
                 status_code=429,
                 detail=DAILY_LIMIT_TEXT if wait.daily else TOO_MANY_TEXT,
                 headers={"Retry-After": str(math.ceil(wait.seconds))},
             )
+
+    def limit_asks(request: Request) -> None:
+        check_limit(ask_limiter, request)
+
+    def limit_transcribe(request: Request) -> None:
+        check_limit(stt_limiter, request)
+
+    def heard_question(
+        state: AppState, audio: UploadFile, language: VoiceLanguage
+    ) -> tuple[str, str, float]:
+        """Gnani speech to text for one clip: (question, Gnani language code, stt ms)."""
+        if state.transcriber is None:
+            raise HTTPException(status_code=503, detail="Voice input is not set up on this server.")
+        settings = get_settings()
+        clip = audio.file.read(settings.stt_max_bytes + 1)
+        filename = audio.filename or "question.wav"
+        language_code = GNANI_LANGUAGE_CODES[language]
+
+        started = time.perf_counter()
+        try:
+            check_audio(clip, filename, settings.stt_max_bytes, settings.stt_max_seconds)
+            transcript = state.transcriber.transcribe(clip, filename, language_code)
+        except SttError as error:
+            raise HTTPException(status_code=error.status_code, detail=error.message) from error
+        stt_ms = (time.perf_counter() - started) * 1000
+
+        try:
+            question = AskRequest(question=transcript).question
+        except ValidationError as error:
+            raise HTTPException(
+                status_code=422, detail="Pakkam could not hear a question. Try again."
+            ) from error
+        return question, language_code, stt_ms
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -224,29 +261,11 @@ def create_app(
         request: Request,
         language: Annotated[VoiceLanguage, Form()] = "ta",
     ) -> VoiceAskResponse:
-        """Spoken question: Gnani speech to text, then the same pipeline as `/ask`."""
-        if state.transcriber is None:
-            raise HTTPException(status_code=503, detail="Voice input is not set up on this server.")
-        settings = get_settings()
-        clip = audio.file.read(settings.stt_max_bytes + 1)
-        filename = audio.filename or "question.wav"
-        language_code = GNANI_LANGUAGE_CODES[language]
+        """Spoken question: Gnani speech to text, then the same pipeline as `/ask`.
 
-        started = time.perf_counter()
-        try:
-            check_audio(clip, filename, settings.stt_max_bytes, settings.stt_max_seconds)
-            transcript = state.transcriber.transcribe(clip, filename, language_code)
-        except SttError as error:
-            raise HTTPException(status_code=error.status_code, detail=error.message) from error
-        stt_ms = (time.perf_counter() - started) * 1000
-
-        try:
-            question = AskRequest(question=transcript).question
-        except ValidationError as error:
-            raise HTTPException(
-                status_code=422, detail="Pakkam could not hear a question. Try again."
-            ) from error
-
+        The chat page uses `/transcribe` and then `/ask` instead, to show the transcript
+        before the answer is ready. This one-call route stays for scripts and the API."""
+        question, language_code, stt_ms = heard_question(state, audio, language)
         answer = state.service.answer(question)
         state.audit.record(request.state.request_id, answer, {"stt": stt_ms})
         response = AskResponse.from_answer(answer, state.titles)
@@ -256,6 +275,21 @@ def create_app(
             transcript=question,
             stt_language_code=language_code,
             stt_ms=round(stt_ms, 1),
+        )
+
+    @app.post("/transcribe", dependencies=[Depends(limit_transcribe)])
+    def transcribe(
+        audio: UploadFile,
+        state: StateDep,
+        request: Request,
+        language: Annotated[VoiceLanguage, Form()] = "ta",
+    ) -> TranscribeResponse:
+        """Speech to text only (1 Gnani call), so the page can show what it heard at once
+        and then send that text to `/ask`."""
+        question, language_code, stt_ms = heard_question(state, audio, language)
+        state.audit.record_transcript(request.state.request_id, language_code, stt_ms)
+        return TranscribeResponse(
+            transcript=question, stt_language_code=language_code, stt_ms=round(stt_ms, 1)
         )
 
     @app.post("/speak", dependencies=[Depends(limit_asks)])
