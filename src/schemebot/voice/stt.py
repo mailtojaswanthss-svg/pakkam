@@ -146,6 +146,9 @@ def _read_transcript(response: httpx.Response) -> str:
         body = {}
     if response.status_code == 429:
         raise SttError("The speech service is busy. Try again in a minute.", 429)
+    if response.status_code >= 500:
+        # The service's own fault: don't tell people their recording was the problem.
+        raise SttError("The speech service is not working right now. Type your question instead.")
     if response.status_code != 200 or not body.get("success"):
         raise SttError("The speech service could not read this recording.")
     transcript = body.get("transcript")

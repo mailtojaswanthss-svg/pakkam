@@ -303,6 +303,9 @@ all 306 fast tests pass.
 | 5 | Audio check | `voice/stt.py`: first bytes must match the extension; WAV and FLAC lengths read from the header (unreadable files refused); MP3/OGG/AAC/M4A over 30 s at 384 kbps (about 1.4 MB) refused. |
 | 6 | Gnani counter | `voice/budget.py`: lock file shared by processes, per-process temp file, stale lock removed after 30 s, a broken count file now stops calls (it used to reset the count to 0). The 4-process probe now gives exactly 1200. |
 | 7 | Daily-limit message | `api/ratelimit.py`, `api/main.py`: the daily cap says "come back tomorrow"; the per-visitor limit says "wait a minute". The chat page still shows its own 429 text; showing the server's text is a one-line change in `web/assets/chat.js` for the UI thread. |
+| 9 | Answer cache | `generate/cache.py`: up to 256 answers for 6 hours, keyed on the tidied question; temporary failures are not kept; the API only, never the eval. |
+| 11 | Gnani 5xx wording | `voice/stt.py`: a Gnani server fault now says "The speech service is not working right now. Type your question instead." instead of blaming the recording. The page's 2-minute fetch timeout was done by the UI thread (`web/assets/chat.js`, now on main). |
+| 8b | Known OCR misreadings | `ingest/corrections.py`, `data/corrections.json`: listed wrong numbers can't be used in answers; person-confirmed fixes are applied at ingestion and flagged `ocr_corrected`. See `OCR_CORRECTIONS_DESIGN.md`. |
 
 Not done here, because they need a person or the laptop:
 

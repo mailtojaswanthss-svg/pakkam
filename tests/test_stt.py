@@ -136,6 +136,17 @@ def test_transcribe_turns_errors_into_stt_error(
     assert caught.value.status_code == expected_status
 
 
+@pytest.mark.parametrize("status", [500, 503])
+def test_server_fault_does_not_blame_the_recording(status: int) -> None:
+    stt = client_replying(status, {"success": False}, [])
+
+    with pytest.raises(SttError) as caught:
+        stt.transcribe(b"audio", "q.wav", "ta-IN")
+    assert "recording" not in caught.value.message
+    assert "Type your question" in caught.value.message
+    assert caught.value.status_code == 502
+
+
 def test_transcribe_handles_network_failure() -> None:
     def fail(request: httpx.Request) -> httpx.Response:
         raise httpx.ConnectError("down", request=request)
