@@ -97,6 +97,9 @@ class Settings(BaseSettings):
     tts_voice_hi: str | None = None
     tts_voice_en: str | None = None
     """Leave empty for the default voice of the chosen model (voice/tts.py)."""
+    tts_spell_amounts: bool = False
+    """Write money amounts as words before TTS (voice/numbers.py). Off until the listening
+    test shows Timbre misreads digits."""
     tts_max_chars: int = Field(default=1200, ge=1)
     """Longest answer read aloud; Gnani documents no limit, so this bounds credit use."""
 

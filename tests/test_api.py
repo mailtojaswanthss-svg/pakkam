@@ -457,3 +457,21 @@ def test_speak_logs_tts_timing_without_text(service: FakeService, tmp_path: Path
     assert entry["language_code"] == "ta-IN"
     assert set(entry["timings_ms"]) == {"tts"}  # type: ignore[arg-type]
     assert "Citizens" not in (tmp_path / "requests.jsonl").read_text()
+
+
+def test_speak_spells_amounts_only_when_switched_on(
+    service: FakeService, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import schemebot.api.main as main_module
+    from schemebot.config import Settings
+
+    body = {"text": "Rs.6000 a year. [1]", "language": "ta"}
+    tts = FakeTts()
+    with speak_client(service, tts, tmp_path) as client:
+        client.post("/speak", json=body)
+        monkeypatch.setattr(
+            main_module, "get_settings", lambda: Settings(_env_file=None, tts_spell_amounts=True)
+        )
+        client.post("/speak", json=body)
+
+    assert [text for text, _ in tts.calls] == ["Rs.6000 a year.", "ஆறு ஆயிரம் ரூபாய் a year."]

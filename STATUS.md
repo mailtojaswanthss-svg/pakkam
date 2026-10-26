@@ -46,6 +46,16 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
   - Reports go to `data/voice/runs/` (gitignored). They carry the "Draft questions, not yet native-speaker verified" note, and a SYNTHETIC banner plus file prefix when any clip name contains "synthetic".
   - 12 more tests; 282 pass. **Not run on real clips yet.**
 
+- Money amounts as words for TTS (26 Oct, **off by default**: `SCHEMEBOT_TTS_SPELL_AMOUNTS=false`):
+  - `voice/numbers.py` turns money into words in the voice's language before `/speak`. Examples: "Rs.1,000" → "ஆயிரம் ரூபாய்", "₹12,000" → "बारह हज़ार रुपये", "Rs.2.5 lakh" → "two point five lakh rupees".
+  - It only touches money: a number with Rs./₹/ரூ./रु. in front, a lakh/crore unit, or a rupee word. Ages, years, helplines and G.O. numbers are left alone. "/-" is dropped.
+  - Deterministic tables with Indian grouping. Decimals are read digit by digit, never rounded.
+  - Every conversion is parsed back to a number and compared with the original. If they differ, or the amount is written unusually ("1,0000", "12,00", rupees and paise), the text is kept as written.
+  - English matches the num2words library on 22,000 numbers (a one-off check, not a dependency). All three languages read back exactly over 0-3000 plus 5,000 random numbers up to 10^11.
+  - `python -m schemebot.voice amounts` (free) lists every way the corpus writes money and how each would be spoken. The chunks aren't in the repo, so it must be run on Jaswanth's laptop. Here it only saw the eval references: 7 formats, 0 kept as written.
+  - **The Tamil and Hindi wording needs a native speaker's review**, e.g. "ஆறு ஆயிரம்" vs the spoken "ஆறாயிரம்".
+  - 40 more tests; 322 pass.
+
 ## Next
 0. Jaswanth runs the Timbre listening test on his laptop (the key is only there; Claude can't hear audio, so Jaswanth describes what he hears):
    - a. `--cases tamil --models timbre-v2.5 timbre-v3.0` (2 calls), then choose the version and set `SCHEMEBOT_TTS_MODEL`.
