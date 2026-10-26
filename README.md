@@ -95,7 +95,9 @@ uv run fastapi run                    # site + API on http://localhost:8000 (cha
 `SCHEMEBOT_ANTHROPIC_API_KEY` in `.env`. To use Gemini instead, set
 `SCHEMEBOT_LLM_PROVIDER=gemini` and `SCHEMEBOT_GEMINI_API_KEY`; switching back is that one
 line. Both providers return the same structured answers and go through the same guardrail.
-On Gemini's free tier, rate-limited calls are retried for about three minutes, and Google may
+Each LLM call waits at most 60 s per attempt and is retried twice on rate limits and server
+errors (`SCHEMEBOT_LLM_TIMEOUT_SECONDS`, `SCHEMEBOT_LLM_RETRIES`). For a long evaluation run on
+Gemini's free tier, set `SCHEMEBOT_LLM_RETRIES=7`. On the free tier Google may
 use the prompts to improve its products, so use a paid key for a public demo. Without a key,
 questions are still retrieved and checked, but answerable ones are refused as
 `service_unavailable`.
