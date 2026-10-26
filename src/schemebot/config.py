@@ -8,7 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -17,6 +17,9 @@ Effort = Literal["low", "medium", "high", "xhigh", "max"]
 """Reasoning effort: how much the model thinks before answering (a thinking level on Gemini)."""
 
 LlmProvider = Literal["claude", "gemini"]
+
+TimbreModel = Literal["timbre-v2.5", "timbre-v3.0"]
+"""Gnani text-to-speech models. Voice names differ between them."""
 
 SUPPORTED_LANGUAGES = ("en", "ta", "hi", "ta-Latn")
 """English, Tamil, Hindi, and Tamil written in Latin script (Tanglish)."""
@@ -74,10 +77,41 @@ class Settings(BaseSettings):
     ask_limit_per_client_per_minute: int = Field(default=10, ge=1)
     ask_limit_total_per_day: int = Field(default=500, ge=1)
 
+    # Gnani voice (Prisma v2.5 speech to text). The key lives only in .env.
+    gnani_api_key: SecretStr | None = None
+    gnani_stt_url: str = "https://api.vachana.ai/stt/v3"
+    stt_max_seconds: float = Field(default=30.0, gt=0, le=60)
+    """Gnani's docs say both 30 s and 60 s; 30 s is the safe limit until tested."""
+    stt_max_bytes: int = Field(default=5_000_000, ge=1)
+    """Upload size cap: 30 s of 16 kHz mono WAV is about 1 MB."""
+    stt_timeout_seconds: float = Field(default=30.0, gt=0)
+    gnani_max_calls_per_day: int = Field(default=100, ge=0)
+    """Speech to text and text to speech together, web app and compare script together.
+
+    A guess until credit use is measured in the Gnani dashboard."""
+
+    # Gnani Timbre text to speech. Spoken answers stay off until a model is chosen.
+    tts_model: TimbreModel | None = None
+    gnani_tts_url: str = "https://api.vachana.ai/api/v1/tts/inference"
+    tts_voice_ta: str | None = None
+    tts_voice_hi: str | None = None
+    tts_voice_en: str | None = None
+    """Leave empty for the default voice of the chosen model (voice/tts.py)."""
+    tts_max_chars: int = Field(default=1200, ge=1)
+    """Longest answer read aloud; Gnani documents no limit, so this bounds credit use."""
+
     # OCR
     tesseract_cmd: str | None = None
     tessdata_dir: Path | None = None
     """Folder holding tam/hin/eng .traineddata, when not the install's own tessdata folder."""
+
+    @field_validator(
+        "gnani_api_key", "tts_model", "tts_voice_ta", "tts_voice_hi", "tts_voice_en", mode="before"
+    )
+    @classmethod
+    def _empty_means_unset(cls, value: object) -> object:
+        # `SCHEMEBOT_TTS_MODEL=` (empty, as in .env.example) means "not set", not "".
+        return None if isinstance(value, str) and not value.strip() else value
 
     @model_validator(mode="after")
     def _rerank_within_retrieval(self) -> "Settings":

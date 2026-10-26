@@ -238,6 +238,18 @@ body { overflow: hidden; background: var(--panel); }
 .send:disabled { opacity: .45; cursor: progress; }
 .form-msg { min-height: 0; margin-top: 6px; color: var(--tape); font-size: var(--step--1); }
 .form-msg:empty { display: none; }
+.voice-btn { flex: none; align-self: flex-end; margin-bottom: 1px; color: var(--ink-2); }
+.voice-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.voice-btn:focus-within { outline: 2px solid var(--stamp); outline-offset: 2px; }
+#mic[aria-pressed="true"] { background: var(--tape-soft); color: var(--tape); border-color: var(--tape); }
+.voice-btn[hidden] { display: none; }
+.voice-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-top: 6px; color: var(--ink-2); font-size: var(--step--1); }
+.voice-row select { padding: 2px 6px; color: var(--ink); background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-sm); font: inherit; }
+.voice-row[hidden] { display: none; }
+.voice-status:empty { display: none; }
+.voice-status { color: var(--tape); font-variant-numeric: tabular-nums; }
+.listen-btn[aria-pressed="true"] { color: var(--tape); border-color: var(--tape); }
+.heard { display: block; margin-bottom: 2px; font-size: var(--step--1); opacity: .8; }
 .composer-hint { margin-top: 8px; color: var(--ink-2); font-size: var(--step--1); text-align: center; }
 
 /* ---------- sources panel ---------- */
