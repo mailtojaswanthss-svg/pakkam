@@ -101,6 +101,10 @@ Gemini's free tier, set `SCHEMEBOT_LLM_RETRIES=7`. On the free tier Google may
 use the prompts to improve its products, so use a paid key for a public demo. Without a key,
 questions are still retrieved and checked, but answerable ones are refused as
 `service_unavailable`.
+The API keeps up to 256 answers in memory for 6 hours, so a repeated question (same words,
+ignoring case, spaces and a final "?") is answered without calling the LLM
+(`SCHEMEBOT_ANSWER_CACHE_SIZE`, `0` turns it off; `SCHEMEBOT_ANSWER_CACHE_TTL_SECONDS`).
+The evaluation never uses this cache.
 
 ### API
 
