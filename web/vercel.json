@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/ask", "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/ask" },
+    { "source": "/sources", "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/sources" },
+    { "source": "/transcribe", "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/transcribe" },
+    { "source": "/speak", "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/speak" }
+  ]
+}
