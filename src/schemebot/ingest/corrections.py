@@ -5,7 +5,8 @@ guardrail cannot catch that, because the wrong number really is in the passage. 
 in data/corrections.json names one misreading:
 
 - Unconfirmed (no `confirmed_by`): the text is left alone, but answers may not use the wrong
-  number from that document (generate/answer.py removes such sentences).
+  number from a passage covering that page (generate/answer.py removes such sentences).
+  An entry whose page is not known yet blocks nothing.
 - Confirmed (a person compared it with the PDF page and wrote their name): ingestion replaces
   the misreading with what the page shows, and marks those chunks "ocr-corrected" so the UI
   can say the text was corrected by hand.

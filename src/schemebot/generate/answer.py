@@ -27,6 +27,7 @@ from schemebot.generate.prompt import (
 )
 from schemebot.ingest.corrections import CORRECTED, OcrCorrection
 from schemebot.ingest.langid import Language, detect_language
+from schemebot.ingest.models import Chunk
 from schemebot.retrieve.retriever import RetrievedPassage, Retriever
 
 logger = logging.getLogger(__name__)
@@ -87,13 +88,23 @@ def _citation(number: int, passage: RetrievedPassage) -> Citation:
     )
 
 
-def misread_numbers_by_doc(corrections: list[OcrCorrection]) -> dict[str, set[str]]:
-    """doc_id -> numbers OCR is known to have misread there ('4000' for Rs.1,000)."""
-    found: dict[str, set[str]] = {}
+def misread_numbers_by_page(corrections: list[OcrCorrection]) -> dict[tuple[str, int], set[str]]:
+    """(doc_id, page) -> numbers OCR is known to have misread there ('4000' for Rs.1,000).
+    An entry whose page is not known yet blocks nothing."""
+    found: dict[tuple[str, int], set[str]] = {}
     for correction in corrections:
+        if correction.page is None:
+            continue
         wrong = numbers_in(correction.ocr_reads) - numbers_in(correction.pdf_shows)
-        found.setdefault(correction.doc_id, set()).update(wrong)
+        found.setdefault((correction.doc_id, correction.page), set()).update(wrong)
     return found
+
+
+def _misread_in(chunk: Chunk, misread: dict[tuple[str, int], set[str]]) -> set[str]:
+    """Known-wrong numbers on the pages this passage covers that its text really contains."""
+    pages = range(chunk.page_start, chunk.page_end + 1)
+    wrong = set().union(*(misread.get((chunk.doc_id, page), set()) for page in pages))
+    return wrong & numbers_in(chunk.text)
 
 
 class Answerer:
@@ -113,7 +124,7 @@ class Answerer:
         self._contacts = contacts or {}
         # Confirmed fixes are applied at ingestion, but stay here too: until the index is
         # rebuilt the passage still holds the misreading.
-        self._misread = misread_numbers_by_doc(corrections or [])
+        self._misread = misread_numbers_by_page(corrections or [])
 
     def answer(self, question: str) -> Answer:
         timings: dict[str, float] = {}
@@ -157,10 +168,7 @@ class Answerer:
 
         passages = retrieval.passages
         passage_texts = [passage.chunk.text for passage in passages]
-        misread = [
-            self._misread.get(passage.chunk.doc_id, set()) & numbers_in(passage.chunk.text)
-            for passage in passages
-        ]
+        misread = [_misread_in(passage.chunk, self._misread) for passage in passages]
         generation_started = time.perf_counter()
         try:
             reply = parse_reply(
