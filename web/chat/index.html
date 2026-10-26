@@ -53,7 +53,7 @@
     </div>
 
     <div class="side-block side-schemes">
-      <p class="side-h">Schemes Pakkam can read</p>
+      <p class="side-h" id="schemes-h" tabindex="-1">Schemes Pakkam can read</p>
       <ul class="scheme-list" id="scheme-list">
         <li class="scheme-note">Loading the document list</li>
       </ul>
@@ -136,11 +136,12 @@
         <span class="vh" id="voice-announce" aria-live="polite"></span>
       </div>
       <p class="form-msg" id="form-msg" role="status"></p>
-      <p class="composer-hint">Answers come from official documents only. For information, not official advice.</p>
+      <p class="composer-hint">Information only, not official advice. Check the official source.</p>
     </div>
   </main>
 
-  <!-- Sources panel -->
+  <!-- Sources panel (a bottom sheet on phones, with a backdrop that closes it) -->
+  <div class="sheet-scrim" id="sheet-scrim" hidden></div>
   <aside class="sources" id="sources" aria-labelledby="sources-h" hidden>
     <div class="sources-head">
       <h2 id="sources-h" tabindex="-1">Sources</h2>
