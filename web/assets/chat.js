@@ -310,8 +310,8 @@
     input.style.height = `${input.scrollHeight}px`;
   }
 
-  // One question and answer turn. `request` returns the fetch promise; `label` shows until the
-  // server replies (for voice, the transcript then replaces it).
+  // One question and answer turn. `request(bubble)` returns the fetch promise; `label` shows
+  // in the question bubble until it is replaced (for voice, by what Pakkam heard).
   async function runTurn(label, request) {
     if (busy) return;
     showFormMsg('');
@@ -331,7 +331,7 @@
     try {
       let response;
       try {
-        response = await withTimeout(request(), ASK_TIMEOUT_MS);
+        response = await withTimeout(request(bubble), ASK_TIMEOUT_MS);
       } catch (error) {
         throw new Error(error.message === 'timeout' ? 'timeout' : 'network');
       }
@@ -406,15 +406,35 @@
   // Not for 4xx answers like "could not hear", where speaking again is the fix.
   const canRetry = (error) => !(error instanceof ServerError) || error.status >= 500;
 
-  async function askVoice(audio, filename, language = voiceLanguage()) {
+  const askText = (question) => fetch('/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+
+  // Two steps, so "Pakkam heard: ..." shows as soon as speech to text is done, while the
+  // answer is still being written: /transcribe (1 Gnani call), then /ask with that text.
+  // Once the transcript is known, Send again resends only the text, with no new Gnani call.
+  async function askVoice(clip) {
     retryButton.hidden = true;
-    lastClip = { audio, filename, language };
-    const body = new FormData();
-    body.append('audio', audio, filename);
-    body.append('language', language);
+    lastClip = clip;
     setVoiceStatus(TEXT.sendingVoice);
     const slow = setTimeout(() => setVoiceStatus(TEXT.slowUpload), SLOW_UPLOAD_MS);
-    const error = await runTurn(TEXT.voiceQuestion, () => fetch('/ask/voice', { method: 'POST', body }));
+    const error = await runTurn(TEXT.voiceQuestion, async (bubble) => {
+      if (!clip.transcript) {
+        const body = new FormData();
+        body.append('audio', clip.audio, clip.filename);
+        body.append('language', clip.language);
+        const heard = await fetch('/transcribe', { method: 'POST', body });
+        if (!heard.ok) return heard; // runTurn shows the server's message
+        clip.transcript = (await heard.json()).transcript;
+      }
+      clearTimeout(slow);
+      setVoiceStatus('');
+      bubble.textContent = '';
+      bubble.append(el('span', 'heard', TEXT.heard), clip.transcript);
+      return askText(clip.transcript);
+    });
     clearTimeout(slow);
     if (error && canRetry(error)) {
       setVoiceStatus(TEXT.voiceFailed);
@@ -424,6 +444,8 @@
       lastClip = null;
     }
   }
+
+  const newClip = (audio, filename) => ({ audio, filename, language: voiceLanguage(), transcript: null });
 
   function showRecording(seconds) {
     const text = seconds >= WARN_AT_SECONDS
@@ -449,7 +471,7 @@
   async function stopRecording() {
     if (!recording) return;
     const wav = await endRecording().stop();
-    askVoice(wav, 'question.wav');
+    askVoice(newClip(wav, 'question.wav'));
   }
 
   function cancelRecording() {
@@ -509,7 +531,7 @@
   }
   cancelButton.addEventListener('click', cancelRecording);
   retryButton.addEventListener('click', () => {
-    if (lastClip && !busy) askVoice(lastClip.audio, lastClip.filename, lastClip.language);
+    if (lastClip && !busy) askVoice(lastClip);
   });
   typeInstead.addEventListener('click', () => {
     typeInstead.hidden = true;
@@ -522,7 +544,7 @@
   upload.addEventListener('change', () => {
     const file = upload.files[0];
     upload.value = '';
-    if (file) askVoice(file, file.name);
+    if (file) askVoice(newClip(file, file.name));
   });
 
   form.addEventListener('submit', (event) => {

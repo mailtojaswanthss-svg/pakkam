@@ -519,3 +519,61 @@ def test_speak_spells_amounts_only_when_switched_on(
         client.post("/speak", json=body)
 
     assert [text for text, _ in tts.calls] == ["Rs.6000 a year.", "ஆறு ஆயிரம் ரூபாய் a year."]
+
+
+# ---------- /transcribe: speech to text on its own, so the page shows it at once ----------
+
+
+def test_transcribe_returns_the_text_without_answering(
+    service: FakeService, tmp_path: Path
+) -> None:
+    stt = FakeStt("  APY age limit?  ")
+    with voice_client(service, stt, tmp_path) as client:
+        response = client.post(
+            "/transcribe",
+            files={"audio": ("q.wav", short_wav(), "audio/wav")},
+            data={"language": "ta-Latn"},
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["transcript"] == "APY age limit?"
+    assert body["stt_language_code"] == "ta-IN"
+    assert body["stt_ms"] >= 0
+    assert stt.calls == [("q.wav", "ta-IN")]
+    assert service.questions == []  # no answer, no LLM call
+    [entry] = audit_lines(tmp_path)
+    assert entry["kind"] == "transcript"
+    timings = entry["timings_ms"]
+    assert isinstance(timings, dict) and set(timings) == {"stt"}
+    assert "APY" not in (tmp_path / "requests.jsonl").read_text()
+
+
+@pytest.mark.parametrize(
+    ("stt", "status"),
+    [(None, 503), (FakeStt("a"), 422), (FakeStt(error=SttError("Gnani is down.", 502)), 502)],
+)
+def test_transcribe_errors_match_ask_voice(
+    service: FakeService, tmp_path: Path, stt: FakeStt | None, status: int
+) -> None:
+    with voice_client(service, stt, tmp_path) as client:
+        response = client.post("/transcribe", files={"audio": ("q.wav", short_wav(), "audio/wav")})
+
+    assert response.status_code == status
+    assert isinstance(response.json()["detail"], str)
+
+
+def test_transcribe_has_its_own_rate_limit(service: FakeService, tmp_path: Path) -> None:
+    app = create_app(
+        lambda: service,
+        build_stt=FakeStt,
+        log_dir=tmp_path,
+        limiter=AskLimiter(per_client_per_minute=1, total_per_day=100),
+        transcribe_limiter=AskLimiter(per_client_per_minute=1, total_per_day=100),
+    )
+    clip = {"audio": ("q.wav", short_wav(), "audio/wav")}
+    with TestClient(app) as client:
+        # One voice question is one /transcribe and one /ask: both pass.
+        assert client.post("/transcribe", files=clip).status_code == 200
+        assert client.post("/ask", json={"question": QUESTION}).status_code == 200
+        assert client.post("/transcribe", files=clip).status_code == 429

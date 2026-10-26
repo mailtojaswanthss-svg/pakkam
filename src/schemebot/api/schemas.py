@@ -97,6 +97,12 @@ class VoiceAskResponse(AskResponse):
     stt_ms: float = Field(description="Time spent on speech to text, in milliseconds.")
 
 
+class TranscribeResponse(BaseModel):
+    transcript: str = Field(description="What Gnani speech to text heard.")
+    stt_language_code: str = Field(description="Language code sent to Gnani, e.g. 'ta-IN'.")
+    stt_ms: float = Field(description="Time spent on speech to text, in milliseconds.")
+
+
 class SpeakRequest(BaseModel):
     text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)] = Field(
         description="Answer text to read aloud; [n] citation markers are removed first."
