@@ -4,18 +4,41 @@
 
   const MIN_CHARS = 3;
   const MAX_CHARS = 500;
+  const MAX_VOICE_SECONDS = 30;
+  // Give up on an answer after 2 minutes, so the page never waits forever.
+  const ASK_TIMEOUT_MS = 120000;
+  // Voice errors whose server message is written for the user (bad file, nothing heard, STT down).
+  const VOICE_ERRORS = new Set([400, 413, 415, 422, 502, 503]);
   const TEXT = {
     tooShort: 'Type at least 3 characters.',
     tooLong: 'Keep it under 500 characters.',
     network: 'Pakkam could not reach the server. Check your connection and ask again.',
     server: 'Something went wrong on the server. Ask again in a moment.',
     tooMany: 'Pakkam is getting a lot of questions. Wait a minute, then ask again.',
+    timeout: 'Pakkam took too long to answer. Ask again in a moment.',
     offline: 'The live chat is offline right now. The answer server is not connected to this site.',
     waiting: 'Finding the pages, reading them and checking every sentence',
     chip: 'Show the source',
     answeredIn: (ms) => `Answered in ${(ms / 1000).toFixed(1)} s`,
     openPdf: (page) => `Open the official PDF at page ${page}`,
     passage: 'Cited passage',
+    voiceQuestion: 'Voice question',
+    listen: 'Listen',
+    listenLoading: 'Getting audio',
+    listenStop: 'Stop',
+    listenFailed: 'Pakkam could not read this answer aloud.',
+    heard: 'Pakkam heard:',
+    recording: (s, max) => `● 0:${String(s).padStart(2, '0')} / 0:${max}`,
+    recordingSpoken: (s, max) => `Recording, ${s} of ${max} seconds. Tap the mic again to send.`,
+    fewSecondsLeft: (s, max) => `● 0:${String(s).padStart(2, '0')} / 0:${max}, 5 seconds left`,
+    micStart: 'Ask by voice',
+    micStop: 'Stop and send',
+    micBlocked: 'Pakkam could not use the microphone. Allow it in the browser, or upload a recording.',
+    micOff: 'Mic is off. Type instead, or turn on the microphone in your browser settings.',
+    cancelled: 'Recording cancelled.',
+    sendingVoice: 'Sending your voice…',
+    slowUpload: 'Slow connection, still sending…',
+    voiceFailed: 'Your recording is kept. Tap Send again when the connection is back.',
     schemesFailed: 'The document list could not load. Each answer still links its own source.',
   };
   // Refusal card text. Tamil needs native review; other languages fall back to English.
@@ -43,9 +66,10 @@
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   class ServerError extends Error {
-    constructor(status) {
+    constructor(status, detail = null) {
       super(`HTTP ${status}`);
       this.status = status;
+      this.detail = detail;
     }
   }
 
@@ -57,6 +81,12 @@
   }
   const setLang = (node, lang) => { if (LANG_ATTR.has(lang)) node.lang = lang; };
   const safeUrl = (url) => (/^https?:\/\//i.test(url) ? url : null);
+  // Rejects with Error('timeout') if the promise has not settled after ms.
+  function withTimeout(promise, ms) {
+    let timer;
+    const timeout = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('timeout')), ms); });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  }
   const pagesText = (c) => (c.page_start === c.page_end ? `page ${c.page_start}` : `pages ${c.page_start} to ${c.page_end}`);
   const pageShort = (c) => (c.page_start === c.page_end ? `p.\u00a0${c.page_start}` : `pp.\u00a0${c.page_start}-${c.page_end}`);
   // "From: <document> · page N", in the answer's language. Tamil needs native review.
@@ -229,6 +259,8 @@
     }
 
     const meta = el('div', 'a-meta');
+    // Listen sits beside the time; the source lines above replace the old "N sources" button.
+    meta.append(listenButton(data));
     if (data.latency_ms && !refused) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
     const disclaimer = el('p', 'disclaimer', data.disclaimer);
     setLang(disclaimer, data.language);
@@ -269,6 +301,62 @@
     return card;
   }
 
+  /* ---------- spoken answers (Gnani Timbre on the server; only after a tap) ---------- */
+  let playing = null; // { audio, button, url }
+
+  function stopPlaying() {
+    if (!playing) return;
+    playing.audio.pause();
+    URL.revokeObjectURL(playing.url);
+    playing.button.textContent = TEXT.listen;
+    playing.button.setAttribute('aria-pressed', 'false');
+    playing = null;
+  }
+
+  function spokenText(data) {
+    if (data.refused || data.sentences.length === 0) return data.answer;
+    return data.sentences.map((s) => s.text).join(' ');
+  }
+
+  async function listen(data, button) {
+    if (playing && playing.button === button) return stopPlaying();
+    stopPlaying();
+    button.disabled = true;
+    button.textContent = TEXT.listenLoading;
+    try {
+      const response = await fetch('/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: spokenText(data), language: data.language }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(typeof body.detail === 'string' ? body.detail : TEXT.listenFailed);
+      }
+      const url = URL.createObjectURL(await response.blob());
+      const audio = new Audio(url);
+      playing = { audio, button, url };
+      audio.addEventListener('ended', stopPlaying);
+      button.textContent = TEXT.listenStop;
+      button.setAttribute('aria-pressed', 'true');
+      await audio.play();
+    } catch (error) {
+      stopPlaying();
+      button.textContent = TEXT.listen;
+      showFormMsg(error instanceof TypeError ? TEXT.network : error.message);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function listenButton(data) {
+    const button = el('button', 'listen-btn', TEXT.listen);
+    button.type = 'button';
+    button.setAttribute('aria-pressed', 'false');
+    button.addEventListener('click', () => listen(data, button));
+    return button;
+  }
+
   function assistantItem(className, content) {
     const item = el('li', `msg a ${className}`);
     const body = el('div', 'a-body');
@@ -286,12 +374,10 @@
     input.style.height = `${input.scrollHeight}px`;
   }
 
-  async function ask(raw) {
-    const question = raw.trim();
-    if (question.length < MIN_CHARS) return showFormMsg(TEXT.tooShort);
-    if (question.length > MAX_CHARS) return showFormMsg(TEXT.tooLong);
+  // One question and answer turn. `request` returns the fetch promise; `label` shows until the
+  // server replies (for voice, the transcript then replaces it).
+  async function runTurn(label, request) {
     if (busy) return;
-
     showFormMsg('');
     busy = true;
     send.disabled = true;
@@ -300,38 +386,42 @@
     closeSources(false);
 
     const questionItem = el('li', 'msg q');
-    const bubble = el('p', null, question);
+    const bubble = el('p', null, label);
     questionItem.append(bubble);
     const pending = assistantItem('pending', [el('p', 'wait', TEXT.waiting), el('span', 'wait-bar')]);
     log.append(questionItem, pending);
     scrollToEnd();
-    input.value = '';
-    autosize();
 
     try {
       let response;
       try {
-        response = await fetch('/ask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question }),
-        });
-      } catch {
-        throw new Error('network');
+        response = await withTimeout(request(), ASK_TIMEOUT_MS);
+      } catch (error) {
+        throw new Error(error.message === 'timeout' ? 'timeout' : 'network');
       }
-      if (!response.ok) throw new ServerError(response.status);
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new ServerError(response.status, typeof body.detail === 'string' ? body.detail : null);
+      }
       const data = await response.json();
+      if (data.transcript) {
+        bubble.textContent = '';
+        bubble.append(el('span', 'heard', TEXT.heard), data.transcript);
+      }
       setLang(bubble, data.language);
       pending.replaceWith(renderAnswer(data));
     } catch (error) {
-      let message = TEXT.network;
+      let message = error.message === 'timeout' ? TEXT.timeout : TEXT.network;
       if (error instanceof ServerError) {
         // 404/405: a static host (e.g. Vercel) with no answer server behind it.
-        if (error.status === 429) message = TEXT.tooMany;
+        // 429: the server says whether to wait a minute or come back tomorrow.
+        if (error.status === 429) message = error.detail || TEXT.tooMany;
         else if (error.status === 404 || error.status === 405) message = TEXT.offline;
+        else if (error.detail && VOICE_ERRORS.has(error.status)) message = error.detail;
         else message = TEXT.server;
       }
       pending.replaceWith(assistantItem('', [el('p', 'error-msg', message)]));
+      return error;
     } finally {
       busy = false;
       send.disabled = false;
@@ -340,6 +430,164 @@
       input.focus({ preventScroll: true });
     }
   }
+
+  function ask(raw) {
+    const question = raw.trim();
+    if (question.length < MIN_CHARS) return showFormMsg(TEXT.tooShort);
+    if (question.length > MAX_CHARS) return showFormMsg(TEXT.tooLong);
+    if (busy) return;
+    input.value = '';
+    autosize();
+    return runTurn(question, () => fetch('/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    }));
+  }
+
+  /* ---------- asking by voice (Gnani speech to text on the server) ---------- */
+  const SLOW_UPLOAD_MS = 5000;
+  const WARN_AT_SECONDS = MAX_VOICE_SECONDS - 5;
+  const ANNOUNCE_EVERY_SECONDS = 10;
+  const mic = $('#mic');
+  const upload = $('#upload');
+  const voiceStatus = $('#voice-status');
+  const voiceAnnounce = $('#voice-announce');
+  const cancelButton = $('#voice-cancel');
+  const retryButton = $('#voice-retry');
+  const typeInstead = $('#type-instead');
+  let recording = null; // { recorder, timer }
+  let lastClip = null; // { audio, filename, language }, kept until it is sent without a network error
+
+  const voiceLanguage = () => $('input[name="voice-lang"]:checked').value;
+
+  function setVoiceStatus(text, spoken = text) {
+    voiceStatus.textContent = text;
+    if (spoken !== null) voiceAnnounce.textContent = spoken;
+  }
+
+  // Worth sending the same clip again: the request never arrived, or the server failed.
+  // Not for 4xx answers like "could not hear", where speaking again is the fix.
+  const canRetry = (error) => !(error instanceof ServerError) || error.status >= 500;
+
+  async function askVoice(audio, filename, language = voiceLanguage()) {
+    retryButton.hidden = true;
+    lastClip = { audio, filename, language };
+    const body = new FormData();
+    body.append('audio', audio, filename);
+    body.append('language', language);
+    setVoiceStatus(TEXT.sendingVoice);
+    const slow = setTimeout(() => setVoiceStatus(TEXT.slowUpload), SLOW_UPLOAD_MS);
+    const error = await runTurn(TEXT.voiceQuestion, () => fetch('/ask/voice', { method: 'POST', body }));
+    clearTimeout(slow);
+    if (error && canRetry(error)) {
+      setVoiceStatus(TEXT.voiceFailed);
+      retryButton.hidden = false;
+    } else {
+      setVoiceStatus('');
+      lastClip = null;
+    }
+  }
+
+  function showRecording(seconds) {
+    const text = seconds >= WARN_AT_SECONDS
+      ? TEXT.fewSecondsLeft(seconds, MAX_VOICE_SECONDS)
+      : TEXT.recording(seconds, MAX_VOICE_SECONDS);
+    // Screen readers hear the time every 10 seconds and the warning once, not every tick.
+    let spoken = null;
+    if (seconds === WARN_AT_SECONDS) spoken = text;
+    else if (seconds % ANNOUNCE_EVERY_SECONDS === 0) spoken = TEXT.recordingSpoken(seconds, MAX_VOICE_SECONDS);
+    setVoiceStatus(text, spoken);
+  }
+
+  function endRecording() {
+    const { recorder, timer } = recording;
+    recording = null;
+    clearInterval(timer);
+    mic.setAttribute('aria-pressed', 'false');
+    mic.setAttribute('aria-label', TEXT.micStart);
+    cancelButton.hidden = true;
+    return recorder;
+  }
+
+  async function stopRecording() {
+    if (!recording) return;
+    const wav = await endRecording().stop();
+    askVoice(wav, 'question.wav');
+  }
+
+  function cancelRecording() {
+    if (!recording) return;
+    endRecording().cancel();
+    setVoiceStatus(TEXT.cancelled);
+    mic.focus();
+  }
+
+  async function micIsDenied() {
+    try {
+      const status = await navigator.permissions.query({ name: 'microphone' });
+      return status.state === 'denied';
+    } catch {
+      return false; // Firefox and older Safari cannot query the microphone permission.
+    }
+  }
+
+  function showMicOff() {
+    mic.classList.add('mic-off');
+    setVoiceStatus(TEXT.micOff);
+    typeInstead.hidden = false;
+  }
+
+  async function startRecording() {
+    if (busy) return;
+    showFormMsg('');
+    stopPlaying();
+    typeInstead.hidden = true;
+    retryButton.hidden = true;
+    try {
+      const recorder = await window.PakkamRecorder.start();
+      const startedAt = Date.now();
+      let shown = -1;
+      const timer = setInterval(() => {
+        const seconds = Math.floor((Date.now() - startedAt) / 1000);
+        if (seconds >= MAX_VOICE_SECONDS) stopRecording();
+        else if (seconds !== shown) showRecording((shown = seconds));
+      }, 250);
+      recording = { recorder, timer };
+      mic.classList.remove('mic-off');
+      mic.setAttribute('aria-pressed', 'true');
+      mic.setAttribute('aria-label', TEXT.micStop);
+      cancelButton.hidden = false;
+      showRecording((shown = 0));
+    } catch {
+      if (await micIsDenied()) showMicOff();
+      else showFormMsg(TEXT.micBlocked);
+    }
+  }
+
+  if (window.PakkamRecorder && window.PakkamRecorder.supported) {
+    mic.addEventListener('click', () => (recording ? stopRecording() : startRecording()));
+    micIsDenied().then((denied) => { if (denied) showMicOff(); });
+  } else {
+    mic.hidden = true;
+  }
+  cancelButton.addEventListener('click', cancelRecording);
+  retryButton.addEventListener('click', () => {
+    if (lastClip && !busy) askVoice(lastClip.audio, lastClip.filename, lastClip.language);
+  });
+  typeInstead.addEventListener('click', () => {
+    typeInstead.hidden = true;
+    setVoiceStatus('');
+    input.focus();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && recording) cancelRecording();
+  });
+  upload.addEventListener('change', () => {
+    const file = upload.files[0];
+    upload.value = '';
+    if (file) askVoice(file, file.name);
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -364,6 +612,11 @@
   document.querySelectorAll('[data-new-chat]').forEach((button) => {
     button.addEventListener('click', () => {
       if (busy) return;
+      stopPlaying();
+      cancelRecording();
+      lastClip = null;
+      retryButton.hidden = true;
+      setVoiceStatus('');
       closeSources(false);
       log.textContent = '';
       welcome.hidden = false;

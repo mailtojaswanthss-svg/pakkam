@@ -56,4 +56,13 @@ def test_total_daily_cap_applies_across_clients() -> None:
 
     wait = limiter.check("c")
 
-    assert wait is not None and wait > 3600
+    assert wait is not None and wait.daily and wait.seconds > 3600
+
+
+def test_per_client_limit_is_not_reported_as_daily() -> None:
+    limiter = AskLimiter(per_client_per_minute=1, total_per_day=100, clock=Clock())
+    limiter.check("a")
+
+    wait = limiter.check("a")
+
+    assert wait is not None and not wait.daily and wait.seconds <= 60
