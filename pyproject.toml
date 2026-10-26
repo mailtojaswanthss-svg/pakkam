@@ -8,12 +8,7 @@ license = { text = "MIT" }
 dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
-    "fastapi>=0.115",
 ]
-
-# Entrypoint for Vercel: module:variable
-[project.scripts]
-app = "schemebot.api.main:app"
 
 [project.optional-dependencies]
 # Each pipeline stage pulls in only what it needs, so CI and the API image stay small.
@@ -38,7 +33,6 @@ generate = [
 gemini = [
     "google-genai>=2.30",
 ]
-# Local development extras (uvicorn, fastapi CLI). Not needed on Vercel.
 api = [
     "fastapi[standard]>=0.115",
 ]
