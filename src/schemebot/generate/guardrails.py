@@ -12,6 +12,7 @@ A sentence that fails any check is removed; if nothing is left the answer is ref
 
 import re
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from typing import Literal
 
 from pydantic import BaseModel
@@ -20,6 +21,17 @@ from schemebot.generate.llm import JsonLlm, parse_reply
 from schemebot.text import normalize_for_search
 
 _NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
+
+# "2.5 lakh" and "Rs.2,50,000" are the same amount; so are "2023-24" and "2023-2024".
+# Tamil and Hindi words are matched by their stem, so inflected forms such as
+# "லட்சத்திற்குள்" (within ... lakh) count too.
+_LAKH, _CRORE = Decimal(100_000), Decimal(10_000_000)
+_UNITS = re.compile(
+    r"(?P<number>\d+(?:[.,]\d+)*)\s*"
+    r"(?:(?P<lakh>lakhs?\b|lacs?\b|லட்ச|लाख)|(?P<crore>crores?\b|கோடி|करोड))",
+    re.IGNORECASE,
+)
+_FINANCIAL_YEAR = re.compile(r"\b(?P<start>\d{4})\s*[-–/]\s*(?P<end>\d{2})\b")
 
 FailureReason = Literal["no_valid_citation", "number_not_in_source", "not_supported"]
 
@@ -43,10 +55,31 @@ class GuardrailResult:
     rejected: list[RejectedSentence]
 
 
+def _in_full(match: re.Match[str]) -> str:
+    """'2.5 lakh' -> '250000', '1 crore' -> '10000000'; unchanged if not a plain number."""
+    try:
+        value = Decimal(match["number"].replace(",", ""))
+    except InvalidOperation:
+        return match[0]
+    full = value * (_LAKH if match["lakh"] else _CRORE)
+    return str(full.to_integral_value()) if full == full.to_integral_value() else match[0]
+
+
+def _full_year(match: re.Match[str]) -> str:
+    """'2023-24' -> '2023-2024', only when the second part is the following year."""
+    start, end = int(match["start"]), int(match["end"])
+    if (start + 1) % 100 != end:
+        return match[0]
+    return f"{start}-{start + 1}"
+
+
 def numbers_in(text: str) -> set[str]:
-    """Numbers with thousands separators removed: 'Rs.6,000' and '6000' both give '6000'."""
+    """Numbers in one comparable form: 'Rs.6,000' and '6000' both give '6000', '2.5 lakh'
+    and '2,50,000' both give '250000', and '2023-24' gives '2023' and '2024'."""
+    text = _UNITS.sub(_in_full, normalize_for_search(text))
+    text = _FINANCIAL_YEAR.sub(_full_year, text)
     found = set()
-    for match in _NUMBER.findall(normalize_for_search(text)):
+    for match in _NUMBER.findall(text):
         number = match.replace(",", "").rstrip(".")
         found.add(number.removesuffix(".00").removesuffix(".0"))
     return found
