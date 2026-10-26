@@ -13,7 +13,6 @@
     offline: 'The live chat is offline right now. The answer server is not connected to this site.',
     waiting: 'Finding the pages, reading them and checking every sentence',
     chip: 'Show the source',
-    sources: (n) => (n === 1 ? '1 source' : `${n} sources`),
     answeredIn: (ms) => `Answered in ${(ms / 1000).toFixed(1)} s`,
     openPdf: (page) => `Open the official PDF at page ${page}`,
     passage: 'Cited passage',
@@ -33,6 +32,7 @@
   const welcome = $('#welcome');
   const formMsg = $('#form-msg');
   const panel = $('#sources');
+  const sheetScrim = $('#sheet-scrim');
   const panelHeading = $('#sources-h');
   const sourceList = $('#source-list');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -53,6 +53,13 @@
   const setLang = (node, lang) => { if (LANG_ATTR.has(lang)) node.lang = lang; };
   const safeUrl = (url) => (/^https?:\/\//i.test(url) ? url : null);
   const pagesText = (c) => (c.page_start === c.page_end ? `page ${c.page_start}` : `pages ${c.page_start} to ${c.page_end}`);
+  const pageShort = (c) => (c.page_start === c.page_end ? `p.\u00a0${c.page_start}` : `pp.\u00a0${c.page_start}-${c.page_end}`);
+  // "From: <document> · page N", in the answer's language. Tamil needs native review.
+  function sourceLineText(c, lang) {
+    const pages = c.page_start === c.page_end ? String(c.page_start) : `${c.page_start}-${c.page_end}`;
+    if (lang === 'ta') return `ஆதாரம்: ${c.document} · பக்கம்\u00a0${pages}`;
+    return `From: ${c.document} · ${c.page_start === c.page_end ? 'page' : 'pages'}\u00a0${pages}`;
+  }
   const scrollToEnd = () => thread.scrollTo({ top: thread.scrollHeight, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 
   /* ---------- greeting in four scripts ---------- */
@@ -85,6 +92,7 @@
   function closeSources(returnFocus) {
     if (!open) return;
     panel.hidden = true;
+    sheetScrim.hidden = true;
     open.item.querySelectorAll('.sent.lit').forEach((s) => s.classList.remove('lit'));
     open.item.querySelectorAll('[aria-expanded="true"]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
     if (returnFocus) open.chip.focus({ preventScroll: true });
@@ -94,7 +102,7 @@
   function sourceCard(c, current) {
     const li = el('li', `source${current ? ' current' : ''}`);
     const head = el('div', 'source-head');
-    head.append(el('span', 'source-no', String(c.number)));
+    head.append(el('span', 'source-no', pageShort(c)));
     const meta = el('div');
     meta.append(el('p', 'source-title', `${c.scheme}, ${pagesText(c)}`));
     const lang = LANG_NAME[c.language];
@@ -132,12 +140,14 @@
     }
     opener.setAttribute('aria-expanded', 'true');
     panel.hidden = false;
+    sheetScrim.hidden = false;
     open = { chip: opener, item };
     panelHeading.focus({ preventScroll: true });
     if (currentCard) currentCard.scrollIntoView({ block: 'nearest' });
   }
 
   $('#sources-close').addEventListener('click', () => closeSources(true));
+  sheetScrim.addEventListener('click', () => closeSources(true));
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
     if (app.classList.contains('menu-open')) setMenu(false);
@@ -168,7 +178,7 @@
         sentence.citations.forEach((n) => {
           const c = byNumber.get(n);
           if (!c) return;
-          const chip = el('button', 'chip', String(n));
+          const chip = el('button', 'chip', pageShort(c));
           chip.type = 'button';
           chip.title = TEXT.chip;
           chip.setAttribute('aria-label', `${TEXT.chip}: ${c.scheme}, ${pagesText(c)}`);
@@ -183,20 +193,28 @@
         para.append(' ');
       });
       body.append(para);
+
+      // The proof, visible without a tap: one line per cited document page.
+      const cited = new Set(data.sentences.flatMap((sentence) => sentence.citations));
+      const lines = el('ul', 'source-lines');
+      data.citations.filter((c) => cited.has(c.number)).forEach((c) => {
+        const line = el('button', 'source-line', sourceLineText(c, data.language));
+        line.type = 'button';
+        setLang(line, data.language);
+        line.setAttribute('aria-expanded', 'false');
+        line.setAttribute('aria-controls', 'sources');
+        line.addEventListener('click', () => {
+          if (open && open.chip === line) closeSources(true);
+          else openSources(data, c.number, line, item);
+        });
+        const li = el('li');
+        li.append(line);
+        lines.append(li);
+      });
+      if (lines.children.length) body.append(lines);
     }
 
     const meta = el('div', 'a-meta');
-    if (data.citations.length) {
-      const button = el('button', 'sources-btn', TEXT.sources(data.citations.length));
-      button.type = 'button';
-      button.setAttribute('aria-expanded', 'false');
-      button.setAttribute('aria-controls', 'sources');
-      button.addEventListener('click', () => {
-        if (open && open.chip === button) closeSources(true);
-        else openSources(data, null, button, item);
-      });
-      meta.append(button);
-    }
     if (data.latency_ms) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
     const disclaimer = el('p', 'disclaimer', data.disclaimer);
     setLang(disclaimer, data.language);
