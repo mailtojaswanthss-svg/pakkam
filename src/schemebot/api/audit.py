@@ -26,7 +26,10 @@ class AuditLog:
         self._lock = threading.Lock()
         path.parent.mkdir(parents=True, exist_ok=True)
 
-    def record(self, request_id: str, answer: Answer) -> None:
+    def record(
+        self, request_id: str, answer: Answer, extra_timings_ms: dict[str, float] | None = None
+    ) -> None:
+        timings = {**answer.timings_ms, **(extra_timings_ms or {})}
         entry = {
             "time": datetime.now(UTC).isoformat(timespec="seconds"),
             "request_id": request_id,
@@ -39,8 +42,24 @@ class AuditLog:
             "cited": [f"{c.doc_id}:p{c.page_start}" for c in answer.citations],
             "sentences": len(answer.sentences),
             "removed_by_guardrail": [r.reason for r in answer.rejected],
-            "timings_ms": {k: round(v, 1) for k, v in answer.timings_ms.items()},
+            "timings_ms": {k: round(v, 1) for k, v in timings.items()},
         }
+        self._write(entry)
+
+    def record_speech(self, request_id: str, chars: int, language_code: str, tts_ms: float) -> None:
+        """A spoken answer: numbers only, never the text or the audio."""
+        self._write(
+            {
+                "time": datetime.now(UTC).isoformat(timespec="seconds"),
+                "request_id": request_id,
+                "kind": "speech",
+                "chars": chars,
+                "language_code": language_code,
+                "timings_ms": {"tts": round(tts_ms, 1)},
+            }
+        )
+
+    def _write(self, entry: dict[str, object]) -> None:
         line = json.dumps(entry, ensure_ascii=False)
         with self._lock, self._path.open("a", encoding="utf-8") as file:
             file.write(line + "\n")

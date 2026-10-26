@@ -31,3 +31,6 @@ data/eval/runs/
 
 # Local helper binaries (cloudflared for the public tunnel)
 tools/
+
+# Voice recordings and their transcripts (python -m schemebot.voice): never committed
+data/voice/
