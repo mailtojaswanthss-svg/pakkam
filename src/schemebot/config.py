@@ -82,6 +82,8 @@ class Settings(BaseSettings):
     stt_max_bytes: int = Field(default=5_000_000, ge=1)
     """Upload size cap: 30 s of 16 kHz mono WAV is about 1 MB."""
     stt_timeout_seconds: float = Field(default=30.0, gt=0)
+    gnani_max_calls_per_day: int = Field(default=100, ge=0)
+    """Shared by the web app and the compare script; a guess until credit use is measured."""
 
     # OCR
     tesseract_cmd: str | None = None
