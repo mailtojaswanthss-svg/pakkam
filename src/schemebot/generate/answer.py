@@ -60,6 +60,8 @@ class Answer:
     disclaimer: str
     rejected: list[RejectedSentence] = field(default_factory=list)
     timings_ms: dict[str, float] = field(default_factory=dict)
+    """Milliseconds per stage: retrieval (= search + rerank), llm_answer, verifier,
+    generation (= llm_answer + verifier) and total. A stage that did not run is absent."""
 
 
 def _citation(number: int, passage: RetrievedPassage) -> Citation:
@@ -98,6 +100,7 @@ class Answerer:
 
         retrieval = self._retriever.retrieve(question)
         timings["retrieval"] = (time.perf_counter() - started) * 1000
+        timings.update(retrieval.timings_ms)  # "search" and "rerank" inside "retrieval"
         confidence = retrieval.confidence
 
         def refuse(reason: RefusalReason, rejected: list[RejectedSentence] | None = None) -> Answer:
@@ -140,10 +143,14 @@ class Answerer:
                     SYSTEM_PROMPT, build_user_message(question, language, passages), ANSWER_SCHEMA
                 ),
             )
+            timings["llm_answer"] = (time.perf_counter() - generation_started) * 1000
             drafts = [DraftSentence(s.text.strip(), s.sources) for s in reply.sentences]
             if not reply.answerable or not drafts:
                 return refuse("not_in_documents")
+            verify_started = time.perf_counter()
             checked = check_answer(drafts, passage_texts, self._verifier)
+            # Guardrail checks plus the verifier call (when one is configured).
+            timings["verifier"] = (time.perf_counter() - verify_started) * 1000
         except LlmDeclinedError:
             return refuse("model_declined")
         except LlmUnavailableError as error:
