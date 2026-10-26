@@ -119,6 +119,25 @@ bakes the index and both models into the image, and `deploy/cloudrun/deploy.sh` 
 Cloud Build and deploys it; step-by-step instructions are in
 [deploy/cloudrun/README.md](deploy/cloudrun/README.md).
 
+### Website on Vercel
+
+The site in `web/` is plain HTML, CSS and JavaScript, so Vercel's free plan can host it: import
+the GitHub repository at vercel.com/new, set **Root Directory** to `web`, framework **Other**,
+no build command. The home page then works fully. The chat needs the answer server, which is
+too large for Vercel (about 4.5 GB of models); until one is connected it says the live chat is
+offline. To connect one (Cloud Run, or a tunnel to a laptop), add `web/vercel.json`:
+
+```json
+{
+  "rewrites": [
+    { "source": "/ask", "destination": "https://YOUR-SERVER/ask" },
+    { "source": "/sources", "destination": "https://YOUR-SERVER/sources" }
+  ]
+}
+```
+
+Vercel then forwards the chat's requests to that server, so no cross-site setup is needed.
+
 ### CI
 
 `.github/workflows/ci.yml` runs ruff, the format check, mypy and the fast tests on every push

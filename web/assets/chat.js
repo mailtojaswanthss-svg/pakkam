@@ -10,6 +10,7 @@
     network: 'Pakkam could not reach the server. Check your connection and ask again.',
     server: 'Something went wrong on the server. Ask again in a moment.',
     tooMany: 'Pakkam is getting a lot of questions. Wait a minute, then ask again.',
+    offline: 'The live chat is offline right now. The answer server is not connected to this site.',
     waiting: 'Finding the pages, reading them and checking every sentence',
     chip: 'Show the source',
     sources: (n) => (n === 1 ? '1 source' : `${n} sources`),
@@ -261,7 +262,12 @@
       pending.replaceWith(renderAnswer(data));
     } catch (error) {
       let message = TEXT.network;
-      if (error instanceof ServerError) message = error.status === 429 ? TEXT.tooMany : TEXT.server;
+      if (error instanceof ServerError) {
+        // 404/405: a static host (e.g. Vercel) with no answer server behind it.
+        if (error.status === 429) message = TEXT.tooMany;
+        else if (error.status === 404 || error.status === 405) message = TEXT.offline;
+        else message = TEXT.server;
+      }
       pending.replaceWith(assistantItem('', [el('p', 'error-msg', message)]));
     } finally {
       busy = false;
