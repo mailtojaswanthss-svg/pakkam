@@ -361,6 +361,8 @@ body { overflow: hidden; background: var(--panel); }
 }
 @media (max-width: 640px) {
   .suggestions { grid-template-columns: 1fr; }
+  /* The composer hint says this in English on phones; keep it for other languages. */
+  .disclaimer[lang="en"] { display: none; }
   .sources {
     top: auto;
     left: 0;
