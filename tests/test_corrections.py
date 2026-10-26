@@ -205,7 +205,7 @@ def answer_from(
     return answerer.answer("How much does Pudhumai Penn pay per month?")
 
 
-UNCONFIRMED_PENN = [correction(confirmed=False, ocr_reads="Rs 4000", pdf_shows="Rs 1000")]
+UNCONFIRMED_PENN = [correction(confirmed=False, page=1, ocr_reads="Rs 4000", pdf_shows="Rs 1000")]
 PENN_CORPUS = {
     "penn-ta-001": "Pudhumai Penn pays Rs 4000 per month to girl students.",
     "penn-en-001": "Pudhumai Penn pays Rs 1000 per month to girl students.",
@@ -223,6 +223,20 @@ def test_unconfirmed_misreading_cannot_reach_an_answer() -> None:
 
     assert answer.refused
     assert [r.reason for r in answer.rejected] == ["known_ocr_error"]
+
+
+@pytest.mark.parametrize("page", [2, None])
+def test_block_is_per_page_and_needs_a_known_page(page: int | None) -> None:
+    llm = FakeLlm(
+        lambda prompt: sentences(
+            ("Pudhumai Penn pays Rs 4000 per month.", [passage_number(prompt, "Rs 4000")])
+        )
+    )
+    other_page = [correction(confirmed=False, page=page, ocr_reads="Rs 4000", pdf_shows="Rs 1000")]
+
+    answer = answer_from(PENN_CORPUS, llm, other_page)  # passages are on page 1
+
+    assert not answer.refused
 
 
 def test_right_amount_from_the_same_document_is_still_answered() -> None:
@@ -251,3 +265,17 @@ def test_corrected_passage_is_flagged_in_the_api_response() -> None:
     body = AskResponse.from_answer(answer).model_dump()
 
     assert [c["ocr_corrected"] for c in body["citations"]] == [True]
+
+
+def test_find_pages_ignores_commas_and_lists_each_page_once() -> None:
+    from schemebot.ingest.find import find_pages
+
+    chunks = [
+        make_chunk("hfw-ta-001", "வருமான வரம்பு ரூ.4,20,000", page=12),
+        make_chunk("hfw-ta-002", "income 420000 again", page=12),
+        make_chunk("hfw-ta-003", "முதியோர் உதவி எண் 14167", page=30),
+    ]
+
+    assert find_pages(chunks, "4,20,000") == [("hfw-ta", 12, 12)]
+    assert find_pages(chunks, "14167") == [("hfw-ta", 30, 30)]
+    assert find_pages(chunks, "4400") == []
