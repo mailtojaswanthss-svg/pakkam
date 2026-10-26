@@ -60,14 +60,11 @@ The summary prints the following:
 - per language, n (answerable/unanswerable), Recall@1 and @5, and false and correct refusals;
 - for full runs, "model-judged faithfulness" with the number of sentences judged.
 
-## 4b. Find the hostel and helpline pages (prints document and page only)
+## 4b. Hostel and helpline pages
 
-```
-uv run --frozen python -m schemebot.ingest.find 14167 4400 "4,20,000"
-```
-
-Send me the output. I'll add those pages to `data/corrections.json`, still unconfirmed, so the
-wrong numbers are blocked on exactly those pages.
+Done from the cloud session with read-only access to `data/processed`, so there's nothing to run.
+The pages are in `data/corrections.json`. `python -m schemebot.ingest.find` stays available for
+any new ones.
 
 ## 5. Commit the result
 
