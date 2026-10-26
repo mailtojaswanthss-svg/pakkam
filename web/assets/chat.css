@@ -176,10 +176,31 @@ body { overflow: hidden; background: var(--panel); }
 .refusal {
   padding: 14px 16px;
   background: var(--canvas);
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--border);
+  border: 1.5px dashed var(--border);
   border-radius: var(--r-md);
 }
+.refusal-title { margin-bottom: 6px; font-weight: 600; }
+.refusal-text { color: var(--ink); }
+.refusal-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }
+.refusal-link, .refusal-schemes {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 44px;
+  padding: 6px 14px;
+  background: var(--panel);
+  color: var(--stamp);
+  border: 1px solid var(--stamp-line);
+  border-radius: var(--r-sm);
+  font-size: var(--step--1);
+  font-weight: 600;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+.refusal-link:hover, .refusal-schemes:hover { border-color: var(--stamp); }
+.refusal-host { color: var(--ink-2); font-weight: 400; overflow-wrap: anywhere; }
+#schemes-h:focus { outline: none; }
 .error-msg { padding: 12px 14px; color: var(--tape); background: var(--tape-soft); border-radius: var(--r-md); }
 
 .pending .a-body { display: grid; gap: var(--s-2); }
@@ -361,7 +382,7 @@ body { overflow: hidden; background: var(--panel); }
     background: var(--border);
     border-radius: 2px;
   }
-  .composer-hint { display: none; }
+  .composer-hint { margin-top: 6px; font-size: .8125rem; }
 }
 @media (pointer: coarse) {
   .icon-btn { width: 44px; height: 44px; }
