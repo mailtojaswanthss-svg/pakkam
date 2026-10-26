@@ -9,6 +9,9 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+UNUSED_MODEL_FILES = ["onnx/*", "*.onnx", "imgs/*"]
+"""The ONNX exports in the bge-m3 repository are not used and add about 2 GB."""
+
 QUERY_MAX_TOKENS = 256
 PASSAGE_MAX_TOKENS = 1024
 """Chunks are at most 1000 characters; Tamil needs up to ~3 characters per token."""
@@ -19,6 +22,17 @@ class Embedding:
     dense: list[float]
     sparse: dict[int, float]
     """Token id -> weight. Only tokens with a non-zero weight are present."""
+
+
+def model_source(name: str, revision: str | None) -> str:
+    """Where to load a model from: the name itself (latest version) or, when a revision is
+    pinned, the local folder of exactly that commit, downloaded once into the HF cache."""
+    if revision is None:
+        return name
+    from huggingface_hub import snapshot_download
+
+    path: str = snapshot_download(name, revision=revision, ignore_patterns=UNUSED_MODEL_FILES)
+    return path
 
 
 class Encoder(Protocol):

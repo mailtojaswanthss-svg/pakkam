@@ -80,7 +80,8 @@ def main() -> int:
         "Mode": ("full pipeline" if full else "retrieval only")
         + f", {args.mode} search, reranker {'off' if args.no_rerank else 'on'}"
         + ("" if args.no_rerank else f", Tanglish gloss {'off' if args.no_gloss else 'on'}"),
-        "Models": f"{settings.embedding_model}, {settings.reranker_model}"
+        "Models": f"{settings.embedding_model}@{settings.embedding_revision or 'latest'}, "
+        f"{settings.reranker_model}@{settings.reranker_revision or 'latest'}"
         + (llm_models if full else ""),
         "Refusal threshold": f"{settings.refusal_threshold}",
         "Corpus": f"{len({c.doc_id for c in chunks})} documents, {len(chunks)} chunks",
