@@ -26,7 +26,7 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 5. Mic UX polish, from the UI thread's spec (section 6 of /mnt/project-files/ui-ux/UX_RECOMMENDATIONS.md). Candidates: a big "Tap and speak" mic on phones, language buttons with Tanglish marked "(being tested)", denied-permission card, Stop/Cancel with a "5 seconds left" note, a slow-upload "Send again" option, and a TTS play/stop bar with no autoplay. Already done: the 0:30 cap, and an empty transcript gets "could not hear" and is never sent to /ask. Needs Jaswanth's go-ahead, and it touches runTurn in chat.js, which the UI thread also plans to change.
 
 ## Blockers
-- Tanglish clips (Jaswanth). The key is in his local `.env` (26 Oct).
+- Tanglish clips (Jaswanth). The key is in his local `.env` (26 Oct). **Target: recordings done by Wed 28 Oct, no later than Sun 1 Nov.** The result decides whether the roughly 6-hour transliteration work is needed, so a later date makes the plan slip.
 - Unknown: what one credit buys. Check the dashboard before any bulk run.
 
 ## Decisions
@@ -36,6 +36,10 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 - Without a Gnani key the server still runs, and `/ask/voice` answers 503.
 - Credits: tests and CI never call Gnani. Only the live app and the clip script do, and both are under the daily cap.
 - The cap's lock is per process, so the app and the script running at exactly the same moment could miss one count. That's fine for one person on one laptop.
+
+## Rules for recording other people
+- Get their verbal consent first, and use made-up questions only. No real names, phone numbers, Aadhaar or PAN.
+- Keep recordings only as long as needed. They live in `data/voice/`, which is gitignored and never committed.
 
 ## Challenge facts re-checked (26 Oct, gnani.ai/internship)
 - The submission must also say what each team member contributed.
