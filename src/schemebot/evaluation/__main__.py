@@ -12,6 +12,7 @@ from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.evaluation.dataset import load_questions
 from schemebot.evaluation.report import git_revision, per_question_rows, render, run_stamp
 from schemebot.evaluation.runner import evaluate
+from schemebot.evaluation.summary import info_path
 from schemebot.ingest.pipeline import CHUNKS_NAME, read_chunks
 from schemebot.retrieve.factory import IndexMissingError, build_retriever
 
@@ -107,6 +108,10 @@ def main() -> int:
     with detail_path.open("w", encoding="utf-8") as file:
         for row in per_question_rows(results):
             file.write(json.dumps(row, ensure_ascii=False) + "\n")
+    # What produced the run (commit, models, mode), for `python -m schemebot.evaluation.summary`.
+    info_path(detail_path).write_text(
+        json.dumps(run_info, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
 
     print(report)
     print(f"per-question details: {detail_path}")
