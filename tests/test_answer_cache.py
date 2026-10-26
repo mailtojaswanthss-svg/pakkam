@@ -1,9 +1,11 @@
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 
+from schemebot.config import Settings
 from schemebot.generate.answer import Answer
-from schemebot.generate.cache import CachedAnswerer, cache_key
+from schemebot.generate.cache import CachedAnswerer, answer_fingerprint, cache_key
 from schemebot.generate.messages import RefusalReason
 
 ANSWER = Answer(
@@ -151,3 +153,75 @@ def test_api_wraps_the_answerer_unless_the_cache_is_off(
         get_settings.cache_clear()
 
     assert isinstance(service, CachedAnswerer) is wrapped
+
+
+def test_key_holds_fingerprint_language_and_question() -> None:
+    assert cache_key("Who can join APY?", "fp1").split("\x1f") == ["fp1", "en", "who can join apy"]
+    assert cache_key("Who can join APY?", "fp1") != cache_key("Who can join APY?", "fp2")
+
+
+def test_different_fingerprint_does_not_reuse_answers() -> None:
+    service = CountingService()
+    CachedAnswerer(service, 10, 60.0, fingerprint="old").answer("Who can join APY?")
+    CachedAnswerer(service, 10, 60.0, fingerprint="new").answer("Who can join APY?")
+
+    assert len(service.calls) == 2
+
+
+@pytest.fixture
+def data_dir(tmp_path: Path) -> Path:
+    (tmp_path / "index").mkdir()
+    (tmp_path / "index" / "collection.sqlite").write_bytes(b"vectors v1")
+    (tmp_path / "corrections.json").write_text("[]", encoding="utf-8")
+    return tmp_path
+
+
+def fingerprint(data_dir: Path, **changes: object) -> str:
+    settings = Settings(_env_file=None, data_dir=data_dir, **changes)  # type: ignore[arg-type]
+    return answer_fingerprint(settings, "answer-model", "verifier-model")
+
+
+def test_fingerprint_changes_with_index_corrections_and_settings(data_dir: Path) -> None:
+    base = fingerprint(data_dir)
+    assert fingerprint(data_dir) == base
+
+    (data_dir / "index" / ".lock").write_text("held", encoding="utf-8")
+    assert fingerprint(data_dir) == base  # the store's lock file is not content
+
+    assert fingerprint(data_dir, refusal_threshold=0.5) != base
+    assert fingerprint(data_dir, verify_answers=False) != base
+
+    (data_dir / "corrections.json").write_text('[{"x": 1}]', encoding="utf-8")
+    after_corrections = fingerprint(data_dir)
+    assert after_corrections != base
+
+    (data_dir / "index" / "collection.sqlite").write_bytes(b"vectors v2")
+    assert fingerprint(data_dir) != after_corrections
+
+
+def test_model_change_changes_the_fingerprint(data_dir: Path) -> None:
+    settings = Settings(_env_file=None, data_dir=data_dir)
+    assert answer_fingerprint(settings, "model-a", "v") != answer_fingerprint(
+        settings, "model-b", "v"
+    )
+
+
+def test_cache_hit_still_counts_against_the_rate_limit(tmp_path: Path) -> None:
+    from fastapi.testclient import TestClient
+
+    from schemebot.api.main import create_app
+    from schemebot.api.ratelimit import AskLimiter
+
+    service = CountingService()
+    app = create_app(
+        lambda: CachedAnswerer(service, 10, 60.0),
+        log_dir=tmp_path,
+        limiter=AskLimiter(per_client_per_minute=1, total_per_day=100),
+    )
+    with TestClient(app) as client:
+        first = client.post("/ask", json={"question": "Who can join APY?"})
+        second = client.post("/ask", json={"question": "Who can join APY?"})
+
+    assert first.status_code == 200
+    assert second.status_code == 429
+    assert len(service.calls) == 1

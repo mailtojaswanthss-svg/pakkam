@@ -114,14 +114,22 @@ def configure_logging() -> None:
 
 
 def _default_service() -> AnswerService:
-    from schemebot.generate.cache import CachedAnswerer
-    from schemebot.generate.factory import build_answerer
+    from schemebot.generate.cache import CachedAnswerer, answer_fingerprint
+    from schemebot.generate.factory import build_answerer, model_for
 
     settings = get_settings()
-    answerer = build_answerer(settings)
     if settings.answer_cache_size == 0:
-        return answerer
-    return CachedAnswerer(answerer, settings.answer_cache_size, settings.answer_cache_ttl_seconds)
+        return build_answerer(settings)
+    # Hashed before the index is opened, so the store's own lock file is not read.
+    fingerprint = answer_fingerprint(
+        settings, model_for(settings, "answer"), model_for(settings, "verifier")
+    )
+    return CachedAnswerer(
+        build_answerer(settings),
+        settings.answer_cache_size,
+        settings.answer_cache_ttl_seconds,
+        fingerprint,
+    )
 
 
 def _default_transcriber() -> Transcriber | None:
