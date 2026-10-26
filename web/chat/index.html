@@ -122,14 +122,18 @@
         </button>
       </form>
       <div class="voice-row">
-        <label for="voice-lang">I will speak in</label>
-        <select id="voice-lang">
-          <option value="ta" lang="ta">தமிழ்</option>
-          <option value="ta-Latn">Tanglish</option>
-          <option value="hi" lang="hi">हिन्दी</option>
-          <option value="en">English</option>
-        </select>
-        <span class="voice-status" id="voice-status" aria-live="polite"></span>
+        <fieldset class="voice-langs" id="voice-lang">
+          <legend>I will speak in</legend>
+          <label><input type="radio" name="voice-lang" value="ta" checked><span lang="ta">தமிழ்</span></label>
+          <label><input type="radio" name="voice-lang" value="hi"><span lang="hi">हिन्दी</span></label>
+          <label><input type="radio" name="voice-lang" value="en"><span>English</span></label>
+          <label><input type="radio" name="voice-lang" value="ta-Latn"><span>Tanglish <small>(being tested)</small></span></label>
+        </fieldset>
+        <span class="voice-status" id="voice-status"></span>
+        <button type="button" class="voice-action" id="voice-cancel" hidden>✕ Cancel</button>
+        <button type="button" class="voice-action" id="voice-retry" hidden>Send again</button>
+        <button type="button" class="voice-action" id="type-instead" hidden>Type instead</button>
+        <span class="vh" id="voice-announce" aria-live="polite"></span>
       </div>
       <p class="form-msg" id="form-msg" role="status"></p>
       <p class="composer-hint">Answers come from official documents only. For information, not official advice.</p>
