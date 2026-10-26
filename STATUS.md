@@ -56,15 +56,23 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
   - **The Tamil and Hindi wording needs a native speaker's review**, e.g. "ஆறு ஆயிரம்" vs the spoken "ஆறாயிரம்".
   - 40 more tests; 322 pass.
 
+- Mic polish (26 Oct, UI spec section 6), with no backend change:
+  - Four language buttons (Tamil, Hindi, English, Tanglish marked "(being tested)").
+  - Recording shows "● 0:07 / 0:30" and a square Stop, a "5 seconds left" note from 0:25, and a ✕ Cancel button (Escape also cancels) that discards the clip.
+  - If the browser says the mic is denied: "Mic is off. Type instead…" with a Type instead button.
+  - "Sending your voice…", then "Slow connection, still sending…" after 5 s. On a network or server error, the clip is kept and a Send again button resends it. A 4xx such as "could not hear" asks you to speak again instead.
+  - On phones the mic is a 52 px round button. Screen readers hear the timer every 10 s, not every second. A new recording stops any answer playing.
+  - Checked in headless Chromium with a fake mic and a mocked /ask/voice. Not tried on a real phone.
+
 ## Next
 0. Jaswanth runs the Timbre listening test on his laptop (the key is only there; Claude can't hear audio, so Jaswanth describes what he hears):
    - a. `--cases tamil --models timbre-v2.5 timbre-v3.0` (2 calls), then choose the version and set `SCHEMEBOT_TTS_MODEL`.
-   - b. `--cases digits tanglish --models <chosen>` (2 calls). Digits decide whether deterministic number-to-words is needed (not built yet). For Tanglish, Claude proposes options and Jaswanth chooses.
+   - b. `--cases digits tanglish --models <chosen>` (2 calls). Digits decide whether to switch on number-to-words (`SCHEMEBOT_TTS_SPELL_AMOUNTS=true`; built, off by default). For Tanglish, Claude proposes options and Jaswanth chooses.
 1. Jaswanth: record clips into `data/voice/tanglish/` (5 to 10 Tanglish, plus a pure Tamil, a pure English and one noisy clip as controls) and run the compare script.
 2. After the first few real calls, check credit use in the Gnani dashboard and set the daily cap to match.
 3. Read the CSV together and decide Tanglish ta-IN vs en-IN.
 4. Record the 32 eval clips from `script.csv` (plus 1-2 noisy takes) and run `eval` (retrieval-only first, free).
-5. Mic UX polish, from the UI thread's spec (section 6 of /mnt/project-files/ui-ux/UX_RECOMMENDATIONS.md). Candidates: a big "Tap and speak" mic on phones, language buttons with Tanglish marked "(being tested)", denied-permission card, Stop/Cancel with a "5 seconds left" note, a slow-upload "Send again" option, and a TTS play/stop bar with no autoplay. Already done: the 0:30 cap, and an empty transcript gets "could not hear" and is never sent to /ask. Needs Jaswanth's go-ahead, and it touches runTurn in chat.js, which the UI thread also plans to change.
+5. Mic UX polish: mostly done (see Done). Not built from the spec: the one-time mic pre-prompt (3), showing "Pakkam heard" before the answer arrives (6, needs a separate STT step), and a fixed "Playing answer" bar (9; the Listen/Stop button stays on each answer). Try it on a real phone before the video.
 
 ## Blockers
 - Tanglish clips (Jaswanth). The key is in his local `.env` (26 Oct). **Target: recordings done by Wed 28 Oct, no later than Sun 1 Nov.** The result decides whether the roughly 6-hour transliteration work is needed, so a later date makes the plan slip.
