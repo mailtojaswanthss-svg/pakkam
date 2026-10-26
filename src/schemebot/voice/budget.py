@@ -71,7 +71,9 @@ class CallBudget:
             try:
                 os.close(os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
                 break
-            except FileExistsError:
+            # Windows answers PermissionError, not FileExistsError, while another process
+            # is still deleting the lock file.
+            except (FileExistsError, PermissionError):
                 if _older_than(lock, STALE_LOCK_S):
                     lock.unlink(missing_ok=True)
                 elif time.monotonic() > deadline:
@@ -110,7 +112,7 @@ class CallBudget:
 def _older_than(path: Path, seconds: float) -> bool:
     try:
         return time.time() - path.stat().st_mtime > seconds
-    except FileNotFoundError:
+    except OSError:  # gone, or being deleted (Windows)
         return False
 
 
