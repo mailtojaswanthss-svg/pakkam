@@ -59,6 +59,18 @@ class AuditLog:
             }
         )
 
+    def record_transcript(self, request_id: str, language_code: str, stt_ms: float) -> None:
+        """Speech to text on its own: numbers only, never the transcript or the audio."""
+        self._write(
+            {
+                "time": datetime.now(UTC).isoformat(timespec="seconds"),
+                "request_id": request_id,
+                "kind": "transcript",
+                "language_code": language_code,
+                "timings_ms": {"stt": round(stt_ms, 1)},
+            }
+        )
+
     def _write(self, entry: dict[str, object]) -> None:
         line = json.dumps(entry, ensure_ascii=False)
         with self._lock, self._path.open("a", encoding="utf-8") as file:
