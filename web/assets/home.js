@@ -2,26 +2,16 @@
 (() => {
   'use strict';
 
-  // Example answers written by hand from the real documents (PM-KISAN e-KYC notes, page 1).
-  // Labelled "Example answers" on the page: they are not saved pipeline output.
+  // An example answer written by hand from the documents, labelled "Example answer" on the
+  // page: it is not saved pipeline output. Its source slip is hidden until Jaswanth confirms
+  // the page against the PDF (docs/review/hidden-items.md); add slipTitle/slipLine to show it.
+  // The Hindi example is hidden for the same reason.
   const DEMOS = {
-    hi: {
-      lang: 'hi',
-      question: 'पीएम किसान के लिए ई-केवाईसी कैसे करें?',
-      read: 'Reading page 1 of the e-KYC note',
-      answer: 'ई-केवाईसी ओटीपी से पीएम-किसान पोर्टल या मोबाइल ऐप पर हो सकता है, या कॉमन सर्विस सेंटर पर बायोमेट्रिक से।',
-      slipTitle: 'PM-KISAN, page 1',
-      slipLine: '(i) ओटीपी आधारित ई-केवाईसी (पीएम-किसान पोर्टल और मोबाइल ऐप पर उपलब्ध)…',
-      slipLang: 'hi',
-    },
     tl: {
       lang: 'ta-Latn',
       question: 'PM kisan la varushathuku evlo panam kidaikum',
-      read: 'Reading page 1 of the e-KYC note',
+      read: 'Reading the page',
       answer: 'PM-KISAN la thagudhiyana vivasayigalukku varushathuku Rs.6000 kidaikum, moonu samamaana thavanaiyaa.',
-      slipTitle: 'PM-KISAN, page 1',
-      slipLine: 'Rs 6,000/- per year in three equal instalments is transferred into the Aadhaar seeded bank accounts of farmers…',
-      slipLang: 'en',
     },
   };
 
@@ -33,12 +23,14 @@
   const answer = document.getElementById('demo-a-text');
   const slipTitle = document.getElementById('demo-slip-title');
   const slipLine = document.getElementById('demo-slip-line');
+  const slip = win.querySelector('.demo-slip');
+  const citeChip = win.querySelector('.chip-cite');
   const replay = document.getElementById('demo-replay');
   const tabs = Array.from(document.querySelectorAll('.demo-tab'));
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   let timers = [];
-  let current = 'hi';
+  let current = 'tl';
 
   function clearTimers() {
     timers.forEach(clearTimeout);
@@ -55,9 +47,12 @@
     readStep.textContent = demo.read;
     answer.textContent = demo.answer;
     answer.lang = demo.lang;
-    slipTitle.textContent = demo.slipTitle;
-    slipLine.textContent = demo.slipLine;
-    slipLine.lang = demo.slipLang;
+    const hasSlip = Boolean(demo.slipTitle);
+    slip.hidden = !hasSlip;
+    citeChip.hidden = !hasSlip;
+    slipTitle.textContent = demo.slipTitle || '';
+    slipLine.textContent = demo.slipLine || '';
+    if (demo.slipLang) slipLine.lang = demo.slipLang;
   }
 
   function showFinal() {
@@ -91,7 +86,7 @@
   replay.addEventListener('click', () => play(current));
 
   // Play once when the demo first scrolls into view.
-  fill(DEMOS.hi);
+  fill(DEMOS.tl);
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((e) => e.isIntersecting)) {
