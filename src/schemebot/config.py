@@ -51,6 +51,12 @@ class Settings(BaseSettings):
     judge_model: str = "claude-opus-5-5"
     """Evaluation only: grades faithfulness independently of the in-pipeline verifier."""
 
+    # Limits for every LLM call (Claude and Gemini), so one stuck call cannot hold a visitor
+    # for many minutes. Retries cover rate limits (429), server errors (5xx) and timeouts.
+    # For a long evaluation run on Gemini's free tier, raise the retries (e.g. 7).
+    llm_timeout_seconds: float = Field(default=60.0, gt=0)
+    llm_retries: int = Field(default=2, ge=0, le=10)
+
     # Gemini (llm_provider = "gemini"). With no key set, the SDK falls back to GEMINI_API_KEY.
     gemini_api_key: SecretStr | None = None
     gemini_model: str = "gemini-3.8-flash"
