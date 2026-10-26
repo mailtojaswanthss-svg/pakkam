@@ -96,9 +96,6 @@ html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 .float-forward { top: 16%; left: 0; border-radius: 16px 16px 16px 4px; animation-delay: .35s; }
 .float-label { color: var(--ink-2); font-size: var(--step--1); }
 .float-main { margin-top: 2px; font-weight: 600; line-height: 1.35; }
-.float-slip { right: 0; bottom: 9%; border-left: 4px solid var(--stamp); animation-delay: .9s; }
-.float-slip p[lang="ta"] { margin-top: 6px; font-family: var(--font-display); font-weight: 600; font-size: 1.0625rem; }
-.float-sub { color: var(--ink-2); font-size: var(--step--1); }
 @keyframes float-in { from { opacity: 0; transform: translateY(12px) scale(.97); } }
 
 .chip-mini {

@@ -2,18 +2,9 @@
 (() => {
   'use strict';
 
-  // Example answers built from the real documents (G.O. p9, e-KYC note p1, PM-KISAN p10),
-  // chosen where the indexed text is clean so the real pipeline can give the same answer.
+  // Example answers written by hand from the real documents (PM-KISAN e-KYC notes, page 1).
+  // Labelled "Example answers" on the page: they are not saved pipeline output.
   const DEMOS = {
-    ta: {
-      lang: 'ta',
-      question: 'மகளிர் உரிமைத் தொகை ஆண்டுக்கு எவ்வளவு?',
-      read: 'Reading page 9 of G.O.(Ms) No.15',
-      answer: 'கலைஞர் மகளிர் உரிமைத் திட்டத்தில் ஆண்டுக்கு 12 ஆயிரம் ரூபாய் உரிமைத் தொகை வழங்கப்படும்.',
-      slipTitle: 'Kalaignar Magalir Urimai Thittam, page 9',
-      slipLine: 'ஆண்டுக்கு 12 ஆயிரம் ரூபாய் உரிமைத்தொகை…',
-      slipLang: 'ta',
-    },
     hi: {
       lang: 'hi',
       question: 'पीएम किसान के लिए ई-केवाईसी कैसे करें?',
@@ -26,10 +17,10 @@
     tl: {
       lang: 'ta-Latn',
       question: 'PM kisan la varushathuku evlo panam kidaikum',
-      read: 'Reading page 10 of the PM-KISAN guidelines',
-      answer: 'PM-KISAN la thagudhiyana vivasayigalukku varushathuku Rs.6000 kidaikum, moonu thavanaiyaa Rs.2000 aaga.',
-      slipTitle: 'PM-KISAN, page 10',
-      slipLine: 'The financial benefit of Rs.6000/- per year is to be released to the eligible farmers in three installments of Rs.2000/- each…',
+      read: 'Reading page 1 of the e-KYC note',
+      answer: 'PM-KISAN la thagudhiyana vivasayigalukku varushathuku Rs.6000 kidaikum, moonu samamaana thavanaiyaa.',
+      slipTitle: 'PM-KISAN, page 1',
+      slipLine: 'Rs 6,000/- per year in three equal instalments is transferred into the Aadhaar seeded bank accounts of farmers…',
       slipLang: 'en',
     },
   };
@@ -47,7 +38,7 @@
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   let timers = [];
-  let current = 'ta';
+  let current = 'hi';
 
   function clearTimers() {
     timers.forEach(clearTimeout);
@@ -100,7 +91,7 @@
   replay.addEventListener('click', () => play(current));
 
   // Play once when the demo first scrolls into view.
-  fill(DEMOS.ta);
+  fill(DEMOS.hi);
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((e) => e.isIntersecting)) {
