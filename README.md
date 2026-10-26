@@ -205,4 +205,4 @@ document dates listed in the data-source file.
 
 ## License
 
-MIT for the code. Source documents remain the property of their publishers.
+The code is under the [MIT License](LICENSE). The licence covers the code only: the source PDFs remain the property of their publishers (and are not in this repository), and the photos in `web/assets/img/` are under the Unsplash License (see `CREDITS.md`).
