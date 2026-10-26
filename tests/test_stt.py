@@ -67,6 +67,7 @@ def test_check_audio_accepts_short_wav() -> None:
         (b"\x00\x00\x00\x20ftypM4A " + b"\x00" * 1000, "voice memo.m4a"),
         (b"\xff\xf1" + b"\x00" * 1000, "q.aac"),
     ],
+    ids=["flac", "mp3-id3", "mp3", "ogg", "m4a", "aac"],
 )
 def test_check_audio_accepts_real_formats(audio: bytes, filename: str) -> None:
     check_audio(audio, filename, max_bytes=5_000_000, max_seconds=30)
@@ -92,6 +93,20 @@ def test_flac_length_is_read_from_its_header() -> None:
         (make_flac(45), "q.flac", 400),
         (b"RIFF\x00\x00\x00\x00WAVEbroken", "q.wav", 415),
         (b"fLaC" + b"\x00" * 40, "q.flac", 415),
+    ],
+    # Short names: Windows refuses the long default ids in PYTEST_CURRENT_TEST.
+    ids=[
+        "empty",
+        "too-big",
+        "webm",
+        "wav-too-long",
+        "text-as-wav",
+        "pdf-as-m4a",
+        "mp3-too-long",
+        "ogg-too-long",
+        "flac-too-long",
+        "broken-wav",
+        "broken-flac",
     ],
 )
 def test_check_audio_rejects_bad_clips(audio: bytes, filename: str, status: int) -> None:
@@ -134,6 +149,17 @@ def test_transcribe_turns_errors_into_stt_error(
     with pytest.raises(SttError) as caught:
         stt.transcribe(b"audio", "q.wav", "en-IN")
     assert caught.value.status_code == expected_status
+
+
+@pytest.mark.parametrize("status", [500, 503])
+def test_server_fault_does_not_blame_the_recording(status: int) -> None:
+    stt = client_replying(status, {"success": False}, [])
+
+    with pytest.raises(SttError) as caught:
+        stt.transcribe(b"audio", "q.wav", "ta-IN")
+    assert "recording" not in caught.value.message
+    assert "Type your question" in caught.value.message
+    assert caught.value.status_code == 502
 
 
 def test_transcribe_handles_network_failure() -> None:

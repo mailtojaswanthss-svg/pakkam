@@ -76,17 +76,17 @@ def test_broken_file_stops_calls(tmp_path: Path, content: str) -> None:
         budget.take()
 
 
-def _take_many(args: tuple[Path, int]) -> int:
-    """Run in a separate process: take `count` calls, return how many failed."""
+def _take_many(args: tuple[Path, int]) -> list[str]:
+    """Run in a separate process: take `count` calls, return the errors of those that failed."""
     path, count = args
     budget = CallBudget(path, 10_000, Day(DAY_ONE))
-    failed = 0
+    errors = []
     for _ in range(count):
         try:
             budget.take()
-        except Exception:
-            failed += 1
-    return failed
+        except Exception as error:
+            errors.append(repr(error))
+    return errors
 
 
 def test_processes_sharing_the_file_lose_no_calls(tmp_path: Path) -> None:
@@ -94,11 +94,31 @@ def test_processes_sharing_the_file_lose_no_calls(tmp_path: Path) -> None:
     path = tmp_path / "calls.json"
     # "spawn", as on Windows, also avoids forking a process that runs threads.
     with multiprocessing.get_context("spawn").Pool(4) as pool:
-        failed = pool.map(_take_many, [(path, 50)] * 4)
+        errors = pool.map(_take_many, [(path, 50)] * 4)
 
-    assert failed == [0, 0, 0, 0]
+    assert errors == [[], [], [], []]
     assert CallBudget(path, 10_000, Day(DAY_ONE)).used_today() == 200
     assert not path.with_suffix(".lock").exists()
+
+
+def test_lock_being_deleted_on_windows_is_waited_for(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Windows refuses to create a file another process is still deleting.
+    real_open = os.open
+    refusals = [PermissionError(13, "Access is denied")]
+
+    def open_like_windows(path: str, flags: int, mode: int = 0o777) -> int:
+        if refusals and str(path).endswith(".lock"):
+            raise refusals.pop()
+        return real_open(path, flags, mode)
+
+    monkeypatch.setattr(budget_module.os, "open", open_like_windows)
+    budget = CallBudget(tmp_path / "calls.json", 3, Day(DAY_ONE))
+
+    budget.take()
+
+    assert budget.used_today() == 1
 
 
 def test_lock_left_by_a_crashed_process_is_removed(tmp_path: Path) -> None:

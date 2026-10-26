@@ -1,7 +1,7 @@
 """Builds a ready-to-use Retriever from settings (loads both models, opens the index)."""
 
 from schemebot.config import Settings
-from schemebot.index.embed import BgeM3Encoder
+from schemebot.index.embed import BgeM3Encoder, model_source
 from schemebot.index.store import open_client
 from schemebot.retrieve.hybrid import HybridRetriever
 from schemebot.retrieve.rerank import BgeReranker
@@ -21,7 +21,10 @@ def build_retriever(
         raise IndexMissingError(
             f"No index at {settings.index_dir}. Run `python -m schemebot.index` first."
         )
-    encoder = BgeM3Encoder(settings.embedding_model, settings.embed_batch_size)
+    encoder = BgeM3Encoder(
+        model_source(settings.embedding_model, settings.embedding_revision),
+        settings.embed_batch_size,
+    )
     return Retriever(
         HybridRetriever(
             client,
@@ -29,7 +32,9 @@ def build_retriever(
             encoder,
             candidates_per_method=settings.retrieval_top_k,
         ),
-        BgeReranker(settings.reranker_model) if use_reranker else None,
+        BgeReranker(model_source(settings.reranker_model, settings.reranker_revision))
+        if use_reranker
+        else None,
         candidates=settings.retrieval_top_k,
         keep=settings.rerank_top_k,
         gloss_tanglish=settings.gloss_tanglish if gloss_tanglish is None else gloss_tanglish,
