@@ -5,6 +5,8 @@
   const MIN_CHARS = 3;
   const MAX_CHARS = 500;
   const MAX_VOICE_SECONDS = 30;
+  // Give up on an answer after 2 minutes, so the page never waits forever.
+  const ASK_TIMEOUT_MS = 120000;
   // Voice errors whose server message is written for the user (bad file, nothing heard, STT down).
   const VOICE_ERRORS = new Set([400, 413, 415, 422, 502, 503]);
   const TEXT = {
@@ -13,6 +15,7 @@
     network: 'Pakkam could not reach the server. Check your connection and ask again.',
     server: 'Something went wrong on the server. Ask again in a moment.',
     tooMany: 'Pakkam is getting a lot of questions. Wait a minute, then ask again.',
+    timeout: 'Pakkam took too long to answer. Ask again in a moment.',
     offline: 'The live chat is offline right now. The answer server is not connected to this site.',
     waiting: 'Finding the pages, reading them and checking every sentence',
     chip: 'Show the source',
@@ -66,6 +69,12 @@
   }
   const setLang = (node, lang) => { if (LANG_ATTR.has(lang)) node.lang = lang; };
   const safeUrl = (url) => (/^https?:\/\//i.test(url) ? url : null);
+  // Rejects with Error('timeout') if the promise has not settled after ms.
+  function withTimeout(promise, ms) {
+    let timer;
+    const timeout = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('timeout')), ms); });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  }
   const pagesText = (c) => (c.page_start === c.page_end ? `page ${c.page_start}` : `pages ${c.page_start} to ${c.page_end}`);
   const scrollToEnd = () => thread.scrollTo({ top: thread.scrollHeight, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 
@@ -315,9 +324,9 @@
     try {
       let response;
       try {
-        response = await request();
-      } catch {
-        throw new Error('network');
+        response = await withTimeout(request(), ASK_TIMEOUT_MS);
+      } catch (error) {
+        throw new Error(error.message === 'timeout' ? 'timeout' : 'network');
       }
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -331,7 +340,7 @@
       setLang(bubble, data.language);
       pending.replaceWith(renderAnswer(data));
     } catch (error) {
-      let message = TEXT.network;
+      let message = error.message === 'timeout' ? TEXT.timeout : TEXT.network;
       if (error instanceof ServerError) {
         // 404/405: a static host (e.g. Vercel) with no answer server behind it.
         // 429: the server says whether to wait a minute or come back tomorrow.
