@@ -28,7 +28,7 @@ Status: ☐ open, ◐ partly done, ☑ done (with evidence).
 
 | Sev. | Item | Who | Status |
 |---|---|---|---|
-| High | Check every demo number against its PDF page; start with Pudhumai Penn on the home page | Teammate (reading Tamil/Hindi: skill UNKNOWN) | ☐ PDFs are on Jaswanth's laptop, not in the repo |
+| High | Check every demo number against its PDF page; start with Pudhumai Penn on the home page | Teammate (reading Tamil/Hindi: skill UNKNOWN) | ◐ 26 Oct: sheet ready, `docs/review/demo-numbers.csv` (24 rows, with source URLs) and `DEMO_NUMBERS_GUIDE.md`; checks not done. Jaswanth confirms the demo question list. |
 | High | Commit the code and re-run the evaluation cleanly (`results.md` says "uncommitted changes") | Jaswanth (laptop; needs the index and models; no credits) | ☐ |
 | High | Show n next to every percentage | Claude (docs): README table and the batch table in `report.md` | ☑ 26 Oct: n columns added to both, plus a note that correct refusal is out of 10 |
 | Med | Describe the judge accurately: "model-judged", same model verified and judged in the live test | Claude (docs): README, `report.md`, `evaluation.md` | ☑ 26 Oct: all three say model-judged and note that one model verified and judged in the live test. The Word report (`docs/Pakkam-Project-Report.docx`) still has the old wording. |
