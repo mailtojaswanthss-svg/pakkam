@@ -38,21 +38,35 @@ query ──► normalise (Unicode, numerals) ──► hybrid search ──► 
 
 ## Results
 
-Retrieval on 194 **draft** questions (38-39 answerable and 10 unanswerable per group; 146
-held out), from `python -m schemebot.evaluation --retrieval-only`. Full table in
+Retrieval on 194 **draft** questions (not yet checked by a native speaker), from
+`python -m schemebot.evaluation --retrieval-only`. One person wrote all the questions and the
+system. The refusal threshold was chosen on the first 110, so only the last 84 (held-out 2)
+were untouched by any tuning. Full table in
 [docs/results.md](docs/results.md), ablations and error analysis in the
 [technical report](docs/report.md).
 
-| Language | Recall@5 | MRR | Correct refusal | False refusal | Retrieval p50 / p95 |
-|---|---|---|---|---|---|
-| English | 100% | 0.91 | 90% | 5% | 495 / 921 ms |
-| Tamil | 100% | 0.96 | 90% | 8% | 532 / 644 ms |
-| Hindi | 100% | 0.88 | 100% | 8% | 578 / 691 ms |
-| Tanglish | 92% | 0.87 | 100% | 44% | 525 / 775 ms |
+| Language | Answerable / unanswerable (n) | Recall@5 | MRR | Correct refusal | False refusal | Retrieval p50 / p95 |
+|---|---|---|---|---|---|---|
+| English | 39 / 10 | 100% | 0.91 | 90% | 5% | 495 / 921 ms |
+| Tamil | 38 / 10 | 100% | 0.96 | 90% | 8% | 532 / 644 ms |
+| Hindi | 38 / 10 | 100% | 0.88 | 100% | 8% | 578 / 691 ms |
+| Tanglish | 39 / 10 | 92% | 0.87 | 100% | 44% | 525 / 775 ms |
 
-Answers were checked live on 8 questions with Gemini's free tier (one per language plus the
-hardest cases): 5 correct cited answers, 3 correct refusals, all sentences judged faithful.
-The full answer-quality evaluation needs a paid key. The labels still need checking by native
+Recall@5 and false refusal are out of the answerable questions; correct refusal is out of the
+10 unanswerable ones, so one question moves it by 10 points. Recall@5 (98% overall, 151 of 154)
+means a correct source page was among the 5 passages retrieved. It says nothing about whether
+the written answer is correct. Latency is retrieval only, on a laptop RTX 4060.
+
+**Hindi coverage is thin:** the corpus has 2 Hindi documents (5 pages, 14 chunks). Most Hindi
+questions are answered from English or Tamil pages through cross-language retrieval, with the
+answer written in Hindi.
+
+Answers were checked live on 8 hand-picked questions with Gemini's free tier (one per
+language plus the hardest cases): 5 cited answers and 3 correct refusals. All 8 answer
+sentences were judged faithful by an LLM judge (model-judged, not by a person), and that judge
+was the same model that ran the in-pipeline check, so it is not an independent judge. Eight
+questions are a smoke test, not an accuracy figure. The full answer-quality evaluation needs a
+paid key. The labels still need checking by native
 speakers: `python -m schemebot.evaluation.review export review.csv` gives them a spreadsheet
 with each question beside its gold-page text, and `import` marks the checked ones verified.
 
@@ -60,6 +74,11 @@ with each question beside its gold-page text, and `import` marks the checked one
 
 Requires [uv](https://docs.astral.sh/uv/). Tesseract (with `tam` and `hin` language packs) is
 needed for OCR during ingestion; Docker only for the container.
+
+The source PDFs and the search index are not in the repository. Before ingesting, download
+each document in [data/sources.json](data/sources.json) from its `source_url` into `data/raw/`,
+saved under the name in its `file` field. Ingestion OCRs about 1,350 pages, so the first run is
+slow; the OCR result is cached.
 
 ```bash
 cp .env.example .env                  # then fill in the Tesseract paths (and later your API key)
@@ -76,7 +95,9 @@ uv run fastapi run                    # site + API on http://localhost:8000 (cha
 `SCHEMEBOT_ANTHROPIC_API_KEY` in `.env`. To use Gemini instead, set
 `SCHEMEBOT_LLM_PROVIDER=gemini` and `SCHEMEBOT_GEMINI_API_KEY`; switching back is that one
 line. Both providers return the same structured answers and go through the same guardrail.
-On Gemini's free tier, rate-limited calls are retried for about three minutes, and Google may
+Each LLM call waits at most 60 s per attempt and is retried twice on rate limits and server
+errors (`SCHEMEBOT_LLM_TIMEOUT_SECONDS`, `SCHEMEBOT_LLM_RETRIES`). For a long evaluation run on
+Gemini's free tier, set `SCHEMEBOT_LLM_RETRIES=7`. On the free tier Google may
 use the prompts to improve its products, so use a paid key for a public demo. Without a key,
 questions are still retrieved and checked, but answerable ones are refused as
 `service_unavailable`.
@@ -87,6 +108,8 @@ questions are still retrieved and checked, but answerable ones are refused as
 returns the answer as cited sentences, the citations (document, pages, source URL), whether
 it refused and why, the retrieval confidence, a disclaimer and the latency. A refusal is a
 normal `200` response. `GET /health` returns `{"status": "ok"}` once the models are loaded.
+
+What leaves the app and what it keeps is summarised in [docs/PRIVACY.md](docs/PRIVACY.md).
 
 Each request is logged to `logs/requests.jsonl` for audit and evaluation **without the
 question text**: only a hash, its length and language, what was cited, refusals and

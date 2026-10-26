@@ -71,6 +71,9 @@ Sources, dates and licences are in [data_sources.md](data_sources.md).
 Language is also detected per chunk (1,390 English, 1,382 Tamil, 13 Hindi), since Tamil
 documents carry English pages, such as the KMUT G.O.'s English annexure.
 
+Hindi coverage is thin: 2 documents, 5 pages, 14 chunks. Most Hindi questions are answered
+from English or Tamil pages through cross-language retrieval, with the answer in Hindi.
+
 ## 4. Ingestion
 
 All pages of the Hindi documents and all but 7 pages of the Tamil ones (the KMUT G.O.'s
@@ -189,8 +192,9 @@ same interface: it requests JSON that follows the same schemas, and maps safety 
 decline and API failures to "unavailable", so the pipeline, guardrail and evaluation run
 unchanged. `SCHEMEBOT_LLM_PROVIDER` switches between them. The answer-quality numbers in
 section 8 were measured with Gemini, because the Claude account had no credit during
-development. On the free tier, rate-limited and overloaded calls are retried with backoff
-for about three minutes, and calls that still fail are counted separately in the results.
+development. On the free tier, rate-limited and overloaded calls were retried with backoff
+for about three minutes (now `SCHEMEBOT_LLM_RETRIES=7`; the app default is 2 retries of at
+most 60 s each, so a visitor is not kept waiting), and calls that still fail are counted separately in the results.
 
 ## 7. Service and interface
 
@@ -246,11 +250,16 @@ From [results.md](results.md), hybrid search, reranker and Tanglish gloss on:
 
 By batch (all groups):
 
-| Batch | Recall@1 | Recall@5 | Correct refusal | False refusal |
-|---|---|---|---|---|
-| Development | 89% | 97% | 83% | 8% |
-| Held-out 1 | 89% | 100% | 100% | 9% |
-| Held-out 2 | 79% | 97% | 100% | 25% |
+| Batch | Answerable / unanswerable (n) | Recall@1 | Recall@5 | Correct refusal | False refusal |
+|---|---|---|---|---|---|
+| Development | 36 / 12 | 89% | 97% | 83% | 8% |
+| Held-out 1 | 46 / 16 | 89% | 100% | 100% | 9% |
+| Held-out 2 | 72 / 12 | 79% | 97% | 100% | 25% |
+
+Recall@5 means a gold page was among the 5 retrieved passages; it does not measure whether
+the written answer is correct. One person wrote every question and the system, and the
+threshold was chosen on the first 110 questions, so held-out 2 is the only batch untouched by
+any tuning.
 
 Retrieval holds up on the fresh batch (recall@5 97%), but its false refusals are higher:
 Tanglish (61%) and several Ujjwala and marriage-assistance questions in Tamil and Hindi score
@@ -314,7 +323,9 @@ Flash-Lite verifying and judging, through the same pipeline and guardrail:
 | q011 Next PM-KISAN instalment date | English | Refused, pointing to the PM-KISAN website: correct |
 | q023 New ration card | Tamil | Refused in Tamil, pointing to the KMUT website: correct |
 
-All 8 sentences were judged faithful, no call failed, and every refusal came in the
+All 8 sentences were judged faithful. This is model-judged: the same Flash-Lite model ran
+the in-pipeline support check and the judging, so it is not an independent judge, and no
+person checked the verdicts. No call failed, and every refusal came in the
 question's language with the official website. Both near misses that passed the retrieval
 check were refused by the model, and q039, the risk of the Tanglish gloss, was refused rather
 than answered wrongly. End-to-end time was 13 to 52 seconds per answer on the free tier,

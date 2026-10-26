@@ -7,25 +7,44 @@ reranker models load once at startup; requests then reuse them.
 import logging
 import math
 import mimetypes
-import threading
+import re
+import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Protocol
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import JSONResponse
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 
 from schemebot.api.audit import AuditLog
 from schemebot.api.ratelimit import AskLimiter
-from schemebot.api.schemas import AskRequest, AskResponse, HealthResponse, SourceOut
+from schemebot.api.schemas import (
+    AskRequest,
+    AskResponse,
+    HealthResponse,
+    SourceOut,
+    SpeakRequest,
+    VoiceAskResponse,
+)
 from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer
 from schemebot.ingest.models import SourceDoc
+from schemebot.voice.numbers import spell_amounts
+from schemebot.voice.stt import (
+    GNANI_LANGUAGE_CODES,
+    SttError,
+    Transcriber,
+    VoiceLanguage,
+    build_transcriber,
+    check_audio,
+)
+from schemebot.voice.tts import Speaker, TtsError, build_speaker, language_code_for
 
 SOURCES_NAME = "sources.json"
+CITATION_MARKER = re.compile(r"\s*\[\d+\]")
 
 # Windows' MIME table has no entry for WebP, so photos would be served as octet-stream.
 mimetypes.add_type("image/webp", ".webp")
@@ -33,6 +52,10 @@ mimetypes.add_type("image/webp", ".webp")
 logger = logging.getLogger(__name__)
 
 REQUEST_ID_HEADER = "X-Request-ID"
+TOO_MANY_TEXT = "Too many questions. Wait a minute and ask again."
+DAILY_LIMIT_TEXT = (
+    "Pakkam has answered as many questions as it can today. Please come back tomorrow."
+)
 AUDIT_LOG_NAME = "requests.jsonl"
 
 
@@ -41,13 +64,24 @@ class AnswerService(Protocol):
 
 
 class AppState:
-    """Everything built at startup. The lock serialises model use on the single GPU."""
+    """Everything built at startup.
 
-    def __init__(self, service: AnswerService, audit: AuditLog, titles: dict[str, str]) -> None:
+    No lock here: the retriever makes requests take turns on the GPU itself, and the LLM
+    calls (most of the time per answer) can then run for several users at once."""
+
+    def __init__(
+        self,
+        service: AnswerService,
+        audit: AuditLog,
+        titles: dict[str, str],
+        transcriber: Transcriber | None = None,
+        speaker: Speaker | None = None,
+    ) -> None:
         self.service = service
         self.audit = audit
         self.titles = titles
-        self.lock = threading.Lock()
+        self.transcriber = transcriber
+        self.speaker = speaker
 
 
 def load_sources() -> list[SourceDoc]:
@@ -85,8 +119,18 @@ def _default_service() -> AnswerService:
     return build_answerer(get_settings())
 
 
+def _default_transcriber() -> Transcriber | None:
+    return build_transcriber(get_settings())
+
+
+def _default_speaker() -> Speaker | None:
+    return build_speaker(get_settings())
+
+
 def create_app(
     build_service: Callable[[], AnswerService] = _default_service,
+    build_stt: Callable[[], Transcriber | None] = _default_transcriber,
+    build_tts: Callable[[], Speaker | None] = _default_speaker,
     log_dir: Path | None = None,
     web_dir: Path | None = None,
     limiter: AskLimiter | None = None,
@@ -99,8 +143,8 @@ def create_app(
         if wait is not None:
             raise HTTPException(
                 status_code=429,
-                detail="Too many questions. Wait a little and ask again.",
-                headers={"Retry-After": str(math.ceil(wait))},
+                detail=DAILY_LIMIT_TEXT if wait.daily else TOO_MANY_TEXT,
+                headers={"Retry-After": str(math.ceil(wait.seconds))},
             )
 
     @asynccontextmanager
@@ -109,7 +153,11 @@ def create_app(
         audit_dir = log_dir or get_settings().log_dir
         titles = {d.doc_id: d.title or d.doc_id for d in load_sources()}
         app.state.schemebot = AppState(
-            build_service(), AuditLog(audit_dir / AUDIT_LOG_NAME), titles
+            build_service(),
+            AuditLog(audit_dir / AUDIT_LOG_NAME),
+            titles,
+            build_stt(),
+            build_tts(),
         )
         logger.info("models loaded, ready")
         yield
@@ -152,10 +200,76 @@ def create_app(
     @app.post("/ask", dependencies=[Depends(limit_asks)])
     def ask(body: AskRequest, state: StateDep, request: Request) -> AskResponse:
         # Plain `def`: model inference blocks, so FastAPI runs this in its threadpool.
-        with state.lock:
-            answer = state.service.answer(body.question)
+        answer = state.service.answer(body.question)
         state.audit.record(request.state.request_id, answer)
         return AskResponse.from_answer(answer, state.titles)
+
+    @app.post("/ask/voice", dependencies=[Depends(limit_asks)])
+    def ask_voice(
+        audio: UploadFile,
+        state: StateDep,
+        request: Request,
+        language: Annotated[VoiceLanguage, Form()] = "ta",
+    ) -> VoiceAskResponse:
+        """Spoken question: Gnani speech to text, then the same pipeline as `/ask`."""
+        if state.transcriber is None:
+            raise HTTPException(status_code=503, detail="Voice input is not set up on this server.")
+        settings = get_settings()
+        clip = audio.file.read(settings.stt_max_bytes + 1)
+        filename = audio.filename or "question.wav"
+        language_code = GNANI_LANGUAGE_CODES[language]
+
+        started = time.perf_counter()
+        try:
+            check_audio(clip, filename, settings.stt_max_bytes, settings.stt_max_seconds)
+            transcript = state.transcriber.transcribe(clip, filename, language_code)
+        except SttError as error:
+            raise HTTPException(status_code=error.status_code, detail=error.message) from error
+        stt_ms = (time.perf_counter() - started) * 1000
+
+        try:
+            question = AskRequest(question=transcript).question
+        except ValidationError as error:
+            raise HTTPException(
+                status_code=422, detail="Pakkam could not hear a question. Try again."
+            ) from error
+
+        answer = state.service.answer(question)
+        state.audit.record(request.state.request_id, answer, {"stt": stt_ms})
+        response = AskResponse.from_answer(answer, state.titles)
+        response.timings_ms["stt"] = round(stt_ms, 1)
+        return VoiceAskResponse(
+            **response.model_dump(),
+            transcript=question,
+            stt_language_code=language_code,
+            stt_ms=round(stt_ms, 1),
+        )
+
+    @app.post("/speak", dependencies=[Depends(limit_asks)])
+    def speak(body: SpeakRequest, state: StateDep, request: Request) -> Response:
+        """An answer read aloud by Gnani Timbre, as WAV. Only numbers are logged, never the
+        text or the audio."""
+        if state.speaker is None:
+            raise HTTPException(status_code=503, detail="Spoken answers are not set up.")
+        text = CITATION_MARKER.sub("", body.text).strip()
+        if not text:
+            raise HTTPException(status_code=422, detail="There is nothing to read aloud.")
+        settings = get_settings()
+        if len(text) > settings.tts_max_chars:
+            raise HTTPException(status_code=413, detail="This answer is too long to read aloud.")
+        language_code = language_code_for(body.language)
+        if settings.tts_spell_amounts:
+            text = spell_amounts(text, language_code)
+        started = time.perf_counter()
+        try:
+            audio = state.speaker.speak(text, language_code)
+        except TtsError as error:
+            raise HTTPException(status_code=error.status_code, detail=error.message) from error
+        tts_ms = (time.perf_counter() - started) * 1000
+        state.audit.record_speech(request.state.request_id, len(text), language_code, tts_ms)
+        # Server-Timing is the standard header for this; browsers show it in dev tools.
+        headers = {"Cache-Control": "no-store", "Server-Timing": f"tts;dur={tts_ms:.1f}"}
+        return Response(content=audio, media_type="audio/wav", headers=headers)
 
     @app.get("/sources")
     def sources() -> list[SourceOut]:

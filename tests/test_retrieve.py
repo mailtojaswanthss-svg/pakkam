@@ -95,3 +95,11 @@ def test_indic_digits_in_query_match_ascii_digits_in_passage(
     results = first_stage.search(f"income below {tamil_two_point_five} lakh", limit=1)
 
     assert results[0].chunk.chunk_id == "kmut-en-001"
+
+
+def test_search_and_rerank_are_timed(first_stage: HybridRetriever) -> None:
+    with_rerank = Retriever(first_stage, FakeReranker(), candidates=5, keep=2)
+    without = Retriever(first_stage, None, candidates=5, keep=2)
+
+    assert with_rerank.retrieve("pension age").timings_ms.keys() == {"search", "rerank"}
+    assert without.retrieve("pension age").timings_ms.keys() == {"search"}

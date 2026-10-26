@@ -24,13 +24,11 @@ THINKING_LEVEL: dict[Effort, str] = {
     "max": "HIGH",
 }
 
-# The free tier allows only a few requests per minute. Rate-limited and server errors are
-# retried with backoff (2, 4, 8 ... capped at 60 s; about three minutes in all) before the
-# call counts as unavailable.
-RETRY_ATTEMPTS = 8
+# Rate-limited (429), server errors (5xx) and timeouts are retried with backoff (2, 4, 8 ...
+# capped at 60 s) before the call counts as unavailable. The number of retries and the time
+# per attempt come from settings (llm_retries, llm_timeout_seconds).
 RETRY_INITIAL_DELAY_S = 2.0
 RETRY_MAX_DELAY_S = 60.0
-REQUEST_TIMEOUT_MS = 120_000
 
 BLOCKED = frozenset(
     {"SAFETY", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII", "RECITATION", "JAILBREAK", "OTHER"}
@@ -44,7 +42,14 @@ def _name(value: object) -> str:
 
 
 class GeminiJsonLlm:
-    def __init__(self, model: str, api_key: str | None, effort: Effort) -> None:
+    def __init__(
+        self,
+        model: str,
+        api_key: str | None,
+        effort: Effort,
+        timeout_seconds: float = 60.0,
+        retries: int = 2,
+    ) -> None:
         from google import genai
         from google.genai import errors, types
 
@@ -53,9 +58,9 @@ class GeminiJsonLlm:
         self._model = model
         self._effort = effort
         options = types.HttpOptions(
-            timeout=REQUEST_TIMEOUT_MS,
+            timeout=round(timeout_seconds * 1000),
             retry_options=types.HttpRetryOptions(
-                attempts=RETRY_ATTEMPTS,
+                attempts=retries + 1,
                 initial_delay=RETRY_INITIAL_DELAY_S,
                 max_delay=RETRY_MAX_DELAY_S,
             ),

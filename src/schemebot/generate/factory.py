@@ -30,16 +30,17 @@ def build_llm(settings: Settings, role: LlmRole) -> ConfiguredJsonLlm:
     # The verifier only reads and judges, so a fast model at low effort is enough.
     effort: Effort = {"answer": settings.llm_effort, "verifier": "low", "judge": "medium"}[role]
     model = model_for(settings, role)
+    limits = (settings.llm_timeout_seconds, settings.llm_retries)
     if settings.llm_provider == "gemini":
         from schemebot.generate.gemini import GeminiJsonLlm
 
         key = settings.gemini_api_key
-        return GeminiJsonLlm(model, key.get_secret_value() if key else None, effort)
+        return GeminiJsonLlm(model, key.get_secret_value() if key else None, effort, *limits)
 
     from schemebot.generate.llm import ClaudeJsonLlm
 
     key = settings.anthropic_api_key
-    return ClaudeJsonLlm(model, key.get_secret_value() if key else None, effort)
+    return ClaudeJsonLlm(model, key.get_secret_value() if key else None, effort, *limits)
 
 
 def build_answerer(settings: Settings, retriever: Retriever | None = None) -> Answerer:

@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Baloo+Thambi+2:wght@600;800&family=Hind:wght@400;500;600&family=Hind+Madurai:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="../assets/tokens.css">
 <link rel="stylesheet" href="../assets/chat.css">
+<script src="../assets/recorder.js" defer></script>
 <script src="../assets/chat.js" defer></script>
 </head>
 <body>
@@ -108,10 +109,32 @@
       <form class="composer" id="ask" novalidate>
         <label class="vh" for="q">Your question</label>
         <textarea id="q" name="question" rows="1" autocomplete="off" placeholder="Ask about a scheme, in your own words"></textarea>
+        <label class="icon-btn voice-btn" id="upload-label" title="Upload a recorded question (WAV, MP3, OGG, FLAC, AAC or M4A, up to 30 seconds)">
+          <span class="vh">Upload a recorded question</span>
+          <input type="file" id="upload" class="vh" accept=".wav,.mp3,.ogg,.flac,.aac,.m4a,audio/wav,audio/mpeg,audio/ogg,audio/flac,audio/aac,audio/mp4">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>
+        </label>
+        <button type="button" class="icon-btn voice-btn" id="mic" aria-pressed="false" aria-label="Ask by voice" title="Ask by voice (up to 30 seconds)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
         <button type="submit" class="send" id="send" aria-label="Ask">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
         </button>
       </form>
+      <div class="voice-row">
+        <fieldset class="voice-langs" id="voice-lang">
+          <legend>I will speak in</legend>
+          <label><input type="radio" name="voice-lang" value="ta" checked><span lang="ta">தமிழ்</span></label>
+          <label><input type="radio" name="voice-lang" value="hi"><span lang="hi">हिन्दी</span></label>
+          <label><input type="radio" name="voice-lang" value="en"><span>English</span></label>
+          <label><input type="radio" name="voice-lang" value="ta-Latn"><span>Tanglish <small>(being tested)</small></span></label>
+        </fieldset>
+        <span class="voice-status" id="voice-status"></span>
+        <button type="button" class="voice-action" id="voice-cancel" hidden>✕ Cancel</button>
+        <button type="button" class="voice-action" id="voice-retry" hidden>Send again</button>
+        <button type="button" class="voice-action" id="type-instead" hidden>Type instead</button>
+        <span class="vh" id="voice-announce" aria-live="polite"></span>
+      </div>
       <p class="form-msg" id="form-msg" role="status"></p>
       <p class="composer-hint">Information only, not official advice. Check the official source.</p>
     </div>

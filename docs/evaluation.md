@@ -94,9 +94,11 @@ English gold pages only, for the reviewer to complete.
 - **Correct refusal**: share of unanswerable questions the system refused.
 - **False refusal**: share of answerable questions it refused. In `--retrieval-only` runs
   "refused" means retrieval confidence was below the threshold (the pipeline's first check).
-- **Faithfulness** (full runs): share of answer sentences that an independent judge
-  (`judge_model`, different from the in-pipeline verifier) finds supported by the passages
-  they cite. It is an LLM judge: check a sample of its verdicts by hand and report that.
+- **Faithfulness** (full runs): share of answer sentences that an LLM judge (`judge_model`)
+  finds supported by the passages they cite. Report it as **model-judged**. By default the
+  judge is a different model from the in-pipeline verifier, but that is not independence in
+  the human sense, and the 8-question live test (report section 8) used one model for both.
+  Check a sample of its verdicts by hand and report that.
 - **Citation accuracy** (full runs): share of citations on answerable questions that point
   to a gold page.
 - **Latency**: p50 and p95 of retrieval alone and of the full answer.
