@@ -238,6 +238,32 @@ body { overflow: hidden; background: var(--panel); }
 .send:disabled { opacity: .45; cursor: progress; }
 .form-msg { min-height: 0; margin-top: 6px; color: var(--tape); font-size: var(--step--1); }
 .form-msg:empty { display: none; }
+.voice-btn { flex: none; align-self: flex-end; margin-bottom: 1px; color: var(--ink-2); }
+.voice-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.voice-btn:focus-within { outline: 2px solid var(--stamp); outline-offset: 2px; }
+#mic[aria-pressed="true"] { background: var(--tape-soft); color: var(--tape); border-color: var(--tape); }
+.voice-btn[hidden] { display: none; }
+.voice-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-top: 6px; color: var(--ink-2); font-size: var(--step--1); }
+.voice-langs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; padding: 0; border: 0; }
+.voice-langs legend { float: left; margin-right: 4px; padding: 0; }
+.voice-langs label { position: relative; }
+.voice-langs input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.voice-langs span { display: inline-block; padding: 3px 10px; color: var(--ink); background: var(--panel); border: 1px solid var(--border); border-radius: 999px; }
+.voice-langs small { color: var(--ink-2); font-size: inherit; }
+.voice-langs input:checked + span { color: var(--on-stamp); background: var(--stamp); border-color: var(--stamp); }
+.voice-langs input:checked + span small { color: inherit; opacity: .85; }
+.voice-langs input:focus-visible + span { outline: 2px solid var(--stamp); outline-offset: 2px; }
+.voice-action { padding: 3px 10px; color: var(--ink); background: var(--panel); border: 1px solid var(--border); border-radius: 999px; font: inherit; cursor: pointer; }
+.voice-action:hover { background: var(--panel-2); }
+.voice-action[hidden] { display: none; }
+#mic[aria-pressed="true"] svg { display: none; }
+#mic[aria-pressed="true"]::before { content: ""; width: 14px; height: 14px; background: currentColor; border-radius: 2px; }
+#mic.mic-off { opacity: .55; }
+.voice-row[hidden] { display: none; }
+.voice-status:empty { display: none; }
+.voice-status { color: var(--tape); font-variant-numeric: tabular-nums; }
+.listen-btn[aria-pressed="true"] { color: var(--tape); border-color: var(--tape); }
+.heard { display: block; margin-bottom: 2px; font-size: var(--step--1); opacity: .8; }
 .composer-hint { margin-top: 8px; color: var(--ink-2); font-size: var(--step--1); text-align: center; }
 
 /* ---------- sources panel ---------- */
@@ -341,6 +367,10 @@ body { overflow: hidden; background: var(--panel); }
   }
   @keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } }
   .composer-hint { display: none; }
+  /* On phones the mic is the main control. */
+  #mic { width: 52px; height: 52px; color: var(--on-stamp); background: var(--stamp); border-radius: 50%; }
+  #mic svg { width: 24px; height: 24px; }
+  #mic[aria-pressed="true"] { color: var(--on-stamp); background: var(--tape); }
 }
 @media (pointer: coarse) {
   .icon-btn { width: 44px; height: 44px; }
