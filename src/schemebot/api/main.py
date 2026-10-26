@@ -114,9 +114,14 @@ def configure_logging() -> None:
 
 
 def _default_service() -> AnswerService:
+    from schemebot.generate.cache import CachedAnswerer
     from schemebot.generate.factory import build_answerer
 
-    return build_answerer(get_settings())
+    settings = get_settings()
+    answerer = build_answerer(settings)
+    if settings.answer_cache_size == 0:
+        return answerer
+    return CachedAnswerer(answerer, settings.answer_cache_size, settings.answer_cache_ttl_seconds)
 
 
 def _default_transcriber() -> Transcriber | None:
