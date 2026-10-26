@@ -12,6 +12,18 @@ Inputs: `UI_AUDIT.md`, `REFERENCES.md`, `STORY_AND_FLOW.md`, the weakness review
 
 ---
 
+## Update after Jaswanth's review (26 Oct)
+
+- **Build now, on a separate branch off main:** T0, T1, T3, T4. These touch rendering and refusal only.
+- **Build after the voice branch merges:** T2, T5, T7.
+- **Cut order:** T7 first, then T5, then T2's extras. Keep T4 (section 5).
+- **Waiting message:** "This is taking longer than usual." Don't mention a free service.
+- **Not to ship until Jaswanth confirms them:** every fact in the wireframe (section 8) and in the proof card examples is **UNVERIFIED**. That includes the PM-KISAN line, the document date and the contact link. Shown only as layout examples.
+- **The forward "₹1,000 every month for women":** a clearly labelled example message, not a claim.
+- **Tamil strings:** stay "needs native review". Jaswanth reviews them.
+
+---
+
 ## 1. Main problems from the audit (and what is in scope)
 
 | # | Problem | In build scope? |
@@ -43,7 +55,7 @@ The ranking is by impact on the 60-second video and on a first-time phone user. 
 |---|---|---|---|---|---|
 | 1 | **T0. Remove UNVERIFIED facts from the site.** Drop the hero "page 9 / 12 ஆயிரம்" slip and the Tamil Magalir Urimai demo tab. Drop the Atal Pension amount and keep only "join between 18 and 40" (verified, brochure p1). Label every remaining hand-written demo answer "Example answer". | Every number on screen must be checkable, and judges may open the PDF | S (0.5 h) | Step 3 fact check | This thread |
 | 2 | **T1. Proof you can see.** The citation chip shows "p. 9" (the page number) instead of "1". Under each answer, an always-visible source line: "From: G.O.(Ms) No.15 · page 9 · 10 Jul 2023". Tapping it opens the slip with the quoted line and "Open the official PDF at page N". The phone sheet gets a backdrop and a drag-handle bar. | Pakkam's whole difference has to be visible in a 2-second glance in the video | M (3.5 h) | #3, #10 | This thread |
-| 3 | **T2. Honest waiting state.** Show an elapsed timer ("Working on it · 0:08"). After 15 s add "This is taking longer than usual. The free answer service can be slow." Add a Cancel button (AbortController). On failure, put the question back in the box and show a Retry button. No fake step-by-step progress, because the server does not report stages. | Real waits are 13-52 s (`report.md` §8); a silent bar looks frozen | M (2.5 h) | #6, #8 | This thread (chat.js shared with voice; see section 4) |
+| 3 | **T2. Honest waiting state.** Show an elapsed timer ("Working on it · 0:08"). After 15 s add "This is taking longer than usual." Add a Cancel button (AbortController). On failure, put the question back in the box and show a Retry button. No fake step-by-step progress, because the server does not report stages. | Real waits are 13-52 s (`report.md` §8); a silent bar looks frozen | M (2.5 h) | #6, #8 | This thread (chat.js shared with voice; see section 4) |
 | 4 | **T3. Better "I don't know".** A calm card with a dashed border, no red and no "Answered in". The refusal text, then the scheme's **official website as a real link** when one is known, then a "What Pakkam can read" button that opens the scheme list. | The honest refusal is the trust moment; today it is a dead end | M (2 h, including a small API field) | #7 | This thread |
 | 5 | **T4. Disclaimer on phones.** Show the composer hint at 640 px and below as one short line: "Information only, not official advice. Check the official source." Add the same line, in English, under the hero buttons. | It has to be on screen in every frame of the video | S (0.5 h) | #9 | This thread |
 | 6 | **T5. Home hero for voice** *(build after voice works end to end)*. The primary button becomes "Ask by voice" and opens `/chat/` with the mic ready. The secondary is "or type your question". | The video's first 5 seconds must say "speak" | S (1 h) | #1 | This thread, after voice is live |
@@ -113,16 +125,16 @@ The voice thread owns `web/assets/chat.js`, `chat.css` and `web/chat/index.html`
 
 ---
 
-## 5. Cut list (in the order Jaswanth set)
+## 5. Cut list (Jaswanth's order, revised 26 Oct)
 
 If time runs short, cut in this order:
-1. **#9, T4** disclaimer on phones. **Fallback:** the per-answer disclaimer already shows after each answer. Make sure the video shows one answer.
-2. **#6, T2** honest waiting state. **Fallback:** edit the video to skip the wait, and say "the wait is cut" in the subtitles. Don't hide that the wait exists.
-3. **T7** hero sample card. The hero stays as is, minus the T0 facts.
-4. **T5** hero "Ask by voice". The hero stays "Ask Pakkam" until voice is live.
-5. **T3's scheme list button.** Keep the official link.
+1. **T7** hero sample card. The hero stays as is, minus the T0 facts.
+2. **T5** hero "Ask by voice". The hero stays "Ask Pakkam" until voice is live.
+3. **T2's extras** (Cancel, Retry and keeping the question). Keep the elapsed timer and the "This is taking longer than usual." line.
 
-**Never cut:** T0 (unverified facts) and T1 (visible proof), since these carry the honesty story. Also never cut the English subtitles.
+**Keep T4** (disclaimer on phones). It is cheap and protects against looking official.
+
+**Never cut:** T0 (unverified facts), T1 (visible proof) and T4 (disclaimer on phones), since these carry the honesty story. Also never cut the English subtitles.
 
 **Already cut (later, after the deadline):** the full 7-beat home page, the full interface translation, generated results JSON, public hosting, and the dark-mode toggle changes.
 
@@ -179,6 +191,8 @@ These are the first ones only: the mic label, recording state, errors and refusa
 
 ## 8. Wireframe: the ideal phone voice chat screen (390 px)
 
+**Every fact in these wireframes is UNVERIFIED** until Jaswanth confirms it from the PDF: the PM-KISAN amount and quote, "page 1", "13 Nov 2023" and the pmkisan.gov.in link. They are layout placeholders, not content to ship.
+
 Three states of the same screen. All facts shown are verified (see STORY_AND_FLOW.md §0). The answer text is a placeholder for a real saved output.
 
 ```
@@ -221,10 +235,10 @@ D. Waiting (honest)               E. Refusal ("I don't know")       F. Didn't ca
 │ ▣ Working on it · 0:18     │   │        └─────────────────┘ │   │ │little closer to the    │ │
 │   ━━━━━━━━━━━━━━━━━━━━━    │   │ ▣ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐  │   │ │phone.  [🎙 Try again]  │ │
 │   This is taking longer    │   │   Not in the documents     │   │ └────────────────────────┘ │
-│   than usual. The free     │   │   Pakkam has               │   │                            │
-│   answer service can be    │   │   I couldn't find this in  │   │ ┌────────────────────────┐ │
-│   slow.                    │   │   the official scheme      │   │ │Mic is off. Type        │ │
-│   [Cancel]                 │   │   documents I have…        │   │ │instead, or turn on the │ │
+│   than usual.              │   │   Pakkam has               │   │                            │
+│   [Cancel]                 │   │   I couldn't find this in  │   │ ┌────────────────────────┐ │
+│                            │   │   the official scheme      │   │ │Mic is off. Type        │ │
+│                            │   │   documents I have…        │   │ │instead, or turn on the │ │
 │                            │   │   [Ask on the official     │   │ │microphone in your      │ │
 │                            │   │    website ↗ pmkisan.gov.in]│   │ │browser settings.       │ │
 │                            │   │   [What Pakkam can read]   │   │ │[Type instead]          │ │

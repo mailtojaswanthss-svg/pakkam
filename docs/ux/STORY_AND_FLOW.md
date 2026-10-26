@@ -11,6 +11,8 @@ Inputs: `UI_AUDIT.md`, `REFERENCES.md`, Jaswanth's rules from 26 Oct, and the we
 
 ---
 
+> **Update 26 Oct (Jaswanth's review):** every fact below, including the ones marked "Verified", stays **UNVERIFIED for shipping** until Jaswanth confirms it from the PDF page. That covers the PM-KISAN line, document dates and contact links. The ₹1,000 forward is a clearly labelled example message.
+
 ## 0. Fact check for everything this page would show
 
 **How I checked:** against the repo. That means `data/sources.json`, `docs/data_sources.md`, `docs/results.md`, and the page text extracted from each PDF in `docs/review/questions-review.csv`. The PDFs themselves are not in the repo, and this container cannot download them. So "verified" here means **verified in the repo's extracted text**.
