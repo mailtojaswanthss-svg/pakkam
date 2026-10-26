@@ -20,9 +20,14 @@ by default (free); --full also answers each spoken question with the paid LLM an
     uv run python -m schemebot.voice eval-script
     uv run python -m schemebot.voice eval data/voice/eval/
     uv run python -m schemebot.voice eval data/voice/eval/ --full
+
+Check how money amounts in the corpus would be spoken (free, no calls; voice/numbers.py):
+
+    uv run python -m schemebot.voice amounts
 """
 
 import argparse
+import csv
 import json
 import sys
 from datetime import datetime
@@ -48,6 +53,7 @@ from schemebot.voice.evaluate import (
     transcribe_missing,
     write_script,
 )
+from schemebot.voice.numbers import amount_shape, find_amounts, spell_amounts
 from schemebot.voice.samples import CASES, MODELS, make_samples
 from schemebot.voice.stt import GNANI_LANGUAGE_CODES, build_budget, build_transcriber
 from schemebot.voice.tts import BudgetedSpeaker, GnaniTts, Speaker, voices_for
@@ -71,7 +77,10 @@ def main() -> int:
     voice_eval.add_argument("folder", type=Path)
     voice_eval.add_argument("--full", action="store_true", help="also answer (paid LLM calls)")
     voice_eval.add_argument("--tanglish-code", default="ta-IN", choices=["ta-IN", "en-IN"])
+    sub.add_parser("amounts", help="Show how corpus money amounts would be spoken.")
     args = parser.parse_args()
+    if args.command == "amounts":
+        return amounts_command()
     if args.command == "compare":
         return compare_command(args.folder, args.codes)
     if args.command == "eval-script":
@@ -254,6 +263,45 @@ def _evaluate_and_report(
     out.with_suffix(".jsonl").write_text("\n".join(rows) + "\n", encoding="utf-8")
     print(report)
     print(f"Saved {out.with_suffix('.md')} (and per-clip details in .jsonl).")
+    return 0
+
+
+def amounts_command() -> int:
+    """Every way the corpus writes money, each spoken in Tamil, Hindi and English."""
+    from schemebot.ingest.models import Chunk
+
+    settings = get_settings()
+    texts = [q.reference for q in load_questions(settings.eval_questions_path)]
+    chunks_path = settings.processed_dir / "chunks.jsonl"
+    if chunks_path.exists():
+        lines = chunks_path.read_text(encoding="utf-8").splitlines()
+        texts += [Chunk.model_validate_json(line).text for line in lines if line.strip()]
+    else:
+        print(f"No {chunks_path}; checking the eval references only.", file=sys.stderr)
+
+    by_shape: dict[str, list[str]] = {}
+    for text in texts:
+        for amount in find_amounts(text):
+            by_shape.setdefault(amount_shape(amount), []).append(amount)
+
+    rows = []
+    for shape, amounts in sorted(by_shape.items(), key=lambda item: -len(item[1])):
+        example = amounts[0]
+        spoken = {code: spell_amounts(example, code) for code in ("ta-IN", "hi-IN", "en-IN")}
+        unchanged = spoken["en-IN"] == example
+        rows.append([shape, len(amounts), example, "KEPT AS WRITTEN" if unchanged else "spelled",
+                     spoken["ta-IN"], spoken["hi-IN"], spoken["en-IN"]])  # fmt: skip
+        print(f"{len(amounts):5}  {example:22} -> {spoken['ta-IN']} | {spoken['en-IN']}")
+
+    out = settings.data_dir / "voice" / "runs" / f"amounts-{run_stamp()}.csv"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", newline="", encoding="utf-8-sig") as file:
+        writer = csv.writer(file)
+        writer.writerow(["shape", "count", "example", "result", "tamil", "hindi", "english"])
+        writer.writerows(rows)
+    kept = sum(1 for row in rows if row[3] != "spelled")
+    print(f"\n{len(rows)} ways of writing amounts, {kept} kept as written. Saved {out}.")
+    print("Tamil and Hindi wording needs a native speaker's check before the demo.")
     return 0
 
 

@@ -33,6 +33,7 @@ from schemebot.api.schemas import (
 from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer
 from schemebot.ingest.models import SourceDoc
+from schemebot.voice.numbers import spell_amounts
 from schemebot.voice.stt import (
     GNANI_LANGUAGE_CODES,
     SttError,
@@ -250,9 +251,12 @@ def create_app(
         text = CITATION_MARKER.sub("", body.text).strip()
         if not text:
             raise HTTPException(status_code=422, detail="There is nothing to read aloud.")
-        if len(text) > get_settings().tts_max_chars:
+        settings = get_settings()
+        if len(text) > settings.tts_max_chars:
             raise HTTPException(status_code=413, detail="This answer is too long to read aloud.")
         language_code = language_code_for(body.language)
+        if settings.tts_spell_amounts:
+            text = spell_amounts(text, language_code)
         started = time.perf_counter()
         try:
             audio = state.speaker.speak(text, language_code)

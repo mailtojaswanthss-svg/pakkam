@@ -231,3 +231,18 @@ def test_eval_script_writes_32_rows(monkeypatch: pytest.MonkeyPatch, tmp_path: P
     script = tmp_path / "data" / "voice" / "eval" / "script.csv"
     with script.open(encoding="utf-8-sig") as file:
         assert len(list(csv.DictReader(file))) == 32
+
+
+def test_amounts_command_lists_formats_without_calls(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    settings = Settings(_env_file=None, data_dir=tmp_path / "data")
+    real = get_settings().eval_questions_path
+    monkeypatch.setattr(cli, "get_settings", lambda: settings)
+    monkeypatch.setattr(Settings, "eval_questions_path", property(lambda self: real))
+    monkeypatch.setattr(cli, "build_transcriber", lambda s: pytest.fail("no Gnani calls"))
+
+    assert cli.amounts_command() == 0
+
+    assert "kept as written" in capsys.readouterr().out
+    assert list((tmp_path / "data" / "voice" / "runs").glob("amounts-*.csv"))
