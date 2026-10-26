@@ -231,17 +231,20 @@ def create_app(
 
         with state.lock:
             answer = state.service.answer(question)
-        state.audit.record(request.state.request_id, answer)
+        state.audit.record(request.state.request_id, answer, {"stt": stt_ms})
+        response = AskResponse.from_answer(answer, state.titles)
+        response.timings_ms["stt"] = round(stt_ms, 1)
         return VoiceAskResponse(
-            **AskResponse.from_answer(answer, state.titles).model_dump(),
+            **response.model_dump(),
             transcript=question,
             stt_language_code=language_code,
             stt_ms=round(stt_ms, 1),
         )
 
     @app.post("/speak", dependencies=[Depends(limit_asks)])
-    def speak(body: SpeakRequest, state: StateDep) -> Response:
-        """An answer read aloud by Gnani Timbre, as WAV. Neither text nor audio is logged."""
+    def speak(body: SpeakRequest, state: StateDep, request: Request) -> Response:
+        """An answer read aloud by Gnani Timbre, as WAV. Only numbers are logged, never the
+        text or the audio."""
         if state.speaker is None:
             raise HTTPException(status_code=503, detail="Spoken answers are not set up.")
         text = CITATION_MARKER.sub("", body.text).strip()
@@ -249,13 +252,17 @@ def create_app(
             raise HTTPException(status_code=422, detail="There is nothing to read aloud.")
         if len(text) > get_settings().tts_max_chars:
             raise HTTPException(status_code=413, detail="This answer is too long to read aloud.")
+        language_code = language_code_for(body.language)
+        started = time.perf_counter()
         try:
-            audio = state.speaker.speak(text, language_code_for(body.language))
+            audio = state.speaker.speak(text, language_code)
         except TtsError as error:
             raise HTTPException(status_code=error.status_code, detail=error.message) from error
-        return Response(
-            content=audio, media_type="audio/wav", headers={"Cache-Control": "no-store"}
-        )
+        tts_ms = (time.perf_counter() - started) * 1000
+        state.audit.record_speech(request.state.request_id, len(text), language_code, tts_ms)
+        # Server-Timing is the standard header for this; browsers show it in dev tools.
+        headers = {"Cache-Control": "no-store", "Server-Timing": f"tts;dur={tts_ms:.1f}"}
+        return Response(content=audio, media_type="audio/wav", headers=headers)
 
     @app.get("/sources")
     def sources() -> list[SourceOut]:
