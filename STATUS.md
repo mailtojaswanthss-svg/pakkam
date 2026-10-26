@@ -23,6 +23,7 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 2. After the first few real calls, check credit use in the Gnani dashboard and set the daily cap to match.
 3. Read the CSV together and decide Tanglish ta-IN vs en-IN.
 4. Voice out (Timbre TTS).
+5. Mic UX polish, from the UI thread's spec (section 6 of /mnt/project-files/ui-ux/UX_RECOMMENDATIONS.md). Candidates: a big "Tap and speak" mic on phones, language buttons with Tanglish marked "(being tested)", denied-permission card, Stop/Cancel with a "5 seconds left" note, a slow-upload "Send again" option, and a TTS play/stop bar with no autoplay. Already done: the 0:30 cap, and an empty transcript gets "could not hear" and is never sent to /ask. Needs Jaswanth's go-ahead, and it touches runTurn in chat.js, which the UI thread also plans to change.
 
 ## Blockers
 - Tanglish clips (Jaswanth). The key is in his local `.env` (26 Oct).
