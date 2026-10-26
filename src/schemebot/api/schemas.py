@@ -42,6 +42,12 @@ class SentenceOut(BaseModel):
     citations: list[int] = Field(description="Numbers into `citations`.")
 
 
+class ContactOut(BaseModel):
+    scheme: str
+    website: str
+    helpline: str | None
+
+
 class AskResponse(BaseModel):
     answer: str = Field(description="Full answer with [n] markers, or the refusal message.")
     language: Language
@@ -52,6 +58,9 @@ class AskResponse(BaseModel):
     confidence: float = Field(description="Relevance of the best retrieved passage, 0-1.")
     disclaimer: str
     latency_ms: float
+    contact: ContactOut | None = Field(
+        default=None, description="On a refusal about a known scheme: its official contact."
+    )
 
     @classmethod
     def from_answer(cls, answer: Answer, titles: Mapping[str, str] | None = None) -> "AskResponse":
@@ -79,6 +88,15 @@ class AskResponse(BaseModel):
             confidence=round(answer.confidence, 4),
             disclaimer=answer.disclaimer,
             latency_ms=round(answer.timings_ms.get("total", 0.0), 1),
+            contact=(
+                ContactOut(
+                    scheme=answer.contact.scheme,
+                    website=str(answer.contact.website),
+                    helpline=answer.contact.helpline,
+                )
+                if answer.contact
+                else None
+            ),
         )
 
 

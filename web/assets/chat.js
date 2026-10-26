@@ -18,6 +18,11 @@
     passage: 'Cited passage',
     schemesFailed: 'The document list could not load. Each answer still links its own source.',
   };
+  // Refusal card text. Tamil needs native review; other languages fall back to English.
+  const REFUSAL_TEXT = {
+    en: { title: 'Not in the documents Pakkam has', official: 'Ask on the official website', schemes: 'What Pakkam can read' },
+    ta: { title: 'Pakkam-இடம் உள்ள ஆவணங்களில் இது இல்லை', official: 'அதிகாரப்பூர்வ இணையதளத்தில் கேளுங்கள்', schemes: 'Pakkam படிக்கக்கூடியவை' },
+  };
   const LANG_NAME = { en: 'English', ta: 'தமிழ்', hi: 'हिन्दी', 'ta-Latn': 'Tanglish' };
   const LANG_ATTR = new Set(['en', 'ta', 'hi', 'ta-Latn']);
   const AVATAR = '<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="2.5"/><path d="M9 10h11M9 15h11M9 20h7"/><circle cx="24" cy="23" r="6"/></svg>';
@@ -83,6 +88,14 @@
     else sideOpen.focus({ preventScroll: true });
   }
   sideOpen.addEventListener('click', () => setMenu(true));
+
+  // "What Pakkam can read": the scheme list lives in the sidebar (a drawer on phones).
+  const schemesHeading = $('#schemes-h');
+  function showSchemes() {
+    if (matchMedia('(max-width: 860px)').matches) setMenu(true);
+    schemesHeading.scrollIntoView({ block: 'start', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    schemesHeading.focus({ preventScroll: true });
+  }
   $('#side-close').addEventListener('click', () => setMenu(false));
   scrim.addEventListener('click', () => setMenu(false));
 
@@ -166,8 +179,9 @@
     const body = el('div', 'a-body');
     setLang(body, data.language);
 
-    if (data.refused || data.sentences.length === 0) {
-      body.append(el('p', 'refusal', data.answer));
+    const refused = data.refused || data.sentences.length === 0;
+    if (refused) {
+      body.append(refusalCard(data));
     } else {
       const byNumber = new Map(data.citations.map((c) => [c.number, c]));
       const para = el('p', 'sentences');
@@ -215,13 +229,44 @@
     }
 
     const meta = el('div', 'a-meta');
-    if (data.latency_ms) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
+    if (data.latency_ms && !refused) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
     const disclaimer = el('p', 'disclaimer', data.disclaimer);
     setLang(disclaimer, data.language);
     body.append(meta, disclaimer);
 
     item.append(avatar(), body);
     return item;
+  }
+
+  // "I don't know": the refusal text, the scheme's official website when known, and the list
+  // of schemes Pakkam can read. Calm on purpose: a refusal is a correct answer, not an error.
+  function refusalCard(data) {
+    const words = REFUSAL_TEXT[data.language] || REFUSAL_TEXT.en;
+    const card = el('div', 'refusal');
+    if (data.refusal_reason !== 'service_unavailable') {
+      const title = el('p', 'refusal-title', words.title);
+      setLang(title, data.language);
+      card.append(title);
+    }
+    card.append(el('p', 'refusal-text', data.answer));
+    const actions = el('div', 'refusal-actions');
+    const url = data.contact ? safeUrl(data.contact.website) : null;
+    if (url) {
+      const link = el('a', 'refusal-link', words.official);
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.append(el('span', 'refusal-host', new URL(url).host));
+      actions.append(link);
+    }
+    if (data.refusal_reason !== 'service_unavailable') {
+      const schemes = el('button', 'refusal-schemes', words.schemes);
+      schemes.type = 'button';
+      schemes.addEventListener('click', showSchemes);
+      actions.append(schemes);
+    }
+    if (actions.children.length) card.append(actions);
+    return card;
   }
 
   function assistantItem(className, content) {

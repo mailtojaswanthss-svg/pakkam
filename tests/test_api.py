@@ -10,6 +10,7 @@ from schemebot.api.main import REQUEST_ID_HEADER, create_app
 from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import MAX_QUESTION_CHARS
 from schemebot.generate.answer import Answer, AnswerSentence, Citation
+from schemebot.generate.contacts import Contact
 
 QUESTION = "Who can join Atal Pension Yojana? My Aadhaar is 1234 5678 9012"
 
@@ -126,6 +127,34 @@ def test_refusal_is_a_normal_200_response(tmp_path: Path) -> None:
     assert body["refused"] is True
     assert body["refusal_reason"] == "low_confidence"
     assert body["citations"] == []
+    assert body["contact"] is None
+
+
+def test_refusal_carries_the_scheme_contact(tmp_path: Path) -> None:
+    contact = Contact(
+        scheme="PM-KISAN", helpline=None, helpline_source=None, website="https://pmkisan.gov.in"
+    )
+    refused = Answer(
+        question=QUESTION,
+        language="en",
+        text="I couldn't find this. For help with PM-KISAN, visit https://pmkisan.gov.in/.",
+        sentences=[],
+        citations=[],
+        refused=True,
+        refusal_reason="not_in_documents",
+        confidence=0.6,
+        disclaimer="Informational only.",
+        contact=contact,
+    )
+    app = create_app(lambda: FakeService(refused), log_dir=tmp_path)
+    with TestClient(app) as client:
+        body = client.post("/ask", json={"question": QUESTION}).json()
+
+    assert body["contact"] == {
+        "scheme": "PM-KISAN",
+        "website": "https://pmkisan.gov.in/",
+        "helpline": None,
+    }
 
 
 def test_internal_error_hides_details(tmp_path: Path) -> None:

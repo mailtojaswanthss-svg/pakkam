@@ -40,6 +40,7 @@ def test_on_topic_refusal_names_the_scheme_contact(corpus: list[Chunk]) -> None:
     assert answer.refusal_reason == "not_in_documents"
     assert "1800 000 000" in answer.text
     assert "https://example.gov.in" in answer.text
+    assert answer.contact == CONTACTS["Test Scheme"]
 
 
 def test_off_topic_refusal_does_not_guess_a_scheme(corpus: list[Chunk]) -> None:
@@ -48,6 +49,7 @@ def test_off_topic_refusal_does_not_guess_a_scheme(corpus: list[Chunk]) -> None:
 
     assert answer.refusal_reason == "low_confidence"
     assert "1800" not in answer.text
+    assert answer.contact is None
 
 
 def test_contact_text_is_in_the_question_language(corpus: list[Chunk]) -> None:
