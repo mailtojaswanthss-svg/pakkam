@@ -51,6 +51,12 @@ class SentenceOut(BaseModel):
     citations: list[int] = Field(description="Numbers into `citations`.")
 
 
+class ContactOut(BaseModel):
+    scheme: str
+    website: str
+    helpline: str | None
+
+
 class AskResponse(BaseModel):
     answer: str = Field(description="Full answer with [n] markers, or the refusal message.")
     language: Language
@@ -64,6 +70,9 @@ class AskResponse(BaseModel):
     timings_ms: dict[str, float] = Field(
         description="Milliseconds per stage, e.g. search, rerank, llm_answer, verifier, total "
         "(plus stt for voice questions). A stage that did not run is absent."
+    )
+    contact: ContactOut | None = Field(
+        default=None, description="On a refusal about a known scheme: its official contact."
     )
 
     @classmethod
@@ -94,11 +103,26 @@ class AskResponse(BaseModel):
             disclaimer=answer.disclaimer,
             latency_ms=round(answer.timings_ms.get("total", 0.0), 1),
             timings_ms=rounded_timings(answer.timings_ms),
+            contact=(
+                ContactOut(
+                    scheme=answer.contact.scheme,
+                    website=str(answer.contact.website),
+                    helpline=answer.contact.helpline,
+                )
+                if answer.contact
+                else None
+            ),
         )
 
 
 class VoiceAskResponse(AskResponse):
     transcript: str = Field(description="What Gnani speech to text heard; this was the question.")
+    stt_language_code: str = Field(description="Language code sent to Gnani, e.g. 'ta-IN'.")
+    stt_ms: float = Field(description="Time spent on speech to text, in milliseconds.")
+
+
+class TranscribeResponse(BaseModel):
+    transcript: str = Field(description="What Gnani speech to text heard.")
     stt_language_code: str = Field(description="Language code sent to Gnani, e.g. 'ta-IN'.")
     stt_ms: float = Field(description="Time spent on speech to text, in milliseconds.")
 

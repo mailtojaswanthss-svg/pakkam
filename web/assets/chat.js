@@ -19,7 +19,6 @@
     offline: 'The live chat is offline right now. The answer server is not connected to this site.',
     waiting: 'Finding the pages, reading them and checking every sentence',
     chip: 'Show the source',
-    sources: (n) => (n === 1 ? '1 source' : `${n} sources`),
     answeredIn: (ms) => `Answered in ${(ms / 1000).toFixed(1)} s`,
     openPdf: (page) => `Open the official PDF at page ${page}`,
     passage: 'Cited passage',
@@ -42,6 +41,11 @@
     voiceFailed: 'Your recording is kept. Tap Send again when the connection is back.',
     schemesFailed: 'The document list could not load. Each answer still links its own source.',
   };
+  // Refusal card text. Tamil needs native review; other languages fall back to English.
+  const REFUSAL_TEXT = {
+    en: { title: 'Not in the documents Pakkam has', official: 'Ask on the official website', schemes: 'What Pakkam can read' },
+    ta: { title: 'Pakkam-இடம் உள்ள ஆவணங்களில் இது இல்லை', official: 'அதிகாரப்பூர்வ இணையதளத்தில் கேளுங்கள்', schemes: 'Pakkam படிக்கக்கூடியவை' },
+  };
   const LANG_NAME = { en: 'English', ta: 'தமிழ்', hi: 'हिन्दी', 'ta-Latn': 'Tanglish' };
   const LANG_ATTR = new Set(['en', 'ta', 'hi', 'ta-Latn']);
   const AVATAR = '<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="2.5"/><path d="M9 10h11M9 15h11M9 20h7"/><circle cx="24" cy="23" r="6"/></svg>';
@@ -56,6 +60,7 @@
   const welcome = $('#welcome');
   const formMsg = $('#form-msg');
   const panel = $('#sources');
+  const sheetScrim = $('#sheet-scrim');
   const panelHeading = $('#sources-h');
   const sourceList = $('#source-list');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -83,6 +88,13 @@
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
   }
   const pagesText = (c) => (c.page_start === c.page_end ? `page ${c.page_start}` : `pages ${c.page_start} to ${c.page_end}`);
+  const pageShort = (c) => (c.page_start === c.page_end ? `p.\u00a0${c.page_start}` : `pp.\u00a0${c.page_start}-${c.page_end}`);
+  // "From: <document> · page N", in the answer's language. Tamil needs native review.
+  function sourceLineText(c, lang) {
+    const pages = c.page_start === c.page_end ? String(c.page_start) : `${c.page_start}-${c.page_end}`;
+    if (lang === 'ta') return `ஆதாரம்: ${c.document} · பக்கம்\u00a0${pages}`;
+    return `From: ${c.document} · ${c.page_start === c.page_end ? 'page' : 'pages'}\u00a0${pages}`;
+  }
   const scrollToEnd = () => thread.scrollTo({ top: thread.scrollHeight, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 
   /* ---------- greeting in four scripts ---------- */
@@ -106,6 +118,14 @@
     else sideOpen.focus({ preventScroll: true });
   }
   sideOpen.addEventListener('click', () => setMenu(true));
+
+  // "What Pakkam can read": the scheme list lives in the sidebar (a drawer on phones).
+  const schemesHeading = $('#schemes-h');
+  function showSchemes() {
+    if (matchMedia('(max-width: 860px)').matches) setMenu(true);
+    schemesHeading.scrollIntoView({ block: 'start', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    schemesHeading.focus({ preventScroll: true });
+  }
   $('#side-close').addEventListener('click', () => setMenu(false));
   scrim.addEventListener('click', () => setMenu(false));
 
@@ -115,6 +135,7 @@
   function closeSources(returnFocus) {
     if (!open) return;
     panel.hidden = true;
+    sheetScrim.hidden = true;
     open.item.querySelectorAll('.sent.lit').forEach((s) => s.classList.remove('lit'));
     open.item.querySelectorAll('[aria-expanded="true"]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
     if (returnFocus) open.chip.focus({ preventScroll: true });
@@ -124,7 +145,7 @@
   function sourceCard(c, current) {
     const li = el('li', `source${current ? ' current' : ''}`);
     const head = el('div', 'source-head');
-    head.append(el('span', 'source-no', String(c.number)));
+    head.append(el('span', 'source-no', pageShort(c)));
     const meta = el('div');
     meta.append(el('p', 'source-title', `${c.scheme}, ${pagesText(c)}`));
     const lang = LANG_NAME[c.language];
@@ -162,12 +183,14 @@
     }
     opener.setAttribute('aria-expanded', 'true');
     panel.hidden = false;
+    sheetScrim.hidden = false;
     open = { chip: opener, item };
     panelHeading.focus({ preventScroll: true });
     if (currentCard) currentCard.scrollIntoView({ block: 'nearest' });
   }
 
   $('#sources-close').addEventListener('click', () => closeSources(true));
+  sheetScrim.addEventListener('click', () => closeSources(true));
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
     if (app.classList.contains('menu-open')) setMenu(false);
@@ -186,8 +209,9 @@
     const body = el('div', 'a-body');
     setLang(body, data.language);
 
-    if (data.refused || data.sentences.length === 0) {
-      body.append(el('p', 'refusal', data.answer));
+    const refused = data.refused || data.sentences.length === 0;
+    if (refused) {
+      body.append(refusalCard(data));
     } else {
       const byNumber = new Map(data.citations.map((c) => [c.number, c]));
       const para = el('p', 'sentences');
@@ -198,7 +222,7 @@
         sentence.citations.forEach((n) => {
           const c = byNumber.get(n);
           if (!c) return;
-          const chip = el('button', 'chip', String(n));
+          const chip = el('button', 'chip', pageShort(c));
           chip.type = 'button';
           chip.title = TEXT.chip;
           chip.setAttribute('aria-label', `${TEXT.chip}: ${c.scheme}, ${pagesText(c)}`);
@@ -213,28 +237,68 @@
         para.append(' ');
       });
       body.append(para);
+
+      // The proof, visible without a tap: one line per cited document page.
+      const cited = new Set(data.sentences.flatMap((sentence) => sentence.citations));
+      const lines = el('ul', 'source-lines');
+      data.citations.filter((c) => cited.has(c.number)).forEach((c) => {
+        const line = el('button', 'source-line', sourceLineText(c, data.language));
+        line.type = 'button';
+        setLang(line, data.language);
+        line.setAttribute('aria-expanded', 'false');
+        line.setAttribute('aria-controls', 'sources');
+        line.addEventListener('click', () => {
+          if (open && open.chip === line) closeSources(true);
+          else openSources(data, c.number, line, item);
+        });
+        const li = el('li');
+        li.append(line);
+        lines.append(li);
+      });
+      if (lines.children.length) body.append(lines);
     }
 
     const meta = el('div', 'a-meta');
-    if (data.citations.length) {
-      const button = el('button', 'sources-btn', TEXT.sources(data.citations.length));
-      button.type = 'button';
-      button.setAttribute('aria-expanded', 'false');
-      button.setAttribute('aria-controls', 'sources');
-      button.addEventListener('click', () => {
-        if (open && open.chip === button) closeSources(true);
-        else openSources(data, null, button, item);
-      });
-      meta.append(button);
-    }
+    // Listen sits beside the time; the source lines above replace the old "N sources" button.
     meta.append(listenButton(data));
-    if (data.latency_ms) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
+    if (data.latency_ms && !refused) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
     const disclaimer = el('p', 'disclaimer', data.disclaimer);
     setLang(disclaimer, data.language);
     body.append(meta, disclaimer);
 
     item.append(avatar(), body);
     return item;
+  }
+
+  // "I don't know": the refusal text, the scheme's official website when known, and the list
+  // of schemes Pakkam can read. Calm on purpose: a refusal is a correct answer, not an error.
+  function refusalCard(data) {
+    const words = REFUSAL_TEXT[data.language] || REFUSAL_TEXT.en;
+    const card = el('div', 'refusal');
+    if (data.refusal_reason !== 'service_unavailable') {
+      const title = el('p', 'refusal-title', words.title);
+      setLang(title, data.language);
+      card.append(title);
+    }
+    card.append(el('p', 'refusal-text', data.answer));
+    const actions = el('div', 'refusal-actions');
+    const url = data.contact ? safeUrl(data.contact.website) : null;
+    if (url) {
+      const link = el('a', 'refusal-link', words.official);
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.append(el('span', 'refusal-host', new URL(url).host));
+      actions.append(link);
+    }
+    if (data.refusal_reason !== 'service_unavailable') {
+      const schemes = el('button', 'refusal-schemes', words.schemes);
+      schemes.type = 'button';
+      schemes.addEventListener('click', showSchemes);
+      actions.append(schemes);
+    }
+    if (actions.children.length) card.append(actions);
+    return card;
   }
 
   /* ---------- spoken answers (Gnani Timbre on the server; only after a tap) ---------- */
@@ -286,7 +350,7 @@
   }
 
   function listenButton(data) {
-    const button = el('button', 'sources-btn listen-btn', TEXT.listen);
+    const button = el('button', 'listen-btn', TEXT.listen);
     button.type = 'button';
     button.setAttribute('aria-pressed', 'false');
     button.addEventListener('click', () => listen(data, button));
@@ -310,8 +374,8 @@
     input.style.height = `${input.scrollHeight}px`;
   }
 
-  // One question and answer turn. `request` returns the fetch promise; `label` shows until the
-  // server replies (for voice, the transcript then replaces it).
+  // One question and answer turn. `request(bubble)` returns the fetch promise; `label` shows
+  // in the question bubble until it is replaced (for voice, by what Pakkam heard).
   async function runTurn(label, request) {
     if (busy) return;
     showFormMsg('');
@@ -331,7 +395,7 @@
     try {
       let response;
       try {
-        response = await withTimeout(request(), ASK_TIMEOUT_MS);
+        response = await withTimeout(request(bubble), ASK_TIMEOUT_MS);
       } catch (error) {
         throw new Error(error.message === 'timeout' ? 'timeout' : 'network');
       }
@@ -406,15 +470,35 @@
   // Not for 4xx answers like "could not hear", where speaking again is the fix.
   const canRetry = (error) => !(error instanceof ServerError) || error.status >= 500;
 
-  async function askVoice(audio, filename, language = voiceLanguage()) {
+  const askText = (question) => fetch('/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+
+  // Two steps, so "Pakkam heard: ..." shows as soon as speech to text is done, while the
+  // answer is still being written: /transcribe (1 Gnani call), then /ask with that text.
+  // Once the transcript is known, Send again resends only the text, with no new Gnani call.
+  async function askVoice(clip) {
     retryButton.hidden = true;
-    lastClip = { audio, filename, language };
-    const body = new FormData();
-    body.append('audio', audio, filename);
-    body.append('language', language);
+    lastClip = clip;
     setVoiceStatus(TEXT.sendingVoice);
     const slow = setTimeout(() => setVoiceStatus(TEXT.slowUpload), SLOW_UPLOAD_MS);
-    const error = await runTurn(TEXT.voiceQuestion, () => fetch('/ask/voice', { method: 'POST', body }));
+    const error = await runTurn(TEXT.voiceQuestion, async (bubble) => {
+      if (!clip.transcript) {
+        const body = new FormData();
+        body.append('audio', clip.audio, clip.filename);
+        body.append('language', clip.language);
+        const heard = await fetch('/transcribe', { method: 'POST', body });
+        if (!heard.ok) return heard; // runTurn shows the server's message
+        clip.transcript = (await heard.json()).transcript;
+      }
+      clearTimeout(slow);
+      setVoiceStatus('');
+      bubble.textContent = '';
+      bubble.append(el('span', 'heard', TEXT.heard), clip.transcript);
+      return askText(clip.transcript);
+    });
     clearTimeout(slow);
     if (error && canRetry(error)) {
       setVoiceStatus(TEXT.voiceFailed);
@@ -424,6 +508,8 @@
       lastClip = null;
     }
   }
+
+  const newClip = (audio, filename) => ({ audio, filename, language: voiceLanguage(), transcript: null });
 
   function showRecording(seconds) {
     const text = seconds >= WARN_AT_SECONDS
@@ -449,7 +535,7 @@
   async function stopRecording() {
     if (!recording) return;
     const wav = await endRecording().stop();
-    askVoice(wav, 'question.wav');
+    askVoice(newClip(wav, 'question.wav'));
   }
 
   function cancelRecording() {
@@ -509,7 +595,7 @@
   }
   cancelButton.addEventListener('click', cancelRecording);
   retryButton.addEventListener('click', () => {
-    if (lastClip && !busy) askVoice(lastClip.audio, lastClip.filename, lastClip.language);
+    if (lastClip && !busy) askVoice(lastClip);
   });
   typeInstead.addEventListener('click', () => {
     typeInstead.hidden = true;
@@ -522,7 +608,7 @@
   upload.addEventListener('change', () => {
     const file = upload.files[0];
     upload.value = '';
-    if (file) askVoice(file, file.name);
+    if (file) askVoice(newClip(file, file.name));
   });
 
   form.addEventListener('submit', (event) => {

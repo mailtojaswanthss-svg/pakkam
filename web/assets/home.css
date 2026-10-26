@@ -61,6 +61,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 .hero h1 { max-width: 15ch; margin-top: var(--s-5); font-size: var(--step-5); line-height: 1.04; }
 .hero .lead { margin-top: var(--s-5); max-width: 44ch; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
+.hero-note { margin-top: var(--s-3); max-width: 44ch; color: var(--ink-2); font-size: var(--step--1); }
 .scripts { display: flex; flex-wrap: wrap; gap: var(--s-2); margin: var(--s-6) 0 0; padding: 0; list-style: none; }
 .scripts li {
   padding: 4px 14px;
@@ -96,9 +97,6 @@ html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 .float-forward { top: 16%; left: 0; border-radius: 16px 16px 16px 4px; animation-delay: .35s; }
 .float-label { color: var(--ink-2); font-size: var(--step--1); }
 .float-main { margin-top: 2px; font-weight: 600; line-height: 1.35; }
-.float-slip { right: 0; bottom: 9%; border-left: 4px solid var(--stamp); animation-delay: .9s; }
-.float-slip p[lang="ta"] { margin-top: 6px; font-family: var(--font-display); font-weight: 600; font-size: 1.0625rem; }
-.float-sub { color: var(--ink-2); font-size: var(--step--1); }
 @keyframes float-in { from { opacity: 0; transform: translateY(12px) scale(.97); } }
 
 .chip-mini {
@@ -273,6 +271,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 80px; }
   border-left: 4px solid var(--stamp);
   border-radius: 12px;
 }
+.demo-slip[hidden], .chip-cite[hidden] { display: none; }
 .demo-slip-title { font-weight: 600; font-size: var(--step--1); }
 .demo-slip-line { margin-top: 4px; color: var(--ink-2); }
 .demo-replay {
@@ -311,6 +310,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 .person-copy { padding: var(--s-4) var(--s-5) var(--s-5); }
 .person-who { font-family: var(--font-display); font-size: var(--step-1); font-weight: 800; }
 .person-copy p + p { margin-top: 4px; color: var(--ink-2); }
+.person-copy .person-tag { margin-top: var(--s-2); font-size: var(--step--1); font-weight: 600; }
 .person-copy strong { color: var(--ink); font-weight: 600; }
 
 /* ---------- how ---------- */

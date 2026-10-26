@@ -11,6 +11,7 @@ from schemebot.api.main import REQUEST_ID_HEADER, create_app
 from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import MAX_QUESTION_CHARS
 from schemebot.generate.answer import Answer, AnswerSentence, Citation
+from schemebot.generate.contacts import Contact
 from schemebot.voice.stt import SttError
 from schemebot.voice.tts import TtsError
 from tests.test_stt import make_wav
@@ -160,6 +161,34 @@ def test_refusal_is_a_normal_200_response(tmp_path: Path) -> None:
     assert body["refused"] is True
     assert body["refusal_reason"] == "low_confidence"
     assert body["citations"] == []
+    assert body["contact"] is None
+
+
+def test_refusal_carries_the_scheme_contact(tmp_path: Path) -> None:
+    contact = Contact(
+        scheme="PM-KISAN", helpline=None, helpline_source=None, website="https://pmkisan.gov.in"
+    )
+    refused = Answer(
+        question=QUESTION,
+        language="en",
+        text="I couldn't find this. For help with PM-KISAN, visit https://pmkisan.gov.in/.",
+        sentences=[],
+        citations=[],
+        refused=True,
+        refusal_reason="not_in_documents",
+        confidence=0.6,
+        disclaimer="Informational only.",
+        contact=contact,
+    )
+    app = create_app(lambda: FakeService(refused), log_dir=tmp_path)
+    with TestClient(app) as client:
+        body = client.post("/ask", json={"question": QUESTION}).json()
+
+    assert body["contact"] == {
+        "scheme": "PM-KISAN",
+        "website": "https://pmkisan.gov.in/",
+        "helpline": None,
+    }
 
 
 def test_internal_error_hides_details(tmp_path: Path) -> None:
@@ -519,3 +548,61 @@ def test_speak_spells_amounts_only_when_switched_on(
         client.post("/speak", json=body)
 
     assert [text for text, _ in tts.calls] == ["Rs.6000 a year.", "ஆறு ஆயிரம் ரூபாய் a year."]
+
+
+# ---------- /transcribe: speech to text on its own, so the page shows it at once ----------
+
+
+def test_transcribe_returns_the_text_without_answering(
+    service: FakeService, tmp_path: Path
+) -> None:
+    stt = FakeStt("  APY age limit?  ")
+    with voice_client(service, stt, tmp_path) as client:
+        response = client.post(
+            "/transcribe",
+            files={"audio": ("q.wav", short_wav(), "audio/wav")},
+            data={"language": "ta-Latn"},
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["transcript"] == "APY age limit?"
+    assert body["stt_language_code"] == "ta-IN"
+    assert body["stt_ms"] >= 0
+    assert stt.calls == [("q.wav", "ta-IN")]
+    assert service.questions == []  # no answer, no LLM call
+    [entry] = audit_lines(tmp_path)
+    assert entry["kind"] == "transcript"
+    timings = entry["timings_ms"]
+    assert isinstance(timings, dict) and set(timings) == {"stt"}
+    assert "APY" not in (tmp_path / "requests.jsonl").read_text()
+
+
+@pytest.mark.parametrize(
+    ("stt", "status"),
+    [(None, 503), (FakeStt("a"), 422), (FakeStt(error=SttError("Gnani is down.", 502)), 502)],
+)
+def test_transcribe_errors_match_ask_voice(
+    service: FakeService, tmp_path: Path, stt: FakeStt | None, status: int
+) -> None:
+    with voice_client(service, stt, tmp_path) as client:
+        response = client.post("/transcribe", files={"audio": ("q.wav", short_wav(), "audio/wav")})
+
+    assert response.status_code == status
+    assert isinstance(response.json()["detail"], str)
+
+
+def test_transcribe_has_its_own_rate_limit(service: FakeService, tmp_path: Path) -> None:
+    app = create_app(
+        lambda: service,
+        build_stt=FakeStt,
+        log_dir=tmp_path,
+        limiter=AskLimiter(per_client_per_minute=1, total_per_day=100),
+        transcribe_limiter=AskLimiter(per_client_per_minute=1, total_per_day=100),
+    )
+    clip = {"audio": ("q.wav", short_wav(), "audio/wav")}
+    with TestClient(app) as client:
+        # One voice question is one /transcribe and one /ask: both pass.
+        assert client.post("/transcribe", files=clip).status_code == 200
+        assert client.post("/ask", json={"question": QUESTION}).status_code == 200
+        assert client.post("/transcribe", files=clip).status_code == 429
