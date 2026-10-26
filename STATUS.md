@@ -37,6 +37,15 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
   - A stage that didn't run is left out: a low-confidence refusal has no llm_answer or verifier entry.
   - 6 more tests; 270 pass. **No real latency numbers exist yet.** They need live runs on Jaswanth's laptop.
 
+- Voice evaluation script (26 Oct, fakes only, no live calls; scope item 3):
+  - `python -m schemebot.voice eval-script` writes `data/voice/eval/script.csv`. It lists 32 questions to read aloud: per language, the first 6 answerable and the first 2 unanswerable by id. The pick is deterministic, so nobody hand-picks easy ones. Each row gives the file name to save as (`q001.wav`, or `q001-noisy.wav` for a noisy take).
+  - `python -m schemebot.voice eval data/voice/eval/` sends only clips that aren't transcribed yet. It asks for yes first and counts them in the cap. Transcripts are cached in `transcripts.jsonl`, so re-runs are free.
+  - It then runs typed and spoken versions of the same questions through the normal evaluation. The report has one row per language plus a "Noisy clips" row. Columns: clips, STT failed, Recall@5 typed → spoken, correct refusal typed → spoken, false refusal typed → spoken, and STT ms p50/p95. Every percentage shows its n.
+  - `--full` adds faithfulness (model-judged), citation accuracy and answer latency, using paid LLM calls. It asks first, and the default is retrieval only, which is free.
+  - `--tanglish-code en-IN` switches Tanglish to en-IN.
+  - Reports go to `data/voice/runs/` (gitignored). They carry the "Draft questions, not yet native-speaker verified" note, and a SYNTHETIC banner plus file prefix when any clip name contains "synthetic".
+  - 12 more tests; 282 pass. **Not run on real clips yet.**
+
 ## Next
 0. Jaswanth runs the Timbre listening test on his laptop (the key is only there; Claude can't hear audio, so Jaswanth describes what he hears):
    - a. `--cases tamil --models timbre-v2.5 timbre-v3.0` (2 calls), then choose the version and set `SCHEMEBOT_TTS_MODEL`.
@@ -44,7 +53,7 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 1. Jaswanth: record clips into `data/voice/tanglish/` (5 to 10 Tanglish, plus a pure Tamil, a pure English and one noisy clip as controls) and run the compare script.
 2. After the first few real calls, check credit use in the Gnani dashboard and set the daily cap to match.
 3. Read the CSV together and decide Tanglish ta-IN vs en-IN.
-4. Voice out (Timbre TTS).
+4. Record the 32 eval clips from `script.csv` (plus 1-2 noisy takes) and run `eval` (retrieval-only first, free).
 5. Mic UX polish, from the UI thread's spec (section 6 of /mnt/project-files/ui-ux/UX_RECOMMENDATIONS.md). Candidates: a big "Tap and speak" mic on phones, language buttons with Tanglish marked "(being tested)", denied-permission card, Stop/Cancel with a "5 seconds left" note, a slow-upload "Send again" option, and a TTS play/stop bar with no autoplay. Already done: the 0:30 cap, and an empty transcript gets "could not hear" and is never sent to /ask. Needs Jaswanth's go-ahead, and it touches runTurn in chat.js, which the UI thread also plans to change.
 
 ## Blockers
