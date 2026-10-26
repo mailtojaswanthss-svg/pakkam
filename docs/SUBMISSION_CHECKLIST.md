@@ -17,7 +17,7 @@ Status: ☐ open, ◐ partly done, ☑ done (with evidence).
 | Sev. | Item | Who | Status |
 |---|---|---|---|
 | High | Teammate accepts the terms email; agree who holds the API key and credits (primary registrant only; never in chat or git) | Jaswanth, Teammate | ☐ |
-| High | Agree the split; start the contribution log (date, person, what they did); both read all the code | Jaswanth, Teammate. Claude (docs) can create an empty `docs/CONTRIBUTIONS.md` from the plan's template | ☐ |
+| High | Agree the split; start the contribution log (date, person, what they did); both read all the code | Jaswanth, Teammate. `docs/CONTRIBUTIONS.md` created (empty) | ◐ Log file ready; the split still needs agreeing |
 | High | Test 5-10 real Tanglish clips on Gnani STT, ta-IN vs en-IN; save both transcripts | Jaswanth (clips, key, OK to spend), then the voice thread (script) | ☐ Blocked on the key and the clips |
 | Med | Gnani dashboard: what credits cover, which Timbre version is current | Jaswanth | ☐ |
 | Med | Ask Gnani (Discord or FAQ contact) what the engagement cutoff time is | Jaswanth | ☐ |
@@ -30,10 +30,10 @@ Status: ☐ open, ◐ partly done, ☑ done (with evidence).
 |---|---|---|---|
 | High | Check every demo number against its PDF page; start with Pudhumai Penn on the home page | Teammate (reading Tamil/Hindi: skill UNKNOWN) | ☐ PDFs are on Jaswanth's laptop, not in the repo |
 | High | Commit the code and re-run the evaluation cleanly (`results.md` says "uncommitted changes") | Jaswanth (laptop; needs the index and models; no credits) | ☐ |
-| High | Show n next to every percentage | Claude (docs): README table and the batch table in `report.md` | ☐ |
-| Med | Describe the judge accurately: "model-judged", same model verified and judged in the live test | Claude (docs): README, `report.md`, `evaluation.md` | ☐ |
-| Med | State Hindi coverage exactly: 2 Hindi documents, 5 pages, 14 chunks (`report.md` §3); most Hindi answers come through cross-language retrieval | Claude (docs) | ☐ Facts confirmed |
-| Med | Say what the 8 live answers and the 98% do and do not show (98% = gold page in the top 5, draft questions, not answer correctness) | Claude (docs) | ☐ |
+| High | Show n next to every percentage | Claude (docs): README table and the batch table in `report.md` | ☑ 26 Oct: n columns added to both, plus a note that correct refusal is out of 10 |
+| Med | Describe the judge accurately: "model-judged", same model verified and judged in the live test | Claude (docs): README, `report.md`, `evaluation.md` | ☑ 26 Oct: all three say model-judged and note that one model verified and judged in the live test. The Word report (`docs/Pakkam-Project-Report.docx`) still has the old wording. |
+| Med | State Hindi coverage exactly: 2 Hindi documents, 5 pages, 14 chunks (`report.md` §3); most Hindi answers come through cross-language retrieval | Claude (docs) | ☑ 26 Oct: README and `report.md` §3 |
+| Med | Say what the 8 live answers and the 98% do and do not show (98% = gold page in the top 5, draft questions, not answer correctness) | Claude (docs) | ☑ 26 Oct: README results and `report.md` §8; README now calls the 8 live answers a smoke test |
 | High | Tamil and Hindi speakers review a sample of the drafts with `docs/review/questions-review.csv`; open the PDF for any number | Teammate or volunteer reviewers | ☐ |
 
 ## 3. Build and prove it (28 Oct - 2 Nov)
@@ -55,8 +55,8 @@ Status: ☐ open, ◐ partly done, ☑ done (with evidence).
 |---|---|---|---|
 | High | Search the whole git history for API keys; keep `.env` ignored | Claude | ☑ 26 Oct: all branches scanned for Anthropic, Google, Hugging Face and generic `KEY=` value patterns, with no match. `.env` is in `.gitignore` (line 2), and only `.env.example` (empty values) was ever committed. The Gnani key format is unknown, so the scan can't rule out a Gnani key by pattern; none of the `SCHEMEBOT_GNANI_API_KEY` lines has a value. |
 | Med | Licences for the photos and the government documents | Claude (check), Jaswanth (decide) | ◐ Photos: 5 Unsplash photos, credited in `web/assets/img/CREDITS.md` under the Unsplash License. Documents: PDFs are not redistributed (only URLs in `data/sources.json`), and the README says documents stay their publishers' property. Open: `docs/data_sources.md` still says "candidate list" with TODOs, though `sources.json` is complete; no per-document licence or terms are recorded; the code is MIT in `pyproject.toml` and the README, but there is no LICENSE file. |
-| Med | README with setup steps and a tiny sample, so a reviewer can run it (PDFs and index not in the repo) | Claude (docs) drafts; Jaswanth picks the sample | ☐ |
-| Med | Voice privacy note: audio goes to Gnani, text to the LLM provider; nothing stored by the app | Claude (docs) | ☐ Facts confirmed in Step 1 (A6) |
+| Med | README with setup steps and a tiny sample, so a reviewer can run it (PDFs and index not in the repo) | Claude (docs) drafts; Jaswanth picks the sample | ◐ 26 Oct: README now says the PDFs and index are not in the repo and how to download them from `sources.json`. The tiny sample needs a small download script (code), not done. |
+| Med | Voice privacy note: audio goes to Gnani, text to the LLM provider; nothing stored by the app | Claude (docs) | ☑ 26 Oct: `docs/PRIVACY.md`, linked from the README |
 
 ## 5. Video and post (30 Oct - 3 Nov; post latest 5 Nov)
 
@@ -75,7 +75,7 @@ Status: ☐ open, ◐ partly done, ☑ done (with evidence).
 | Sev. | Item | Who | Status |
 |---|---|---|---|
 | High | Written explanation names the models used and each member's real contribution | Claude (docs) drafts from the contribution log; Jaswanth edits | ☐ |
-| High | Both can explain retrieval, reranker, refusal threshold, guardrails, STT, TTS and the evaluation script | Jaswanth, Teammate. Claude (docs) can write short module notes as a starting point; they must be rewritten in your own words. | ☐ |
+| High | Both can explain retrieval, reranker, refusal threshold, guardrails, STT, TTS and the evaluation script | Jaswanth, Teammate. Starting notes in `docs/MODULE_NOTES.md`; rewrite them in your own words. | ◐ Notes drafted 26 Oct |
 | High | Re-check the page for rule changes, then submit once on Fri 6 Nov (post live first) | Jaswanth only | ☐ |
 
 ## Do not claim
