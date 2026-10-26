@@ -288,3 +288,29 @@ Hours are estimates for one person including tests. "Fits" means it fits in the 
 | 16 | `/speak` only reads text Pakkam produced (signed answer ID); CSRF check on `/ask/voice` | 9 | 3 | No |
 
 Ranks 2-8 change code and need a go-ahead each, one step at a time.
+
+## Fixes made on 26 Oct (with Jaswanth's go-ahead)
+
+On branch `claude/project-thread-vl8ipg`, which has the voice branch merged in (several fixes touch
+voice code). One commit per fix, each with tests; no Gnani or LLM call was made. Ruff, mypy and
+all 306 fast tests pass.
+
+| Rank | Fix | What changed |
+|---|---|---|
+| 2 | Lock only retrieval | `api/main.py`: the API lock is gone. The retriever's own lock (`retrieve/retriever.py`) still makes GPU work take turns; LLM calls now run side by side. Test: two questions are answered at the same time. |
+| 3 | LLM limits | New settings `SCHEMEBOT_LLM_TIMEOUT_SECONDS` (60) and `SCHEMEBOT_LLM_RETRIES` (2), used by both Claude and Gemini. For a long eval run on Gemini's free tier set retries to 7 (README, `.env.example`). |
+| 4 | Number check | `generate/guardrails.py`: "2.5 lakh", "2.5 லட்சம்", "2.5 लाख" and "1 crore" are written out in full before comparing; "2023-24" matches "2023-2024". Different amounts are still rejected (tests for both). |
+| 5 | Audio check | `voice/stt.py`: first bytes must match the extension; WAV and FLAC lengths read from the header (unreadable files refused); MP3/OGG/AAC/M4A over 30 s at 384 kbps (about 1.4 MB) refused. |
+| 6 | Gnani counter | `voice/budget.py`: lock file shared by processes, per-process temp file, stale lock removed after 30 s, a broken count file now stops calls (it used to reset the count to 0). The 4-process probe now gives exactly 1200. |
+| 7 | Daily-limit message | `api/ratelimit.py`, `api/main.py`: the daily cap says "come back tomorrow"; the per-visitor limit says "wait a minute". The chat page still shows its own 429 text; showing the server's text is a one-line change in `web/assets/chat.js` for the UI thread. |
+
+Not done here, because they need a person or the laptop:
+
+- **Rank 1, demo amounts.** Open each PDF page in `docs/review/demo-numbers.csv` (weakness branch)
+  and fill in what the page shows, starting with Pudhumai Penn (Tamil higher-education and social
+  welfare notes), the APY Hindi brochure and the Rs.1,20,000 insurance limit. Leave a row out of
+  the demo until it is checked.
+- **Rank 8, clean results stamp.** On the laptop, with the index built: commit or stash any local
+  changes, push, then run `uv run python -m schemebot.evaluation --retrieval-only` (free, no API
+  key). Check that `docs/results.md` names a commit that is on GitHub and does not say
+  "uncommitted changes", then commit it.
