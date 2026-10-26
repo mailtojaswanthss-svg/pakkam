@@ -25,7 +25,46 @@ def test_numbers_ignore_thousands_separators_and_indic_digits() -> None:
 
     assert numbers_in("Rs.6,000 per year") == {"6000"}
     assert numbers_in(f"ரூ.{tamil_six_thousand}") == {"6000"}
-    assert numbers_in("income below 2.5 lakh") == {"2.5"}
+    assert numbers_in("income below 2.5 lakh") == {"250000"}
+
+
+@pytest.mark.parametrize(
+    ("sentence", "passage"),
+    [
+        ("Income must be below 2.5 lakh.", "Annual family income should not exceed Rs.2,50,000."),
+        ("Income must be below Rs.2,50,000.", "Income should not exceed Rs. 2.5 lakhs."),
+        ("ஆண்டு வருமானம் 2.5 லட்சத்திற்குள் இருக்க வேண்டும்.", "ஆண்டு வருமானம் ரூ.2,50,000/-க்குள்"),
+        ("वार्षिक आय 2.5 लाख से कम होनी चाहिए।", "Annual income below Rs.2,50,000."),
+        ("Cover of Rs.5 lakh per family.", "Cover of Rs.5,00,000 per family per year."),
+        ("The budget is Rs.1 crore.", "An amount of Rs.1,00,00,000 is sanctioned."),
+        ("The scheme started in 2023-24.", "Launched in the financial year 2023-2024."),
+    ],
+)
+def test_same_amount_written_differently_is_kept(sentence: str, passage: str) -> None:
+    result = check_answer([DraftSentence(sentence, [1])], [passage])
+
+    assert result.rejected == []
+
+
+@pytest.mark.parametrize(
+    ("sentence", "passage"),
+    [
+        ("Income must be below 2.5 lakh.", "Income should not exceed Rs.25,000."),
+        ("Income must be below 2 lakh.", "Income should not exceed Rs.2,50,000."),
+        ("Income must be below 2.5 lakh.", "Income should not exceed Rs.2.5 crore."),
+        ("The scheme started in 2023-24.", "Launched in 2023-2025."),
+    ],
+)
+def test_different_amount_is_still_rejected(sentence: str, passage: str) -> None:
+    result = check_answer([DraftSentence(sentence, [1])], [passage])
+
+    assert [r.reason for r in result.rejected] == ["number_not_in_source"]
+
+
+def test_age_ranges_and_plain_numbers_are_not_read_as_years() -> None:
+    assert numbers_in("Age: 18-60 years") == {"18", "60"}
+    assert numbers_in("in the year 2019-20") == {"2019", "2020"}
+    assert numbers_in("2019-21") == {"2019", "21"}
 
 
 def test_sentence_with_numbers_from_its_cited_passage_is_kept() -> None:
