@@ -168,6 +168,25 @@ def test_timings_are_recorded(corpus: list[Chunk]) -> None:
     assert {"retrieval", "generation", "total"} <= answer.timings_ms.keys()
 
 
+def test_every_stage_that_ran_is_timed(corpus: list[Chunk]) -> None:
+    answer = answer_with(
+        FakeLlm(sentences(("PM-KISAN pays Rs 6000 per year.", [1]))), corpus, QUESTION
+    )
+
+    timings = answer.timings_ms
+    assert {"search", "rerank", "llm_answer", "verifier", "total"} <= timings.keys()
+    assert all(isinstance(ms, float) and ms >= 0 for ms in timings.values())
+    assert timings["total"] >= timings["retrieval"] >= timings["search"]
+
+
+def test_a_low_confidence_refusal_has_no_llm_timings(corpus: list[Chunk]) -> None:
+    answer = answer_with(FakeLlm(sentences(("x", [1]))), corpus, "Capital city France?")
+
+    assert answer.refused
+    assert "llm_answer" not in answer.timings_ms
+    assert "verifier" not in answer.timings_ms
+
+
 class _FakeResponse:
     def __init__(self, text: str, stop_reason: str = "end_turn") -> None:
         self.stop_reason = stop_reason

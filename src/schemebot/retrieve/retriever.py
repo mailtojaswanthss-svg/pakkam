@@ -1,7 +1,8 @@
 """Full retrieval: hybrid search for candidates, then rerank and keep the best few."""
 
 import threading
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, field
 
 from schemebot.ingest.langid import detect_language
 from schemebot.ingest.models import Chunk
@@ -25,6 +26,8 @@ class RetrievedPassage:
 class RetrievalResult:
     query: str
     passages: list[RetrievedPassage]
+    timings_ms: dict[str, float] = field(default_factory=dict)
+    """"search" (first stage) and, when a reranker ran, "rerank"."""
 
     @property
     def confidence(self) -> float:
@@ -54,10 +57,14 @@ class Retriever:
             return self._retrieve(query, mode)
 
     def _retrieve(self, query: str, mode: SearchMode) -> RetrievalResult:
+        timings: dict[str, float] = {}
+        started = time.perf_counter()
         candidates = self._first_stage.search(query, limit=self._candidates, mode=mode)
+        timings["search"] = (time.perf_counter() - started) * 1000
         if self._reranker is None:
             passages = [RetrievedPassage(c.chunk, c.score) for c in candidates]
         else:
+            rerank_started = time.perf_counter()
             scores = self._reranker.score(
                 normalize_for_search(self.rerank_query(query)),
                 [normalize_for_search(c.chunk.text) for c in candidates],
@@ -67,7 +74,8 @@ class Retriever:
                 key=lambda passage: passage.relevance,
                 reverse=True,
             )
-        return RetrievalResult(query=query, passages=passages[: self._keep])
+            timings["rerank"] = (time.perf_counter() - rerank_started) * 1000
+        return RetrievalResult(query=query, passages=passages[: self._keep], timings_ms=timings)
 
     def rerank_query(self, query: str) -> str:
         """The query the reranker reads. First-stage search always uses the original.
