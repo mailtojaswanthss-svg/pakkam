@@ -21,6 +21,10 @@
     openPdf: (page) => `Open the official PDF at page ${page}`,
     passage: 'Cited passage',
     voiceQuestion: 'Voice question',
+    listen: 'Listen',
+    listenLoading: 'Getting audio',
+    listenStop: 'Stop',
+    listenFailed: 'Pakkam could not read this answer aloud.',
     heard: 'Pakkam heard:',
     recording: (s, max) => `Recording 0:${String(s).padStart(2, '0')} of 0:${max}. Tap the mic again to send.`,
     micStart: 'Ask by voice',
@@ -207,6 +211,7 @@
       });
       meta.append(button);
     }
+    meta.append(listenButton(data));
     if (data.latency_ms) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
     const disclaimer = el('p', 'disclaimer', data.disclaimer);
     setLang(disclaimer, data.language);
@@ -214,6 +219,62 @@
 
     item.append(avatar(), body);
     return item;
+  }
+
+  /* ---------- spoken answers (Gnani Timbre on the server; only after a tap) ---------- */
+  let playing = null; // { audio, button, url }
+
+  function stopPlaying() {
+    if (!playing) return;
+    playing.audio.pause();
+    URL.revokeObjectURL(playing.url);
+    playing.button.textContent = TEXT.listen;
+    playing.button.setAttribute('aria-pressed', 'false');
+    playing = null;
+  }
+
+  function spokenText(data) {
+    if (data.refused || data.sentences.length === 0) return data.answer;
+    return data.sentences.map((s) => s.text).join(' ');
+  }
+
+  async function listen(data, button) {
+    if (playing && playing.button === button) return stopPlaying();
+    stopPlaying();
+    button.disabled = true;
+    button.textContent = TEXT.listenLoading;
+    try {
+      const response = await fetch('/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: spokenText(data), language: data.language }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(typeof body.detail === 'string' ? body.detail : TEXT.listenFailed);
+      }
+      const url = URL.createObjectURL(await response.blob());
+      const audio = new Audio(url);
+      playing = { audio, button, url };
+      audio.addEventListener('ended', stopPlaying);
+      button.textContent = TEXT.listenStop;
+      button.setAttribute('aria-pressed', 'true');
+      await audio.play();
+    } catch (error) {
+      stopPlaying();
+      button.textContent = TEXT.listen;
+      showFormMsg(error instanceof TypeError ? TEXT.network : error.message);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function listenButton(data) {
+    const button = el('button', 'sources-btn listen-btn', TEXT.listen);
+    button.type = 'button';
+    button.setAttribute('aria-pressed', 'false');
+    button.addEventListener('click', () => listen(data, button));
+    return button;
   }
 
   function assistantItem(className, content) {
@@ -386,6 +447,7 @@
   document.querySelectorAll('[data-new-chat]').forEach((button) => {
     button.addEventListener('click', () => {
       if (busy) return;
+      stopPlaying();
       closeSources(false);
       log.textContent = '';
       welcome.hidden = false;

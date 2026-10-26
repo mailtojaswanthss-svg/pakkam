@@ -16,7 +16,7 @@ from typing import Literal, Protocol
 import httpx  # installed with fastapi[standard] (the `api` extra)
 
 from schemebot.config import Settings
-from schemebot.voice.budget import CALLS_FILE_NAME, BudgetExhausted, CallBudget
+from schemebot.voice.budget import CALLS_FILE_NAME, BudgetExhausted, CallBudget, shared_budget
 
 VoiceLanguage = Literal["ta", "hi", "en", "ta-Latn"]
 
@@ -127,7 +127,8 @@ class BudgetedTranscriber:
 
 
 def build_budget(settings: Settings) -> CallBudget:
-    return CallBudget(settings.log_dir / CALLS_FILE_NAME, settings.gnani_max_calls_per_day)
+    """The daily Gnani cap shared by speech to text and text to speech."""
+    return shared_budget(settings.log_dir / CALLS_FILE_NAME, settings.gnani_max_calls_per_day)
 
 
 def build_transcriber(settings: Settings) -> BudgetedTranscriber | None:

@@ -7,6 +7,7 @@ reranker models load once at startup; requests then reuse them.
 import logging
 import math
 import mimetypes
+import re
 import threading
 import time
 import uuid
@@ -26,6 +27,7 @@ from schemebot.api.schemas import (
     AskResponse,
     HealthResponse,
     SourceOut,
+    SpeakRequest,
     VoiceAskResponse,
 )
 from schemebot.config import PROJECT_ROOT, get_settings
@@ -39,8 +41,10 @@ from schemebot.voice.stt import (
     build_transcriber,
     check_audio,
 )
+from schemebot.voice.tts import Speaker, TtsError, build_speaker, language_code_for
 
 SOURCES_NAME = "sources.json"
+CITATION_MARKER = re.compile(r"\s*\[\d+\]")
 
 # Windows' MIME table has no entry for WebP, so photos would be served as octet-stream.
 mimetypes.add_type("image/webp", ".webp")
@@ -64,11 +68,13 @@ class AppState:
         audit: AuditLog,
         titles: dict[str, str],
         transcriber: Transcriber | None = None,
+        speaker: Speaker | None = None,
     ) -> None:
         self.service = service
         self.audit = audit
         self.titles = titles
         self.transcriber = transcriber
+        self.speaker = speaker
         self.lock = threading.Lock()
 
 
@@ -111,9 +117,14 @@ def _default_transcriber() -> Transcriber | None:
     return build_transcriber(get_settings())
 
 
+def _default_speaker() -> Speaker | None:
+    return build_speaker(get_settings())
+
+
 def create_app(
     build_service: Callable[[], AnswerService] = _default_service,
     build_stt: Callable[[], Transcriber | None] = _default_transcriber,
+    build_tts: Callable[[], Speaker | None] = _default_speaker,
     log_dir: Path | None = None,
     web_dir: Path | None = None,
     limiter: AskLimiter | None = None,
@@ -136,7 +147,11 @@ def create_app(
         audit_dir = log_dir or get_settings().log_dir
         titles = {d.doc_id: d.title or d.doc_id for d in load_sources()}
         app.state.schemebot = AppState(
-            build_service(), AuditLog(audit_dir / AUDIT_LOG_NAME), titles, build_stt()
+            build_service(),
+            AuditLog(audit_dir / AUDIT_LOG_NAME),
+            titles,
+            build_stt(),
+            build_tts(),
         )
         logger.info("models loaded, ready")
         yield
@@ -222,6 +237,24 @@ def create_app(
             transcript=question,
             stt_language_code=language_code,
             stt_ms=round(stt_ms, 1),
+        )
+
+    @app.post("/speak", dependencies=[Depends(limit_asks)])
+    def speak(body: SpeakRequest, state: StateDep) -> Response:
+        """An answer read aloud by Gnani Timbre, as WAV. Neither text nor audio is logged."""
+        if state.speaker is None:
+            raise HTTPException(status_code=503, detail="Spoken answers are not set up.")
+        text = CITATION_MARKER.sub("", body.text).strip()
+        if not text:
+            raise HTTPException(status_code=422, detail="There is nothing to read aloud.")
+        if len(text) > get_settings().tts_max_chars:
+            raise HTTPException(status_code=413, detail="This answer is too long to read aloud.")
+        try:
+            audio = state.speaker.speak(text, language_code_for(body.language))
+        except TtsError as error:
+            raise HTTPException(status_code=error.status_code, detail=error.message) from error
+        return Response(
+            content=audio, media_type="audio/wav", headers={"Cache-Control": "no-store"}
         )
 
     @app.get("/sources")

@@ -29,7 +29,7 @@ class CallBudget:
         self, path: Path, max_per_day: int, today: Callable[[], date] = today_in_india
     ) -> None:
         self._path = path
-        self._max = max_per_day
+        self.max_per_day = max_per_day
         self._today = today
         self._lock = threading.Lock()
 
@@ -38,14 +38,14 @@ class CallBudget:
             return self._read_count()
 
     def remaining(self) -> int:
-        return max(self._max - self.used_today(), 0)
+        return max(self.max_per_day - self.used_today(), 0)
 
     def take(self) -> None:
         """Count one call, or raise BudgetExhausted if today's cap is reached."""
         with self._lock:
             used = self._read_count()
-            if used >= self._max:
-                raise BudgetExhausted(f"Daily Gnani limit of {self._max} calls reached.")
+            if used >= self.max_per_day:
+                raise BudgetExhausted(f"Daily Gnani limit of {self.max_per_day} calls reached.")
             self._write_count(used + 1)
 
     def _read_count(self) -> int:
@@ -65,3 +65,17 @@ class CallBudget:
         record = {"date": self._today().isoformat(), "calls": calls}
         temporary.write_text(json.dumps(record), encoding="utf-8")
         temporary.replace(self._path)
+
+
+_shared: dict[Path, CallBudget] = {}
+_shared_lock = threading.Lock()
+
+
+def shared_budget(path: Path, max_per_day: int) -> CallBudget:
+    """One budget object per file in this process, so STT and TTS share one lock."""
+    with _shared_lock:
+        budget = _shared.get(path)
+        if budget is None or budget.max_per_day != max_per_day:
+            budget = CallBudget(path, max_per_day)
+            _shared[path] = budget
+        return budget
