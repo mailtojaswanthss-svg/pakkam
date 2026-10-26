@@ -1,4 +1,5 @@
 import json
+import threading
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -70,6 +71,36 @@ def test_health(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+class MeetingService(FakeService):
+    """Each answer waits until a second one is running too; fails if answers take turns."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._both_running = threading.Barrier(2, timeout=5)
+
+    def answer(self, question: str) -> Answer:
+        self._both_running.wait()
+        return super().answer(question)
+
+
+def test_two_questions_are_answered_at_the_same_time(tmp_path: Path) -> None:
+    # The GPU lock lives in the retriever; the API must not hold a lock over the LLM calls.
+    app = create_app(MeetingService, log_dir=tmp_path)
+    statuses: list[int] = []
+    with TestClient(app, raise_server_exceptions=False) as test_client:
+
+        def ask() -> None:
+            statuses.append(test_client.post("/ask", json={"question": QUESTION}).status_code)
+
+        threads = [threading.Thread(target=ask) for _ in range(2)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+    assert statuses == [200, 200]
 
 
 def test_ask_returns_cited_answer(client: TestClient) -> None:
