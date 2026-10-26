@@ -334,7 +334,8 @@
       let message = TEXT.network;
       if (error instanceof ServerError) {
         // 404/405: a static host (e.g. Vercel) with no answer server behind it.
-        if (error.status === 429) message = TEXT.tooMany;
+        // 429: the server says whether to wait a minute or come back tomorrow.
+        if (error.status === 429) message = error.detail || TEXT.tooMany;
         else if (error.status === 404 || error.status === 405) message = TEXT.offline;
         else if (error.detail && VOICE_ERRORS.has(error.status)) message = error.detail;
         else message = TEXT.server;
