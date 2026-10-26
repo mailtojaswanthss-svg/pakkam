@@ -64,11 +64,21 @@ def has_credentials(client: Any) -> bool:
 
 
 class ClaudeJsonLlm:
-    def __init__(self, model: str, api_key: str | None, effort: Effort) -> None:
+    def __init__(
+        self,
+        model: str,
+        api_key: str | None,
+        effort: Effort,
+        timeout_seconds: float = 60.0,
+        retries: int = 2,
+    ) -> None:
         import anthropic
 
         # api_key=None lets the SDK find credentials itself (env var or `ant auth login`).
-        self._client = anthropic.Anthropic(api_key=api_key)
+        # The SDK retries 408, 409, 429, 5xx and timeouts with backoff, `retries` times.
+        self._client = anthropic.Anthropic(
+            api_key=api_key, timeout=timeout_seconds, max_retries=retries
+        )
         self._anthropic = anthropic
         self._model = model
         self._effort = effort
