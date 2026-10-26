@@ -74,6 +74,15 @@ class Settings(BaseSettings):
     ask_limit_per_client_per_minute: int = Field(default=10, ge=1)
     ask_limit_total_per_day: int = Field(default=500, ge=1)
 
+    # Gnani voice (Prisma v2.5 speech to text). The key lives only in .env.
+    gnani_api_key: SecretStr | None = None
+    gnani_stt_url: str = "https://api.vachana.ai/stt/v3"
+    stt_max_seconds: float = Field(default=30.0, gt=0, le=60)
+    """Gnani's docs say both 30 s and 60 s; 30 s is the safe limit until tested."""
+    stt_max_bytes: int = Field(default=5_000_000, ge=1)
+    """Upload size cap: 30 s of 16 kHz mono WAV is about 1 MB."""
+    stt_timeout_seconds: float = Field(default=30.0, gt=0)
+
     # OCR
     tesseract_cmd: str | None = None
     tessdata_dir: Path | None = None

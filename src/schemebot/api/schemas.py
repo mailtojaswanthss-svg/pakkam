@@ -82,6 +82,12 @@ class AskResponse(BaseModel):
         )
 
 
+class VoiceAskResponse(AskResponse):
+    transcript: str = Field(description="What Gnani speech to text heard; this was the question.")
+    stt_language_code: str = Field(description="Language code sent to Gnani, e.g. 'ta-IN'.")
+    stt_ms: float = Field(description="Time spent on speech to text, in milliseconds.")
+
+
 class HealthResponse(BaseModel):
     status: Literal["ok"]
 

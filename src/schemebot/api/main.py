@@ -8,22 +8,37 @@ import logging
 import math
 import mimetypes
 import threading
+import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Protocol
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import JSONResponse
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 
 from schemebot.api.audit import AuditLog
 from schemebot.api.ratelimit import AskLimiter
-from schemebot.api.schemas import AskRequest, AskResponse, HealthResponse, SourceOut
+from schemebot.api.schemas import (
+    AskRequest,
+    AskResponse,
+    HealthResponse,
+    SourceOut,
+    VoiceAskResponse,
+)
 from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer
 from schemebot.ingest.models import SourceDoc
+from schemebot.voice.stt import (
+    GNANI_LANGUAGE_CODES,
+    SttError,
+    Transcriber,
+    VoiceLanguage,
+    build_transcriber,
+    check_audio,
+)
 
 SOURCES_NAME = "sources.json"
 
@@ -43,10 +58,17 @@ class AnswerService(Protocol):
 class AppState:
     """Everything built at startup. The lock serialises model use on the single GPU."""
 
-    def __init__(self, service: AnswerService, audit: AuditLog, titles: dict[str, str]) -> None:
+    def __init__(
+        self,
+        service: AnswerService,
+        audit: AuditLog,
+        titles: dict[str, str],
+        transcriber: Transcriber | None = None,
+    ) -> None:
         self.service = service
         self.audit = audit
         self.titles = titles
+        self.transcriber = transcriber
         self.lock = threading.Lock()
 
 
@@ -85,8 +107,13 @@ def _default_service() -> AnswerService:
     return build_answerer(get_settings())
 
 
+def _default_transcriber() -> Transcriber | None:
+    return build_transcriber(get_settings())
+
+
 def create_app(
     build_service: Callable[[], AnswerService] = _default_service,
+    build_stt: Callable[[], Transcriber | None] = _default_transcriber,
     log_dir: Path | None = None,
     web_dir: Path | None = None,
     limiter: AskLimiter | None = None,
@@ -109,7 +136,7 @@ def create_app(
         audit_dir = log_dir or get_settings().log_dir
         titles = {d.doc_id: d.title or d.doc_id for d in load_sources()}
         app.state.schemebot = AppState(
-            build_service(), AuditLog(audit_dir / AUDIT_LOG_NAME), titles
+            build_service(), AuditLog(audit_dir / AUDIT_LOG_NAME), titles, build_stt()
         )
         logger.info("models loaded, ready")
         yield
@@ -156,6 +183,46 @@ def create_app(
             answer = state.service.answer(body.question)
         state.audit.record(request.state.request_id, answer)
         return AskResponse.from_answer(answer, state.titles)
+
+    @app.post("/ask/voice", dependencies=[Depends(limit_asks)])
+    def ask_voice(
+        audio: UploadFile,
+        state: StateDep,
+        request: Request,
+        language: Annotated[VoiceLanguage, Form()] = "ta",
+    ) -> VoiceAskResponse:
+        """Spoken question: Gnani speech to text, then the same pipeline as `/ask`."""
+        if state.transcriber is None:
+            raise HTTPException(status_code=503, detail="Voice input is not set up on this server.")
+        settings = get_settings()
+        clip = audio.file.read(settings.stt_max_bytes + 1)
+        filename = audio.filename or "question.wav"
+        language_code = GNANI_LANGUAGE_CODES[language]
+
+        started = time.perf_counter()
+        try:
+            check_audio(clip, filename, settings.stt_max_bytes, settings.stt_max_seconds)
+            transcript = state.transcriber.transcribe(clip, filename, language_code)
+        except SttError as error:
+            raise HTTPException(status_code=error.status_code, detail=error.message) from error
+        stt_ms = (time.perf_counter() - started) * 1000
+
+        try:
+            question = AskRequest(question=transcript).question
+        except ValidationError as error:
+            raise HTTPException(
+                status_code=422, detail="Pakkam could not hear a question. Try again."
+            ) from error
+
+        with state.lock:
+            answer = state.service.answer(question)
+        state.audit.record(request.state.request_id, answer)
+        return VoiceAskResponse(
+            **AskResponse.from_answer(answer, state.titles).model_dump(),
+            transcript=question,
+            stt_language_code=language_code,
+            stt_ms=round(stt_ms, 1),
+        )
 
     @app.get("/sources")
     def sources() -> list[SourceOut]:

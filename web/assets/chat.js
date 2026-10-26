@@ -4,6 +4,9 @@
 
   const MIN_CHARS = 3;
   const MAX_CHARS = 500;
+  const MAX_VOICE_SECONDS = 30;
+  // Voice errors whose server message is written for the user (bad file, nothing heard, STT down).
+  const VOICE_ERRORS = new Set([400, 413, 415, 422, 502, 503]);
   const TEXT = {
     tooShort: 'Type at least 3 characters.',
     tooLong: 'Keep it under 500 characters.',
@@ -17,6 +20,12 @@
     answeredIn: (ms) => `Answered in ${(ms / 1000).toFixed(1)} s`,
     openPdf: (page) => `Open the official PDF at page ${page}`,
     passage: 'Cited passage',
+    voiceQuestion: 'Voice question',
+    heard: 'Pakkam heard:',
+    recording: (s, max) => `Recording 0:${String(s).padStart(2, '0')} of 0:${max}. Tap the mic again to send.`,
+    micStart: 'Ask by voice',
+    micStop: 'Stop and send',
+    micBlocked: 'Pakkam could not use the microphone. Allow it in the browser, or upload a recording.',
     schemesFailed: 'The document list could not load. Each answer still links its own source.',
   };
   const LANG_NAME = { en: 'English', ta: 'தமிழ்', hi: 'हिन्दी', 'ta-Latn': 'Tanglish' };
@@ -38,9 +47,10 @@
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   class ServerError extends Error {
-    constructor(status) {
+    constructor(status, detail = null) {
       super(`HTTP ${status}`);
       this.status = status;
+      this.detail = detail;
     }
   }
 
@@ -223,12 +233,10 @@
     input.style.height = `${input.scrollHeight}px`;
   }
 
-  async function ask(raw) {
-    const question = raw.trim();
-    if (question.length < MIN_CHARS) return showFormMsg(TEXT.tooShort);
-    if (question.length > MAX_CHARS) return showFormMsg(TEXT.tooLong);
+  // One question and answer turn. `request` returns the fetch promise; `label` shows until the
+  // server replies (for voice, the transcript then replaces it).
+  async function runTurn(label, request) {
     if (busy) return;
-
     showFormMsg('');
     busy = true;
     send.disabled = true;
@@ -237,27 +245,28 @@
     closeSources(false);
 
     const questionItem = el('li', 'msg q');
-    const bubble = el('p', null, question);
+    const bubble = el('p', null, label);
     questionItem.append(bubble);
     const pending = assistantItem('pending', [el('p', 'wait', TEXT.waiting), el('span', 'wait-bar')]);
     log.append(questionItem, pending);
     scrollToEnd();
-    input.value = '';
-    autosize();
 
     try {
       let response;
       try {
-        response = await fetch('/ask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question }),
-        });
+        response = await request();
       } catch {
         throw new Error('network');
       }
-      if (!response.ok) throw new ServerError(response.status);
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new ServerError(response.status, typeof body.detail === 'string' ? body.detail : null);
+      }
       const data = await response.json();
+      if (data.transcript) {
+        bubble.textContent = '';
+        bubble.append(el('span', 'heard', TEXT.heard), data.transcript);
+      }
       setLang(bubble, data.language);
       pending.replaceWith(renderAnswer(data));
     } catch (error) {
@@ -266,6 +275,7 @@
         // 404/405: a static host (e.g. Vercel) with no answer server behind it.
         if (error.status === 429) message = TEXT.tooMany;
         else if (error.status === 404 || error.status === 405) message = TEXT.offline;
+        else if (error.detail && VOICE_ERRORS.has(error.status)) message = error.detail;
         else message = TEXT.server;
       }
       pending.replaceWith(assistantItem('', [el('p', 'error-msg', message)]));
@@ -277,6 +287,81 @@
       input.focus({ preventScroll: true });
     }
   }
+
+  function ask(raw) {
+    const question = raw.trim();
+    if (question.length < MIN_CHARS) return showFormMsg(TEXT.tooShort);
+    if (question.length > MAX_CHARS) return showFormMsg(TEXT.tooLong);
+    if (busy) return;
+    input.value = '';
+    autosize();
+    return runTurn(question, () => fetch('/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    }));
+  }
+
+  /* ---------- asking by voice (Gnani speech to text on the server) ---------- */
+  const mic = $('#mic');
+  const upload = $('#upload');
+  const voiceLang = $('#voice-lang');
+  const voiceStatus = $('#voice-status');
+  let recording = null; // { recorder, timer, startedAt }
+
+  function askVoice(audio, filename) {
+    const body = new FormData();
+    body.append('audio', audio, filename);
+    body.append('language', voiceLang.value);
+    return runTurn(TEXT.voiceQuestion, () => fetch('/ask/voice', { method: 'POST', body }));
+  }
+
+  function showRecording(seconds) {
+    voiceStatus.textContent = TEXT.recording(seconds, MAX_VOICE_SECONDS);
+  }
+
+  async function stopRecording() {
+    if (!recording) return;
+    const { recorder, timer } = recording;
+    recording = null;
+    clearInterval(timer);
+    mic.setAttribute('aria-pressed', 'false');
+    mic.setAttribute('aria-label', TEXT.micStart);
+    voiceStatus.textContent = '';
+    const wav = await recorder.stop();
+    askVoice(wav, 'question.wav');
+  }
+
+  async function startRecording() {
+    if (busy) return;
+    showFormMsg('');
+    try {
+      const recorder = await window.PakkamRecorder.start();
+      const startedAt = Date.now();
+      const timer = setInterval(() => {
+        const seconds = Math.floor((Date.now() - startedAt) / 1000);
+        if (seconds >= MAX_VOICE_SECONDS) stopRecording();
+        else showRecording(seconds);
+      }, 250);
+      recording = { recorder, timer };
+      mic.setAttribute('aria-pressed', 'true');
+      mic.setAttribute('aria-label', TEXT.micStop);
+      showRecording(0);
+    } catch {
+      showFormMsg(TEXT.micBlocked);
+    }
+  }
+
+  if (window.PakkamRecorder && window.PakkamRecorder.supported) {
+    mic.addEventListener('click', () => (recording ? stopRecording() : startRecording()));
+  } else {
+    mic.hidden = true;
+  }
+  upload.addEventListener('change', () => {
+    const file = upload.files[0];
+    upload.value = '';
+    if (file) askVoice(file, file.name);
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
