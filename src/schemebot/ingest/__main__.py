@@ -40,6 +40,8 @@ def main() -> int:
             f"chunks={doc.chunks:<4} {doc.chunks_by_language}"
         )
     print(f"total chunks: {report.total_chunks}")
+    for fix in report.corrections_applied:
+        print(f"corrected by hand: {fix}")
     unverified = sum(d.pages_by_method.get("text-unverified", 0) for d in report.documents)
     if unverified:
         print(f"WARNING: {unverified} pages needed OCR but did not get it", file=sys.stderr)

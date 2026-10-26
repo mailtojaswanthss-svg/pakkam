@@ -207,6 +207,12 @@ Public documents only. It does not process applications or personal data, it is 
 service, and its answers need human verification. Scheme rules change, so answers reflect the
 document dates listed in the data-source file.
 
+OCR misreads some digits in Tamil and Hindi pages (Rs.1,000 read as 4,000). Known misreadings
+are listed in `data/corrections.json`. An answer may never use a listed wrong number from that
+document. Only after a person has checked the printed PDF page and filled in `confirmed_by`,
+`confirmed_on` and `page` does ingestion replace the text, and then the citation is flagged
+`ocr_corrected` in the API. Re-run ingestion and indexing after confirming an entry.
+
 ## License
 
 MIT for the code. Source documents remain the property of their publishers.

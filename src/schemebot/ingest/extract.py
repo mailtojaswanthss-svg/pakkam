@@ -20,8 +20,9 @@ from schemebot.ingest.langid import Language
 
 logger = logging.getLogger(__name__)
 
-ExtractionMethod = Literal["text", "ocr", "text-unverified"]
-"""text-unverified: the page needed OCR but OCR was unavailable; the text may be garbage."""
+ExtractionMethod = Literal["text", "ocr", "text-unverified", "ocr-corrected"]
+"""text-unverified: the page needed OCR but OCR was unavailable; the text may be garbage.
+ocr-corrected: OCR text with a misreading fixed by hand (ingest/corrections.py)."""
 
 MIN_PAGE_CHARS = 40
 """A page with fewer real characters than this is treated as a scanned image."""

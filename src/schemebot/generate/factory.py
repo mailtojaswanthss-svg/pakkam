@@ -6,6 +6,7 @@ from schemebot.config import Effort, Settings
 from schemebot.generate.answer import Answerer
 from schemebot.generate.contacts import CONTACTS_NAME, load_contacts
 from schemebot.generate.llm import ConfiguredJsonLlm
+from schemebot.ingest.corrections import CORRECTIONS_NAME, load_corrections
 from schemebot.retrieve.factory import build_retriever
 from schemebot.retrieve.retriever import Retriever
 
@@ -53,4 +54,5 @@ def build_answerer(settings: Settings, retriever: Retriever | None = None) -> An
         verifier,
         settings.refusal_threshold,
         contacts,
+        load_corrections(settings.data_dir / CORRECTIONS_NAME),
     )
