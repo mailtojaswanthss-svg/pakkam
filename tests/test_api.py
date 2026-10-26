@@ -266,6 +266,19 @@ def test_too_many_questions_get_429_with_retry_after(service: FakeService, tmp_p
     assert health.status_code == 200
 
 
+def test_daily_limit_says_come_back_tomorrow(service: FakeService, tmp_path: Path) -> None:
+    # "Wait a minute" would be wrong here: the next slot can be many hours away.
+    limiter = AskLimiter(per_client_per_minute=10, total_per_day=1)
+    app = create_app(lambda: service, log_dir=tmp_path, limiter=limiter)
+    with TestClient(app) as test_client:
+        test_client.post("/ask", json={"question": QUESTION})
+        response = test_client.post("/ask", json={"question": QUESTION})
+
+    assert response.status_code == 429
+    assert "tomorrow" in response.json()["detail"]
+    assert int(response.headers["Retry-After"]) > 3600
+
+
 # ---------- POST /ask/voice ----------
 
 
