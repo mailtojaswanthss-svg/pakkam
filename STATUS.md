@@ -81,6 +81,13 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 ## Open questions for TTS (untested)
 - Gnani's docs say to spell out numbers, dates and currency. Our answers contain digits like "Rs. 1,000", and how Timbre reads them is unknown. Test this before the demo.
 - Typed Tanglish questions get Tanglish answers in Latin letters, and a ta-IN voice reading Latin text is untested. Spoken Tanglish goes through ta-IN STT and probably comes back in Tamil script, but that depends on the clip test.
+- **Tanglish TTS options, for Jaswanth to choose after the listening test (no choice made):**
+  - A. Speak as is with a ta-IN voice. No work. Fine if the test sounds like Tamil; bad if it sounds English or garbled.
+  - B1. Ask the answer LLM for a Tamil-script copy of each Tanglish sentence and speak that. About 2-3 h: one more field in the answer JSON, so more output tokens but no extra call. Risk: the copy could drift from the checked text. Mitigation: only accept it if its numbers match the Tanglish sentence, else fall back to C.
+  - B2. Rule-based Latin-to-Tamil transliteration. No LLM, but Tanglish spelling is loose ("evlo/evvalavu"), so quality is likely poor. About 3-4 h plus tuning. Not recommended without a test set.
+  - C. Hide Listen on Tanglish answers, with a one-line note saying listening is available for Tamil, Hindi and English. Under 1 h. Honest, but it shows a gap in the demo.
+  - D. Speak Tanglish with an en-IN voice, which reads Latin letters as written. No work. This goes against "Tanglish is spoken in Tamil", so it's listed only for completeness.
+  - Note: spoken Tanglish questions go through ta-IN STT and will likely come back in Tamil script, so the answer and its voice would be Tamil. The gap mostly affects typed Tanglish.
 
 ## Synthetic test clips
 - Synthetic voices are for plumbing tests only (pipeline, CSV, counter, errors). File names and outputs carry "synthetic". Clips made with Gnani Timbre for Gnani STT are labelled "synthetic, same vendor". Results from them are never used as evidence in any doc or number.
