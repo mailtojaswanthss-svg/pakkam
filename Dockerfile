@@ -4,10 +4,13 @@
 #
 #   docker compose up --build        (see compose.yaml)
 
+# To pin the base image as well, add its digest on the laptop:
+#   docker buildx imagetools inspect python:3.12-slim-trixie   (the "Digest:" line)
+# and build with --build-arg PYTHON_IMAGE=python:3.12-slim-trixie@sha256:<digest>.
 ARG PYTHON_IMAGE=python:3.12-slim-trixie
 
 # ---------- build: install dependencies, then the project ----------
-FROM ghcr.io/astral-sh/uv:0.11.12 AS uv
+FROM ghcr.io/astral-sh/uv:0.11.12@sha256:3a59a3cdd5f7c217faa36e32dbc7fddbb0412889c2a0a5229f6d790e5a019dd7 AS uv
 FROM ${PYTHON_IMAGE} AS builder
 COPY --from=uv /uv /bin/uv
 
@@ -68,19 +71,26 @@ CMD ["uvicorn", "schemebot.api.main:app", "--host", "0.0.0.0", "--port", "8000",
 FROM builder AS models
 ARG EMBEDDING_MODEL=BAAI/bge-m3
 ARG RERANKER_MODEL=BAAI/bge-reranker-v2-m3
+# Commit hashes from .env (SCHEMEBOT_EMBEDDING_REVISION, SCHEMEBOT_RERANKER_REVISION); empty
+# means the latest version.
+ARG EMBEDDING_REVISION=
+ARG RERANKER_REVISION=
 ENV HF_HOME=/models
-# The ONNX exports in the bge-m3 repository are not used and add about 2 GB.
-RUN /app/.venv/bin/python -c "import sys; from huggingface_hub import snapshot_download; \
-[snapshot_download(m, ignore_patterns=['onnx/*', '*.onnx', 'imgs/*']) for m in sys.argv[1:]]" \
-    "${EMBEDDING_MODEL}" "${RERANKER_MODEL}"
+RUN /app/.venv/bin/python -c "import sys; from schemebot.index.embed import model_source; \
+[model_source(m, r or None) for m, r in zip(sys.argv[1::2], sys.argv[2::2])]" \
+    "${EMBEDDING_MODEL}" "${EMBEDDING_REVISION}" "${RERANKER_MODEL}" "${RERANKER_REVISION}"
 
 FROM runtime AS cloudrun
+ARG EMBEDDING_REVISION=
+ARG RERANKER_REVISION=
 COPY --from=models --chown=app:app /models /app/models
 # Only what the server reads: the index (Qdrant writes a lock file in it), sources, contacts.
 COPY --chown=app:app data/index /app/data/index
-COPY --chown=app:app data/sources.json data/contacts.json /app/data/
+COPY --chown=app:app data/sources.json data/contacts.json data/corrections.json /app/data/
 # Models load from the image, never from the network. Only Google's front end can reach a
 # Cloud Run container, so trusting X-Forwarded-For from any address is safe here, and the
 # rate limit then sees each visitor's address instead of the proxy's.
 ENV HF_HUB_OFFLINE=1 \
-    FORWARDED_ALLOW_IPS="*"
+    FORWARDED_ALLOW_IPS="*" \
+    SCHEMEBOT_EMBEDDING_REVISION=${EMBEDDING_REVISION} \
+    SCHEMEBOT_RERANKER_REVISION=${RERANKER_REVISION}

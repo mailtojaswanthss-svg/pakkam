@@ -305,6 +305,7 @@ all 306 fast tests pass.
 | 7 | Daily-limit message | `api/ratelimit.py`, `api/main.py`: the daily cap says "come back tomorrow"; the per-visitor limit says "wait a minute". The chat page still shows its own 429 text; showing the server's text is a one-line change in `web/assets/chat.js` for the UI thread. |
 | 9 | Answer cache | `generate/cache.py`: up to 256 answers for 6 hours, keyed on the tidied question; temporary failures are not kept; the API only, never the eval. |
 | 11 | Gnani 5xx wording | `voice/stt.py`: a Gnani server fault now says "The speech service is not working right now. Type your question instead." instead of blaming the recording. The page's 2-minute fetch timeout was done by the UI thread (`web/assets/chat.js`, now on main). |
+| 10 | Pinned versions | New settings `SCHEMEBOT_EMBEDDING_REVISION` / `SCHEMEBOT_RERANKER_REVISION` (full commit hashes) load exactly that model version, in the app, the indexer and the Cloud Run image; the eval report prints them. The uv image is pinned by digest. The Python base image digest and the two commit hashes still have to be filled in from the laptop (Docker Hub and Hugging Face were not reachable from the cloud session). |
 | 8b | Known OCR misreadings | `ingest/corrections.py`, `data/corrections.json`: listed wrong numbers can't be used in answers; person-confirmed fixes are applied at ingestion and flagged `ocr_corrected`. See `OCR_CORRECTIONS_DESIGN.md`. |
 
 Not done here, because they need a person or the laptop:
