@@ -2,7 +2,7 @@
 
 *Draft for the Pakkam project report (Word). Markdown first, for review. Nothing here has been copied into the .docx yet.*
 
-**Snapshot taken: Mon 26 Oct 2026, 11:42 UTC (5:12 PM IST).** Other work is still going on, so this section describes the repository at these commits:
+**Snapshot: branches fetched Mon 26 Oct 2026, 11:37 UTC (5:07 PM IST).** Other work is still going on, so this section describes the repository at these commits:
 
 | Branch | What it holds | Commit |
 |---|---|---|
@@ -12,6 +12,10 @@
 | `claude/project-thread-i98lxh` | UI/UX audit and recommendations (PR #1) | `5494278` |
 
 None of the three side branches has been merged into `main` yet.
+
+**Pushed just after the snapshot, so not counted here** (to be added in the next update):
+- Voice branch `84b14d6` (11:37:58 UTC): spoken answers with Gnani Timbre TTS (`POST /speak`, Listen/Stop button), off until the Timbre version is set. `2491d46` (11:42 UTC): a Timbre listening-test script.
+- New UI branch `claude/ui-proof-refusal`: `af190c6` removes unverified facts from the home page (T0) and `b30177d` shows the source page under every answer (T1), both waiting for Jaswanth's review.
 
 **Labels used here.** UNKNOWN: not in the sources. UNVERIFIED: written down, but not yet checked against the source. ESTIMATE: a guess, not a measurement. All hours are estimates.
 
@@ -158,7 +162,7 @@ From `SUBMISSION_CHECKLIST.md` and `DOCX_CHANGES.md`:
 
 ## 4. Percent of work done
 
-**As of Mon 26 Oct 2026, 11:42 UTC**, from the 38 tasks in section 3.
+**As of Mon 26 Oct 2026, 11:37 UTC**, from the 38 tasks in section 3. Work pushed after that time (TTS, T0, T1) is not counted.
 
 **Method**
 1. Every task in section 3 counts once. Tasks that overlap between the two plans were merged first (for example, WP #13 is split into V9 and U1-U10, and WP #15 is inside U4).
