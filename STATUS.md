@@ -30,6 +30,13 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 
 - Timbre listening test script (26 Oct): `python -m schemebot.voice tts-samples` speaks short made-up sentences (cases: tamil, digits, tanglish; text in `voice/samples.py`). It prints the voices and the call count, waits for `yes`, and counts calls in the daily cap. Output files are `data/voice/tts-samples/synthetic-test-*.wav`, each with a notes file saying what to listen for. 5 more tests; 264 pass.
 
+- Per-stage timing (26 Oct, fakes only, no live calls):
+  - `/ask` and `/ask/voice` responses now include `timings_ms`, with keys search, rerank, retrieval (= search + rerank), llm_answer, verifier (guardrail checks plus the verifier call), generation (= llm_answer + verifier), total, and stt for voice.
+  - `/speak` sends a `Server-Timing: tts;dur=…` header.
+  - The audit log (`logs/requests.jsonl`) stores the same numbers. A spoken answer gets its own line holding only character count, language code and tts ms. No text or audio is logged.
+  - A stage that didn't run is left out: a low-confidence refusal has no llm_answer or verifier entry.
+  - 6 more tests; 270 pass. **No real latency numbers exist yet.** They need live runs on Jaswanth's laptop.
+
 ## Next
 0. Jaswanth runs the Timbre listening test on his laptop (the key is only there; Claude can't hear audio, so Jaswanth describes what he hears):
    - a. `--cases tamil --models timbre-v2.5 timbre-v3.0` (2 calls), then choose the version and set `SCHEMEBOT_TTS_MODEL`.

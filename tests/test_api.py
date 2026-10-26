@@ -419,3 +419,41 @@ def test_speak_does_not_log_text(service: FakeService, tmp_path: Path) -> None:
 
     logged = "".join(path.read_text() for path in tmp_path.rglob("*") if path.is_file())
     assert "secret" not in logged
+
+
+# ---------- timings: numbers only ----------
+
+
+def audit_lines(log_dir: Path) -> list[dict[str, object]]:
+    return [json.loads(line) for line in (log_dir / "requests.jsonl").read_text().splitlines()]
+
+
+def test_ask_returns_stage_timings(client: TestClient) -> None:
+    body = client.post("/ask", json={"question": QUESTION}).json()
+
+    assert body["timings_ms"] == {"retrieval": 40.0, "generation": 900.0, "total": 950.0}
+
+
+def test_voice_adds_stt_timing_to_response_and_log(service: FakeService, tmp_path: Path) -> None:
+    with voice_client(service, FakeStt(), tmp_path) as client:
+        body = client.post(
+            "/ask/voice", files={"audio": ("q.wav", short_wav(), "audio/wav")}
+        ).json()
+
+    assert body["timings_ms"]["stt"] == body["stt_ms"]
+    assert body["timings_ms"]["total"] == 950.0
+    [entry] = audit_lines(tmp_path)
+    assert set(entry["timings_ms"]) == {"retrieval", "generation", "total", "stt"}  # type: ignore[arg-type]
+
+
+def test_speak_logs_tts_timing_without_text(service: FakeService, tmp_path: Path) -> None:
+    with speak_client(service, FakeTts(), tmp_path) as client:
+        response = client.post("/speak", json={"text": "Citizens can join. [1]", "language": "ta"})
+
+    assert response.headers["Server-Timing"].startswith("tts;dur=")
+    [entry] = audit_lines(tmp_path)
+    assert entry["kind"] == "speech"
+    assert entry["chars"] == len("Citizens can join.")
+    assert entry["language_code"] == "ta-IN"
+    assert set(entry["timings_ms"]) == {"tts"}  # type: ignore[arg-type]
+    assert "Citizens" not in (tmp_path / "requests.jsonl").read_text()

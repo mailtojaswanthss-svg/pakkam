@@ -25,6 +25,10 @@ class AskRequest(BaseModel):
     question: Question = Field(examples=["PM Kisan ku evlo panam kidaikum?"])
 
 
+def rounded_timings(timings: Mapping[str, float]) -> dict[str, float]:
+    return {stage: round(ms, 1) for stage, ms in timings.items()}
+
+
 class CitationOut(BaseModel):
     number: int
     scheme: str
@@ -52,6 +56,10 @@ class AskResponse(BaseModel):
     confidence: float = Field(description="Relevance of the best retrieved passage, 0-1.")
     disclaimer: str
     latency_ms: float
+    timings_ms: dict[str, float] = Field(
+        description="Milliseconds per stage, e.g. search, rerank, llm_answer, verifier, total "
+        "(plus stt for voice questions). A stage that did not run is absent."
+    )
 
     @classmethod
     def from_answer(cls, answer: Answer, titles: Mapping[str, str] | None = None) -> "AskResponse":
@@ -79,6 +87,7 @@ class AskResponse(BaseModel):
             confidence=round(answer.confidence, 4),
             disclaimer=answer.disclaimer,
             latency_ms=round(answer.timings_ms.get("total", 0.0), 1),
+            timings_ms=rounded_timings(answer.timings_ms),
         )
 
 
