@@ -1,7 +1,7 @@
 # Pakkam: the next 24 hours
 
 Written Mon 26 Oct 2026, 11:55 UTC (5:25 PM IST). Covers Mon 26 Oct evening to Tue 27 Oct evening (IST).
-Task IDs come from [REPORT_STATUS_SECTION.md](REPORT_STATUS_SECTION.md). All hours are ESTIMATES.
+Task IDs come from [REPORT_STATUS_SECTION.md](REPORT_STATUS_SECTION.md). Updated 12:40 UTC after the merges into `main`. All hours are ESTIMATES.
 
 **Goal:** finish the three tasks that decide what we can honestly claim, and clear the small tasks that block other work. The goal is not a percentage.
 
@@ -18,7 +18,7 @@ Task IDs come from [REPORT_STATUS_SECTION.md](REPORT_STATUS_SECTION.md). All hou
 | # | Task | Who | Hours | Unblocks |
 |---|---|---|---|---|
 | 4 | **Gnani dashboard:** check what one credit buys, and which Timbre version is current (v2.5 Beta or v3.0). Set `SCHEMEBOT_TTS_MODEL`. Or compare both first: `uv run python -m schemebot.voice tts-samples --cases tamil --models timbre-v2.5 timbre-v3.0` (synthetic sentences, yes prompt) and listen. | Jaswanth | 1 | V3 (TTS) is built on the branch but switched off until the version is set; also the voice eval budget |
-| 5 | **Review the UI branch `claude/ui-proof-refusal`:** T0 (hide unverified facts), T1 (source page under every answer), T3 (clearer "I don't know") and T4 (disclaimer on phones). | Jaswanth | 0.5 | Marking U1, U2, U4, U5 done |
+| 5 | **Review the UI branch `claude/ui-proof-refusal` (PR #3):** T0 (hide unverified facts), T1 (source page under every answer), T3 (clearer "I don't know") and T4 (disclaimer on phones). | Jaswanth | 0.5 | Marking U1, U2, U4, U5 done |
 | 6 | **S5:** teammate confirms the terms email is accepted; agree who holds the key and credits. **S4:** ask Gnani (Discord or FAQ contact) when engagement is counted. | Jaswanth, Teammate | 0.5 | The submission, and the post date |
 | 7 | **D4:** choose the licence (MIT or Apache-2.0). | Jaswanth | 0.1 to decide | A LICENSE file |
 | 8 | **S1:** first rows in `docs/CONTRIBUTIONS.md`, for both people, with links. **S2:** 20 minutes of interview practice. | Both | 0.5 | The contribution section, which is empty today |
@@ -29,7 +29,7 @@ Task IDs come from [REPORT_STATUS_SECTION.md](REPORT_STATUS_SECTION.md). All hou
 |---|---|---|---|---|
 | 9 | **V4: latency.** The voice branch now records per-stage timings (`5b4b542`). Run 3-5 live voice questions and report median and max with n. | Jaswanth | 2 | Items 1 and 4; Gnani credits and an LLM key; your OK before the calls |
 | 10 | **U8:** native review of the Tamil interface strings (UX_RECOMMENDATIONS.md §7). | Jaswanth | 1-2 | — |
-| 11 | **U10 preparation:** decide the merge order. The voice branch and `claude/ui-proof-refusal` conflict in 4 files: `api/schemas.py`, `generate/answer.py`, `tests/test_api.py`, `web/assets/chat.js` (checked with `git merge-tree`, 26 Oct 11:55 UTC). Suggestion: merge voice first, then rebase the UI branch on it. | Jaswanth decides; Claude can do the rebase with a go-ahead | 2 | Your go-ahead for merging |
+| 11 | **U10: review and merge PR #3** (UI T0, T1, T3, T4). Voice and the backend fixes are already in `main` (26 Oct, 12:32 UTC), and `main` is merged into PR #3; 359 tests pass on it. | Jaswanth | 0.5 | CI green on PR #3 |
 
 ## Not in these 24 hours (and why)
 
