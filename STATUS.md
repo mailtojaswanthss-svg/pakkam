@@ -73,7 +73,16 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
 3. Read the CSV together and decide Tanglish ta-IN vs en-IN.
 4. Record the 32 eval clips from `script.csv` (plus 1-2 noisy takes) and run `eval` (retrieval-only first, free).
 5. Mic UX polish: mostly done (see Done). Not built from the spec: the one-time mic pre-prompt (3), showing "Pakkam heard" before the answer arrives (6, needs a separate STT step), and a fixed "Playing answer" bar (9; the Listen/Stop button stays on each answer). Try it on a real phone before the video, using docs/PHONE_TEST.md.
-6. Later list (Jaswanth, 26 Oct): the one-time mic pre-prompt; a "Playing answer" bar (needs TTS switched on first); "show the transcript as soon as it is known" (a proposal with the Gnani call cost comes after the merge, not built).
+6. Later list (Jaswanth, 26 Oct): the one-time mic pre-prompt; a "Playing answer" bar (needs TTS switched on first); "show the transcript as soon as it is known" (proposal below, not built).
+7. Proposal: show the transcript first (not built, waiting for Jaswanth's choice). Today /ask/voice returns the transcript only together with the answer.
+   - **A. Two requests (recommended).** Add a new `POST /transcribe` that only runs STT. The page shows "Pakkam heard: …" straight away, then sends that text to `/ask` like a typed question.
+     - Gnani cost: 1 call per question, the same as now.
+     - Extras: one more local HTTP round trip, and it could later let the user fix a wrong transcript before asking.
+     - Work: about 2-3 h. `/transcribe` needs its own rate limit so a voice question isn't counted twice. The stt_ms timing and the language picked must be passed on to `/ask`. Tests use fakes.
+   - **B. Streaming.** `/ask/voice` sends the transcript first, then the answer, in one response.
+     - Gnani cost: also 1 call per question.
+     - Work: about 4-5 h. Errors after the transcript arrive inside a 200 response, so runTurn's error handling (shared with the UI thread) has to change, and the browser must read a stream.
+   - Neither option makes the speech-to-text step itself faster. They only stop the transcript waiting for the answer. The 13-50 s figure in the UI spec is the UI thread's estimate of answer time, not a voice measurement.
 
 ## Blockers
 - Tanglish clips (Jaswanth). The key is in his local `.env` (26 Oct). **Target: recordings done by Wed 28 Oct, no later than Sun 1 Nov.** The result decides whether the roughly 6-hour transliteration work is needed, so a later date makes the plan slip.
