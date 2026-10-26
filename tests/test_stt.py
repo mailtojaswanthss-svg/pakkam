@@ -13,6 +13,7 @@ from schemebot.voice.stt import (
     SttError,
     build_transcriber,
     check_audio,
+    flac_seconds,
     wav_seconds,
 )
 
@@ -45,8 +46,35 @@ def test_wav_seconds_is_none_for_other_formats() -> None:
     assert wav_seconds(b"ID3 not a wav file") is None
 
 
+def make_flac(seconds: float, rate: int = 16000) -> bytes:
+    """Just the FLAC header with STREAMINFO: enough for the format and length checks."""
+    packed = rate << 44 | 0 << 41 | 15 << 36 | int(seconds * rate)  # mono, 16-bit
+    streaminfo = b"\x10\x00\x10\x00" + b"\x00" * 6 + packed.to_bytes(8, "big") + b"\x00" * 16
+    return b"fLaC" + b"\x80\x00\x00\x22" + streaminfo
+
+
 def test_check_audio_accepts_short_wav() -> None:
     check_audio(make_wav(3), "q.wav", max_bytes=5_000_000, max_seconds=30)
+
+
+@pytest.mark.parametrize(
+    ("audio", "filename"),
+    [
+        (make_flac(20), "q.FLAC"),
+        (b"ID3" + b"\x00" * 300_000, "q.mp3"),  # about 20 s at 128 kbps
+        (b"\xff\xfb" + b"\x00" * 1000, "q.mp3"),
+        (b"OggS" + b"\x00" * 1000, "q.ogg"),
+        (b"\x00\x00\x00\x20ftypM4A " + b"\x00" * 1000, "voice memo.m4a"),
+        (b"\xff\xf1" + b"\x00" * 1000, "q.aac"),
+    ],
+)
+def test_check_audio_accepts_real_formats(audio: bytes, filename: str) -> None:
+    check_audio(audio, filename, max_bytes=5_000_000, max_seconds=30)
+
+
+def test_flac_length_is_read_from_its_header() -> None:
+    assert flac_seconds(make_flac(12.5)) == 12.5
+    assert flac_seconds(make_wav(1)) is None
 
 
 @pytest.mark.parametrize(
@@ -56,6 +84,14 @@ def test_check_audio_accepts_short_wav() -> None:
         (b"x" * 101, "q.mp3", 413),
         (b"webm bytes", "q.webm", 415),
         (make_wav(31, rate=8000), "q.wav", 400),
+        # The name says audio, the bytes do not: these would each cost a Gnani credit.
+        (b"hello, this is not audio" * 10, "q.wav", 415),
+        (b"%PDF-1.7\n" * 100, "q.m4a", 415),
+        (b"\xff" * 4_900_000, "q.mp3", 400),  # about 5 minutes at 128 kbps
+        (b"OggS" + b"\x00" * 1_500_000, "q.ogg", 400),
+        (make_flac(45), "q.flac", 400),
+        (b"RIFF\x00\x00\x00\x00WAVEbroken", "q.wav", 415),
+        (b"fLaC" + b"\x00" * 40, "q.flac", 415),
     ],
 )
 def test_check_audio_rejects_bad_clips(audio: bytes, filename: str, status: int) -> None:

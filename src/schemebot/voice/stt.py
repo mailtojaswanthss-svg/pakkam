@@ -55,17 +55,62 @@ def wav_seconds(audio: bytes) -> float | None:
         return None
 
 
+def flac_seconds(audio: bytes) -> float | None:
+    """Length of a FLAC clip from its STREAMINFO header, or None if it cannot be read."""
+    # "fLaC", a 4-byte block header, then STREAMINFO; its bytes 10-17 hold the sample rate
+    # (20 bits), channels (3), bits per sample (5) and the total number of samples (36).
+    if len(audio) < 26 or not audio.startswith(b"fLaC"):
+        return None
+    packed = int.from_bytes(audio[18:26], "big")
+    rate = packed >> 44
+    samples = packed & ((1 << 36) - 1)
+    if rate == 0 or samples == 0:
+        return None
+    return samples / rate
+
+
+def _looks_like(audio: bytes, extension: str) -> bool:
+    """Whether the first bytes are those of the format the file name claims."""
+    if extension == ".wav":
+        return audio[:4] == b"RIFF" and audio[8:12] == b"WAVE"
+    if extension == ".flac":
+        return audio.startswith(b"fLaC")
+    if extension == ".ogg":
+        return audio.startswith(b"OggS")
+    if extension == ".m4a":
+        return audio[4:8] == b"ftyp"
+    # MP3 starts with an ID3 tag or a frame sync (11 set bits); AAC with ADTS or ADIF.
+    frame_sync = len(audio) > 1 and audio[0] == 0xFF and audio[1] & 0xE0 == 0xE0
+    if extension == ".mp3":
+        return audio.startswith(b"ID3") or frame_sync
+    return audio.startswith(b"ADIF") or frame_sync  # .aac
+
+
+COMPRESSED_BYTES_PER_SECOND = 48_000
+"""384 kbps, above any normal voice recording. MP3, OGG, AAC and M4A lengths are not read
+from the file, so a clip larger than this rate allows for `max_seconds` is too long."""
+
+
 def check_audio(audio: bytes, filename: str, max_bytes: int, max_seconds: float) -> None:
     """Reject clips Gnani would refuse, before spending a credit on them."""
     if not audio:
         raise SttError("The recording is empty.", 400)
     if len(audio) > max_bytes:
         raise SttError("The recording is too large.", 413)
-    if not filename.lower().endswith(AUDIO_EXTENSIONS):
+    extension = "." + filename.lower().rpartition(".")[2]
+    if extension not in AUDIO_EXTENSIONS:
         raise SttError("Use a WAV, MP3, OGG, FLAC, AAC or M4A file.", 415)
-    seconds = wav_seconds(audio)
-    if seconds is not None and seconds > max_seconds:
-        raise SttError(f"Keep the question under {max_seconds:.0f} seconds.", 400)
+    if not _looks_like(audio, extension):
+        raise SttError("This file is not a recording in the format its name says.", 415)
+    too_long = SttError(f"Keep the question under {max_seconds:.0f} seconds.", 400)
+    if extension in (".wav", ".flac"):
+        seconds = wav_seconds(audio) if extension == ".wav" else flac_seconds(audio)
+        if seconds is None:
+            raise SttError("This recording could not be read. Try recording again.", 415)
+        if seconds > max_seconds:
+            raise too_long
+    elif len(audio) > max_seconds * COMPRESSED_BYTES_PER_SECOND:
+        raise too_long
 
 
 class GnaniStt:
