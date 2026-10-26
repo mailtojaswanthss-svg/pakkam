@@ -104,6 +104,9 @@ questions are still retrieved and checked, but answerable ones are refused as
 The API keeps up to 256 answers in memory for 6 hours, so a repeated question (same words,
 ignoring case, spaces and a final "?") is answered without calling the LLM
 (`SCHEMEBOT_ANSWER_CACHE_SIZE`, `0` turns it off; `SCHEMEBOT_ANSWER_CACHE_TTL_SECONDS`).
+The key also covers the answer language, the models and settings, and a hash of the index and
+`data/corrections.json`, so a rebuilt index or a new correction starts fresh. Service errors are
+never kept, nothing cached is logged, and a cached answer still counts against the rate limit.
 The evaluation never uses this cache.
 
 ### API
