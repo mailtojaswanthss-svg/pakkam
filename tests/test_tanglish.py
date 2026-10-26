@@ -26,3 +26,25 @@ def test_a_suffix_alone_does_not_gloss_an_unknown_stem() -> None:
 
 def test_dropped_particles_leave_no_double_spaces_and_punctuation_is_kept() -> None:
     assert gloss_tanglish("idhu free dhaan ah?") == "idhu free ?"
+
+
+def test_word_pairs_are_glossed_as_phrases() -> None:
+    assert gloss_tanglish("atal pension la join panna age evlo") == (
+        "atal pension in to join what age"
+    )
+
+
+def test_phrases_ignore_case_and_leave_the_rest_to_the_word_pass() -> None:
+    assert gloss_tanglish("Apply Panna enna venum") == "to apply what needed"
+
+
+def test_verbs_from_the_dev_misses_are_known() -> None:
+    assert gloss_tanglish("CM health insurance card ku income evlo irukanum") == (
+        "CM health insurance card for income how much must be"
+    )
+    assert gloss_tanglish("11th padikra BC MBC pasangalukku free cycle tharaangala") == (
+        "11th studying BC MBC for children free cycle do they give"
+    )
+    assert gloss_tanglish(
+        "govt school la padicha ponnunga college ponaa maasam evlo kudupaanga"
+    ) == ("govt school in studied girls college goes to month how much they give")
