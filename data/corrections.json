@@ -19,12 +19,12 @@
   },
   {
     "doc_id": "tn-hfw-policy-note-2024-ta",
-    "page": null,
+    "page": 421,
     "ocr_reads": "ரூ.4,20,000",
     "pdf_shows": "ரூ.1,20,000",
     "confirmed_by": null,
     "confirmed_on": null,
-    "note": "Insurance scheme income limit (English note: Rs.1,20,000). Page not found yet."
+    "note": "Insurance scheme family income limit (English note: Rs.1,20,000). Page 421 found in the extracted text; the printed page is not checked yet."
   },
   {
     "doc_id": "apy-brochure-hi",
@@ -34,5 +34,32 @@
     "confirmed_by": null,
     "confirmed_on": null,
     "note": "Minimum guaranteed pension. Claude's first pass of the PDF suggests p1 prints रु.1000; not yet checked by a person."
+  },
+  {
+    "doc_id": "tn-swwe-policy-note-2024-ta",
+    "page": 88,
+    "ocr_reads": "14௧67",
+    "pdf_shows": "14567",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Senior-citizen helpline in the body text (OCR mixed a Tamil digit: 14௧67 = 14167); the heading on the same page reads (14567). Printed page not checked yet."
+  },
+  {
+    "doc_id": "tn-bcmbc-policy-note-2024-ta",
+    "page": 59,
+    "ocr_reads": "ரூ.4400",
+    "pdf_shows": "ரூ.1400",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Hostel food charge per month for school students (English note: Rs.1,400). The 'ரூ4000' just before it may be Rs.1,000 misread too. Printed page not checked yet."
+  },
+  {
+    "doc_id": "tn-adtw-policy-note-2024-ta",
+    "page": 53,
+    "ocr_reads": "ரூ.44007-",
+    "pdf_shows": "ரூ.1400/-",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Hostel food subsidy for school students; '7-' is OCR for '/-'. pdf_shows is taken from the English note (Rs.1,400); printed page not checked yet."
   }
 ]
