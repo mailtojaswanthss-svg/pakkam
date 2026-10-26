@@ -28,8 +28,12 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
   - Empty values in `.env` (e.g. `SCHEMEBOT_TTS_MODEL=`) now count as not set. This also stops an empty Gnani key from switching voice on.
   - 24 more tests with a fake TTS. 259 tests pass; ruff and mypy are clean. Checked in a headless browser with a fake TTS only. **No real Timbre audio has been generated yet.**
 
+- Timbre listening test script (26 Oct): `python -m schemebot.voice tts-samples` speaks short made-up sentences (cases: tamil, digits, tanglish; text in `voice/samples.py`). It prints the voices and the call count, waits for `yes`, and counts calls in the daily cap. Output files are `data/voice/tts-samples/synthetic-test-*.wav`, each with a notes file saying what to listen for. 5 more tests; 264 pass.
+
 ## Next
-0. Jaswanth: confirm the Timbre version in the dashboard and set `SCHEMEBOT_TTS_MODEL`. Real audio only after he types yes.
+0. Jaswanth runs the Timbre listening test on his laptop (the key is only there; Claude can't hear audio, so Jaswanth describes what he hears):
+   - a. `--cases tamil --models timbre-v2.5 timbre-v3.0` (2 calls), then choose the version and set `SCHEMEBOT_TTS_MODEL`.
+   - b. `--cases digits tanglish --models <chosen>` (2 calls). Digits decide whether deterministic number-to-words is needed (not built yet). For Tanglish, Claude proposes options and Jaswanth chooses.
 1. Jaswanth: record clips into `data/voice/tanglish/` (5 to 10 Tanglish, plus a pure Tamil, a pure English and one noisy clip as controls) and run the compare script.
 2. After the first few real calls, check credit use in the Gnani dashboard and set the daily cap to match.
 3. Read the CSV together and decide Tanglish ta-IN vs en-IN.
