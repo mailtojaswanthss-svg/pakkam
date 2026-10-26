@@ -11,7 +11,12 @@ import time
 from dataclasses import dataclass, field
 
 from schemebot.generate.contacts import Contact
-from schemebot.generate.guardrails import DraftSentence, RejectedSentence, check_answer
+from schemebot.generate.guardrails import (
+    DraftSentence,
+    RejectedSentence,
+    check_answer,
+    numbers_in,
+)
 from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError, parse_reply
 from schemebot.generate.messages import RefusalReason, contact_text, disclaimer, refusal_text
 from schemebot.generate.prompt import (
@@ -20,6 +25,7 @@ from schemebot.generate.prompt import (
     AnswerReply,
     build_user_message,
 )
+from schemebot.ingest.corrections import CORRECTED, OcrCorrection
 from schemebot.ingest.langid import Language, detect_language
 from schemebot.retrieve.retriever import RetrievedPassage, Retriever
 
@@ -38,6 +44,8 @@ class Citation:
     """The cited passage itself, for showing the source and for faithfulness checks."""
     language: Language = "unknown"
     """Language of the passage, so the UI can tag and render it correctly."""
+    ocr_corrected: bool = False
+    """The passage holds a misreading fixed by hand from the printed page."""
 
 
 @dataclass(frozen=True)
@@ -75,7 +83,17 @@ def _citation(number: int, passage: RetrievedPassage) -> Citation:
         source_url=str(chunk.source_url),
         text=chunk.text,
         language=chunk.language,
+        ocr_corrected=chunk.extraction == CORRECTED,
     )
+
+
+def misread_numbers_by_doc(corrections: list[OcrCorrection]) -> dict[str, set[str]]:
+    """doc_id -> numbers OCR is known to have misread there ('4000' for Rs.1,000)."""
+    found: dict[str, set[str]] = {}
+    for correction in corrections:
+        wrong = numbers_in(correction.ocr_reads) - numbers_in(correction.pdf_shows)
+        found.setdefault(correction.doc_id, set()).update(wrong)
+    return found
 
 
 class Answerer:
@@ -86,12 +104,16 @@ class Answerer:
         verifier: JsonLlm | None,
         refusal_threshold: float,
         contacts: dict[str, Contact] | None = None,
+        corrections: list[OcrCorrection] | None = None,
     ) -> None:
         self._retriever = retriever
         self._llm = llm
         self._verifier = verifier
         self._refusal_threshold = refusal_threshold
         self._contacts = contacts or {}
+        # Confirmed fixes are applied at ingestion, but stay here too: until the index is
+        # rebuilt the passage still holds the misreading.
+        self._misread = misread_numbers_by_doc(corrections or [])
 
     def answer(self, question: str) -> Answer:
         timings: dict[str, float] = {}
@@ -135,6 +157,10 @@ class Answerer:
 
         passages = retrieval.passages
         passage_texts = [passage.chunk.text for passage in passages]
+        misread = [
+            self._misread.get(passage.chunk.doc_id, set()) & numbers_in(passage.chunk.text)
+            for passage in passages
+        ]
         generation_started = time.perf_counter()
         try:
             reply = parse_reply(
@@ -148,7 +174,7 @@ class Answerer:
             if not reply.answerable or not drafts:
                 return refuse("not_in_documents")
             verify_started = time.perf_counter()
-            checked = check_answer(drafts, passage_texts, self._verifier)
+            checked = check_answer(drafts, passage_texts, self._verifier, misread)
             # Guardrail checks plus the verifier call (when one is configured).
             timings["verifier"] = (time.perf_counter() - verify_started) * 1000
         except LlmDeclinedError:

@@ -1,7 +1,10 @@
-# Stopping known-bad OCR amounts from reaching answers (design only)
+# Stopping known-bad OCR amounts from reaching answers
 
-Written 26 Oct 2026. Nothing here is built. You pick an option once the PDF pages are checked by
-a person.
+Written 26 Oct 2026. **Update, same day:** at Jaswanth's request, A and B are both built
+(`ingest/corrections.py`, `data/corrections.json`, tests in `tests/test_corrections.py`). Every
+entry is unconfirmed, so no text is changed yet. Answers just can't use the listed wrong
+numbers. To confirm an entry, check the printed page, fill in `page`, `confirmed_by` and
+`confirmed_on`, then re-run ingestion and indexing. C is not built.
 
 ## The problem in one paragraph
 

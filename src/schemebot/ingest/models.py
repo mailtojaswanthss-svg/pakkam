@@ -40,4 +40,4 @@ class Chunk(BaseModel):
     language: Language
     doc_date: date | None
     text: str
-    extraction: str = Field(description="text, ocr, or text-unverified")
+    extraction: str = Field(description="text, ocr, text-unverified or ocr-corrected")

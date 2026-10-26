@@ -1,0 +1,38 @@
+[
+  {
+    "doc_id": "tn-hedu-policy-note-2024-ta",
+    "page": 33,
+    "ocr_reads": "ரூ.4,000",
+    "pdf_shows": "ரூ.1,000",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Pudhumai Penn monthly amount. Claude's first pass of the PDF suggests p33 prints ரூ.1,000/-; not yet checked by a person. Page and exact OCR text to be confirmed."
+  },
+  {
+    "doc_id": "tn-swwe-policy-note-2024-ta",
+    "page": 11,
+    "ocr_reads": "ரூ.7000",
+    "pdf_shows": "ரூ.1000",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Pudhumai Penn monthly amount. Claude's first pass of the PDF suggests p11 prints ரூ.1000/-; not yet checked by a person."
+  },
+  {
+    "doc_id": "tn-hfw-policy-note-2024-ta",
+    "page": null,
+    "ocr_reads": "ரூ.4,20,000",
+    "pdf_shows": "ரூ.1,20,000",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Insurance scheme income limit (English note: Rs.1,20,000). Page not found yet."
+  },
+  {
+    "doc_id": "apy-brochure-hi",
+    "page": 1,
+    "ocr_reads": "रु.000",
+    "pdf_shows": "रु.1000",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Minimum guaranteed pension. Claude's first pass of the PDF suggests p1 prints रु.1000; not yet checked by a person."
+  }
+]
