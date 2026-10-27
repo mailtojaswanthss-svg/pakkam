@@ -77,8 +77,7 @@ needed for OCR during ingestion; Docker only for the container.
 
 The source PDFs and the search index are not in the repository. Before ingesting, download
 each document in [data/sources.json](data/sources.json) from its `source_url` into `data/raw/`,
-saved under the name in its `file` field. Ingestion OCRs about 1,350 pages, so the first run is
-slow; the OCR result is cached.
+saved under the name in its `file` field. Across the 18 official documents (2,688 total pages), ingestion OCRs exactly 1,353 pages (50.3% of the corpus, verified via scripts/report_ocr_stats.py), producing 2,785 chunks total (1,390 English, 1,382 Tamil, 13 Hindi). Ingestion OCR is slow on the first run; the result is cached.
 
 ```bash
 cp .env.example .env                  # then fill in the Tesseract paths (and later your API key)
@@ -218,4 +217,20 @@ passage covering that page. Only after a person has checked the printed PDF page
 
 ## License
 
-The code is under the [MIT License](LICENSE). The licence covers the code only: the source PDFs remain the property of their publishers (and are not in this repository), and the photos in `web/assets/img/` are under the Unsplash License (see `CREDITS.md`).
+The code is under the [MIT License](LICENSE). The licence covers the code only: the source PDFs remain the property of their publishers (and are not in this repository), and the photos in `web/assets/img/` are under the Unsplash License (see [CREDITS.md](CREDITS.md)).
+
+### OCR Engines & Model Licenses
+- **Tesseract OCR**: Licensed under Apache License 2.0.
+- **Chitrapathak-2** (`krutrim-ai-labs/Chitrapathak-2`): Released under the Krutrim Community License Agreement Version 1.0:
+  > **Krutrim Community License Agreement Version 1.0**
+  >
+  > "Subject to the terms and conditions of this Agreement, Krutrim grants you a worldwide, non-exclusive, non-transferable, revocable limited license to:
+  > - Use the Software for permitted purposes as outlined in this license, including research, academic, and personal projects.
+  > - Modify the Software for research and personal use, provided that all changes are clearly documented, and proper attribution is maintained.
+  > - Distribute the Software under specified conditions, ensuring compliance with attribution, modification transparency, and adherence to non-commercial restrictions where applicable.
+  >
+  > This license does not constitute a sale of the Software and does not grant ownership rights. Krutrim retains all intellectual property rights not explicitly granted herein."
+  >
+  > "Research and Personal Use: Free to use, modify, and distribute for academic, educational, and research projects without prior written permission, subject to the conditions of this license."
+  >
+  > "Non-Commercial Limitation: The Software may not be used, directly or indirectly, for commercial purposes or in commercial products or services without express written authorization from Krutrim."
