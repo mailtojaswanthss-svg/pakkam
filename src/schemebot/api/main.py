@@ -33,6 +33,7 @@ from schemebot.api.schemas import (
 from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer
 from schemebot.ingest.models import SourceDoc
+from schemebot.voice.audio import convert_to_wav16k
 from schemebot.voice.numbers import spell_amounts
 from schemebot.voice.stt import (
     GNANI_LANGUAGE_CODES,
@@ -183,8 +184,8 @@ def create_app(
 
         started = time.perf_counter()
         try:
-            check_audio(clip, filename, settings.stt_max_bytes, settings.stt_max_seconds)
-            transcript = state.transcriber.transcribe(clip, filename, language_code)
+            converted_clip = convert_to_wav16k(clip, filename, settings.stt_max_seconds)
+            transcript = state.transcriber.transcribe(converted_clip, "question.wav", language_code)
         except SttError as error:
             raise HTTPException(status_code=error.status_code, detail=error.message) from error
         stt_ms = (time.perf_counter() - started) * 1000
