@@ -8,6 +8,7 @@ Executes Option C:
 - Builds the new Qdrant collection 'pakkam_chitra' leaving 'schemes' untouched.
 """
 
+import argparse
 import csv
 import json
 import logging
@@ -88,6 +89,14 @@ def load_tesseract_page(cache_root: Path, pdf_path: Path, language: str, page_nu
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Hybrid OCR Runner and Finalizer (Option C)")
+    parser.add_argument(
+        "--finalize",
+        action="store_true",
+        help="Build ocr_disagreements.csv and pakkam_chitra index immediately from whatever pages are currently completed, without running further GPU extraction.",
+    )
+    args = parser.parse_args()
+
     settings = get_settings()
     manifest_file = settings.data_dir / "sources.json"
     sources_by_id = {s["doc_id"]: s for s in json.loads(manifest_file.read_text(encoding="utf-8"))}
@@ -113,22 +122,55 @@ def main():
             })
 
     target_tasks.sort(key=lambda t: (t["priority"], t["page"]))
-    logger.info("Found %d target pages for Option C overnight processing", len(target_tasks))
+    logger.info("Found %d target pages for Option C processing", len(target_tasks))
 
     out_dir = Path("data/processed/chitrapathak_text")
     out_dir.mkdir(parents=True, exist_ok=True)
     cache_root = settings.processed_dir / "ocr_cache"
 
-    # Check already completed pages
+    # Completed tasks vs pending tasks
+    completed_tasks = [
+        t for t in target_tasks
+        if (out_dir / f"{t['document']}_p{t['page']}.txt").is_file()
+        and (out_dir / f"{t['document']}_p{t['page']}.txt").stat().st_size >= 20
+    ]
     pending_tasks = [
         t for t in target_tasks
         if not (out_dir / f"{t['document']}_p{t['page']}.txt").is_file()
         or (out_dir / f"{t['document']}_p{t['page']}.txt").stat().st_size < 20
     ]
-    logger.info("%d pages already completed; %d pages pending to extract", len(target_tasks) - len(pending_tasks), len(pending_tasks))
 
-    # Initialize model if tasks pending
-    if pending_tasks:
+    # Load recorded page timings
+    timing_file = out_dir / "page_timings.json"
+    timings: dict[str, float] = {}
+    if timing_file.is_file():
+        try:
+            timings = json.loads(timing_file.read_text(encoding="utf-8"))
+        except Exception:
+            timings = {}
+
+    avg_s = sum(timings.values()) / len(timings) if timings else 78.8
+    done_count = len(completed_tasks)
+    left_count = len(pending_tasks)
+    est_sec_left = left_count * avg_s
+    est_hours_left = est_sec_left / 3600
+
+    print("\n" + "=" * 78)
+    print(" OPTION C HYBRID OCR: PROGRESS SUMMARY")
+    print("=" * 78)
+    pct = (done_count / len(target_tasks) * 100) if target_tasks else 0.0
+    print(f" Target Pages (Flagged with Currency): {len(target_tasks)}")
+    print(f" Pages Completed (Chitrapathak):      {done_count} ({pct:.1f}%)")
+    print(f" Pages Remaining:                     {left_count}")
+    print(f" Average Time per Page:               {avg_s:.1f}s")
+    print(f" Estimated Time Remaining:            {est_hours_left:.2f} hours ({int(est_sec_left)}s)")
+    print("=" * 78 + "\n")
+
+    if args.finalize:
+        logger.info("--finalize flag passed: Skipping GPU extraction and building outputs directly from %d completed pages.", done_count)
+
+    # Initialize model if tasks pending and not finalizing
+    if not args.finalize and pending_tasks:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
         logger.info("Loading Chitrapathak-2 on %s (%s)...", device, dtype)
@@ -193,6 +235,11 @@ def main():
 
                 target_txt.write_text(output_text, encoding="utf-8")
                 elapsed = time.perf_counter() - t0
+                timings[f"{doc_id}_p{page_num}"] = round(elapsed, 1)
+                try:
+                    timing_file.write_text(json.dumps(timings, indent=2), encoding="utf-8")
+                except Exception:
+                    pass
                 logger.info("  -> Saved %s (%d chars) in %.1fs", target_txt.name, len(output_text), elapsed)
 
             except torch.cuda.OutOfMemoryError:
@@ -259,12 +306,16 @@ def main():
         with pymupdf.open(pdf_path) as pdf:
             for i, p in enumerate(pdf, start=1):
                 chitra_p = out_dir / f"{doc_id}_p{i}.txt"
-                if chitra_p.is_file():
+                if chitra_p.is_file() and chitra_p.stat().st_size >= 20:
                     text = chitra_p.read_text(encoding="utf-8")
                     method = "ocr-chitrapathak"
                 else:
                     text = load_tesseract_page(cache_root, pdf_path, s["language"], i)
-                    method = "ocr-tesseract" if text else "text"
+                    if text:
+                        method = "ocr-tesseract"
+                    else:
+                        text = p.get_text("text").strip()
+                        method = "text"
                 doc_pages.append(PageText(page=i, text=text, method=method))
 
         source_doc = SourceDoc.model_validate(s)
