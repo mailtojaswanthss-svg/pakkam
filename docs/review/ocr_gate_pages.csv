@@ -1,11 +1,11 @@
 document,page,known_number,notes
-tn-hedu-policy-note-2024-ta,33,,"Pudhumai Penn monthly amount (corrections.json: OCR read 4,000 vs 1,000)"
-tn-swwe-policy-note-2024-ta,11,,Pudhumai Penn monthly amount (corrections.json: OCR read 7000 vs 1000)
-tn-hfw-policy-note-2024-ta,421,,"Insurance family income limit (corrections.json: OCR read 4,20,000 vs 1,20,000)"
-apy-brochure-hi,1,,APY minimum pension (corrections.json: OCR read 000 vs 1000)
-tn-swwe-policy-note-2024-ta,88,,Senior helpline (corrections.json: OCR read Tamil digit 14௧67 vs 14567)
-tn-bcmbc-policy-note-2024-ta,59,,Hostel food charge per month (corrections.json: OCR read 4400 vs 1400)
-tn-adtw-policy-note-2024-ta,53,,Hostel food subsidy (corrections.json: OCR read 44007- vs 1400/-)
+tn-hedu-policy-note-2024-ta,33,1000,"Pudhumai Penn monthly amount (corrections.json: OCR read 4,000 vs 1,000)"
+tn-swwe-policy-note-2024-ta,11,1000,Pudhumai Penn monthly amount (corrections.json: OCR read 7000 vs 1000)
+tn-hfw-policy-note-2024-ta,421,120000,"Insurance family income limit (corrections.json: OCR read 4,20,000 vs 1,20,000)"
+apy-brochure-hi,1,1000,APY minimum pension (corrections.json: OCR read 000 vs 1000)
+tn-swwe-policy-note-2024-ta,88,14567,Senior helpline (corrections.json: OCR read Tamil digit 14௧67 vs 14567)
+tn-bcmbc-policy-note-2024-ta,59,1400,Hostel food charge per month (corrections.json: OCR read 4400 vs 1400)
+tn-adtw-policy-note-2024-ta,53,1400,Hostel food subsidy (corrections.json: OCR read 44007- vs 1400/-)
 kmut-go15-2023-ta,3,,"KMUT G.O.: eligibility age cutoff 21, Rs.12,000 per annum"
 kmut-go15-2023-ta,4,,KMUT G.O.: annual family income below Rs. 2.5 lakh
 kmut-go15-2023-ta,9,,"KMUT G.O. Tamil: 21 வயது, ஆண்டுக்கு 12 ஆயிரம் ரூபாய்"

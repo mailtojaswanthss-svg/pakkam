@@ -1,0 +1,23 @@
+document,page,known_number,tess_has_known,chitra_has_known,tess_chars,chitra_chars,tess_num_count,chitra_num_count,both_nums_count,tess_only_sample,chitra_only_sample,notes
+tn-hedu-policy-note-2024-ta,33,1000,False,True,1418,1335,14,14,11,3.40; 4.60; 4000,1.60; 1000; 3.10,"Pudhumai Penn monthly amount (corrections.json: OCR read 4,000 vs 1,000)"
+tn-swwe-policy-note-2024-ta,11,1000,False,True,645,738,2,2,1,7000,1000,Pudhumai Penn monthly amount (corrections.json: OCR read 7000 vs 1000)
+tn-hfw-policy-note-2024-ta,421,120000,False,True,888,937,18,16,13,2; 3; 420000; 6; 91,1.34; 120000; 9.1,"Insurance family income limit (corrections.json: OCR read 4,20,000 vs 1,20,000)"
+apy-brochure-hi,1,1000,False,True,4445,2423,14,11,7,000; 7; 96; ०; ५,1; 1000; 18; 1961,APY minimum pension (corrections.json: OCR read 000 vs 1000)
+tn-swwe-policy-note-2024-ta,88,14567,True,True,534,503,7,6,5,14167; 25.04.2021,28.04.2021,Senior helpline (corrections.json: OCR read Tamil digit 14௧67 vs 14567)
+tn-bcmbc-policy-note-2024-ta,59,1400,False,True,703,665,12,11,7,104; 2024; 4400; 4500; 46,10.1; 1400; 1500; 16,Hostel food charge per month (corrections.json: OCR read 4400 vs 1400)
+tn-adtw-policy-note-2024-ta,53,1400,False,True,763,722,6,6,1,4.00; 40007; 41007; 44007; 45007,1.00; 1000; 1100; 1400; 1500,Hostel food subsidy (corrections.json: OCR read 44007- vs 1400/-)
+kmut-go15-2023-ta,3,,N/A,N/A,0,0,0,0,0,,,"KMUT G.O.: eligibility age cutoff 21, Rs.12,000 per annum"
+kmut-go15-2023-ta,4,,N/A,N/A,0,0,0,0,0,,,KMUT G.O.: annual family income below Rs. 2.5 lakh
+kmut-go15-2023-ta,9,,N/A,N/A,1722,0,8,0,0,1; 10.07.2023; 12; 15; 2,,"KMUT G.O. Tamil: 21 வயது, ஆண்டுக்கு 12 ஆயிரம் ரூபாய்"
+kmut-go15-2023-ta,10,,N/A,N/A,1755,0,5,0,0,2.21; 21; 213; 25; 3600,,KMUT G.O. Tamil: ஆண்டு வருமானம் ரூ.2.5 இலட்சம்
+kmut-go15-2023-ta,11,,N/A,N/A,1894,0,5,0,0,2; 2.5; 25; 50; 7,,KMUT G.O. Tamil: வருமான விலக்கு ரூ.2.5 இலட்சத்திற்கு மேல்
+pmkisan-ekyc-note-2023-hi,1,,N/A,N/A,1409,0,2,0,0,209; 6000,,"PM-KISAN Hindi: प्रति वर्ष 6,000 रुपये"
+apy-brochure-hi,2,,N/A,N/A,3361,0,13,0,0,030; 0576468; 06; 2; 20,,APY Hindi: contribution amounts / pension slabs
+tn-swwe-policy-note-2024-ta,10,,N/A,N/A,724,0,9,0,0,1; 18; 243; 2430; 273,,SWWE Tamil: Pudhumai Penn scheme coverage
+tn-swwe-policy-note-2024-ta,21,,N/A,N/A,667,0,3,0,0,18; 2; 2.1,,SWWE Tamil: Moovalur Ramamirtham marriage assistance amounts
+tn-swwe-policy-note-2024-ta,22,,N/A,N/A,787,0,2,0,0,19; 231.4,,SWWE Tamil: Dr. Dharmambal marriage assistance amounts
+tn-hedu-policy-note-2024-ta,5,,N/A,N/A,1202,0,11,0,0,1000; 2021; 2024; 22; 25,,HEDU Tamil: Higher education budget outlay
+tn-hedu-policy-note-2024-ta,6,,N/A,N/A,1215,0,8,0,0,01030; 13; 2; 3014.00; 4,,HEDU Tamil: Pudhumai Penn scheme fund allocation
+tn-hedu-policy-note-2024-ta,20,,N/A,N/A,1345,0,13,0,0,10; 1000; 124385; 2.3.19; 2.3.20,,HEDU Tamil: Annamalai University grant
+cmbfs-go43-2022-ta,1,,N/A,N/A,1411,0,49,0,0,04; 05; 06; 07; 07.07.2022,,CM Breakfast scheme: G.O. number 43 and date
+cmbfs-go43-2022-ta,2,,N/A,N/A,1809,0,12,0,0,16.09.1920; 1671; 173; 1922; 1925,,CM Breakfast scheme: Rs. 33.56 crore sanction amount
