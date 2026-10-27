@@ -71,6 +71,13 @@ Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 N
   - `/ask/voice` stays for scripts and the eval.
   - Tests: 4 new API tests with fakes (363 pass). Checked in headless Chromium with mocked routes. No real Gnani call.
 
+- Hosting and checks (26-27 Oct):
+  - Website live on Vercel at https://pakkam-alpha.vercel.app (`web/`). The backend runs on Jaswanth's laptop and is reached through a Cloudflare quick tunnel; `web/vercel.json` forwards `/ask`, `/sources`, `/transcribe` and `/speak`. The tunnel link changes on every restart, so vercel.json needs the new host each time. Plan: Cloud Run (CPU, trial credit) near the deadline.
+  - Vercel cannot run the backend (PyTorch + 4.5 GB models over its ~500 MB limit, no index). Hugging Face Docker Spaces now need PRO ($9/month), so that route was dropped.
+  - First live timings via the site: search + rerank 0.7-0.9 s on the RTX 4060, tunnel ~0.5 s, full answers 40 s to over 120 s on free Gemini (two calls per answer, 429 retries). Suggested `.env`: flash-lite models, 30 s timeout, 1 retry.
+  - OCR corrections: `apy-brochure-hi` p1 checked by rendering the PDF: it prints रु.1000, so the correction holds. The six Tamil Nadu entries could not be checked from the cloud (cms.tn.gov.in resets connections); Jaswanth checks them on the laptop.
+  - Ujjwala (#10): the PMUY SoP lists Aadhaar of the applicant and all adults, and bank account number with IFSC, so the reference answer matches the source.
+
 ## Next
 0. Jaswanth runs the Timbre listening test on his laptop (the key is only there; Claude can't hear audio, so Jaswanth describes what he hears):
    - a. `--cases tamil --models timbre-v2.5 timbre-v3.0` (2 calls), then choose the version and set `SCHEMEBOT_TTS_MODEL`.
