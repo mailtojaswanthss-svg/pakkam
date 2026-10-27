@@ -2,7 +2,7 @@
 
 **Project:** indic-scheme-rag (Pakkam)  
 **Date:** 2026-10-27 22:33:20 IST  
-**Git Commit:** `c3261e20` (clean ✅)  
+**Git Commit:** `866ff742` (clean ✅)  
 **STT Engine:** Gnani Prisma v2.5 (`POST /stt/v3`)  
 **TTS Engine:** Gnani Timbre v3.0 (`Shivani` voice)  
 **Credits & Billing:** Exact credit cost per API call and remaining wallet balance are **unknown** (not exposed by the Gnani API response).  
@@ -29,7 +29,7 @@ Evaluated using `scripts/gnani_stt_eval.py` on real human read speech samples fr
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Kathbath** | read speech, clean audio | TA | n=15 | 6.13s | 6.11s | 0.95s | 3.88s | **1.7%** | 5.2% |
 | **Kathbath** | read speech, clean audio | HI | n=15 | 4.28s | 4.34s | 0.92s | 5.87s | **1.7%** | 3.7% |
-| **Synthetic-Plumbing** | synthetic plumbing, generated audio | TA | n=1 | 89478.49s | 89478.49s | 0.62s | 0.62s | **0.0%** | 0.0% |
+| **Synthetic-Plumbing** | synthetic plumbing, generated audio | TA | n=1 | 2.64s | 2.64s | 0.62s | 0.62s | **0.0%** | 0.0% |
 
 ---
 
