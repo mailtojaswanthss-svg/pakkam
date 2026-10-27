@@ -1,8 +1,12 @@
 # Pakkam + Gnani voice: status
 
-Last updated: 27 Oct 2026. Own target: 8 Nov (12 days left). Hard deadline: 10 Nov, 11:59 PM IST (14 days left).
+Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 Nov, 11:59 PM IST (13 days left).
 
 ## Done
+- Hybrid OCR Pipeline - --finalize & Progress Summary (28 Oct):
+  - Added --finalize flag to scripts/run_hybrid_ocr.py that generates docs/review/ocr_disagreements.csv (21 number disagreements found on finished pages) and indexes all 2,859 chunks into the new Qdrant vector collection pakkam_chitra using Chitrapathak-2 text for completed flagged pages and Tesseract / digital text for all other pages. Leaves the original schemes collection untouched.
+  - Added real-time progress summary to scripts/run_hybrid_ocr.py: reports target pages (352), completed pages (23, 6.5%), pending pages (329), empirical average seconds per page (78.8s baseline), and estimated remaining time (7.20 hours).
+  - Confirmed: resuming never restarts from the beginning; all completed pages in data/processed/chitrapathak_text/ are permanently cached and instantly reused.
 - Hybrid OCR pipeline - Step 1 & 2 (27 Oct):
   - scripts/flag_ocr_pages.py scanned all 1,353 cached Tesseract OCR pages for currency markers (ரூ, Rs, Rs., ₹, रु) and 3+ digits.
   - Output written to docs/review/ocr_flagged_pages.csv (1,255 pages flagged with 3+ digits = 33.1 GPU hours; 500 pages with currency markers = 13.2 GPU hours).
