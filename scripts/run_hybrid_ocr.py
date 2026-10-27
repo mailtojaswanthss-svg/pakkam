@@ -49,24 +49,31 @@ MAX_PIXELS = 1280 * 28 * 28
 NUM_PATTERN = re.compile(r"\b[\d\u0BE6-\u0BEF]+(?:[,\.][\d\u0BE6-\u0BEF]+)*\b")
 TAMIL_DIGITS = str.maketrans("௦௧௨௩௪௫௬௭௮௯", "0123456789")
 
-# Priority order for Option C
-DOC_PRIORITY = {
-    # Demo priority 1: Short national & pension schemes
-    "apy-brochure-hi": 1,
-    "pmkisan-ekyc-note-2023-hi": 2,
-    "pmuy-sop-2023-en": 3,
-    # Demo priority 2: Tamil G.O.s
-    "kmut-go15-2023-ta": 4,
-    "cmbfs-go43-2022-ta": 5,
-    # Demo priority 3: Pudhumai Penn / Higher Ed / Women Welfare
-    "tn-hedu-policy-note-2024-ta": 6,
-    "tn-swwe-policy-note-2024-ta": 7,
-    # Demo priority 4: Hostels (BC/MBC & ADTW)
-    "tn-bcmbc-policy-note-2024-ta": 8,
-    "tn-bcmbc-policy-note-2024-en": 9,
-    "tn-adtw-policy-note-2024-ta": 10,
-    "tn-adtw-policy-note-2024-en": 11,
-}
+def get_page_priority(doc_id: str, page_num: int) -> int:
+    """Demo priority order:
+    1. Pudhumai Penn (tn-hedu, tn-swwe)
+    2. CMCHIS page 421 and nearby (tn-hfw pages 410-430)
+    3. BC/MBC and ADTW hostels (tn-bcmbc, tn-adtw)
+    4. National schemes (apy, pmkisan, pmuy)
+    5. Tamil G.O.s (kmut, cmbfs)
+    6. Other documents
+    """
+    if doc_id in ("tn-hedu-policy-note-2024-ta", "tn-swwe-policy-note-2024-ta"):
+        return 1
+    if doc_id == "tn-hfw-policy-note-2024-ta" and 410 <= page_num <= 430:
+        return 2
+    if doc_id in (
+        "tn-bcmbc-policy-note-2024-ta",
+        "tn-bcmbc-policy-note-2024-en",
+        "tn-adtw-policy-note-2024-ta",
+        "tn-adtw-policy-note-2024-en",
+    ):
+        return 3
+    if doc_id in ("apy-brochure-hi", "pmkisan-ekyc-note-2023-hi", "pmuy-sop-2023-en"):
+        return 4
+    if doc_id in ("kmut-go15-2023-ta", "cmbfs-go43-2022-ta"):
+        return 5
+    return 6
 
 
 def normalize_num(token: str) -> str:
@@ -109,19 +116,21 @@ def main():
     with flagged_csv.open("r", encoding="utf-8") as f:
         all_flagged = list(csv.DictReader(f))
 
-    # Filter for Option C: Target docs and currency markers only
+    # Filter for Option C: Currency markers across all documents, ordered by demo priority
     target_tasks = []
     for r in all_flagged:
         doc_id = r["document"]
-        if doc_id in DOC_PRIORITY and "currency:" in r["reason"]:
+        page_num = int(r["page"])
+        if "currency:" in r["reason"]:
+            prio = get_page_priority(doc_id, page_num)
             target_tasks.append({
                 "document": doc_id,
-                "page": int(r["page"]),
+                "page": page_num,
                 "reason": r["reason"],
-                "priority": DOC_PRIORITY[doc_id],
+                "priority": prio,
             })
 
-    target_tasks.sort(key=lambda t: (t["priority"], t["page"]))
+    target_tasks.sort(key=lambda t: (t["priority"], t["document"], t["page"]))
     logger.info("Found %d target pages for Option C processing", len(target_tasks))
 
     out_dir = Path("data/processed/chitrapathak_text")

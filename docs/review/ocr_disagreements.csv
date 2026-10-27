@@ -1,8 +1,15 @@
 document,page,tesseract_only_numbers,chitrapathak_only_numbers,notes
+tn-hedu-policy-note-2024-ta,33,3.40; 4.60; 4000,1.60; 1000; 3.10,"currency: ரூ; 3+ digits: 2023, 000, 271710, 947, 665"
+tn-swwe-policy-note-2024-ta,11,7000,1000,currency: ரூ; 3+ digits: 7000
+tn-hfw-policy-note-2024-ta,421,2; 3; 420000; 6; 91,1.34; 120000; 9.1,"currency: ரூ; 3+ digits: 440, 293, 100, 513, 000"
+tn-adtw-policy-note-2024-ta,53,4.00; 40007; 41007; 44007; 45007,1.00; 1000; 1100; 1400; 1500,"currency: ரூ; 3+ digits: 40007, 44007, 41007, 45007"
+tn-bcmbc-policy-note-2024-ta,59,104; 2024; 4400; 4500; 46,10.1; 1400; 1500; 16,"currency: ரூ; 3+ digits: 2023, 2024, 104, 200, 4400"
 apy-brochure-hi,1,000; 7; 96; ०; ५; ८; ८०,1; 1000; 18; 1961,"currency: rs, रु; 3+ digits: 000, 2000, 3000, 4000, 5000"
 pmkisan-ekyc-note-2023-hi,1,209,2019,"currency: रु; 3+ digits: 209, 000"
 pmkisan-ekyc-note-2023-hi,2,5,15,currency: रु
 pmuy-sop-2023-en,1,,10; 23,"currency: rs; 3+ digits: 17011, 2022, 43573, 2023, 011"
+cmbfs-go43-2022-ta,2,487; 5.215,18; 5,"currency: ரூ; 3+ digits: 173, 1920, 1922, 811, 1925"
+cmbfs-go43-2022-ta,3,425.35; 50068,125.35; 3,"currency: ரூ; 3+ digits: 1982, 1989, 1998, 2006, 2007"
 kmut-go15-2023-ta,9,212,2.1; 2.1.2,"currency: ரூ; 3+ digits: 2023, 2002, 212"
 kmut-go15-2023-ta,10,2.21; 213,2; 2.1.3; 2.2.1,"currency: ரூ; 3+ digits: 213, 3600"
 kmut-go15-2023-ta,11,2; 2.5; 7,3,currency: ரூ
@@ -14,9 +21,3 @@ kmut-go15-2023-ta,27,74,19; 7.1,currency: ரூ
 kmut-go15-2023-ta,33,1; 715; 744,7.14; 7.15,"currency: rs; 3+ digits: 744, 715"
 kmut-go15-2023-ta,41,,4; 6,currency: rs
 kmut-go15-2023-ta,42,51; 9,1051; 5,currency: rs
-cmbfs-go43-2022-ta,2,487; 5.215,18; 5,"currency: ரூ; 3+ digits: 173, 1920, 1922, 811, 1925"
-cmbfs-go43-2022-ta,3,425.35; 50068,125.35; 3,"currency: ரூ; 3+ digits: 1982, 1989, 1998, 2006, 2007"
-tn-hedu-policy-note-2024-ta,33,3.40; 4.60; 4000,1.60; 1000; 3.10,"currency: ரூ; 3+ digits: 2023, 000, 271710, 947, 665"
-tn-swwe-policy-note-2024-ta,11,7000,1000,currency: ரூ; 3+ digits: 7000
-tn-bcmbc-policy-note-2024-ta,59,104; 2024; 4400; 4500; 46,10.1; 1400; 1500; 16,"currency: ரூ; 3+ digits: 2023, 2024, 104, 200, 4400"
-tn-adtw-policy-note-2024-ta,53,4.00; 40007; 41007; 44007; 45007,1.00; 1000; 1100; 1400; 1500,"currency: ரூ; 3+ digits: 40007, 44007, 41007, 45007"

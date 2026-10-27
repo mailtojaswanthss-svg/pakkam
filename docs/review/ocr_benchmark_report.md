@@ -12,9 +12,9 @@
 
 This report evaluates **Chitrapathak-2** against **Tesseract OCR** across the 18 official government scheme documents used in the Pakkam project. 
 
-- **Accuracy on Scheme Numbers:** **Chitrapathak-2 achieved 100.0% (7/7)** on known ground-truth numerical values, whereas **Tesseract achieved only 14.3% (1/7)**, frequently corrupting critical eligibility thresholds and financial amounts (e.g., misreading Rs. 1,000 as 4,000 or 7,000).
+- **Accuracy on Scheme Numbers:** **Chitrapathak-2 achieved 100.0% (7/7 on the 7 known-problem pages)** on known ground-truth numerical values, whereas **Tesseract achieved 0.0% (0/7)**, corrupting all 7 critical eligibility thresholds and financial amounts (e.g., misreading Rs. 1,000 as 4,000 or 7,000). *(Note: Selection bias applies; these 7 pages were chosen specifically because Tesseract failed on them).*
 - **Speed & Hardware:** **Tesseract is ~60× faster** (~1.2s vs. ~95s per page) and runs entirely on CPU with zero VRAM. Chitrapathak-2 requires an 8 GB GPU.
-- **Decision:** **Adopt a Hybrid Architecture.** Retain Tesseract as the default for fast local development and CPU-bound pipelines, but use Chitrapathak-2 (`SCHEMEBOT_OCR_ENGINE=chitrapathak`) for indexing scanned policy documents containing financial amounts to eliminate errors without brittle manual regex overrides (`data/corrections.json`).
+- **Decision:** **Adopt a Hybrid Architecture for Research Prototype.** Retain Tesseract as the default for fast local development and CPU-bound pipelines. Use Chitrapathak-2 (`SCHEMEBOT_OCR_ENGINE=chitrapathak`) in our research prototype index (`pakkam_chitra`) for policy documents containing financial amounts to eliminate errors without brittle manual regex overrides (`data/corrections.json`). Given Krutrim Community License v1.0 is research-only, this pipeline serves as a research prototype.
 
 ---
 
@@ -62,7 +62,7 @@ Ingestion of the 18 official scheme PDFs yielded the following exact page and ch
 
 | Dimension | Tesseract OCR (v5.5) | Chitrapathak-2 (4B VLM) | Winner |
 | :--- | :--- | :--- | :--- |
-| **Target Number Accuracy** | **14.3% (1 / 7)** | **100.0% (7 / 7)** | **Chitrapathak-2 (+85.7%)** |
+| **Target Number Accuracy** | **0.0% (0 / 7)** | **100.0% (7 / 7 on the 7 known-problem pages)** | **Chitrapathak-2 (+100.0%)** |
 | **Resolution of `corrections.json`** | 0 / 7 without manual patch | **7 / 7 automatically resolved** | **Chitrapathak-2** |
 | **Average Page Latency** | **~1.2 seconds** | ~95.0 seconds (~1.6 min) | **Tesseract (~60× faster)** |
 | **Estimated 1,353 Pages Time** | **~27 minutes** | ~35.7 hours | **Tesseract** |
@@ -89,8 +89,10 @@ Evaluated directly with [`scripts/check_corrections.py`](file:///f:/sar.ai%20pr/
 | 7 | `tn-adtw-policy-note-2024-ta` (p.53) | ADTW Hostel monthly food subsidy | **`ரூ.1400/-`** | `ரூ.44007-` ❌ | `ரூ.1400/-` ✅ | Corrupted digits and punctuation |
 
 **Summary Score:**
-- **Tesseract Accuracy:** **1 / 7 (14.3%)**
-- **Chitrapathak-2 Accuracy:** **7 / 7 (100.0%)**
+- **Tesseract Accuracy:** **0 / 7 (0.0%)** on known failure points
+- **Chitrapathak-2 Accuracy:** **7 / 7 (100.0%) on the 7 known-problem pages**
+
+> **Selection Bias Note:** The 7 evaluation pages were intentionally selected because they were known failure points for Tesseract (originating from `data/corrections.json` where citizen-critical monetary values had been misread). Consequently, the 0/7 Tesseract score reflects performance on these adversarial edge cases, not overall document character accuracy (where Tesseract succeeds on clear prose). Chitrapathak-2's 7/7 result verifies that vision-language modeling effectively resolves these specific numeral segmentation errors on known failure pages.
 
 ---
 
@@ -111,7 +113,7 @@ Evaluated directly with [`scripts/check_corrections.py`](file:///f:/sar.ai%20pr/
 
 | Use Case | Recommended Engine | Rationale |
 | :--- | :--- | :--- |
-| **Production Indexing of Policy Documents** | **Chitrapathak-2** | 100% numerical accuracy ensures citizen answers are factually correct; eliminates brittle `data/corrections.json`. |
+| **Research Prototype Indexing of Policy Documents** | **Chitrapathak-2** | 100% numerical accuracy ensures citizen answers are factually correct on problem pages; serves as an offline research prototype (`pakkam_chitra`). Note: Krutrim Community License v1.0 restricts use to non-commercial research. |
 | **CI / Automated Test Environments** | **Tesseract** | Runs in seconds, requires no GPU/CUDA, fits within standard GitHub Actions runners. |
 | **Rapid Iteration / Development** | **Tesseract** | Rebuilds the full 1,353 OCR page corpus in under 30 minutes. |
 
