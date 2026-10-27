@@ -21,6 +21,9 @@ LlmProvider = Literal["claude", "gemini"]
 TimbreModel = Literal["timbre-v2.5", "timbre-v3.0"]
 """Gnani text-to-speech models. Voice names differ between them."""
 
+OcrEngine = Literal["tesseract", "chitrapathak"]
+"""OCR engine for extracting text from scanned PDF pages."""
+
 SUPPORTED_LANGUAGES = ("en", "ta", "hi", "ta-Latn")
 """English, Tamil, Hindi, and Tamil written in Latin script (Tanglish)."""
 
@@ -119,6 +122,7 @@ class Settings(BaseSettings):
     # OCR
     tesseract_cmd: str | None = None
     tessdata_dir: Path | None = None
+    ocr_engine: OcrEngine = "tesseract"
     """Folder holding tam/hin/eng .traineddata, when not the install's own tessdata folder."""
 
     @field_validator(
