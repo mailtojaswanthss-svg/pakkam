@@ -1,0 +1,93 @@
+[
+  {
+    "doc_id": "tn-hedu-policy-note-2024-ta",
+    "page": 33,
+    "scheme": "Pudhumai Penn monthly aid",
+    "ground_truth": "ரூ.1,000",
+    "crops_count": 1,
+    "avg_time_per_crop_s": 7.81,
+    "total_crop_time_s": 7.81,
+    "full_page_baseline_s": 78.8,
+    "speedup": 10.1,
+    "extracted_text": "றும் ரூ.1,000/-\nஇத்",
+    "is_correct": true
+  },
+  {
+    "doc_id": "tn-swwe-policy-note-2024-ta",
+    "page": 11,
+    "scheme": "Pudhumai Penn monthly aid",
+    "ground_truth": "ரூ.1000",
+    "crops_count": 1,
+    "avg_time_per_crop_s": 3.89,
+    "total_crop_time_s": 3.89,
+    "full_page_baseline_s": 78.8,
+    "speedup": 20.2,
+    "extracted_text": "தாறும் ரூ.1000/-",
+    "is_correct": true
+  },
+  {
+    "doc_id": "tn-hfw-policy-note-2024-ta",
+    "page": 421,
+    "scheme": "CMCHIS family income limit",
+    "ground_truth": "ரூ.1,20,000",
+    "crops_count": 1,
+    "avg_time_per_crop_s": 15.0,
+    "total_crop_time_s": 15.0,
+    "full_page_baseline_s": 78.8,
+    "speedup": 5.3,
+    "extracted_text": "மருத்துவ காப்பட்டுத்\nமானம் ரூ.1,20,000/- ஆக\nகல் செயல்படுத்தப்பட்டு",
+    "is_correct": true
+  },
+  {
+    "doc_id": "apy-brochure-hi",
+    "page": 1,
+    "scheme": "APY minimum pension",
+    "ground_truth": "रु.1000",
+    "crops_count": 2,
+    "avg_time_per_crop_s": 16.51,
+    "total_crop_time_s": 33.01,
+    "full_page_baseline_s": 78.8,
+    "speedup": 2.4,
+    "extracted_text": "दाता सूचना विवरणका\nक पश्चात् रु.1000, रु.2000, रु.3000, रु.4000, रु.5000 | अटल पेंशन योजना (1\nभेदाता को रु. 1000 से 5000 की आजीव\nभेदाता की मृत्यु के बाद वही पेंशन राशि",
+    "is_correct": true
+  },
+  {
+    "doc_id": "tn-swwe-policy-note-2024-ta",
+    "page": 88,
+    "scheme": "Senior citizen helpline",
+    "ground_truth": "14567",
+    "crops_count": 2,
+    "avg_time_per_crop_s": 2.48,
+    "total_crop_time_s": 4.97,
+    "full_page_baseline_s": 78.8,
+    "speedup": 15.9,
+    "extracted_text": "எண் (14567) | 14567' என்ற",
+    "is_correct": true
+  },
+  {
+    "doc_id": "tn-bcmbc-policy-note-2024-ta",
+    "page": 59,
+    "scheme": "BC/MBC Hostel monthly food charge",
+    "ground_truth": "ரூ.1,400",
+    "crops_count": 1,
+    "avg_time_per_crop_s": 4.01,
+    "total_crop_time_s": 4.01,
+    "full_page_baseline_s": 78.8,
+    "speedup": 19.6,
+    "extracted_text": "து\nரூ.1,400\nபிலம்",
+    "is_correct": true
+  },
+  {
+    "doc_id": "tn-adtw-policy-note-2024-ta",
+    "page": 53,
+    "scheme": "ADTW Hostel monthly food subsidy",
+    "ground_truth": "ரூ.1400/-",
+    "crops_count": 1,
+    "avg_time_per_crop_s": 12.12,
+    "total_crop_time_s": 12.12,
+    "full_page_baseline_s": 78.8,
+    "speedup": 6.5,
+    "extracted_text": "கைகு மாதம் ஜூல\nந்து ரூ.1400/-\nஆ\nராக்கடுக்க மாதம் ன்",
+    "is_correct": true
+  }
+]

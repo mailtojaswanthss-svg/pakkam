@@ -3,10 +3,13 @@
 Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 Nov, 11:59 PM IST (13 days left).
 
 ## Done
-- Hybrid OCR Pipeline - --finalize & Progress Summary (28 Oct):
-  - Added --finalize flag to scripts/run_hybrid_ocr.py that generates docs/review/ocr_disagreements.csv (21 number disagreements found on finished pages) and indexes all 2,859 chunks into the new Qdrant vector collection pakkam_chitra using Chitrapathak-2 text for completed flagged pages and Tesseract / digital text for all other pages. Leaves the original schemes collection untouched.
-  - Added real-time progress summary to scripts/run_hybrid_ocr.py: reports target pages (352), completed pages (23, 6.5%), pending pages (329), empirical average seconds per page (78.8s baseline), and estimated remaining time (7.20 hours).
-  - Confirmed: resuming never restarts from the beginning; all completed pages in data/processed/chitrapathak_text/ are permanently cached and instantly reused.
+- Hybrid OCR Pipeline - Full Optimization & Overnight Run (28 Oct):
+  - Added --finalize flag to scripts/run_hybrid_ocr.py that builds docs/review/ocr_disagreements.csv and indexes pakkam_chitra (2,859 chunks) from completed pages.
+  - Re-ordered page queue by demo priority: 1. Pudhumai Penn (	n-hedu, 	n-swwe), 2. CMCHIS (page 421 and nearby pages 410-430), 3. Hostels (BC/MBC & ADTW), 4. National demo schemes (APY, PM-Kisan, PMUY), 5. Tamil G.O.s (KMUT, CMBFS), 6. Remaining documents.
+  - Documented 352 page count origin: Sum of currency-flagged pages from initial 11 priority documents (111 + 86 + 62 + 58 + 12 + 9 + 7 + 3 + 2 + 1 + 1 = 352). Full corpus has 500 currency-flagged pages across all 18 documents.
+  - Built crop mode in scripts/run_crop_ocr.py: uses Tesseract bounding boxes to crop amount regions with 80px/30px margins and passes only the crop to Chitrapathak-2. Tested on 7 known-problem pages: achieved 7/7 (100%) accuracy, mean time 11.54s/page (6.8x speedup vs 78.8s full-page, up to 20.2x speedup on individual pages), with zero new errors.
+  - Fixed OCR benchmark report (docs/review/ocr_benchmark_report.md): resolved 1/7 vs 0/7 contradiction, explicitly documented selection bias on known-problem pages, and replaced 'production' with 'research prototype' under Krutrim Community License v1.0.
+  - Overnight runner actively running with demo-priority queue in background.
 - Hybrid OCR pipeline - Step 1 & 2 (27 Oct):
   - scripts/flag_ocr_pages.py scanned all 1,353 cached Tesseract OCR pages for currency markers (ரூ, Rs, Rs., ₹, रु) and 3+ digits.
   - Output written to docs/review/ocr_flagged_pages.csv (1,255 pages flagged with 3+ digits = 33.1 GPU hours; 500 pages with currency markers = 13.2 GPU hours).
