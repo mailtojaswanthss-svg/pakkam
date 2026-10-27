@@ -65,3 +65,15 @@ def test_env_file_is_found_from_any_working_directory(
     assert isinstance(env_file, Path)
     assert env_file.is_absolute()
     assert env_file.name == ".env"
+
+
+def test_ocr_engine_setting(monkeypatch: pytest.MonkeyPatch) -> None:
+    settings = make_settings()
+    assert settings.ocr_engine == 'tesseract'
+    assert settings.qdrant_collection == 'schemes'
+
+    monkeypatch.setenv('SCHEMEBOT_OCR_ENGINE', 'chitrapathak')
+    monkeypatch.setenv('SCHEMEBOT_QDRANT_COLLECTION', 'pakkam_chitra')
+    settings = make_settings()
+    assert settings.ocr_engine == 'chitrapathak'
+    assert settings.qdrant_collection == 'pakkam_chitra'
