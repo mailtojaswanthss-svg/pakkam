@@ -3,6 +3,13 @@
 Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 Nov, 11:59 PM IST (13 days left).
 
 ## Done
+- Target State Implementation - Step 0 & 1 (28 Oct):
+  - Completed master gap analysis in `docs/BACKEND_GAP_ANALYSIS.md` auditing all 26 target state requirements.
+  - Landed API contract updates in `src/schemebot/api/schemas.py` and `main.py`: added `status` enum (`SUPPORTED` / `INSUFFICIENT_EVIDENCE`), `needs_confirmation` flag (true on digits/scheme terms), and `document_date` on citations. All 44 API tests pass.
+  - Generated `docs/sources.csv` cataloging all 18 documents with issuer, URL, publication date, and download date.
+  - Generated question-set statistics in `docs/review/question_statistics.md` via `scripts/summarize_questions.py`: audited 194 questions across 4 languages, honestly documenting 100% draft status.
+  - Verified non-empty API keys in `.env` for Gemini, Claude, and Gnani.
+  - Committed in `2bdc23d` with clean test suite.
 - Hybrid OCR Pipeline - Full Optimization & Overnight Run (28 Oct):
   - Added --finalize flag to scripts/run_hybrid_ocr.py that builds docs/review/ocr_disagreements.csv and indexes pakkam_chitra (2,859 chunks) from completed pages.
   - Re-ordered page queue by demo priority: 1. Pudhumai Penn (	n-hedu, 	n-swwe), 2. CMCHIS (page 421 and nearby pages 410-430), 3. Hostels (BC/MBC & ADTW), 4. National demo schemes (APY, PM-Kisan, PMUY), 5. Tamil G.O.s (KMUT, CMBFS), 6. Remaining documents.
