@@ -26,3 +26,11 @@ Chitrapathak-2 (`krutrim-ai-labs/Chitrapathak-2`) is developed by Krutrim AI Lab
 > Research and Personal Use: Free to use, modify, and distribute for academic, educational, and research projects without prior written permission, subject to the conditions of this license.
 >
 > Non-Commercial Limitation: The Software may not be used, directly or indirectly, for commercial purposes or in commercial products or services without express written authorization from Krutrim."
+
+
+## Audio Datasets and Licenses
+
+### AI4Bharat Kathbath
+The speech evaluation benchmarks use a sample of the [AI4Bharat Kathbath dataset](https://huggingface.co/datasets/ai4bharat/Kathbath) developed by AI4Bharat.
+- **License**: Creative Commons Attribution 4.0 International ([CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/)).
+- **Citation**: AI4Bharat Kathbath: An open-source crowdsourced speech corpus for Indian languages.
