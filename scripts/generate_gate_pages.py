@@ -3,13 +3,13 @@ from pathlib import Path
 
 GATE_PAGES = [
     # data/corrections.json
-    {"document": "tn-hedu-policy-note-2024-ta", "page": 33, "notes": "Pudhumai Penn monthly amount (corrections.json: OCR read 4,000 vs 1,000)"},
-    {"document": "tn-swwe-policy-note-2024-ta", "page": 11, "notes": "Pudhumai Penn monthly amount (corrections.json: OCR read 7000 vs 1000)"},
-    {"document": "tn-hfw-policy-note-2024-ta", "page": 421, "notes": "Insurance family income limit (corrections.json: OCR read 4,20,000 vs 1,20,000)"},
-    {"document": "apy-brochure-hi", "page": 1, "notes": "APY minimum pension (corrections.json: OCR read 000 vs 1000)"},
-    {"document": "tn-swwe-policy-note-2024-ta", "page": 88, "notes": "Senior helpline (corrections.json: OCR read Tamil digit 14௧67 vs 14567)"},
-    {"document": "tn-bcmbc-policy-note-2024-ta", "page": 59, "notes": "Hostel food charge per month (corrections.json: OCR read 4400 vs 1400)"},
-    {"document": "tn-adtw-policy-note-2024-ta", "page": 53, "notes": "Hostel food subsidy (corrections.json: OCR read 44007- vs 1400/-)"},
+    {"document": "tn-hedu-policy-note-2024-ta", "page": 33, "known_number": "1000", "notes": "Pudhumai Penn monthly amount (corrections.json: OCR read 4,000 vs 1,000)"},
+    {"document": "tn-swwe-policy-note-2024-ta", "page": 11, "known_number": "1000", "notes": "Pudhumai Penn monthly amount (corrections.json: OCR read 7000 vs 1000)"},
+    {"document": "tn-hfw-policy-note-2024-ta", "page": 421, "known_number": "120000", "notes": "Insurance family income limit (corrections.json: OCR read 4,20,000 vs 1,20,000)"},
+    {"document": "apy-brochure-hi", "page": 1, "known_number": "1000", "notes": "APY minimum pension (corrections.json: OCR read 000 vs 1000)"},
+    {"document": "tn-swwe-policy-note-2024-ta", "page": 88, "known_number": "14567", "notes": "Senior helpline (corrections.json: OCR read Tamil digit 14௧67 vs 14567)"},
+    {"document": "tn-bcmbc-policy-note-2024-ta", "page": 59, "known_number": "1400", "notes": "Hostel food charge per month (corrections.json: OCR read 4400 vs 1400)"},
+    {"document": "tn-adtw-policy-note-2024-ta", "page": 53, "known_number": "1400", "notes": "Hostel food subsidy (corrections.json: OCR read 44007- vs 1400/-)"},
 
     # docs/review/demo-numbers.csv & key demo numbers
     {"document": "kmut-go15-2023-ta", "page": 3, "notes": "KMUT G.O.: eligibility age cutoff 21, Rs.12,000 per annum"},
@@ -36,7 +36,7 @@ def main():
         writer = csv.writer(f)
         writer.writerow(["document", "page", "known_number", "notes"])
         for item in GATE_PAGES:
-            writer.writerow([item["document"], item["page"], "", item["notes"]])
+            writer.writerow([item["document"], item["page"], item.get("known_number", ""), item["notes"]])
     print(f"Wrote {len(GATE_PAGES)} rows to {out_path}")
 
 if __name__ == "__main__":

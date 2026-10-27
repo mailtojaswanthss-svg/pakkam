@@ -25,8 +25,8 @@ from schemebot.config import get_settings
 from schemebot.ingest.extract import OCR_DPI, OCR_LANGUAGES
 import json
 
-# Regex to capture numbers with optional commas/decimals and currency markers
-NUM_PATTERN = re.compile(r"(?:[₹रुரூ]\.?\s*)?(\d+(?:[,\.]\d+)*|\b\d+\b)")
+# Regex to capture purely digits and numeric expressions (handling Indian grouping)
+NUM_PATTERN = re.compile(r"\b[\d\u0BE6-\u0BEF]+(?:[,\.][\d\u0BE6-\u0BEF]+)*\b")
 TAMIL_DIGITS = {"௦": "0", "௧": "1", "௨": "2", "௩": "3", "௪": "4", "௫": "5", "௬": "6", "௭": "7", "௮": "8", "௯": "9"}
 
 
@@ -34,7 +34,7 @@ def normalize_number(raw: str) -> str:
     cleaned = raw.strip()
     for t_digit, a_digit in TAMIL_DIGITS.items():
         cleaned = cleaned.replace(t_digit, a_digit)
-    cleaned = cleaned.replace(",", "").replace("/-", "")
+    cleaned = cleaned.replace(",", "").replace("/-", "").strip()
     return cleaned
 
 
