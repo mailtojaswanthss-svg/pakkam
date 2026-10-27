@@ -26,9 +26,14 @@ os.environ["HF_HOME"] = "F:/hf_cache"
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pymupdf
+import pytesseract
 import torch
 from PIL import Image
 from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+
+TESSERACT_EXE = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+if Path(TESSERACT_EXE).is_file():
+    pytesseract.pytesseract.tesseract_cmd = TESSERACT_EXE
 
 from schemebot.config import get_settings
 from schemebot.index.embed import BgeM3Encoder, model_source
@@ -86,6 +91,71 @@ def extract_numbers(text: str) -> set[str]:
     return {normalize_num(n) for n in raw if normalize_num(n)}
 
 
+def find_amount_crops(image: Image.Image, lang: str) -> list[tuple[int, int, int, int]]:
+    """Locate bounding boxes for amounts using Tesseract word positions."""
+    try:
+        data = pytesseract.image_to_data(image, lang=lang, output_type=pytesseract.Output.DICT)
+    except Exception as e:
+        logger.warning("pytesseract image_to_data failed: %s", e)
+        return []
+
+    boxes = []
+    n = len(data["text"])
+
+    for i in range(n):
+        text = data["text"][i].strip()
+        if not text:
+            continue
+
+        is_currency = any(curr in text for curr in ["ரூ", "₹", "Rs", "रु", "ரூ.", "Rs."])
+        is_amount = bool(re.search(r"\d{3,}", text))
+
+        if is_currency or is_amount:
+            left = data["left"][i]
+            top = data["top"][i]
+            width = data["width"][i]
+            height = data["height"][i]
+            if width > 5 and height > 5:
+                boxes.append((left, top, width, height))
+
+    if not boxes:
+        return []
+
+    margin_x = 80
+    margin_y = 30
+    img_w, img_h = image.size
+
+    merged = []
+    for (l, t, w, h) in boxes:
+        x0 = max(0, l - margin_x)
+        y0 = max(0, t - margin_y)
+        x1 = min(img_w, l + w + margin_x)
+        y1 = min(img_h, t + h + margin_y)
+        merged.append([x0, y0, x1, y1])
+
+    # Cluster overlapping boxes
+    final_crops = []
+    while merged:
+        curr = merged.pop(0)
+        overlapping = True
+        while overlapping:
+            overlapping = False
+            remaining = []
+            for other in merged:
+                if not (curr[2] < other[0] or curr[0] > other[2] or curr[3] < other[1] or curr[1] > other[3]):
+                    curr[0] = min(curr[0], other[0])
+                    curr[1] = min(curr[1], other[1])
+                    curr[2] = max(curr[2], other[2])
+                    curr[3] = max(curr[3], other[3])
+                    overlapping = True
+                else:
+                    remaining.append(other)
+            merged = remaining
+        final_crops.append((curr[0], curr[1], curr[2] - curr[0], curr[3] - curr[1]))
+
+    return final_crops[:2]
+
+
 def load_tesseract_page(cache_root: Path, pdf_path: Path, language: str, page_num: int) -> str:
     lang_code = OCR_LANGUAGES.get(language, "tam+eng")
     key = f"{file_sha256(pdf_path)[:HASH_PREFIX]}-{lang_code}-{OCR_DPI}dpi"
@@ -101,6 +171,12 @@ def main():
         "--finalize",
         action="store_true",
         help="Build ocr_disagreements.csv and pakkam_chitra index immediately from whatever pages are currently completed, without running further GPU extraction.",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["crop", "full"],
+        default="crop",
+        help="Extraction mode: 'crop' (Option 2: ~11.5s/page ROI crop around amounts) or 'full' (Option 1: full-page VLM rewrite).",
     )
     args = parser.parse_args()
 
@@ -213,43 +289,83 @@ def main():
                 with pymupdf.open(pdf_path) as doc:
                     page = doc[page_num - 1]
                     pixmap = page.get_pixmap(dpi=DPI)
-                    image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
+                    full_image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
 
-                messages = [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "image", "image": image},
-                            {"type": "text", "text": "Extract all text from this image exactly as written. Output only the extracted text."},
-                        ],
-                    }
-                ]
-                text_prompt = processor.apply_chat_template(
-                    messages, tokenize=False, add_generation_prompt=True
-                )
-                inputs = processor(
-                    text=[text_prompt],
-                    images=[image],
-                    padding=True,
-                    return_tensors="pt",
-                ).to(model.device)
+                if args.mode == "crop":
+                    tess_text = load_tesseract_page(cache_root, pdf_path, source["language"], page_num)
+                    if not tess_text:
+                        tess_text = page.get_text("text").strip()
 
-                generated_ids = model.generate(**inputs, max_new_tokens=2048)
-                generated_ids_trimmed = [
-                    out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-                ]
-                output_text = processor.batch_decode(
-                    generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-                )[0].strip()
+                    lang_code = OCR_LANGUAGES.get(source["language"], "tam+eng")
+                    crops = find_amount_crops(full_image, lang_code)
 
-                target_txt.write_text(output_text, encoding="utf-8")
-                elapsed = time.perf_counter() - t0
+                    if not crops:
+                        target_txt.write_text(tess_text, encoding="utf-8")
+                        elapsed = time.perf_counter() - t0
+                        logger.info("  -> [Crop Mode] Saved %s (Tesseract baseline) in %.1fs", target_txt.name, elapsed)
+                    else:
+                        crop_results = []
+                        for crop_idx, (x, y, w, h) in enumerate(crops, 1):
+                            crop_img = full_image.crop((x, y, x + w, y + h))
+                            messages = [
+                                {
+                                    "role": "user",
+                                    "content": [
+                                        {"type": "image", "image": crop_img},
+                                        {"type": "text", "text": "Extract all text from this image exactly as written. Output only the extracted text."},
+                                    ],
+                                }
+                            ]
+                            text_prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+                            inputs = processor(text=[text_prompt], images=[crop_img], padding=True, return_tensors="pt").to(model.device)
+                            generated_ids = model.generate(**inputs, max_new_tokens=256)
+                            trimmed_ids = [out[len(inp):] for inp, out in zip(inputs.input_ids, generated_ids)]
+                            crop_out = processor.batch_decode(trimmed_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0].strip()
+                            crop_results.append(crop_out)
+
+                        verified_block = "\n\n[Verified Amounts]: " + " | ".join(crop_results)
+                        hybrid_text = tess_text + verified_block
+                        target_txt.write_text(hybrid_text, encoding="utf-8")
+                        elapsed = time.perf_counter() - t0
+                        logger.info("  -> [Crop Mode] Saved %s (%d crops) in %.1fs -> %s", target_txt.name, len(crops), elapsed, repr(" | ".join(crop_results)[:50]))
+
+                else:  # Full-page mode
+                    messages = [
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "image", "image": full_image},
+                                {"type": "text", "text": "Extract all text from this image exactly as written. Output only the extracted text."},
+                            ],
+                        }
+                    ]
+                    text_prompt = processor.apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=True
+                    )
+                    inputs = processor(
+                        text=[text_prompt],
+                        images=[full_image],
+                        padding=True,
+                        return_tensors="pt",
+                    ).to(model.device)
+
+                    generated_ids = model.generate(**inputs, max_new_tokens=2048)
+                    generated_ids_trimmed = [
+                        out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+                    ]
+                    output_text = processor.batch_decode(
+                        generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+                    )[0].strip()
+
+                    target_txt.write_text(output_text, encoding="utf-8")
+                    elapsed = time.perf_counter() - t0
+                    logger.info("  -> [Full-Page] Saved %s (%d chars) in %.1fs", target_txt.name, len(output_text), elapsed)
+
                 timings[f"{doc_id}_p{page_num}"] = round(elapsed, 1)
                 try:
                     timing_file.write_text(json.dumps(timings, indent=2), encoding="utf-8")
                 except Exception:
                     pass
-                logger.info("  -> Saved %s (%d chars) in %.1fs", target_txt.name, len(output_text), elapsed)
 
             except torch.cuda.OutOfMemoryError:
                 logger.error("CUDA OOM on %s page %d! Clearing cache and pausing 5s...", doc_id, page_num)
