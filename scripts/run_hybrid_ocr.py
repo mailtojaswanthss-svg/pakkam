@@ -34,6 +34,7 @@ from schemebot.index.embed import BgeM3Encoder, model_source
 from schemebot.index.store import build_index, open_client
 from schemebot.ingest.chunk import chunk_document
 from schemebot.ingest.extract import OCR_DPI, OCR_LANGUAGES, PageText
+from schemebot.ingest.models import SourceDoc
 from schemebot.ingest.ocr_cache import HASH_PREFIX, file_sha256
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -266,13 +267,7 @@ def main():
                     method = "ocr-tesseract" if text else "text"
                 doc_pages.append(PageText(page=i, text=text, method=method))
 
-        source_doc = SourceDoc(
-            doc_id=s["doc_id"],
-            scheme=s.get("scheme", ""),
-            file=Path(s["file"]),
-            source_url=s["source_url"],
-            language=s["language"],
-        )
+        source_doc = SourceDoc.model_validate(s)
         chunks = chunk_document(source_doc, doc_pages)
         all_chunks.extend(chunks)
 
