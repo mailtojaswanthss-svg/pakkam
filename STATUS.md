@@ -1,8 +1,13 @@
 # Pakkam + Gnani voice: status
 
-Last updated: 26 Oct 2026. Own target: 8 Nov (13 days left). Hard deadline: 10 Nov, 11:59 PM IST (15 days left).
+Last updated: 27 Oct 2026. Own target: 8 Nov (12 days left). Hard deadline: 10 Nov, 11:59 PM IST (14 days left).
 
 ## Done
+- Hybrid OCR pipeline - Step 1 & 2 (27 Oct):
+  - scripts/flag_ocr_pages.py scanned all 1,353 cached Tesseract OCR pages for currency markers (ரூ, Rs, Rs., ₹, रु) and 3+ digits.
+  - Output written to docs/review/ocr_flagged_pages.csv (1,255 pages flagged with 3+ digits = 33.1 GPU hours; 500 pages with currency markers = 13.2 GPU hours).
+  - Priority ordering established: Pudhumai Penn, CMCHIS, BC/MBC and ADTW hostels, APY, PM-Kisan, PMUY.
+  - Stopped before GPU run; waiting for user confirmation on scope and cut-down rule.
 - Voice in, code side (26 Oct):
   - `src/schemebot/voice/stt.py`: Gnani Prisma v2.5 speech-to-text client (`POST /stt/v3`).
   - `POST /ask/voice`: audio upload plus language, then speech to text, then the existing answer pipeline. Returns the answer and the transcript.
