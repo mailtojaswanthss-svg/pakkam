@@ -1,6 +1,6 @@
 """Step 5: STT Evaluation on Kathbath and synthetic/user clips.
 
-Computes Word Error Rate (WER), character accuracy, and latency.
+Computes Word Error Rate (WER) with explicit punctuation/whitespace normalization.
 Tracks credit guard calls strictly and caps each evaluation run at max 40 calls.
 Outputs:
 - data/voice/stt_eval_results.json
@@ -8,10 +8,13 @@ Outputs:
 """
 
 import csv
+import io
 import json
+import re
 import statistics
 import sys
 import time
+import wave
 from pathlib import Path
 
 # Ensure UTF-8 output
@@ -26,10 +29,25 @@ from schemebot.voice.stt import GNANI_LANGUAGE_CODES, GnaniStt, build_budget
 MAX_CALLS_THIS_RUN = 40
 
 
-def calculate_wer(reference: str, hypothesis: str) -> float:
-    """Levenshtein word error rate."""
-    ref_words = reference.strip().split()
-    hyp_words = hypothesis.strip().split()
+def normalize_tokens(text: str) -> list[str]:
+    """WER Token Normalization:
+    1. Strip punctuation marks (.,!?:;"'()[]-`~ and Indic danda)
+    2. Lowercase all characters
+    3. Collapse multiple whitespace into single tokens
+    """
+    cleaned = re.sub(r"[^\w\s]", " ", text, flags=re.UNICODE)
+    return [w.strip().lower() for w in cleaned.split() if w.strip()]
+
+
+def calculate_wer(reference: str, hypothesis: str, normalize: bool = True) -> float:
+    """Levenshtein word error rate. If normalize=True, strips punctuation and collapses whitespace."""
+    if normalize:
+        ref_words = normalize_tokens(reference)
+        hyp_words = normalize_tokens(hypothesis)
+    else:
+        ref_words = reference.strip().split()
+        hyp_words = hypothesis.strip().split()
+
     if not ref_words:
         return 0.0 if not hyp_words else 1.0
 
@@ -41,12 +59,20 @@ def calculate_wer(reference: str, hypothesis: str) -> float:
 
     for i in range(1, len(ref_words) + 1):
         for j in range(1, len(hyp_words) + 1):
-            if ref_words[i - 1].lower() == hyp_words[j - 1].lower():
+            if ref_words[i - 1] == hyp_words[j - 1]:
                 d[i][j] = d[i - 1][j - 1]
             else:
                 d[i][j] = 1 + min(d[i - 1][j], d[i][j - 1], d[i - 1][j - 1])
 
     return d[len(ref_words)][len(hyp_words)] / len(ref_words)
+
+
+def get_clip_duration(clip_path: Path) -> float:
+    try:
+        with wave.open(str(clip_path), "rb") as wf:
+            return wf.getnframes() / float(wf.getframerate())
+    except Exception:
+        return 0.0
 
 
 def main():
@@ -63,7 +89,7 @@ def main():
     print("=" * 80)
     print(" GNANI STT EVALUATION: KATHBATH & SYNTHETIC BENCHMARK")
     print("=" * 80)
-    print(f"Daily Cap: {budget.max_per_day} | Used today before run: {credits_before} | Run cap: {MAX_CALLS_THIS_RUN}")
+    print(f"Our Daily Cap Guard: {budget.max_per_day} | Used today before run: {credits_before} | Run cap: {MAX_CALLS_THIS_RUN}")
 
     # Load Kathbath CSV
     kathbath_csv = Path("data/voice/kathbath_clips.csv")
@@ -86,7 +112,7 @@ def main():
         clips.append({
             "filename": synth_path.name,
             "language": "ta",
-            "reference_text": "வணக்கம் இது ஒரு சோதனை ஒலி",
+            "reference_text": "வணக்கம், இது ஒரு சோதனை ஒலி.",
             "source": "Synthetic-Plumbing",
             "synthetic_or_real": "synthetic",
         })
@@ -122,6 +148,7 @@ def main():
 
         gnani_lang = GNANI_LANGUAGE_CODES.get(lang, "ta-IN")
         audio_bytes = clip_path.read_bytes()
+        clip_duration = get_clip_duration(clip_path)
 
         start_time = time.perf_counter()
         try:
@@ -129,7 +156,8 @@ def main():
             calls_made += 1
             transcript = stt_client.transcribe(audio_bytes, fname, gnani_lang)
             dur = time.perf_counter() - start_time
-            wer = calculate_wer(ref_text, transcript)
+            norm_wer = calculate_wer(ref_text, transcript, normalize=True)
+            raw_wer = calculate_wer(ref_text, transcript, normalize=False)
 
             results.append({
                 "filename": fname,
@@ -138,11 +166,13 @@ def main():
                 "kind": kind,
                 "reference": ref_text,
                 "transcript": transcript,
-                "latency_s": dur,
-                "wer": wer,
+                "clip_duration_s": round(clip_duration, 2),
+                "latency_s": round(dur, 2),
+                "wer_normalized": round(norm_wer, 4),
+                "wer_raw": round(raw_wer, 4),
                 "success": True,
             })
-            print(f"[{idx:02d}/{len(clips)}] {source:<12} ({lang}): Latency={dur:.2f}s | WER={wer*100:.1f}%")
+            print(f"[{idx:02d}/{len(clips)}] {source:<12} ({lang}): Latency={dur:.2f}s | Norm WER={norm_wer*100:.1f}% | Raw WER={raw_wer*100:.1f}%")
         except BudgetExhausted as e:
             print(f"\n[Budget Exceeded]: {e}")
             break
@@ -153,6 +183,7 @@ def main():
                 "source": source,
                 "kind": kind,
                 "reference": ref_text,
+                "clip_duration_s": round(clip_duration, 2),
                 "error": str(e),
                 "success": False,
             })
@@ -167,33 +198,15 @@ def main():
         "credits_before": credits_before,
         "credits_after": credits_after,
         "calls_made": calls_made,
+        "credits_cost_per_call": "unknown (undocumented by Gnani API)",
+        "daily_cap_note": f"The {budget.max_per_day} calls/day limit is our own application-level safety guard",
         "results": results,
     }, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    # Generate summary metrics
     print("\n" + "=" * 80)
     print(" STT EVALUATION SUMMARY REPORT")
     print("=" * 80)
-    print(f"Credits Used: {calls_made} calls (Remaining today: {budget.remaining()} / {budget.max_per_day})")
-
-    # Group by (source, kind, language)
-    groups = {}
-    for r in results:
-        if not r.get("success"):
-            continue
-        key = (r["source"], r["kind"], r["language"])
-        groups.setdefault(key, []).append(r)
-
-    print(f"\n{'Source':<20} {'Kind':<12} {'Lang':<6} {'Count':<6} {'Median Latency':<16} {'Mean WER'}")
-    print("-" * 75)
-    for (src, kind, lang), items in groups.items():
-        wers = [it["wer"] for it in items]
-        lats = [it["latency_s"] for it in items]
-        mean_wer = sum(wers) / len(wers) if wers else 0.0
-        med_lat = statistics.median(lats) if lats else 0.0
-        print(f"{src:<20} {kind:<12} {lang:<6} {len(items):<6} {med_lat:>5.2f}s          {mean_wer*100:>6.1f}%")
-
-    print("=" * 80)
+    print(f"Calls Made This Run: {calls_made} | Today's Guard: {credits_after} / {budget.max_per_day} calls used")
     print(f"Results saved to {out_json.as_posix()}")
     return 0
 
