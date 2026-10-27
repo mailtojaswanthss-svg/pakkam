@@ -116,7 +116,7 @@ $$\\text{WER} = \\frac{S + D + I}{N}$$
 where $S$ is substitutions, $D$ is deletions, $I$ is insertions, and $N$ is total words in the reference text.
 
 To ensure fair measurement between model transcripts and human references, `scripts/gnani_stt_eval.py` applies deterministic normalisation:
-1. **Punctuation Stripping:** Removes commas, periods, question marks, colons, semicolons, quotation marks, parentheses, and Indic dandas (`।`, `॥`) via `re.sub(r"[^\w\s]", " ", text, flags=re.UNICODE)`.
+1. **Punctuation Stripping:** Removes commas, periods, question marks, colons, semicolons, quotation marks, parentheses, and Indic dandas (`।`, `॥`) via `re.sub(r"[^\\w\\s]", " ", text, flags=re.UNICODE)`.
 2. **Whitespace Normalisation:** Collapses consecutive whitespace into single tokens.
 3. **Case Folding:** Normalises characters to lowercase.
 4. **Raw WER Comparison:** Both normalized WER and raw WER (where punctuation attaches to words) are reported above.

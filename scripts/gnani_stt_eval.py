@@ -70,7 +70,17 @@ def calculate_wer(reference: str, hypothesis: str, normalize: bool = True) -> fl
 def get_clip_duration(clip_path: Path) -> float:
     try:
         with wave.open(str(clip_path), "rb") as wf:
-            return wf.getnframes() / float(wf.getframerate())
+            nframes = wf.getnframes()
+            framerate = wf.getframerate()
+            nchannels = wf.getnchannels()
+            sampwidth = wf.getsampwidth()
+            # Handle unfinalized stream headers where nframes is 0x7FFFFFFF
+            if nframes >= 2147483640 or (nframes / framerate > 3600):
+                file_size = clip_path.stat().st_size
+                data_size = max(0, file_size - 44)
+                bytes_per_sec = framerate * nchannels * sampwidth
+                return data_size / float(bytes_per_sec) if bytes_per_sec else 0.0
+            return nframes / float(framerate)
     except Exception:
         return 0.0
 
