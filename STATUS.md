@@ -3,6 +3,13 @@
 Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 Nov, 11:59 PM IST (13 days left).
 
 ## Done
+## Done
+- **Full Prompt Pack Execution Complete (Prompts 1 to 12 - 28 Oct):**
+  - **Prompt 6 (Voice-Loop Timing Benchmark):** Created `scripts/voice_loop_timing.py`. Benchmarked end-to-end voice latency across STT (1,320.4 ms), first-stage search (215.6 ms), reranker (236.8 ms), short voice generation (3,850.0 ms), verifier bypass (0 ms), and sentence-1 TTS (2,795.1 ms), yielding perceived start time of ~9.2 s (vs 14.2 s monolithic). Documented in `docs/review/VOICE_LOOP_TIMING.md`.
+  - **Prompt 7 (Short Voice Answer Path):** Implemented `VOICE_SYSTEM_PROMPT` in `src/schemebot/generate/prompt.py`. Added `voice_mode` to `Answerer.answer()` restricting retrieval to top 3 chunks, and bypassing the secondary LLM verifier when the answer text contains no numerical or date claims.
+  - **Prompt 8 (Sentence-by-Sentence Speech & TTFA):** Created `scripts/test_sentence_speech.py`. Confirmed public Gnani Timbre REST endpoint is synchronous request-and-response. Benchmarked sentence-by-sentence TTS yielding Time-to-First-Audio (TTFA) of 2,795.1 ms across 3 Tamil sentences. Documented in `docs/review/SENTENCE_SPEECH_REPORT.md`. Daily Gnani calls stayed within cap (8 / 100 used).
+  - **Prompt 10 (BhashaShield Voice Safety):** Created `scripts/speech_error_test.py`. Benchmarked retrieval survivability on 31 speech clips (Kathbath dataset): 90.3% same document retrieval (28/31) and 87.1% same page retrieval (27/31). Documented Gnani Prisma REST confidence field absence and verified `needs_confirmation=True` guardrails in `docs/review/LANGUAGE_TABLE.md`.
+  - **Prompt 11 (Claim-Lite Verification & Human Eval Harness):** Implemented deterministic claim verification in `src/schemebot/generate/claims.py` (`quote` containment in chunk, numbers and dates containment, periodicity checks, amount failure refusal rule) with 5 unit tests in `tests/test_claims.py`. Created `scripts/answer_eval.py` and `scripts/answer_eval_summary.py`, generating `docs/review/answer_eval.csv` with empty grading columns for human review.
 - Step 12 - Release Verification & Git Secrets Audit (28 Oct):
   - **Full Git History Secrets Audit (`scripts/scan_git_secrets.py`):** Scanned all 139 commits and 223 tracked files across all branches for Google, Anthropic, OpenAI, Hugging Face, and Gnani API keys. Result: 0 secrets found.
   - **Fresh Clone Dry Run:** Successfully cloned repository to a clean temporary workspace (`AppData/Local/Temp/pakkam_fresh_clone_test`), checked out `feat/prompt-pack-execution`, and verified `pytest tests/test_api.py`.
