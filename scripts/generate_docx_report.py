@@ -3,16 +3,16 @@ import docx
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
-from docx.oxml import parse_xml, OxmlElement
-from docx.oxml.ns import nsdecls, qn
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
 
 def set_cell_background(cell, fill_hex):
     tcPr = cell._element.get_or_add_tcPr()
     shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{fill_hex}"/>')
     tcPr.append(shd)
 
-def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
+def set_cell_margins(cell, top=80, bottom=80, left=120, right=120):
     tcPr = cell._element.get_or_add_tcPr()
     tcMar = parse_xml(f'''
         <w:tcMar {nsdecls("w")}>
@@ -28,52 +28,72 @@ def create_report():
     doc = Document()
     
     # Page setup - 1 inch margins
-    sections = doc.sections
-    for section in sections:
+    for section in doc.sections:
         section.top_margin = Inches(1)
         section.bottom_margin = Inches(1)
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
         
-    # Color Palette
     PRIMARY = RGBColor(26, 54, 93)     # Navy #1A365D
     SECONDARY = RGBColor(49, 130, 206) # Slate Blue #3182CE
     DARK_TEXT = RGBColor(45, 55, 72)   # Dark Gray #2D3748
     MUTED_TEXT = RGBColor(113, 128, 150) # Gray #718096
-    
-    # Configure base Normal style
+    WARNING_TEXT = RGBColor(197, 48, 48) # Red #C53030
+
     style_normal = doc.styles['Normal']
     font = style_normal.font
     font.name = 'Calibri'
-    font.size = Pt(11)
+    font.size = Pt(10.5)
     font.color.rgb = DARK_TEXT
 
     # Header / Title Block
     title_p = doc.add_paragraph()
     title_p.paragraph_format.space_before = Pt(0)
-    title_p.paragraph_format.space_after = Pt(4)
-    run_title = title_p.add_run("PAKKAM 2.0: CITIZEN SCHEME ASSISTANT")
+    title_p.paragraph_format.space_after = Pt(2)
+    run_title = title_p.add_run("PAKKAM 2.0: RESEARCH PROTOTYPE BENCHMARK REPORT")
     run_title.font.name = 'Calibri'
-    run_title.font.size = Pt(24)
+    run_title.font.size = Pt(22)
     run_title.font.bold = True
     run_title.font.color.rgb = PRIMARY
     
     sub_p = doc.add_paragraph()
-    sub_p.paragraph_format.space_after = Pt(16)
-    run_sub = sub_p.add_run("Full Execution, Benchmark Verification, and Architecture Report")
+    sub_p.paragraph_format.space_after = Pt(12)
+    run_sub = sub_p.add_run("Evidence, Engineering Boundaries, and Known Limitations (Draft Questions Benchmark)")
     run_sub.font.name = 'Calibri'
-    run_sub.font.size = Pt(14)
+    run_sub.font.size = Pt(13)
     run_sub.font.italic = True
     run_sub.font.color.rgb = SECONDARY
+
+    # Status Alert Box
+    alert_table = doc.add_table(rows=1, cols=1)
+    alert_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    c_alert = alert_table.rows[0].cells[0]
+    c_alert.width = Inches(6.5)
+    set_cell_background(c_alert, "FFF5F5")
+    set_cell_margins(c_alert, 80, 80, 120, 120)
+    p_alert = c_alert.paragraphs[0]
+    r_al_b = p_alert.add_run("STATUS: Research Prototype (Do Not Push to Git Remote)\n")
+    r_al_b.font.bold = True
+    r_al_b.font.size = Pt(9.5)
+    r_al_b.font.color.rgb = WARNING_TEXT
+    r_al_t = p_alert.add_run(
+        "Evidence gathered to date is measured on draft questions and synthetic/read speech. "
+        "The codebase is not considered ready for remote push or publication until the human answer-level evaluation, "
+        "verified question set, and real conversational audio tests are completed."
+    )
+    r_al_t.font.size = Pt(9)
+    r_al_t.font.color.rgb = DARK_TEXT
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
     # Metadata Table
     meta_table = doc.add_table(rows=4, cols=2)
     meta_table.alignment = WD_TABLE_ALIGNMENT.CENTER
     meta_data = [
-        ("Project Branch:", "feat/prompt-pack-execution (Clean working tree, HEAD: eb34a57)"),
-        ("Repository / Working Directory:", "F:\\sar.ai pr (indic-scheme-rag)"),
-        ("Author / Owner:", "@Jaswanth SS (Pakkam Team)"),
-        ("Verification Status:", "55/55 Automated Unit Tests Passing | 0 Git Secrets across 148 Commits")
+        ("Working Branch:", "feat/prompt-pack-execution (Local only; unpushed)"),
+        ("Corpus Under Test:", "18 PDFs, 2,688 pages, 2,918 chunks, 4,449 vectors in Qdrant ('pakkam_chitra')"),
+        ("Author / Contributor:", "@Jaswanth SS (Developer-authored draft benchmarks)"),
+        ("Verification Status:", "55/55 Unit Tests Passing | Custom Regex Scan: 0 secrets | Real Clone: Pending")
     ]
     for idx, (k, v) in enumerate(meta_data):
         row = meta_table.rows[idx]
@@ -82,90 +102,92 @@ def create_report():
         cell_v.width = Inches(4.3)
         set_cell_background(cell_k, "F7FAFC")
         set_cell_background(cell_v, "EDF2F7")
-        set_cell_margins(cell_k, 60, 60, 100, 100)
-        set_cell_margins(cell_v, 60, 60, 100, 100)
+        set_cell_margins(cell_k, 50, 50, 80, 80)
+        set_cell_margins(cell_v, 50, 50, 80, 80)
         
         p_k = cell_k.paragraphs[0]
-        p_k.paragraph_format.space_after = Pt(2)
+        p_k.paragraph_format.space_after = Pt(1)
         r_k = p_k.add_run(k)
         r_k.font.bold = True
-        r_k.font.size = Pt(9.5)
+        r_k.font.size = Pt(9)
         r_k.font.color.rgb = PRIMARY
         
         p_v = cell_v.paragraphs[0]
-        p_v.paragraph_format.space_after = Pt(2)
+        p_v.paragraph_format.space_after = Pt(1)
         r_v = p_v.add_run(v)
-        r_v.font.size = Pt(9.5)
+        r_v.font.size = Pt(9)
         r_v.font.color.rgb = DARK_TEXT
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(12)
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-    # 1. Executive Summary
+    # 1. Executive Summary & Research Scope
     h1 = doc.add_heading(level=1)
-    r1 = h1.add_run("1. Executive Summary")
+    r1 = h1.add_run("1. Research Scope & Evaluation Context")
     r1.font.color.rgb = PRIMARY
     
     p = doc.add_paragraph(
-        "Pakkam 2.0 marks the transition of Pakkam from an exploratory RAG chatbot into a rigorous, verifiable, "
-        "and production-grade multilingual AI assistant for public Indian government schemes. "
-        "Designed specifically for citizens querying welfare schemes in Tamil, Hindi, English, and Tanglish, "
-        "Pakkam 2.0 addresses the critical vulnerabilities of conventional LLM RAG pipelines: "
-        "numeral misrecognition in scanned government gazettes, ungrounded hallucinations, high voice loop latency, "
-        "and catastrophic silent errors on speech recognition mishearings."
+        "Pakkam 2.0 is an experimental research prototype investigating verifiable, citation-grounded "
+        "question answering over Indian public welfare scheme documents in Tamil, Hindi, English, and Tanglish. "
+        "All quantitative evidence documented to date is evaluated strictly on draft, synthetic, or read-speech datasets. "
+        "The system has not been tested on real end-users, conversational dialect audio, or noisy field recordings."
     )
     p.paragraph_format.space_after = Pt(6)
     
     p = doc.add_paragraph(
-        "To establish unshakeable trustworthiness for judges and technical reviewers, all claims in this document "
-        "are backed by committed, re-runnable scripts with strictly reported sample sizes (n). "
-        "Zero numbers are invented; every benchmark is mathematically measured from the codebase."
+        "In compliance with project integrity rules, every reported number is accompanied by its source script, "
+        "sample size (n), and evaluation constraints. No metrics are extrapolated beyond their tested boundaries."
     )
-    p.paragraph_format.space_after = Pt(14)
+    p.paragraph_format.space_after = Pt(12)
 
-    # 2. Key Upgrades Completed in Pakkam 2.0
+    # 2. Key Upgrades Completed
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("2. Key Architectural Upgrades Completed")
+    r = h1.add_run("2. Engineering Upgrades Completed")
     r.font.color.rgb = PRIMARY
     
     features = [
-        ("Verified Fact Cards Backend (0 LLM Calls, <50ms): ", 
-         "A high-confidence instant answer path for high-frequency queries. Matches queries using BGE-M3 cosine similarity (>=0.82) "
-         "coupled with mandatory scheme entity recognition. Backed by human provenance (verified_by) and official gazette citations. "
-         "Delivers 100% precision with 0 false matches on ungrounded queries."),
+        ("Fact Cards Design Harness (2 Draft Cards): ", 
+         "Implemented in data/fact_cards.json with matching via FactCardMatcher using BGE-M3 cosine similarity (>=0.82) "
+         "plus mandatory scheme keyword identification. Currently contains 2 developer-authored draft cards (KMUT and PM-KISAN). "
+         "Evaluated on n=44 draft queries (4 positive, 40 unanswerables): 100% precision on this small sample, 0% false positives, "
+         "and 0 wrong cross-scheme matches. Pre-cached audio files were generated locally into data/audio_cache/ (gitignored; no audio in git). "
+         "Note: Cards were authored by the developer and have NOT been verified by external persons or government officials."),
         
-        ("Claim-Lite Deterministic Entailment Engine: ", 
-         "A deterministic post-generation validation layer that extracts exact quotation substrings and cross-verifies numbers, "
-         "percentages, dates, and frequencies against cited official chunks. If any numerical figure is missing or ungrounded, "
-         "the response status is strictly forced to INSUFFICIENT_EVIDENCE."),
+        ("Claim-Lite Quote and Number Checks (Not Entailment): ", 
+         "Implemented in src/schemebot/generate/claims.py. Verifies exact quotation substring containment in cited chunks and checks "
+         "whether parsed numbers, percentages, dates, and frequency intervals (monthly, yearly) appear in the source text. "
+         "Forces status='INSUFFICIENT_EVIDENCE' if amounts mismatch. "
+         "Note: This is a deterministic string and number checker, not Natural Language Inference (NLI) entailment. "
+         "Its real-world effect on hallucination reduction is not yet measured (pending human evaluation on verified questions)."),
         
-        ("Voice-Loop Pipelining & Sentence-by-Sentence TTFA: ", 
-         "Reduced perceived user waiting time by ~40% (from 14.2s monolithic loop down to 8.4s - 9.2s). "
-         "Pipelining synthesizes Sentence 1 (~2.8s) and initiates audio playback immediately while Sentence 2 synthesizes in the background."),
+        ("Voice-Loop Latency Pipelining: ", 
+         "Implemented sentence-by-sentence streaming logic. In a single benchmarked run (n=1), the end-to-end wall-clock time was 9.20 s, "
+         "with Sentence 1 Time-to-First-Audio (TTFA) taking 2,795.1 ms. Against an estimated monolithic sequential baseline of 14.2 s, "
+         "this represents a 35.2% reduction in wall-clock wait time. "
+         "Crucial limitation: The project target of 5.0 s end-to-end latency was NOT met (9.20 s is 4.2 s over target)."),
         
         ("Short Voice Answer Path: ", 
-         "Dedicated system prompt enforcing a strict 2-sentence cap, no markdown asterisks/bullets, and phonetic Indic spoken numbers "
-         "(e.g., 'ஆயிரம் ரூபாய்' instead of raw numerals). Retrieval is trimmed to top 3 chunks, and the secondary verifier is bypassed "
-         "for non-numeric queries, reducing LLM free-tier quota consumption by 50%."),
+         "Added VOICE_SYSTEM_PROMPT enforcing a strict 2-sentence maximum, no markdown, and Indic spoken words for currency. "
+         "Restricts retrieval to top 3 chunks and skips the secondary LLM verifier when no numbers or dates are generated. "
+         "Theoretical quota benefit: up to 50% fewer calls on non-numeric questions, but actual savings across a representative query stream are not measured."),
         
         ("Fast Sources-First Endpoint (POST /ask/sources): ", 
-         "A lightweight endpoint that executes dense + sparse hybrid search and reranking to return official document citations "
-         "in ~300 ms with 0 LLM calls, allowing frontends to surface verifiable proof pills nearly instantly."),
+         "Returns top 3 retrieved passages with official document title and page numbers in ~300 ms with 0 LLM calls."),
         
-        ("BhashaShield Voice Safety Guardrail: ", 
-         "Evaluated on 31 read-speech clips from the Kathbath benchmark. Achieved 90.3% document retrieval accuracy and 87.1% page accuracy. "
-         "Mitigates STT hallucinations by rejecting sub-5-character inputs and setting needs_confirmation=True on all numeric and scheme queries."),
+        ("BhashaShield Speech Retrieval Test: ", 
+         "Evaluated on 31 read-speech clips from AI4Bharat Kathbath (15 Tamil, 15 Hindi, 1 boundary sample). "
+         "Measures top-5 retrieval match rate for target document (90.3%, 28/31) and target page (87.1%, 27/31) when querying STT transcripts. "
+         "Tanglish audio and consented conversational recordings remain completely untested."),
         
-        ("Model-Down Graceful Fallback: ", 
-         "If the LLM endpoint suffers a 429 quota exhaustion or network timeout, the API returns status='MODEL_UNAVAILABLE' "
-         "accompanied by the top 3 retrieved official passages and official departmental contacts (helplines, URLs) instead of failing."),
+        ("Model-Down Fallback: ", 
+         "Returns top 3 retrieved passages and available contact information with status='MODEL_UNAVAILABLE' on LLM 429 quota exhaustion or timeouts."),
         
-        ("Automated Secrets and Clean Clone Audit: ", 
-         "Full-history git audit script that scanned 148 commits and 236 tracked files, confirming 0 committed API keys, 0 credentials, "
-         "and 0 audio binaries in the repository.")
+        ("Custom Secrets Audit: ", 
+         "Custom regex scanner (scripts/scan_git_secrets.py) confirmed 0 keys and 0 audio files across 149 commits. "
+         "Certified tools (gitleaks/trufflehog) are not installed on the system. Fresh clone verification is pending.")
     ]
     for bold_prefix, text in features:
         bp = doc.add_paragraph(style='List Bullet')
-        bp.paragraph_format.space_after = Pt(4)
+        bp.paragraph_format.space_after = Pt(3)
         r_bold = bp.add_run(bold_prefix)
         r_bold.font.bold = True
         r_bold.font.color.rgb = PRIMARY
@@ -173,202 +195,266 @@ def create_report():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-    # 3. Comprehensive Benchmark Results Table
+    # 3. Quantitative Benchmarks Table
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("3. Quantitative Benchmarks & Verifiable Results")
+    r = h1.add_run("3. Benchmark Results & Scope Constraints")
     r.font.color.rgb = PRIMARY
 
-    p = doc.add_paragraph("The following table consolidates every quantitative benchmark evaluated across the Pakkam 2.0 pipeline:")
-    p.paragraph_format.space_after = Pt(8)
-
-    bench_table = doc.add_table(rows=1, cols=4)
-    bench_table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    hdr = bench_table.rows[0].cells
-    hdr[0].width = Inches(1.8)
-    hdr[1].width = Inches(2.2)
-    hdr[2].width = Inches(1.2)
-    hdr[3].width = Inches(1.5)
+    b_table = doc.add_table(rows=1, cols=4)
+    b_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    hdr = b_table.rows[0].cells
+    hdr[0].width, hdr[1].width, hdr[2].width, hdr[3].width = Inches(1.8), Inches(2.1), Inches(1.3), Inches(1.3)
     
-    headers = ["Benchmark Area", "Script & Sample Size", "Key Result", "Comparative Baseline"]
+    headers = ["Benchmark Area", "Script & Sample Size", "Result", "Baseline & Scope Notes"]
     for i, h in enumerate(headers):
         set_cell_background(hdr[i], "1A365D")
-        set_cell_margins(hdr[i], 80, 80, 100, 100)
+        set_cell_margins(hdr[i], 70, 70, 100, 100)
         p_hdr = hdr[i].paragraphs[0]
-        p_hdr.paragraph_format.space_after = Pt(2)
         r_hdr = p_hdr.add_run(h)
         r_hdr.font.bold = True
-        r_hdr.font.size = Pt(9.5)
+        r_hdr.font.size = Pt(9)
         r_hdr.font.color.rgb = RGBColor(255, 255, 255)
 
     bench_rows = [
-        ("Hybrid OCR Numeral Accuracy", "scripts/run_hybrid_ocr.py\n(n=7 known problem pages)", "Chitrapathak-2: 7/7 (100.0%)", "Tesseract: 0/7 (0.0%)\nAll misread digits"),
-        ("Hybrid OCR Crop Speedup", "scripts/run_hybrid_ocr.py\n(n=500 currency pages)", "~12.0s per page\n(Crop Mode)", "~95.0s per page\n(Full-page mode, ~8x slower)"),
-        ("Retrieval Recall@5", "scripts/ablate_retrieval.py\n(n=194 draft queries)", "Hybrid + BGE Reranker: 98.7% Recall", "Keyword: 67.5%\nDense-only: 94.8%"),
-        ("Refusal Safety (0.35 Threshold)", "scripts/evaluate_refusal_curve.py\n(n=194 draft queries)", "87.1% Overall Routing Accuracy\n92.5% Unanswerables Refused", "14.3% False Refusal Rate on answerable queries"),
-        ("Voice-Loop TTFA (Sentence 1)", "scripts/voice_loop_timing.py\nscripts/test_sentence_speech.py\n(n=1 end-to-end loop)", "9.20s Perceived Start\n(Sentence 1 TTFA: 2,795 ms)", "14.2s Monolithic Loop\n(~40% perceived latency cut)"),
-        ("Fact Cards Precision", "scripts/fact_card_eval.py\n(n=40 unanswerables + cards)", "100.0% Precision\n0% False Positives", "<50 ms Latency\n0 LLM API calls consumed"),
-        ("BhashaShield Speech Retrieval", "scripts/speech_error_test.py\n(n=31 Kathbath clips)", "Doc Match: 90.3% (28/31)\nPage Match: 87.1% (27/31)", "Tolerant to Indic dialect and pronunciation shifts"),
-        ("Kathbath STT Word Error Rate", "Gnani Prisma REST\n(n=15 Tamil, n=15 Hindi)", "Tamil: 5.2% Raw, 1.7% Norm\nHindi: 3.7% Raw, 1.7% Norm", "Read speech evaluation; synthetic single-clip was 1.32s"),
-        ("Git Security & Leak Audit", "scripts/scan_git_secrets.py\n(n=148 commits, 236 files)", "0 API Keys Found\n0 Audio Files in Git", "Clean clone verified; 55/55 unit tests passing")
+        ("Hybrid OCR Problem Pages", "scripts/run_hybrid_ocr.py\n(n=7 cherry-picked pages)", "Chitrapathak-2: 7/7 (100%)\nTesseract: 0/7 (0%)", "Selection bias: 7 pages chosen because Tesseract failed; not a corpus-wide sample."),
+        ("OCR Crop Speedup", "scripts/run_hybrid_ocr.py\n(n=500 currency pages)", "~12.0s per page (Crop Mode)", "Reconciled: Full-page GPU is ~95s; initial unoptimized CPU run was 6-7 min."),
+        ("Retrieval Recall@5", "scripts/ablate_retrieval.py\n(n=194 draft queries)", "Hybrid + Reranker: 98.7%\nHybrid alone: 94.8%", "Evaluated on draft questions only; no blind held-out set."),
+        ("Refusal Routing (0.35)", "scripts/evaluate_refusal_curve.py\n(n=194 draft queries)", "87.1% Overall Accuracy\n92.5% Unanswerables Refused", "14.3% False Refusal Rate on draft questions; threshold not calibrated on verified set."),
+        ("Voice-Loop TTFA", "scripts/voice_loop_timing.py\n(n=1 end-to-end run)", "9.20s Wall-Clock Latency\n(Sentence 1 TTFA: 2,795 ms)", "Target of 5.0s NOT met (over by 4.2s). Baseline 14.2s is composite estimated sequential."),
+        ("Fact Cards Precision", "scripts/fact_card_eval.py\n(n=4 positive, 40 unanswerables)", "100.0% Precision (4/4)\n0 False Positives (0/40)", "Tested on 2 draft cards authored by developer. Audio generated locally, not in git."),
+        ("Speech Error Retrieval", "scripts/speech_error_test.py\n(n=31 Kathbath clips)", "Doc Match: 90.3% (28/31)\nPage Match: 87.1% (27/31)", "Read-speech news only (15 TA + 15 HI + 1 sample). Tanglish/conversational untested."),
+        ("STT Word Error Rate", "Gnani Prisma REST\n(n=15 Tamil, n=15 Hindi)", "Tamil: Raw 5.2% (Norm 1.7%)\nHindi: Raw 3.7% (Norm 1.7%)", "Clean read speech only. 'Norm' strips punctuation/spaces. Identical 1.7% is coincidental rounding."),
+        ("Custom Secrets Audit", "scripts/scan_git_secrets.py\n(n=149 commits, 238 files)", "0 Secrets Detected\n0 Audio Files in Git", "Custom Python regex scan. Gitleaks unavailable. Fresh clone test pending.")
     ]
 
-    for b_idx, (col0, col1, col2, col3) in enumerate(bench_rows):
-        row = bench_table.add_row()
-        c0, c1, c2, c3 = row.cells[0], row.cells[1], row.cells[2], row.cells[3]
-        c0.width, c1.width, c2.width, c3.width = Inches(1.8), Inches(2.2), Inches(1.2), Inches(1.5)
-        
+    for b_idx, (c0, c1, c2, c3) in enumerate(bench_rows):
+        row = b_table.add_row()
+        cells = row.cells
+        cells[0].width, cells[1].width, cells[2].width, cells[3].width = Inches(1.8), Inches(2.1), Inches(1.3), Inches(1.3)
         bg_col = "FFFFFF" if b_idx % 2 == 0 else "F7FAFC"
-        for c in (c0, c1, c2, c3):
+        for c in cells:
             set_cell_background(c, bg_col)
-            set_cell_margins(c, 60, 60, 100, 100)
-            
-        p0 = c0.paragraphs[0]; p0.add_run(col0).font.bold = True; p0.runs[0].font.size = Pt(9); p0.paragraph_format.space_after = Pt(2)
-        p1 = c1.paragraphs[0]; p1.add_run(col1).font.size = Pt(8.5); p1.runs[0].font.color.rgb = MUTED_TEXT; p1.paragraph_format.space_after = Pt(2)
-        p2 = c2.paragraphs[0]; p2.add_run(col2).font.size = Pt(9); p2.runs[0].font.bold = True; p2.paragraph_format.space_after = Pt(2)
-        p3 = c3.paragraphs[0]; p3.add_run(col3).font.size = Pt(8.5); p3.paragraph_format.space_after = Pt(2)
+            set_cell_margins(c, 50, 50, 80, 80)
+        p0 = cells[0].paragraphs[0]; p0.add_run(c0).font.bold = True; p0.runs[0].font.size = Pt(8.5)
+        p1 = cells[1].paragraphs[0]; p1.add_run(c1).font.size = Pt(8); p1.runs[0].font.color.rgb = MUTED_TEXT
+        p2 = cells[2].paragraphs[0]; p2.add_run(c2).font.size = Pt(8.5); p2.runs[0].font.bold = True
+        p3 = cells[3].paragraphs[0]; p3.add_run(c3).font.size = Pt(8)
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(12)
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-    # 4. Detailed Stage-by-Stage Breakdown
+    # 4. Voice-Loop Stage Decomposition & Explanation
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("4. Detailed Voice-Loop Latency Decomposition")
+    r = h1.add_run("4. Voice Loop Latency Breakdown (n=1)")
     r.font.color.rgb = PRIMARY
 
     p = doc.add_paragraph(
-        "A critical bottleneck in citizen voice assistants is perceived turn-around time. "
-        "A monolithic loop that transcribes speech, retrieves documents, queries Gemini, verifies entailment, "
-        "and synthesizes the entire paragraph with TTS requires ~14.2 seconds. "
-        "Pakkam 2.0 splits this pipeline using short voice mode (2 sentences max) and sentence-by-sentence TTFA pipelining:"
+        "The voice loop timing was evaluated in a single end-to-end run (n=1) using scripts/voice_loop_timing.py "
+        "with Sentence 1 TTS latency verified via scripts/test_sentence_speech.py. "
+        "The total pure processing time of the individual components was 8,417.9 ms (~8.42 s), "
+        "while the measured wall-clock elapsed time was 9.20 s (reflecting ~780 ms of connection and orchestration overhead). "
+        "The 14.2 s baseline is a composite estimate of monolithic execution: STT (1.32s) + Search (0.22s) + Rerank (0.24s) + "
+        "Median Generation (6.30s from scripts/benchmark_speed.py) + Full TTS (5.99s from scripts/test_sentence_speech.py) = ~14.07s (~14.2s)."
     )
-    p.paragraph_format.space_after = Pt(8)
+    p.paragraph_format.space_after = Pt(6)
+
+    p_warn = doc.add_paragraph()
+    r_w = p_warn.add_run("CRITICAL TARGET GAP: The project target was 5.0 s end-to-end. At 9.20 s, the voice loop is 4.2 s over target.")
+    r_w.font.bold = True
+    r_w.font.color.rgb = WARNING_TEXT
+    p_warn.paragraph_format.space_after = Pt(8)
 
     vl_table = doc.add_table(rows=1, cols=4)
     vl_table.alignment = WD_TABLE_ALIGNMENT.CENTER
     hdr = vl_table.rows[0].cells
-    hdr[0].width = Inches(2.2)
-    hdr[1].width = Inches(1.2)
-    hdr[2].width = Inches(1.2)
-    hdr[3].width = Inches(2.1)
+    hdr[0].width, hdr[1].width, hdr[2].width, hdr[3].width = Inches(2.2), Inches(1.1), Inches(1.2), Inches(2.0)
     
-    headers = ["Execution Stage", "Stage Latency", "Cumulative Time", "Optimization Applied"]
+    headers = ["Component Stage", "Stage Latency", "Cumulative Time", "Source Script & Method"]
     for i, h in enumerate(headers):
         set_cell_background(hdr[i], "2D3748")
-        set_cell_margins(hdr[i], 80, 80, 100, 100)
+        set_cell_margins(hdr[i], 70, 70, 100, 100)
         p_hdr = hdr[i].paragraphs[0]
         r_hdr = p_hdr.add_run(h)
         r_hdr.font.bold = True
-        r_hdr.font.size = Pt(9.5)
+        r_hdr.font.size = Pt(9)
         r_hdr.font.color.rgb = RGBColor(255, 255, 255)
 
     stages = [
-        ("1. Speech-to-Text (Gnani Prisma REST)", "1,320.4 ms", "1.32 s", "16 kHz mono WAV input"),
-        ("2. Dense + Sparse Search (Qdrant)", "215.6 ms", "1.54 s", "BGE-M3 multi-vector retrieval"),
-        ("3. Cross-Encoder Reranker (BGE v2)", "236.8 ms", "1.77 s", "Selects top 3 chunks (voice mode)"),
-        ("4. Short Voice Synthesis (Gemini 3.5)", "3,850.0 ms", "5.62 s", "2 sentences, no markdown, Indic words"),
-        ("5. Sentence 1 TTS (Gnani Timbre REST)", "2,795.1 ms", "8.42 s (TTFA)", "Audio playback begins immediately"),
-        ("Sentence 2 TTS (Pipelined in Background)", "3,195.8 ms", "—", "Synthesized while user hears Sentence 1")
+        ("1. STT (Gnani Prisma REST)", "1,320.4 ms", "1.32 s", "scripts/voice_loop_timing.py (synthetic clip)"),
+        ("2. Dense + Sparse Search", "215.6 ms", "1.54 s", "scripts/voice_loop_timing.py (Qdrant)"),
+        ("3. Cross-Encoder Reranker", "236.8 ms", "1.77 s", "scripts/voice_loop_timing.py (BGE v2, top 3)"),
+        ("4. Short Voice Synthesis", "3,850.0 ms", "5.62 s", "scripts/voice_loop_timing.py (Gemini 3.5 Flash)"),
+        ("5. Sentence 1 TTS", "2,795.1 ms", "8.42 s (Proc) / 9.20 s (Wall)", "scripts/test_sentence_speech.py (Gnani Timbre)"),
+        ("Sentence 2 TTS (Pipelined)", "3,195.8 ms", "— (Background)", "Synthesized while Sentence 1 plays")
     ]
     for s_idx, (s0, s1, s2, s3) in enumerate(stages):
         row = vl_table.add_row()
-        c0, c1, c2, c3 = row.cells[0], row.cells[1], row.cells[2], row.cells[3]
-        c0.width, c1.width, c2.width, c3.width = Inches(2.2), Inches(1.2), Inches(1.2), Inches(2.1)
+        cells = row.cells
+        cells[0].width, cells[1].width, cells[2].width, cells[3].width = Inches(2.2), Inches(1.1), Inches(1.2), Inches(2.0)
         bg_col = "FFFFFF" if s_idx % 2 == 0 else "F7FAFC"
-        for c in (c0, c1, c2, c3):
+        for c in cells:
             set_cell_background(c, bg_col)
-            set_cell_margins(c, 60, 60, 100, 100)
-        p0 = c0.paragraphs[0]; p0.add_run(s0).font.bold = True; p0.runs[0].font.size = Pt(9)
-        p1 = c1.paragraphs[0]; p1.add_run(s1).font.size = Pt(9)
-        p2 = c2.paragraphs[0]; p2.add_run(s2).font.size = Pt(9); p2.runs[0].font.bold = True
-        p3 = c3.paragraphs[0]; p3.add_run(s3).font.size = Pt(8.5); p3.runs[0].font.color.rgb = MUTED_TEXT
+            set_cell_margins(c, 50, 50, 80, 80)
+        cells[0].paragraphs[0].add_run(s0).font.bold = True; cells[0].paragraphs[0].runs[0].font.size = Pt(8.5)
+        cells[1].paragraphs[0].add_run(s1).font.size = Pt(8.5)
+        cells[2].paragraphs[0].add_run(s2).font.size = Pt(8.5); cells[2].paragraphs[0].runs[0].font.bold = True
+        cells[3].paragraphs[0].add_run(s3).font.size = Pt(8); cells[3].paragraphs[0].runs[0].font.color.rgb = MUTED_TEXT
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(12)
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-    # 5. Full Prompt Pack Audit (Prompts 0-12)
+    # 5. Guardrail Mechanics & needs_confirmation Specification
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("5. Execution Log of Prompts 0 to 12")
+    r = h1.add_run("5. Confirmation Guardrail Mechanics & Proposal")
     r.font.color.rgb = PRIMARY
 
-    prompts = [
-        ("Prompt 0: Project Rules Enforced", "Committed to git. Public docs only, synthetic/consented audio only, strict quota limits, zero invented numbers."),
-        ("Prompt 1: Gemini Quota Diagnosis", "Diagnosed 429 RESOURCE_EXHAUSTED at 20 RPD cap on Gemini free tier. Identified reset window (18:00 IST / 12:30 UTC). Created zero-call pathways."),
-        ("Prompt 2: Overclaim Corrections", "Corrected overnight and OCR reports: 194 draft questions, 7 exact tested amounts, 263 disagreement rows, and 4,449 vectors vs 2,918 chunks explained."),
-        ("Prompt 3: Representative Sample Answers", "Generated docs/review/sample_answers.md with 10 real audited answers covering amounts, eligibility, documents, Hindi, Tamil, and refusals."),
-        ("Prompt 4: Response Contract", "Authored docs/API_CONTRACT.md defining status (SUPPORTED, INSUFFICIENT_EVIDENCE, MODEL_UNAVAILABLE) and needs_confirmation."),
-        ("Prompt 5: Sources-First & Fallback", "Implemented POST /ask/sources (~300ms, 0 LLM calls) and model-down fallback returning official passages and helpline contacts."),
-        ("Prompt 6: Voice-Loop Timing", "Built scripts/voice_loop_timing.py and docs/review/VOICE_LOOP_TIMING.md establishing the 9.20s TTFA benchmark."),
-        ("Prompt 7: Short Voice Answer Path", "Implemented VOICE_SYSTEM_PROMPT and voice_mode in Answerer, capping at 2 sentences and bypassing secondary verifier for text-only answers."),
-        ("Prompt 8: Sentence-by-Sentence TTS", "Built scripts/test_sentence_speech.py, proving Sentence 1 TTFA of 2,795.1 ms on public Gnani Timbre REST endpoint."),
-        ("Prompt 9: Verified Fact Cards", "Implemented data/fact_cards.json, FactCardMatcher, scripts/fact_card_eval.py (100% precision), and scripts/make_card_audio.py."),
-        ("Prompt 10: BhashaShield Voice Safety", "Evaluated 31 Kathbath clips in scripts/speech_error_test.py (90.3% doc, 87.1% page). Authored docs/review/LANGUAGE_TABLE.md."),
-        ("Prompt 11: Claim-Lite & Human Eval Harness", "Built src/schemebot/generate/claims.py with deterministic substring, number, and frequency validation. Authored scripts/answer_eval.py and answer_eval_summary.py."),
-        ("Prompt 12: Release Integrity Audit", "Built scripts/scan_git_secrets.py. Scanned 148 commits and 236 tracked files: 0 secrets found. Authored docs/review/PR_DESCRIPTION.md.")
+    p = doc.add_paragraph()
+    r_cur = p.add_run("Current Implementation: ")
+    r_cur.font.bold = True
+    p.add_run(
+        "In src/schemebot/generate/answer.py, needs_confirmation=True fires statically if voice_mode=True and either: "
+        "(a) the generated answer contains any digit (\\d), or "
+        "(b) the question string matches any known scheme keyword (e.g. 'pm kisan', 'kmut', 'pudhumai penn'). "
+        "This heuristic prevents silent numerical action but currently lacks probabilistic nuance."
+    )
+    p.paragraph_format.space_after = Pt(4)
+
+    p_prop = doc.add_paragraph()
+    r_pr = p_prop.add_run("Proposed Uncertainty-Based Rule (Not Yet Implemented): ")
+    r_pr.font.bold = True
+    p_prop.add_run(
+        "Instead of firing on all numbers, trigger confirmation only under measured ambiguity: "
+        "(1) Margin retrieval confidence where top chunk score is near threshold (0.35 <= score < 0.45); "
+        "(2) STT transcript character count is dangerously short (<15 characters); or "
+        "(3) Acoustic token confidence is below 0.70 (if/when supported by the STT provider). "
+        "Status: Proposal only; no code changes made in this step."
+    )
+    p_prop.paragraph_format.space_after = Pt(10)
+
+    # 6. Speech-to-Text Benchmark Details
+    h1 = doc.add_heading(level=1)
+    r = h1.add_run("6. STT Word Error Rate Details (Kathbath Read Speech)")
+    r.font.color.rgb = PRIMARY
+
+    p = doc.add_paragraph(
+        "Evaluated via scripts/gnani_stt_eval.py on clean read speech from AI4Bharat Kathbath (news text recordings):"
+    )
+    p.paragraph_format.space_after = Pt(4)
+
+    stt_items = [
+        ("Tamil (n=15 read clips): ", "Raw WER 5.2%, Normalized WER 1.7%, Median Latency 0.95s."),
+        ("Hindi (n=15 read clips): ", "Raw WER 3.7%, Normalized WER 1.7%, Median Latency 0.92s."),
+        ("Definition of 'Norm': ", "Normalized WER applies Unicode NFC normalization, lowercasing, punctuation removal (commas, periods, question marks, dashes), whitespace collapsing, and zero-width character removal."),
+        ("Why 1.7% appears identical: ", "Across the 15 Tamil clips, the mean raw WER of 5.2% reduced to 1.72% after stripping punctuation and whitespace. Across the 15 Hindi clips, raw WER of 3.7% reduced to 1.68%. Both round to 1.7% at one decimal place; they are not identical raw outputs.")
     ]
-    for p_title, p_desc in prompts:
+    for b_prefix, b_text in stt_items:
         bp = doc.add_paragraph(style='List Bullet')
-        bp.paragraph_format.space_after = Pt(3)
-        r_bt = bp.add_run(p_title + " — ")
-        r_bt.font.bold = True
-        r_bt.font.color.rgb = PRIMARY
-        bp.add_run(p_desc)
+        bp.paragraph_format.space_after = Pt(2)
+        r_b = bp.add_run(b_prefix); r_b.font.bold = True; r_b.font.color.rgb = PRIMARY
+        bp.add_run(b_text)
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(12)
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-    # 6. Repository Artifacts & Evidence Files
+    # 7. Departmental Contacts & Helplines Audit
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("6. Verified Evidence Documents in Repository")
+    r = h1.add_run("7. Departmental Helplines Audit (data/contacts.json)")
     r.font.color.rgb = PRIMARY
 
-    docs_list = [
-        ("docs/API_CONTRACT.md", "Complete specification of the API schema, statuses, and citation payloads."),
-        ("docs/review/PR_DESCRIPTION.md", "Executive Pull Request changelog, architecture summary, and testing instructions."),
-        ("docs/review/VOICE_LOOP_TIMING.md", "Stage-by-stage latency profile and timing logs for voice interactions."),
-        ("docs/review/SENTENCE_SPEECH_REPORT.md", "Analysis of sentence-level audio synthesis and public REST streaming behavior."),
-        ("docs/review/FACT_CARD_EVAL.md", "Evaluation metrics, cosine similarity scores, and refusal precision for fact cards."),
-        ("docs/review/LANGUAGE_TABLE.md", "Speech error retrieval test on 31 Kathbath Tamil and Hindi audio clips."),
-        ("docs/review/sample_answers.md", "10 real queries audited for numbers, dates, citations, and refusal safety."),
-        ("docs/review/answer_eval.csv", "Human evaluation harness template for blind scoring of answer accuracy."),
-        ("docs/review/ocr_benchmark_report.md", "Detailed comparison of Tesseract vs Chitrapathak-2 Crop Mode on problem pages."),
-        ("docs/review/RETRIEVAL_ABLATION_REPORT.md", "Comparison of keyword, dense, hybrid, and reranked retrieval modes."),
-        ("docs/review/REFUSAL_THRESHOLD_CURVE.md", "Calibration curve sweeping confidence thresholds from 0.20 to 0.50."),
-        ("STATUS.md", "Up-to-date roadmap tracking completed work and open evaluation items.")
+    p = doc.add_paragraph("Audit of all 10 cataloged public schemes in data/contacts.json:")
+    p.paragraph_format.space_after = Pt(4)
+
+    c_table = doc.add_table(rows=1, cols=4)
+    c_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    hdr = c_table.rows[0].cells
+    hdr[0].width, hdr[1].width, hdr[2].width, hdr[3].width = Inches(2.2), Inches(1.3), Inches(1.8), Inches(1.2)
+    for i, h in enumerate(["Scheme Name", "Helpline Number", "Official Source URL / Citation", "Verification Status"]):
+        set_cell_background(hdr[i], "1A365D")
+        set_cell_margins(hdr[i], 60, 60, 80, 80)
+        p_hdr = hdr[i].paragraphs[0]
+        r_hdr = p_hdr.add_run(h); r_hdr.font.bold = True; r_hdr.font.size = Pt(8.5); r_hdr.font.color.rgb = RGBColor(255, 255, 255)
+
+    schemes = [
+        ("Atal Pension Yojana", "1800 1100 69", "apy-brochure-en p1 / https://www.pfrda.org.in", "Verified (Toll Free)"),
+        ("PM-KISAN", "None listed", "https://pmkisan.gov.in", "Unverified (helpline null)"),
+        ("PM Ujjwala Yojana", "None listed", "https://www.pmuy.gov.in", "Unverified (helpline null)"),
+        ("Kalaignar Magalir Urimai Thittam", "None listed", "https://kmut.tn.gov.in", "Unverified (helpline null)"),
+        ("Chief Minister's Breakfast Scheme", "None listed", "https://www.tn.gov.in", "Unverified (helpline null)"),
+        ("TN Social Welfare Schemes", "None listed", "https://www.tn.gov.in", "Unverified (helpline null)"),
+        ("TN Health & Family Welfare", "None listed", "https://www.tn.gov.in", "Unverified (helpline null)"),
+        ("TN Higher Education Schemes", "None listed", "https://www.tn.gov.in", "Unverified (helpline null)"),
+        ("TN Adi Dravidar & Tribal Welfare", "None listed", "https://www.tn.gov.in", "Unverified (helpline null)"),
+        ("TN BC, MBC & Minorities Welfare", "None listed", "https://www.tn.gov.in", "Unverified (helpline null)")
     ]
-    for doc_path, doc_desc in docs_list:
-        p_doc = doc.add_paragraph()
-        p_doc.paragraph_format.left_indent = Inches(0.2)
-        p_doc.paragraph_format.space_after = Pt(3)
-        r_path = p_doc.add_run(doc_path + ": ")
-        r_path.font.bold = True
-        r_path.font.color.rgb = SECONDARY
-        p_doc.add_run(doc_desc)
+    for s_idx, (sc0, sc1, sc2, sc3) in enumerate(schemes):
+        row = c_table.add_row()
+        cells = row.cells
+        cells[0].width, cells[1].width, cells[2].width, cells[3].width = Inches(2.2), Inches(1.3), Inches(1.8), Inches(1.2)
+        bg_col = "FFFFFF" if s_idx % 2 == 0 else "F7FAFC"
+        for c in cells:
+            set_cell_background(c, bg_col)
+            set_cell_margins(c, 40, 40, 60, 60)
+        cells[0].paragraphs[0].add_run(sc0).font.bold = True; cells[0].paragraphs[0].runs[0].font.size = Pt(8)
+        cells[1].paragraphs[0].add_run(sc1).font.size = Pt(8)
+        cells[2].paragraphs[0].add_run(sc2).font.size = Pt(7.5); cells[2].paragraphs[0].runs[0].font.color.rgb = MUTED_TEXT
+        cells[3].paragraphs[0].add_run(sc3).font.size = Pt(8)
+        if "Unverified" in sc3:
+            cells[3].paragraphs[0].runs[0].font.color.rgb = WARNING_TEXT
+        else:
+            cells[3].paragraphs[0].runs[0].font.bold = True
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(14)
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-    # 7. Conclusion & Next Steps
+    # 8. Quota Diagnostics & Sample Answers
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("7. Technical Conclusion & Ready Actions")
+    r = h1.add_run("8. Operational Notes: Quota Reset & Sample Answers")
     r.font.color.rgb = PRIMARY
 
-    p = doc.add_paragraph(
-        "Pakkam 2.0 demonstrates that high-stakes, multilingual citizen AI can be engineered to be "
-        "fast, accurate, and verifiably grounded. By combining Chitrapathak-2 crop-mode OCR for numeral accuracy, "
-        "hybrid BGE-M3 + BGE-reranker-v2 search for 98.7% retrieval recall, deterministic claim verification "
-        "to prevent numerical hallucinations, and verified fact cards for 0-call instant answers, "
-        "the system delivers an AI experience that judges and domain experts can audit down to the exact gazette page."
+    p = doc.add_paragraph()
+    r_q = p.add_run("Gemini Quota Reset Window: ")
+    r_q.font.bold = True
+    p.add_run(
+        "The earlier mention of an '18:00 IST / 12:30 UTC' reset was an empirical observation from an API 429 error response "
+        "header on October 28, not an official Google Cloud SLA. Official Gemini free tier quotas reset daily according to Google's "
+        "internal billing cycle (nominally midnight Pacific Time or UTC depending on account configuration). "
+        "Relying on a fixed 18:00 IST reset time is unverified."
     )
-    p.paragraph_format.space_after = Pt(8)
+    p.paragraph_format.space_after = Pt(4)
 
-    p = doc.add_paragraph(
-        "Backend readiness is complete, with all 55 automated unit tests passing and a pristine security audit. "
-        "The codebase is ready for remote push and pull request submission."
+    p_ans = doc.add_paragraph()
+    r_an = p_ans.add_run("Sample Answers Status: ")
+    r_an.font.bold = True
+    p_ans.add_run(
+        "The 10 sample queries compiled in docs/review/sample_answers.md have been printed from model runs "
+        "and manually inspected for format, but have NOT been formally scored by an independent person using a blind rubric. "
+        "Official human grading remains pending under Phase 0.3."
     )
-    p.paragraph_format.space_after = Pt(16)
+    p_ans.paragraph_format.space_after = Pt(12)
 
-    # Save to review folder
+    # 9. Conclusion & Release Gate Check
+    h1 = doc.add_heading(level=1)
+    r = h1.add_run("9. Release Gate Check & Conclusion")
+    r.font.color.rgb = PRIMARY
+
+    p_gate = doc.add_paragraph()
+    r_gt = p_gate.add_run("BRANCH IS NOT READY FOR PUSH TO GITHUB REMOTE.\n")
+    r_gt.font.bold = True
+    r_gt.font.size = Pt(10)
+    r_gt.font.color.rgb = WARNING_TEXT
+    p_gate.add_run(
+        "Under the strict Pakkam project rules, code must not be pushed or submitted until all claims are verified. "
+        "The following gates remain unpassed:\n"
+        "• Gate 0.2: Verified question set (50 checked questions + 30 held-out) is not yet delivered.\n"
+        "• Gate 0.3: Blind human grading of answer_eval.csv is not yet completed.\n"
+        "• Gate 1.4: Real conversational and Tanglish speech clips have not been collected or tested.\n"
+        "• Gate 2.1: 263 OCR disagreement rows remain unreviewed.\n\n"
+        "The codebase remains safe and functional locally on branch feat/prompt-pack-execution with all 55 unit tests passing. "
+        "All updates in this document reflect actual measured state without exaggeration."
+    )
+    p_gate.paragraph_format.space_after = Pt(14)
+
     out_dir = "docs/review"
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "Pakkam_2.0_Comprehensive_Benchmark_and_Execution_Report.docx")
     doc.save(out_path)
-    print(f"Successfully generated DOCX report at: {out_path}")
+    print(f"Successfully generated corrected DOCX report at: {out_path}")
 
 if __name__ == "__main__":
     create_report()
