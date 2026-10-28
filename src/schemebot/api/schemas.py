@@ -142,11 +142,11 @@ class AskResponse(BaseModel):
             ]
         elif answer.refused:
             status_val = "INSUFFICIENT_EVIDENCE"
-            path_val = "rag"
+            path_val = getattr(answer, "path", "rag")
             fallback_passages = None
         else:
             status_val = "SUPPORTED"
-            path_val = "rag"
+            path_val = getattr(answer, "path", "rag")
             fallback_passages = None
 
         return cls(

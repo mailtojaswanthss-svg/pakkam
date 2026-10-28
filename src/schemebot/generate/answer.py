@@ -9,6 +9,7 @@ Order of decisions:
 import logging
 import time
 from dataclasses import dataclass, field
+from typing import Any, Literal
 
 from schemebot.generate.contacts import Contact
 from schemebot.generate.guardrails import (
@@ -75,6 +76,8 @@ class Answer:
     """On a refusal about a scheme we hold documents for: its official contact."""
     passages: list[RetrievedPassage] = field(default_factory=list)
     """Retrieved passages, populated on fallback when model is unavailable."""
+    path: Literal["rag", "fact_card", "fallback"] = "rag"
+    """The pipeline path that produced this answer."""
 
 
 def _citation(number: int, passage: RetrievedPassage) -> Citation:
@@ -120,6 +123,7 @@ class Answerer:
         refusal_threshold: float,
         contacts: dict[str, Contact] | None = None,
         corrections: list[OcrCorrection] | None = None,
+        fact_cards: Any | None = None,
     ) -> None:
         self._retriever = retriever
         self._llm = llm
@@ -129,6 +133,7 @@ class Answerer:
         # Confirmed fixes are applied at ingestion, but stay here too: until the index is
         # rebuilt the passage still holds the misreading.
         self._misread = misread_numbers_by_page(corrections or [])
+        self._fact_cards = fact_cards
 
     @property
     def retriever(self) -> Retriever:
@@ -138,6 +143,41 @@ class Answerer:
         timings: dict[str, float] = {}
         started = time.perf_counter()
         language = detect_language(question)
+
+        if self._fact_cards is not None:
+            card_started = time.perf_counter()
+            card, card_score = self._fact_cards.match(question)
+            card_ms = (time.perf_counter() - card_started) * 1000
+            timings["fact_card_match"] = card_ms
+            if card is not None:
+                timings["total"] = (time.perf_counter() - started) * 1000
+                contact = self._contacts.get(card.scheme)
+                citation = Citation(
+                    number=1,
+                    doc_id=card.source_document,
+                    scheme=card.scheme,
+                    page_start=card.source_page,
+                    page_end=card.source_page,
+                    source_url=str(contact.website) if contact else f"https://www.tn.gov.in",
+                    text=card.answer_text,
+                    language=card.language,
+                    ocr_corrected=False,
+                )
+                sentence = AnswerSentence(text=card.answer_text, citations=[1])
+                return Answer(
+                    question=question,
+                    language=language,
+                    text=f"{card.answer_text} [1]",
+                    sentences=[sentence],
+                    citations=[citation],
+                    refused=False,
+                    refusal_reason=None,
+                    confidence=card_score,
+                    disclaimer=disclaimer(language),
+                    timings_ms=timings,
+                    contact=contact,
+                    path="fact_card",
+                )
 
         retrieval = self._retriever.retrieve(question)
         timings["retrieval"] = (time.perf_counter() - started) * 1000
