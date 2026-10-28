@@ -36,6 +36,7 @@ This pull request implements the backend components and evidence verification pi
 
 - `pytest tests/test_api.py`: **47 passed**
 - `pytest tests/test_fact_cards.py`: **3 passed**
+- `pytest tests/test_claims.py`: **5 passed** (Total: **55 tests passed**)
 - `python scripts/scan_git_secrets.py`: **0 secrets found across 139 commits**
 - `python scripts/fact_card_eval.py`: **100% precision, 0% unanswerable false positives**
 - `python scripts/make_card_audio.py`: **2 audio files generated, 5/100 daily Gnani calls used**
