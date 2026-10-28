@@ -267,6 +267,8 @@ def create_app(
         """Fast sources endpoint: runs retriever without LLM to surface official scheme documents in ~300ms."""
         started = time.perf_counter()
         retriever = getattr(state.service, "retriever", None)
+        if retriever is None and hasattr(state.service, "_service"):
+            retriever = getattr(state.service._service, "retriever", None)
         if retriever is None:
             raise HTTPException(status_code=503, detail="Retriever not available")
         retrieval = retriever.retrieve(body.question)
