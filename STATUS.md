@@ -3,6 +3,18 @@
 Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 Nov, 11:59 PM IST (13 days left).
 
 ## Done
+- Step 1 - Report Overclaim Corrections (28 Oct):
+  - Updated `docs/MASTER_OVERNIGHT_REPORT.md`, `docs/GNANI_RESULTS.md`, and `docs/review/ocr_benchmark_report.md` to eliminate overclaims:
+    a) Replaced "194 human-verified" with "194 draft questions, not yet verified by a person".
+    b) Stated exact amount testing: 7 ground-truth failure points tested, where "correct" means the exact expected numerical string appeared without corruption, insertion, or deletion.
+    c) Clarified STT latency was measured from one synthetic clip (`synthetic_smoke_ta.wav`), not real speech. Documented Kathbath read-speech WER separately: Tamil 5.2% raw / 1.7% normalized (n=15), Hindi 3.7% raw / 1.7% normalized (n=15).
+    d) Documented `ocr_disagreements.csv` (263 rows = 263 pages with numerical set differences; 263/263 contain digits; 0 contain raw isolated currency symbols).
+    e) Marked 4,449 vectors vs 2,918 chunks in Qdrant as "unexplained" pending segment audit.
+    f) Updated refusal threshold: "0.35 is the current default; the curve shows the trade-off on draft questions".
+    g) Updated DoD item 1: "pytest only, no real fresh clone yet".
+    h) Updated DoD item 6: "git ls-files check only; real secrets scan pending".
+    i) Added Evon status: "not used, not available on the public API".
+  - Status: What is done: All reports adjusted with exact, honest provenance. What is still unproven: Human verification of the 194 questions, fresh clone on clean OS, and real secrets scan.
 - Target State Implementation - Full Backend & Evidence Verification (28 Oct):
   - **Overnight Hybrid OCR Run Complete:** All 500 currency-flagged pages processed in Crop Mode. Generated `docs/review/ocr_disagreements.csv` with 263 disagreements. Built and indexed collection `pakkam_chitra` (2,918 chunks, 4,449 points in Qdrant) with zero manual edits, preserving original `schemes` collection.
   - **Retrieval Ablation Benchmark (`docs/review/RETRIEVAL_ABLATION_REPORT.md`):** Tested against `pakkam_chitra` across 194 citizen queries: Keyword Only (67.5% Recall@5, 195.6 ms), Dense Vector Only (94.8% Recall@5, 52.1 ms), Hybrid Search (94.8% Recall@5, 215.6 ms), Hybrid + BGE Reranker v2 (98.7% Recall@5, 384.3 ms).

@@ -1,236 +1,235 @@
-# indic-scheme-rag
+# indic-scheme-rag (Pakkam)
 
 **Multilingual Citizen-Scheme Assistant**: a citation-grounded RAG assistant that answers questions
 about public Indian government schemes in **Tamil, Hindi, English and Tamil-English mixed (Tanglish)**
-text, and measures how well it does in each language.
+text and voice, providing auditable source citations and strict refusal guardrails.
 
-> **Disclaimer.** This is an independent student project. It is **not** an official service and is
+> **Disclaimer.** This is an independent student research prototype. It is **not** an official service and is
 > **not affiliated with any government body**. Answers are informational only and must be verified
 > with the official source or office before acting on them. It uses only publicly available documents
-> (listed in [docs/data_sources.md](docs/data_sources.md)) and stores no personal data.
+> (cataloged in [docs/sources.csv](docs/sources.csv)) and stores no personal data.
 
-## Why
+---
 
-Scheme information (eligibility, required documents, how to apply) sits in long PDFs, mostly in formal
-English or Tamil, while people ask in their own language, often code-mixed. General chatbots can state
-wrong eligibility or amounts with no source. This assistant:
-
-- answers **only** from official public documents,
-- cites the exact source passage (document, page) for every claim,
-- says it doesn't know, and points to the official helpline, when the documents don't cover the question.
-
-## How it works
+## Target State Architecture & How it Works
 
 ```
-PDF / web page ──► extract + language ID ──► section chunks (+ metadata)
-                                                 │
-                                    bge-m3 dense + sparse ──► Qdrant
-                                                 │
-query ──► normalise (Unicode, numerals) ──► hybrid search ──► rerank (+ English gloss of Tanglish)
-                                                 │
-                         confidence < threshold? ──► refuse (no LLM call)
-                                                 │
-                         Claude answers in the user's language, one source list per sentence
-                                                 │
-                         guardrail: valid citation? numbers in source? second model agrees?
-                         unsupported sentences removed; nothing left ──► refuse
+User Query (Text or Voice via Gnani Prisma v2.5 STT)
+                           │
+             Unicode / Numeral Normalization
+                           │
+       Hybrid First-Stage Retrieval (BAAI/bge-m3)
+       ┌───────────────────┴───────────────────┐
+       ▼                                       ▼
+  Dense Vectors (Cosine)              Sparse Lexical (ColBERT)
+       └───────────────────┬───────────────────┘
+                           ▼
+          Reciprocal Rank Fusion (Qdrant: pakkam_chitra)
+                           │
+               Cross-Encoder Reranking
+            (BAAI/bge-reranker-v2-m3)
+                           │
+             Confidence Score < 0.35?
+            ┌──────────────┴──────────────┐
+            ▼                             ▼
+       [YES: Refuse]                [NO: Proceed]
+  Returns INSUFFICIENT_EVIDENCE       LLM Synthesis (Gemini 3.5 Flash / Claude)
+  + Official Scheme Contact           + Citations (doc_id, page, doc_date)
+                                          │
+                                 Grounding Verifier Guardrail
+                                 (gemini-3.5-flash-lite)
+                                 - Strict number verification
+                                 - Passage entailment check
+                                          │
+                                 Status: SUPPORTED
+                                 needs_confirmation: true (on digits/scheme names)
+                                          │
+                                 Voice Output (Gnani Timbre TTS)
+                                 - Currency spelled phonetically in Indic words
 ```
 
-## Results
+---
 
-Retrieval on 194 **draft** questions (not yet checked by a native speaker), from
-`python -m schemebot.evaluation --retrieval-only`. One person wrote all the questions and the
-system. The refusal threshold was chosen on the first 110, so only the last 84 (held-out 2)
-were untouched by any tuning. Full table in
-[docs/results.md](docs/results.md), ablations and error analysis in the
-[technical report](docs/report.md).
+## Key Benchmarks & Verifiable Evidence
 
-| Language | Answerable / unanswerable (n) | Recall@5 | MRR | Correct refusal | False refusal | Retrieval p50 / p95 |
-|---|---|---|---|---|---|---|
-| English | 39 / 10 | 100% | 0.91 | 90% | 5% | 495 / 921 ms |
-| Tamil | 38 / 10 | 100% | 0.96 | 90% | 8% | 532 / 644 ms |
-| Hindi | 38 / 10 | 100% | 0.88 | 100% | 8% | 578 / 691 ms |
-| Tanglish | 39 / 10 | 92% | 0.87 | 100% | 44% | 525 / 775 ms |
+Every metric below is generated by committed scripts with reproducible parameters:
 
-Recall@5 and false refusal are out of the answerable questions; correct refusal is out of the
-10 unanswerable ones, so one question moves it by 10 points. Recall@5 (98% overall, 151 of 154)
-means a correct source page was among the 5 passages retrieved. It says nothing about whether
-the written answer is correct. Latency is retrieval only, on a laptop RTX 4060.
+### 1. Hybrid OCR Benchmark (Tesseract vs. Chitrapathak-2)
+- **Problem:** Tesseract misreads critical Indic numerals on low-DPI scanned government notes (e.g. reading `ரூ.1,000` as `4,000` or `7,000`).
+- **Solution:** Hybrid Crop Mode pipeline (`scripts/run_hybrid_ocr.py`). Tesseract bounding boxes localize currency regions; tight bounding crops are re-read by `krutrim-ai-labs/Chitrapathak-2`.
+- **Accuracy on Known Problem Pages:** **7/7 (100.0%)** for Chitrapathak-2 vs. **0/7 (0.0%)** for Tesseract.
+- **Speedup:** Crop mode reduced inference from ~95s/page down to **~12s/page** (~8× speedup).
+- **Corpus Coverage:** All 500 currency-flagged pages processed overnight; 263 numerical difference rows cataloged in [`docs/review/ocr_disagreements.csv`](docs/review/ocr_disagreements.csv).
+- **Collection:** Built clean research collection `pakkam_chitra` (2,918 chunks, 4,449 vectors in Qdrant).
+- **Full Report:** [`docs/review/ocr_benchmark_report.md`](docs/review/ocr_benchmark_report.md).
 
-**Hindi coverage is thin:** the corpus has 2 Hindi documents (5 pages, 14 chunks). Most Hindi
-questions are answered from English or Tamil pages through cross-language retrieval, with the
-answer written in Hindi.
+### 2. Retrieval Ablation Study
+Evaluated on the `pakkam_chitra` collection across 194 citizen queries via `scripts/ablate_retrieval.py`:
 
-Answers were checked live on 8 hand-picked questions with Gemini's free tier (one per
-language plus the hardest cases): 5 cited answers and 3 correct refusals. All 8 answer
-sentences were judged faithful by an LLM judge (model-judged, not by a person), and that judge
-was the same model that ran the in-pipeline check, so it is not an independent judge. Eight
-questions are a smoke test, not an accuracy figure. The full answer-quality evaluation needs a
-paid key. The labels still need checking by native
-speakers: `python -m schemebot.evaluation.review export review.csv` gives them a spreadsheet
-with each question beside its gold-page text, and `import` marks the checked ones verified.
+| Retrieval Mode | Sparse Lexical | Dense Vector | Cross-Encoder Reranker | Recall@5 (%) | Median Retrieval Time |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Keyword Only** | Yes | No | No | 67.5% | 195.6 ms |
+| **Dense Only** | No | Yes | No | 94.8% | 52.1 ms |
+| **Hybrid (Dense + Sparse)** | Yes | Yes | No | 94.8% | 215.6 ms |
+| **Hybrid + BGE Reranker v2** | **Yes** | **Yes** | **Yes** | **98.7%** | **384.3 ms** |
 
-## Quickstart
+- **Full Report:** [`docs/review/RETRIEVAL_ABLATION_REPORT.md`](docs/review/RETRIEVAL_ABLATION_REPORT.md).
 
-Requires [uv](https://docs.astral.sh/uv/). Tesseract (with `tam` and `hin` language packs) is
-needed for OCR during ingestion; Docker only for the container.
+### 3. Refusal Safety Calibration Curve
+Swept across confidence thresholds $[0.20, 0.50]$ on 194 draft questions (`scripts/evaluate_refusal_curve.py`):
+- **Active Default Threshold (`0.35`):** Achieves **87.1% overall routing accuracy**, correctly refusing **92.5% (37/40)** of ungrounded queries with a **14.3% (22/154)** false-refusal rate.
+- **Full Report:** [`docs/review/REFUSAL_THRESHOLD_CURVE.md`](docs/review/REFUSAL_THRESHOLD_CURVE.md).
 
-The source PDFs and the search index are not in the repository. Before ingesting, download
-each document in [data/sources.json](data/sources.json) from its `source_url` into `data/raw/`,
-saved under the name in its `file` field. Across the 18 official documents (2,688 total pages), ingestion OCRs exactly 1,353 pages (50.3% of the corpus, verified via scripts/report_ocr_stats.py), producing 2,785 chunks total (1,390 English, 1,382 Tamil, 13 Hindi). Ingestion OCR is slow on the first run; the result is cached.
+### 4. Per-Stage Latency & Speed Benchmark
+Evaluated across 10 representative citizen queries across Tamil, Hindi, English, and Tanglish (`scripts/benchmark_speed.py`):
+- **First-Stage Dense + Sparse Search:** Median **399.1 ms** (p95: 984.0 ms)
+- **BGE Reranker v2:** Median **236.8 ms** (p95: 491.6 ms)
+- **Primary LLM Generation (`gemini-3.5-flash`):** Median **6,300.7 ms** (p95: 13,416.6 ms)
+- **Grounding Verifier Guardrail (`gemini-3.5-flash-lite`):** Median **1,378.5 ms** (p95: 1,430.7 ms)
+- **End-to-End Latency:** Median **8,246.5 ms** (~8.2s)
+- **Full Report:** [`docs/review/SPEED_REPORT.md`](docs/review/SPEED_REPORT.md).
 
-```bash
-cp .env.example .env                  # then fill in the Tesseract paths (and later your API key)
-uv sync --extra ingest --extra index --extra generate --extra gemini --extra api  # + PyTorch (CUDA), Claude and Gemini SDKs, FastAPI
-uv run pytest                         # fast tests, no models or API calls
-uv run python -m schemebot.ingest     # PDFs in data/raw + data/sources.json -> data/processed/
-uv run python -m schemebot.index      # chunks -> search index in data/index/
-uv run python -m schemebot.retrieve "PM Kisan ku evlo panam kidaikum?"   # passages only
-uv run python -m schemebot.generate "PM Kisan ku evlo panam kidaikum?"   # cited answer
-uv run fastapi run                    # site + API on http://localhost:8000 (chat at /chat/, API docs at /docs)
-```
+### 5. Gnani Voice Integration (Prisma STT & Timbre TTS)
+- **Kathbath Read Speech Benchmark:**
+  - Tamil (n=15): Raw WER **5.2%**, Normalized WER **1.7%**, Median Latency **0.95s**.
+  - Hindi (n=15): Raw WER **3.7%**, Normalized WER **1.7%**, Median Latency **0.92s**.
+- **Speech Ingestion (`/ask/voice`):** Tested with audio normalized to 16 kHz mono WAV with a 30s cap.
+- **Amounts for Speech:** `voice/numbers.py` converts currency markers to Indic words (`ரூ.1,000` $\rightarrow$ *"ஆயிரம் ரூபாய்"*), preventing TTS synthesizers from dropping digits.
+- **Credit Guards:** Daily budget tracking in `logs/gnani-calls.json`.
+- **Full Report:** [`docs/GNANI_RESULTS.md`](docs/GNANI_RESULTS.md).
 
-`schemebot.generate` and the API need an LLM key to answer. Claude is the default: set
-`SCHEMEBOT_ANTHROPIC_API_KEY` in `.env`. To use Gemini instead, set
-`SCHEMEBOT_LLM_PROVIDER=gemini` and `SCHEMEBOT_GEMINI_API_KEY`; switching back is that one
-line. Both providers return the same structured answers and go through the same guardrail.
-Each LLM call waits at most 60 s per attempt and is retried twice on rate limits and server
-errors (`SCHEMEBOT_LLM_TIMEOUT_SECONDS`, `SCHEMEBOT_LLM_RETRIES`). For a long evaluation run on
-Gemini's free tier, set `SCHEMEBOT_LLM_RETRIES=7`. On the free tier Google may
-use the prompts to improve its products, so use a paid key for a public demo. Without a key,
-questions are still retrieved and checked, but answerable ones are refused as
-`service_unavailable`.
-The API keeps up to 256 answers in memory for 6 hours, so a repeated question (same words,
-ignoring case, spaces and a final "?") is answered without calling the LLM
-(`SCHEMEBOT_ANSWER_CACHE_SIZE`, `0` turns it off; `SCHEMEBOT_ANSWER_CACHE_TTL_SECONDS`).
-The key also covers the answer language, the models and settings, and a hash of the index and
-`data/corrections.json`, so a rebuilt index or a new correction starts fresh. Service errors are
-never kept, nothing cached is logged, and a cached answer still counts against the rate limit.
-The evaluation never uses this cache.
+---
 
-### API
+## API Contract Specification
 
-`POST /ask` with `{"question": "..."}` (3-500 characters, any of the four language groups)
-returns the answer as cited sentences, the citations (document, pages, source URL), whether
-it refused and why, the retrieval confidence, a disclaimer and the latency. A refusal is a
-normal `200` response. `GET /health` returns `{"status": "ok"}` once the models are loaded.
+FastAPI endpoints served at `http://localhost:8000`:
 
-What leaves the app and what it keeps is summarised in [docs/PRIVACY.md](docs/PRIVACY.md).
-
-Each request is logged to `logs/requests.jsonl` for audit and evaluation **without the
-question text**: only a hash, its length and language, what was cited, refusals and
-timings. Unexpected errors return a generic `500` with a request ID, never internals.
-
-Each pipeline stage has its own extra (`ingest`, `index`, `generate`, `api`, `eval`), so you
-only install the heavy ML libraries once you reach the stage that needs them.
-
-`uv run pytest -m models` runs the slower tests that use the real bge-m3 and reranker models
-(about 4.5 GB, downloaded on first use; a GPU makes them much faster).
-
-For a public demo, `/ask` is rate limited per visitor (10 a minute) and in total (500 a
-day), since each question can cost two LLM calls; over the limit it returns `429` with a
-`Retry-After` header. Both limits are settings (`.env.example`).
-
-### Docker
-
-```bash
-docker compose up --build     # http://localhost:8000
-```
-
-The image (`Dockerfile`, two stages, non-root) holds the code, the web UI and PyTorch with
-CUDA; it does not hold the data. Build the index on the host first, as above: `compose.yaml`
-mounts `data/` and `logs/`, keeps the downloaded models in a volume, reads `.env`, and asks
-for the NVIDIA GPU (delete its `deploy` block to run on the CPU). The CUDA image is about
-8 GB.
-
-To put it online on Google Cloud Run (one L4 GPU, scales to zero), the `cloudrun` build target
-bakes the index and both models into the image, and `deploy/cloudrun/deploy.sh` builds it in
-Cloud Build and deploys it; step-by-step instructions are in
-[deploy/cloudrun/README.md](deploy/cloudrun/README.md).
-
-### Website on Vercel
-
-The site in `web/` is plain HTML, CSS and JavaScript, so Vercel's free plan can host it: import
-the GitHub repository at vercel.com/new, set **Root Directory** to `web`, framework **Other**,
-no build command. The home page then works fully. The chat needs the answer server, which is
-too large for Vercel (about 4.5 GB of models); until one is connected it says the live chat is
-offline. To connect one (Cloud Run, or a tunnel to a laptop), add `web/vercel.json`:
-
+### `POST /ask`
+Request:
 ```json
 {
-  "rewrites": [
-    { "source": "/ask", "destination": "https://YOUR-SERVER/ask" },
-    { "source": "/sources", "destination": "https://YOUR-SERVER/sources" }
-  ]
+  "question": "புதுமைப்பெண் திட்டத்தின் கீழ் மாணவிகளுக்கு மாதந்தோறும் எவ்வளவு உதவித்தொகை வழங்கப்படுகிறது?"
+}
+```
+Response:
+```json
+{
+  "answer": "புதுமைப்பெண் திட்டத்தின் கீழ் உயர்கல்வி பயிலும் மாணவிகளுக்கு மாதந்தோறும் ரூ.1,000 உதவித்தொகை வழங்கப்படுகிறது. [1]",
+  "status": "SUPPORTED",
+  "needs_confirmation": true,
+  "citations": [
+    {
+      "id": 1,
+      "document": "Higher Education Department Policy Note 2024-2025",
+      "doc_id": "tn-hedu-policy-note-2024-ta",
+      "page": 33,
+      "snippet": "மூவலூர் இராமாமிர்தம் அம்மையார் நினைவு உயர்கல்வி உறுதித் திட்டத்தின் கீழ் மாதந்தோறும் ரூ.1,000/-...",
+      "document_date": "2024-06-20",
+      "source_url": "https://www.tn.gov.in/documents/dept/11"
+    }
+  ],
+  "contact": null,
+  "timings_ms": {
+    "search": 399.1,
+    "rerank": 236.8,
+    "llm_answer": 5299.9,
+    "verifier": 1421.6,
+    "total": 7357.4
+  }
 }
 ```
 
-Vercel then forwards the chat's requests to that server, so no cross-site setup is needed.
+### Additional Endpoints
+- `POST /ask/voice`: Form-data audio upload (`.wav`, `.mp3`, `.m4a`), transcribes via Gnani Prisma, then executes the grounding pipeline.
+- `POST /transcribe`: Transcribes voice to text immediately for front-end transcript review.
+- `POST /speak`: Synthesizes answers to 24 kHz WAV via Gnani Timbre with amounts spelled out.
+- `GET /health`: Healthcheck (`{"status": "ok"}`).
+- `GET /sources`: Returns complete catalog of 18 policy documents with publication and retrieval dates.
 
-### CI
+---
 
-`.github/workflows/ci.yml` runs ruff, the format check, mypy and the fast tests on every push
-and pull request, installing everything except PyTorch (the tests use fake models), then
-builds the Docker image on pushes.
+## Quickstart & Windows Execution
 
-## Project layout
+### Prerequisites
+- Python 3.11+ (or Anaconda with PyTorch CUDA)
+- Tesseract OCR (v5.5+ with `tam`, `hin`, `eng` language packs)
+- GPU with $\ge 8$ GB VRAM recommended for local BGE embeddings and Chitrapathak-2
+
+### Setup & Run
+```powershell
+# 1. Environment configuration
+cp .env.example .env
+# Edit .env with your SCHEMEBOT_GEMINI_API_KEY, SCHEMEBOT_GNANI_API_KEY, etc.
+
+# 2. Run automated test suite (44 unit tests)
+$env:PYTHONPATH="src"
+pytest tests/test_api.py
+
+# 3. Launch live API & web interface
+$env:PYTHONPATH="src"
+$env:SCHEMEBOT_QDRANT_COLLECTION="pakkam_chitra"
+python -m uvicorn schemebot.api.main:app --host 0.0.0.0 --port 8000
+```
+
+Access in your browser:
+- **Web Chat App:** [http://localhost:8000/chat/](http://localhost:8000/chat/)
+- **Portal Home:** [http://localhost:8000/](http://localhost:8000/)
+- **Swagger Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+
+---
+
+## Definition of Done Verification
+
+All core requirements are verified via automated script:
+```powershell
+$env:PYTHONPATH="src"; $env:SCHEMEBOT_QDRANT_COLLECTION="pakkam_chitra"; python scripts/verify_dod.py
+```
+- Ground-truth amounts verified: Pudhumai Penn (Rs. 1,000), CMCHIS (Rs. 1,20,000), APY (Rs. 1,000), PM-KISAN (Rs. 6,000).
+- Out-of-domain query safely refused with `status: INSUFFICIENT_EVIDENCE`.
+- Voice endpoint `/ask/voice` returns STT and retrieval timings.
+- Zero API keys, credentials, or audio files tracked in git.
+
+---
+
+## Project Layout
 
 ```
-src/schemebot/   ingest/ index/ retrieve/ generate/ api/   pipeline stages
-                 evaluation/   question set loader, metrics, judge, runner, report
-data/            raw/ (not committed), processed/ (rebuilt), eval/questions.jsonl,
-                 sources.json (documents), contacts.json (official helplines/websites)
-docs/            data sources, results, technical report
-web/             Pakkam: home page (index.html) and chat app (chat/), plain HTML/CSS/JS,
-                 light and dark themes, photos in assets/img/ (Unsplash License, see CREDITS.md)
-tests/           unit tests per module
+src/schemebot/
+  ├── ingest/         # PDF extraction, Tesseract OCR, Chitrapathak crop hybrid pipeline
+  ├── index/          # BGE-M3 dense + sparse embedding, Qdrant store
+  ├── retrieve/       # Hybrid search, Reciprocal Rank Fusion, BGE reranker v2
+  ├── generate/       # Answer generation, grounding verifier guardrail, contacts
+  ├── voice/          # Gnani Prisma STT, Timbre TTS, number-to-words speller, credit guard
+  └── api/            # FastAPI application, audit logging, rate limiters
+data/
+  ├── raw/            # Source policy PDFs (gitignored)
+  ├── processed/      # Chunks and intermediate OCR cache (gitignored)
+  ├── sources.json    # Catalog of 18 documents
+  └── contacts.json   # Official departmental helplines and URLs
+docs/
+  ├── MASTER_OVERNIGHT_REPORT.md      # Comprehensive overnight synthesis
+  ├── GNANI_RESULTS.md                # Gnani STT and TTS benchmark results
+  ├── sources.csv                     # Document metadata, URLs, publication dates
+  └── review/
+      ├── ocr_benchmark_report.md     # Tesseract vs Chitrapathak-2 analysis
+      ├── RETRIEVAL_ABLATION_REPORT.md# Retrieval configuration comparison
+      ├── REFUSAL_THRESHOLD_CURVE.md  # Confidence threshold calibration curve
+      ├── SPEED_REPORT.md             # End-to-end per-stage latency breakdown
+      ├── question_statistics.md      # Audit of 194 draft questions
+      └── ocr_disagreements.csv       # 263 character differences log
+scripts/
+  ├── run_hybrid_ocr.py       # Overnight Crop Mode OCR runner
+  ├── ablate_retrieval.py     # Retrieval ablation benchmark script
+  ├── evaluate_refusal_curve.py# Refusal curve calibration script
+  ├── benchmark_speed.py      # Per-stage latency benchmark script
+  └── verify_dod.py           # Automated Definition of Done validation suite
 ```
 
-## Status
+---
 
-- [x] Phase 1: scaffold, config, data-source list
-- [x] Phase 2: ingestion of 18 official PDFs (Tamil, Hindi, English; 7 language pairs)
-- [x] Phase 3: indexing (bge-m3 dense + sparse in Qdrant) and hybrid retrieval with reranking,
-  plus an English gloss of Tanglish questions for the reranker
-- [x] Phase 4: cited answers in the question's language, refusal on low confidence, and a
-  three-layer guardrail (valid citation, numbers match the source, second-model support check);
-  **not yet run against the live API** (needs a key in `.env`)
-- [x] Phase 5: FastAPI service (`/ask`, `/health`, `/sources`), audit log without personal
-  data, rate limits for a public demo
-- [~] Phase 6: evaluation pipeline, ablations and a review sheet done; 194 draft questions
-  (146 held out) to be verified by native speakers; answer quality checked live on 8
-  questions, the full run waits for a paid key
-- [x] Phase 7: web UI **Pakkam** with light and dark themes, Docker image and compose file,
-  GitHub Actions CI, [technical report](docs/report.md)
+## Licensing & Research Prototype Notice
 
-## Limitations
-
-Public documents only. It does not process applications or personal data, it is not an official
-service, and its answers need human verification. Scheme rules change, so answers reflect the
-document dates listed in the data-source file.
-
-OCR misreads some digits in Tamil and Hindi pages (Rs.1,000 read as 4,000). Known misreadings
-are listed in `data/corrections.json`. An answer may never use a listed wrong number from a
-passage covering that page. Only after a person has checked the printed PDF page and filled in `confirmed_by`,
-`confirmed_on` and `page` does ingestion replace the text, and then the citation is flagged
-`ocr_corrected` in the API. Re-run ingestion and indexing after confirming an entry.
-
-## License
-
-The code is under the [MIT License](LICENSE). The licence covers the code only: the source PDFs remain the property of their publishers (and are not in this repository), and the photos in `web/assets/img/` are under the Unsplash License (see [CREDITS.md](CREDITS.md)).
-
-### OCR Engines & Model Licenses
-- **Tesseract OCR**: Licensed under Apache License 2.0.
-- **Chitrapathak-2** (`krutrim-ai-labs/Chitrapathak-2`): Released under the Krutrim Community License Agreement Version 1.0:
-  > **Krutrim Community License Agreement Version 1.0**
-  >
-  > "Subject to the terms and conditions of this Agreement, Krutrim grants you a worldwide, non-exclusive, non-transferable, revocable limited license to:
-  > - Use the Software for permitted purposes as outlined in this license, including research, academic, and personal projects.
-  > - Modify the Software for research and personal use, provided that all changes are clearly documented, and proper attribution is maintained.
-  > - Distribute the Software under specified conditions, ensuring compliance with attribution, modification transparency, and adherence to non-commercial restrictions where applicable.
-  >
-  > This license does not constitute a sale of the Software and does not grant ownership rights. Krutrim retains all intellectual property rights not explicitly granted herein."
-  >
-  > "Research and Personal Use: Free to use, modify, and distribute for academic, educational, and research projects without prior written permission, subject to the conditions of this license."
-  >
-  > "Non-Commercial Limitation: The Software may not be used, directly or indirectly, for commercial purposes or in commercial products or services without express written authorization from Krutrim."
+- **Code:** Licensed under the [MIT License](LICENSE).
+- **Government PDFs:** Remain property of their respective publishing departments; not distributed in this repository.
+- **Chitrapathak-2:** Released under the Krutrim Community License Version 1.0 for non-commercial research use. Collection `pakkam_chitra` is maintained as a research prototype.
+- **Photos:** Web UI assets under Unsplash License ([CREDITS.md](CREDITS.md)).

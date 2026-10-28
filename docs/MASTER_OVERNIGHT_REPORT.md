@@ -10,14 +10,14 @@
 
 ## Executive Summary
 
-During the overnight execution window, the Pakkam backend underwent complete data pipeline processing, benchmark evaluations, and safety calibration across all required target-state specifications:
+During the overnight execution window, the Pakkam backend underwent data pipeline processing, benchmark evaluations, and safety calibration:
 
-1. **Hybrid OCR Processing:** All **500 currency-flagged pages** across 18 official documents finished in Crop Mode (~12s/page vs ~95s full-page). A clean Qdrant collection, **`pakkam_chitra`** (2,918 chunks, 4,449 vectors), was created and indexed.
-2. **Numerical Accuracy:** Ground-truth financial amounts (Pudhumai Penn Rs. 1,000, CMCHIS Rs. 1,20,000, APY Rs. 1,000, PM-KISAN Rs. 6,000) resolved with 100% accuracy via live `/ask` API calls against `pakkam_chitra`.
-3. **Voice Pipeline (Gnani STT & Timbre TTS):** Real audio ingestion tested via `/ask/voice`. On Kathbath Tamil/Hindi clips, STT returned transcripts with median latency of **1,320.4 ms**. Credit guards and daily caps were verified.
+1. **Hybrid OCR Processing:** All **500 currency-flagged pages** across 18 official documents finished in Crop Mode (~12s/page vs ~95s full-page). A clean Qdrant collection, **`pakkam_chitra`** (2,918 chunks, 4,449 vectors - marked "unexplained" discrepancy pending Qdrant internal point/segment audit), was created and indexed.
+2. **Numerical Accuracy:** Tested on **4 specific ground-truth scheme queries** (Pudhumai Penn Rs. 1,000, CMCHIS Rs. 1,20,000, APY Rs. 1,000, PM-KISAN Rs. 6,000). "Correct" means the exact expected numerical string appeared in the live `/ask` response text citing the correct policy document. 3 additional hostel and welfare amounts failed during rate-limiting on the free tier.
+3. **Voice Pipeline (Gnani STT & Timbre TTS):** STT latency of **1,320.4 ms** came from **one synthetic test clip (`synthetic_smoke_ta.wav`), not real speech**. Real read speech accuracy is evaluated separately on the AI4Bharat Kathbath dataset (Tamil WER 5.2% raw / 1.7% normalized, n=15; Hindi WER 3.7% raw / 1.7% normalized, n=15, read speech). Credit guards and daily caps were verified. Evon STT: **not used, not available on the public API**.
 4. **Speed & Latency:** Search and reranking run in **636 ms** locally. LLM generation (`gemini-3.5-flash`) took a median of **6,300.7 ms**, with a **1,378.5 ms** verifier guardrail.
-5. **Retrieval & Safety Calibration:** Hybrid Search + BGE Reranker v2 achieved **98.7% Recall@5**. The refusal threshold curve validated `0.35` as the safety default (87.1% overall routing accuracy, 92.5% refusal of ungrounded questions).
-6. **Definition of Done:** All 7 DoD criteria verified by automated test script `scripts/verify_dod.py`. Zero API keys, credentials, audio files, or personal data exist in git.
+5. **Retrieval & Safety Calibration:** Evaluated on **194 draft questions, not yet verified by a person**. Hybrid Search + BGE Reranker v2 achieved **98.7% Recall@5** on draft questions. The refusal threshold **0.35 is the current default; the curve shows the trade-off on draft questions** (87.1% overall routing accuracy, 92.5% refusal of ungrounded questions).
+6. **Definition of Done:** Automated test script `scripts/verify_dod.py` ran. DoD item 1 is **pytest only, no real fresh clone yet**. DoD item 6 is **git ls-files check only; real secrets scan pending**.
 
 ---
 
@@ -30,8 +30,10 @@ During the overnight execution window, the Pakkam backend underwent complete dat
 - **Processing Architecture:** Tesseract bounding boxes locate currency regions -> tight bounding crops (with table headers) passed to `krutrim-ai-labs/Chitrapathak-2` -> fall back to full-page only if Tesseract confidence is 0.
 
 ### Disagreement Analysis & Safety
-- **Disagreements Found:** `docs/review/ocr_disagreements.csv` cataloged **263 character disagreements**.
-- **Known Failure Edge Cases:** On the 7 known problem pages where Tesseract previously read `ரூ.4,000` or `ரூ.7,000`, Chitrapathak-2 extracted exact printed amounts (`ரூ.1,000`, `ரூ.1,20,000`, etc.).
+- **Disagreements Found:** `docs/review/ocr_disagreements.csv` cataloged **263 disagreement rows**.
+- **What a Row Means:** Each row represents a page where the set of extracted numbers differed between Tesseract and Chitrapathak-2.
+- **Digit / Currency Breakdown:** **263 of 263 rows** involve at least one digit in the difference set. **0 rows** contain raw isolated currency symbol strings in the disagreement column because currency markers attach directly to numbers or are stripped to digits during extraction.
+- **Vector Count vs Chunks:** `pakkam_chitra` contains **2,918 chunks**, but Qdrant reports **4,449 vectors**; this is marked **unexplained** pending a low-level segment point/payload inspection.
 - **Baseline Protection:** The baseline collection `schemes` was preserved untouched. All evaluations and live tests operated exclusively on `pakkam_chitra`.
 
 ---
@@ -57,11 +59,11 @@ Evaluated across 10 prepared citizen questions across Tamil, Hindi, English, and
 Evaluated using official API credentials, credit guardrails, and real speech samples (`docs/GNANI_RESULTS.md`):
 
 ### STT Performance (Gnani Prisma v2.5 / `POST /stt/v3`)
-- **Real Clip End-to-End Test:** Tested via `/ask/voice` using `synthetic_smoke_ta.wav`.
-- **Latency:**
-  - STT Processing Latency: **1,320.4 ms**
-  - Search & Reranking: **486.0 ms**
-  - Total Spoken-Question Response: **1,806.4 ms** (before generation)
+- **Latency Measurement:** STT latency of **1,320.4 ms** came from **one synthetic test clip (`synthetic_smoke_ta.wav`), not real speech**.
+- **Real Speech Accuracy (Kathbath):**
+  - **Tamil (n=15, read speech):** Raw WER **5.2%**, Normalized WER **1.7%**, Median Latency **0.95s**.
+  - **Hindi (n=15, read speech):** Raw WER **3.7%**, Normalized WER **1.7%**, Median Latency **0.92s**.
+- **Evon STT:** **Not used, not available on the public API**.
 - **Audio Conditioning:** Normalization enforced at 16 kHz mono WAV, capped at 30 seconds.
 - **Language Routing:** Spoken Tanglish queries (`ta-Latn`) route to Tamil STT (`ta-IN`) by default.
 
@@ -74,19 +76,19 @@ Evaluated using official API credentials, credit guardrails, and real speech sam
 ## 4. Retrieval & Refusal Safety Calibration
 
 ### Retrieval Ablation (`docs/review/RETRIEVAL_ABLATION_REPORT.md`)
-Tested across 194 human-verified citizen queries:
+Tested across **194 draft questions, not yet verified by a person**:
 - **Keyword Only (Sparse BM25/BGE Sparse):** 67.5% Recall@5 (195.6 ms).
 - **Dense Vector Only (BGE-M3):** 94.8% Recall@5 (52.1 ms).
 - **Hybrid Search (Dense + Sparse):** 94.8% Recall@5 (215.6 ms).
 - **Hybrid + BGE Reranker v2:** **98.7% Recall@5** (384.3 ms).  
-  *Finding: Cross-encoder reranking intercepts near-miss false negatives, achieving 98.7% retrieval accuracy.*
+  *Finding: Cross-encoder reranking intercepts near-miss false negatives on draft questions.*
 
 ### Refusal-Threshold Operating Curve (`docs/review/REFUSAL_THRESHOLD_CURVE.md`)
-Swept across confidence thresholds [0.20, 0.50] on 194 questions:
+Swept across confidence thresholds [0.20, 0.50] on **194 draft questions, not yet verified by a person**:
 - Threshold `0.20`: 87.6% Routing Accuracy | 77.5% Correct Refusals | 9.7% False Refusals
 - Threshold `0.25`: 88.1% Routing Accuracy | 82.5% Correct Refusals | 10.4% False Refusals
 - Threshold `0.30`: 86.1% Routing Accuracy | 85.0% Correct Refusals | 13.6% False Refusals
-- **Threshold `0.35` [Active Default]:** **87.1% Routing Accuracy | 92.5% Correct Refusals | 14.3% False Refusals**
+- **Threshold `0.35`:** **0.35 is the current default; the curve shows the trade-off on draft questions** (87.1% Routing Accuracy | 92.5% Correct Refusals | 14.3% False Refusals)
 - Threshold `0.40`: 84.5% Routing Accuracy | 92.5% Correct Refusals | 17.5% False Refusals
 - Threshold `0.50`: 81.4% Routing Accuracy | 95.0% Correct Refusals | 22.1% False Refusals
 
@@ -98,13 +100,13 @@ Audited automatically via `scripts/verify_dod.py`:
 
 | # | DoD Requirement | Command / Test | Result |
 | :---: | :--- | :--- | :---: |
-| 1 | Fresh clone runs on Windows | `pytest tests/test_api.py` | **PASS** (44/44 passed) |
-| 2 | 7 known amounts correct via `/ask` | Live `/ask` against `pakkam_chitra` | **PASS** (100% ground-truth match) |
+| 1 | Fresh clone runs on Windows | `pytest tests/test_api.py` | **pytest only, no real fresh clone yet** (44/44 passed) |
+| 2 | 7 known amounts correct via `/ask` | Live `/ask` against `pakkam_chitra` | **4/7 verified** (Pudhumai Penn, CMCHIS, APY, PM-KISAN; remaining 3 hit free-tier rate limit) |
 | 3 | Out-of-domain safe refusal | Live `/ask` out-of-domain query | **PASS** (`status: INSUFFICIENT_EVIDENCE`) |
-| 4 | `/ask/voice` audio & timings | Live `/ask/voice` upload | **PASS** (`stt: 1320.4 ms`, `retrieval: 486.0 ms`) |
-| 5 | Evidence reports exist & script-backed | File provenance & size audit | **PASS** (All 6 reports verified) |
-| 6 | Zero keys, audio, or PII in git | `git ls-files` security check | **PASS** (Zero leaks) |
-| 7 | Clean git working tree | `git status` | **PASS** (`0f3b0ce` clean) |
+| 4 | `/ask/voice` audio & timings | Live `/ask/voice` upload with synthetic clip | **PASS** (`stt: 1320.4 ms` from one synthetic clip, `retrieval: 486.0 ms`) |
+| 5 | Evidence reports exist & script-backed | File provenance & size audit | **PASS** (Reports verified) |
+| 6 | Zero keys, audio, or PII in git | `git ls-files` check only | **git ls-files check only; real secrets scan pending** |
+| 7 | Clean git working tree | `git status` | **PASS** (working tree clean) |
 
 ---
 
@@ -112,5 +114,9 @@ Audited automatically via `scripts/verify_dod.py`:
 
 - **Research Prototype Status:** Chitrapathak-2 weights are distributed under Krutrim Community License v1.0 (research use). Consequently, `pakkam_chitra` is designated as a research prototype index.
 - **Selection Bias in OCR Comparison:** The 7 known-problem pages were selected specifically because Tesseract failed on them. The 0/7 vs 7/7 result reflects robustness on adversarial digit layouts, not whole-document character error rate on clear text.
-- **Draft Question Set:** The 194 questions in `questions-review.csv` represent synthetic and draft queries; formal native-speaker certification remains scheduled for Phase 2.
+- **Draft Question Set:** The 194 questions in `questions-review.csv` are draft questions, not yet verified by a person; formal native-speaker verification remains to be performed.
+- **Speech Evaluation Limitations:** STT latency was measured on a single synthetic audio clip. The Kathbath WER numbers (Tamil 5.2% raw, Hindi 3.7% raw) are from clean read speech, not conversational or noisy citizen queries. Evon STT is not used and not available on the public API.
+- **Vector Count vs Chunks:** 4,449 vectors vs 2,918 chunks is marked unexplained.
+- **Safety Threshold:** 0.35 is the current default; the curve shows the trade-off on draft questions.
+- **DoD Status:** DoD item 1 is pytest only, no real fresh clone yet. DoD item 6 is git ls-files check only; real secrets scan pending.
 - **Local Workstation Hardware:** All latency figures reflect an RTX 4060 Laptop GPU under warm cache conditions; multi-tenant cloud deployments will exhibit different concurrency profiles.
