@@ -73,6 +73,8 @@ class Answer:
     generation (= llm_answer + verifier) and total. A stage that did not run is absent."""
     contact: Contact | None = None
     """On a refusal about a scheme we hold documents for: its official contact."""
+    passages: list[RetrievedPassage] = field(default_factory=list)
+    """Retrieved passages, populated on fallback when model is unavailable."""
 
 
 def _citation(number: int, passage: RetrievedPassage) -> Citation:
@@ -128,6 +130,10 @@ class Answerer:
         # rebuilt the passage still holds the misreading.
         self._misread = misread_numbers_by_page(corrections or [])
 
+    @property
+    def retriever(self) -> Retriever:
+        return self._retriever
+
     def answer(self, question: str) -> Answer:
         timings: dict[str, float] = {}
         started = time.perf_counter()
@@ -152,6 +158,7 @@ class Answerer:
                     text += " " + contact_text(
                         contact.scheme, contact.helpline, str(contact.website), language
                     )
+            fallback_passages = retrieval.passages[:3] if reason == "service_unavailable" else []
             return Answer(
                 question=question,
                 language=language,
@@ -165,6 +172,7 @@ class Answerer:
                 rejected=rejected or [],
                 timings_ms=timings,
                 contact=contact,
+                passages=fallback_passages,
             )
 
         if confidence < self._refusal_threshold:

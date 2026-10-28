@@ -606,3 +606,90 @@ def test_transcribe_has_its_own_rate_limit(service: FakeService, tmp_path: Path)
         assert client.post("/transcribe", files=clip).status_code == 200
         assert client.post("/ask", json={"question": QUESTION}).status_code == 200
         assert client.post("/transcribe", files=clip).status_code == 429
+
+
+def test_ask_model_unavailable_returns_fallback_passages(tmp_path: Path) -> None:
+    import datetime
+    from schemebot.ingest.models import Chunk
+    from schemebot.retrieve.retriever import RetrievedPassage
+
+    chunk = Chunk(
+        chunk_id="apy-brochure-en:p1:c0",
+        doc_id="apy-brochure-en",
+        scheme="Atal Pension Yojana",
+        source_url="https://pfrda.org.in/apy",
+        page_start=1,
+        page_end=1,
+        section="Eligibility",
+        language="en",
+        doc_date=datetime.date(2024, 1, 1),
+        text="Sample official passage text",
+        extraction='original',
+    )
+    passage = RetrievedPassage(chunk=chunk, relevance=0.95)
+    unavailable_answer = Answer(
+        question="What is APY?",
+        language="en",
+        text="Model is temporarily down. Please refer to official sources.",
+        sentences=[],
+        citations=[],
+        refused=True,
+        refusal_reason="service_unavailable",
+        confidence=0.95,
+        disclaimer="Informational only.",
+        contact=Contact(scheme="Atal Pension Yojana", helpline="1800-110-069", helpline_source="apy-brochure-en:p1", website="https://pfrda.org.in"),
+        passages=[passage],
+    )
+    svc = FakeService(answer=unavailable_answer)
+    with TestClient(create_app(lambda: svc, log_dir=tmp_path)) as client:
+        res = client.post("/ask", json={"question": "What is APY?"})
+        assert res.status_code == 200
+        data = res.json()
+        assert data["status"] == "MODEL_UNAVAILABLE"
+        assert data["path"] == "fallback"
+        assert len(data["passages"]) == 1
+        assert data["passages"][0]["scheme"] == "Atal Pension Yojana"
+        assert data["passages"][0]["text"] == "Sample official passage text"
+        assert data["contact"]["scheme"] == "Atal Pension Yojana"
+
+
+def test_ask_sources_returns_passages(tmp_path: Path) -> None:
+    import datetime
+    from schemebot.ingest.models import Chunk
+    from schemebot.retrieve.retriever import RetrievedPassage, RetrievalResult
+
+    class FakeRetriever:
+        def retrieve(self, question: str) -> RetrievalResult:
+            chunk = Chunk(
+                chunk_id="apy-brochure-en:p1:c0",
+                doc_id="apy-brochure-en",
+                scheme="Atal Pension Yojana",
+                source_url="https://pfrda.org.in/apy",
+                page_start=1,
+                page_end=1,
+                section="Eligibility",
+                language="en",
+                doc_date=datetime.date(2024, 1, 1),
+                text="Direct retrieval passage",
+                extraction='original',
+            )
+            passage = RetrievedPassage(chunk=chunk, relevance=0.95)
+            return RetrievalResult(query=question, passages=[passage], timings_ms={"retrieval": 15.0})
+
+    svc = FakeService()
+    svc.retriever = FakeRetriever()
+    with TestClient(create_app(lambda: svc, log_dir=tmp_path)) as client:
+        res = client.post("/ask/sources", json={"question": "What is APY?"})
+        assert res.status_code == 200
+        data = res.json()
+        assert len(data["passages"]) == 1
+        assert data["passages"][0]["scheme"] == "Atal Pension Yojana"
+        assert data["passages"][0]["text"] == "Direct retrieval passage"
+        assert "retrieval" in data["timings_ms"]
+
+
+def test_ask_sources_503_when_no_retriever(tmp_path: Path) -> None:
+    svc = FakeService()
+    with TestClient(create_app(lambda: svc, log_dir=tmp_path)) as client:
+        res = client.post("/ask/sources", json={"question": "What is APY?"})
+        assert res.status_code == 503
