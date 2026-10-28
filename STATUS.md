@@ -2,7 +2,49 @@
 
 Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 Nov, 11:59 PM IST (13 days left).
 
-## Done
+## PAUSED 28 Oct (End-of-Day Checkpoint)
+
+### 1. What is Done
+- **Full Prompt Pack (Prompts 0 to 12) Implemented:**
+  - Fast sources-first endpoint (POST /ask/sources in ~300ms, 0 LLM calls).
+  - Short voice answer path (VOICE_SYSTEM_PROMPT, max 2 sentences, Indic spoken words).
+  - Model-down graceful fallback (status='MODEL_UNAVAILABLE' with retrieved passages and helpline contacts).
+  - Sentence-by-sentence TTS streaming logic with TTFA pipelining.
+  - Verified fact cards backend (data/fact_cards.json, FactCardMatcher) with local cached audio.
+  - Claim-lite deterministic quote and number checks in src/schemebot/generate/claims.py (5 unit tests).
+  - Custom regex git secrets audit across full history.
+  - All 14 report corrections applied across docs/review/PAKKAM_2.0_BENCHMARK_REPORT.md and .docx report.
+- **Git & Safety Status:** Branch feat/prompt-pack-execution remains local only (not pushed). No audio files in git. 55 / 55 unit tests passing.
+
+### 2. What is Proven (with Source Scripts)
+- **Problem-Page Numeral Accuracy:** Chitrapathak-2 Crop Mode 7/7 (100.0%) vs Tesseract 0/7 (0.0%) on known failure pages (scripts/run_hybrid_ocr.py, n=7).
+- **OCR Crop Mode Speedup:** ~12.0s per page vs ~95s full-page GPU and 6-7 min CPU (scripts/run_hybrid_ocr.py, n=500 pages).
+- **Retrieval Recall@5:** 98.7% for Hybrid RRF + BGE-Reranker-v2 on draft questions (scripts/ablate_retrieval.py, n=194).
+- **Refusal Calibration:** 87.1% routing accuracy and 92.5% ungrounded queries refused at threshold 0.35 on draft questions (scripts/evaluate_refusal_curve.py, n=194).
+- **Fact Card Matching Precision:** 100.0% precision on draft test questions (4/4) and 0% false positives on unanswerables (0/40) (scripts/fact_card_eval.py, n=44).
+- **Sentence 1 TTFA Latency:** 2,795.1 ms on public Gnani Timbre REST endpoint (scripts/test_sentence_speech.py, n=3 sentences).
+- **Speech Error Retrieval Match Rate:** 90.3% document match (28/31) and 87.1% page match (27/31) on read speech (scripts/speech_error_test.py, n=31 Kathbath clips).
+- **STT Word Error Rate:** Clean read speech Tamil raw 5.2% (norm 1.7%) and Hindi raw 3.7% (norm 1.7%) (scripts/gnani_stt_eval.py, n=15 each).
+- **Secrets Audit:** 0 API keys and 0 audio files found in git history (scripts/scan_git_secrets.py, n=149 commits, 238 tracked files).
+- **Unit Test Integrity:** 55 / 55 tests pass in 18s (pytest tests/test_api.py tests/test_fact_cards.py tests/test_claims.py).
+
+### 3. What is Unproven
+- **Voice-Loop 10-Query Distribution:** Multi-query live run stopped due to Gemini free tier 429 RESOURCE_EXHAUSTED. Stitched single-run (n=1) wall-clock latency is 9.20 s (the 5.0 s project target was NOT met). Median, p95, min, and max across 10 queries remain unverified.
+- **Answer Quality & Hallucination Rate:** docs/review/answer_eval.csv is generated with 3 test answers, but blind human grading has not yet been performed.
+- **Verified Question Set:** All 194 questions are developer-written draft questions. The verified question set (50 checked + 30 held-out) is pending delivery.
+- **Conversational Speech:** Voice tests use clean read-speech from news sentences (Kathbath). Real conversational, dialectal, Tanglish, and noisy audio are completely untested.
+- **263 OCR Disagreement Rows:** Differences between Tesseract and Chitrapathak-2 in docs/review/ocr_disagreements.csv remain unreviewed.
+- **Clean Clone on External OS:** Dry-run tested locally, but real fresh clone on a separate clean machine is pending.
+- **Departmental Helplines:** 9 of 10 schemes in data/contacts.json have helpline: null (unverified). Only APY is verified.
+
+### 4. Exact Next Steps
+1. **Gate 0.3:** Grade answers in docs/review/answer_eval.csv (number_correct, citation_supports, unsupported_claim) and run scripts/answer_eval_summary.py.
+2. **Gate 0.2:** Ingest verified question set when delivered (50 checked + 30 held-out).
+3. **Voice Loop Re-run:** Once Gemini daily quota resets, re-run scripts/voice_loop_timing.py across 10 cold-cache questions to record true median, p95, min, and max.
+4. **Gate 2.1:** Review 263 OCR disagreement rows (scripts/analyze_disagreements.py).
+
+---
+
 ## Done
 - **Full Prompt Pack Execution Complete (Prompts 1 to 12 - 28 Oct):**
   - **Prompt 6 (Voice-Loop Timing Benchmark):** Created `scripts/voice_loop_timing.py`. Benchmarked end-to-end voice latency across STT (1,320.4 ms), first-stage search (215.6 ms), reranker (236.8 ms), short voice generation (3,850.0 ms), verifier bypass (0 ms), and sentence-1 TTS (2,795.1 ms), yielding perceived start time of ~9.2 s (vs 14.2 s monolithic). Documented in `docs/review/VOICE_LOOP_TIMING.md`.
