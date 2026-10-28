@@ -10,10 +10,10 @@ Outputs: docs/review/RETRIEVAL_ABLATION_REPORT.md
 """
 
 import logging
+import os
 import statistics
 import subprocess
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
 
@@ -24,7 +24,11 @@ from schemebot.config import get_settings
 from schemebot.evaluation.dataset import load_questions
 from schemebot.evaluation.metrics import recall_at_k
 from schemebot.evaluation.runner import evaluate
-from schemebot.retrieve.factory import build_retriever
+from schemebot.index.embed import BgeM3Encoder, model_source
+from schemebot.index.store import open_client
+from schemebot.retrieve.hybrid import HybridRetriever
+from schemebot.retrieve.rerank import BgeReranker
+from schemebot.retrieve.retriever import Retriever
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("retrieval_ablation")
@@ -46,11 +50,28 @@ def main():
     questions = load_questions(settings.eval_questions_path)
     logger.info("Loaded %d evaluation questions.", len(questions))
 
+    # Open client and models once to avoid repeated lock/load
+    client = open_client(settings.index_dir)
+    collection = os.environ.get("SCHEMEBOT_QDRANT_COLLECTION", settings.qdrant_collection)
+    logger.info("Using Qdrant collection: %s", collection)
+
+    encoder = BgeM3Encoder(
+        model_source(settings.embedding_model, settings.embedding_revision),
+        settings.embed_batch_size,
+    )
+    first_stage = HybridRetriever(
+        client,
+        collection,
+        encoder,
+        candidates_per_method=settings.retrieval_top_k,
+    )
+    reranker = BgeReranker(model_source(settings.reranker_model, settings.reranker_revision))
+
     configs = [
-        {"name": "1. Keyword Only (Sparse)", "mode": "sparse", "rerank": False},
-        {"name": "2. Dense Vector Only", "mode": "dense", "rerank": False},
-        {"name": "3. Hybrid Search (Dense + Sparse)", "mode": "hybrid", "rerank": False},
-        {"name": "4. Hybrid Search + Reranker", "mode": "hybrid", "rerank": True},
+        {"name": "1. Keyword Only (Sparse)", "mode": "sparse", "reranker": None},
+        {"name": "2. Dense Vector Only", "mode": "dense", "reranker": None},
+        {"name": "3. Hybrid Search (Dense + Sparse)", "mode": "hybrid", "reranker": None},
+        {"name": "4. Hybrid Search + Reranker", "mode": "hybrid", "reranker": reranker},
     ]
 
     results_table = []
@@ -58,10 +79,17 @@ def main():
     for cfg in configs:
         c_name = cfg["name"]
         mode = cfg["mode"]
-        rerank = cfg["rerank"]
+        r_model = cfg["reranker"]
         logger.info("Running ablation configuration: %s...", c_name)
 
-        retriever = build_retriever(settings, use_reranker=rerank)
+        retriever = Retriever(
+            first_stage,
+            r_model,
+            candidates=settings.retrieval_top_k,
+            keep=settings.rerank_top_k,
+            gloss_tanglish=settings.gloss_tanglish,
+        )
+
         q_results = evaluate(
             questions=questions,
             retriever=retriever,
@@ -80,7 +108,7 @@ def main():
         results_table.append({
             "config": c_name,
             "mode": mode,
-            "rerank": "Yes" if rerank else "No",
+            "rerank": "Yes" if r_model is not None else "No",
             "recall_at_5": mean_r5,
             "median_lat_ms": med_lat,
             "n_answerable": len(r5_scores),
@@ -98,7 +126,7 @@ def main():
         "",
         f"**Generated:** {now_str}  ",
         f"**Git Commit:** `{commit}` ({clean_flag})  ",
-        f"**Qdrant Collection:** `{settings.qdrant_collection}`  ",
+        f"**Qdrant Collection:** `{collection}`  ",
         f"**Embedding Model:** `{settings.embedding_model}`  ",
         f"**Reranker Model:** `{settings.reranker_model}`  ",
         f"**Total Questions:** {len(questions)}  ",

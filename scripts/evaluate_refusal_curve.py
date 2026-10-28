@@ -9,6 +9,7 @@ Outputs: docs/review/REFUSAL_THRESHOLD_CURVE.md
 """
 
 import logging
+import os
 import statistics
 import subprocess
 import sys
@@ -21,7 +22,11 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from schemebot.config import get_settings
 from schemebot.evaluation.dataset import load_questions
 from schemebot.evaluation.runner import evaluate
-from schemebot.retrieve.factory import build_retriever
+from schemebot.index.embed import BgeM3Encoder, model_source
+from schemebot.index.store import open_client
+from schemebot.retrieve.hybrid import HybridRetriever
+from schemebot.retrieve.rerank import BgeReranker
+from schemebot.retrieve.retriever import Retriever
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("refusal_curve")
@@ -42,7 +47,28 @@ def get_git_info() -> tuple[str, bool]:
 def main():
     settings = get_settings()
     questions = load_questions(settings.eval_questions_path)
-    retriever = build_retriever(settings, use_reranker=True)
+    client = open_client(settings.index_dir)
+    collection = os.environ.get("SCHEMEBOT_QDRANT_COLLECTION", settings.qdrant_collection)
+    logger.info("Using Qdrant collection: %s", collection)
+
+    encoder = BgeM3Encoder(
+        model_source(settings.embedding_model, settings.embedding_revision),
+        settings.embed_batch_size,
+    )
+    first_stage = HybridRetriever(
+        client,
+        collection,
+        encoder,
+        candidates_per_method=settings.retrieval_top_k,
+    )
+    reranker = BgeReranker(model_source(settings.reranker_model, settings.reranker_revision))
+    retriever = Retriever(
+        first_stage,
+        reranker,
+        candidates=settings.retrieval_top_k,
+        keep=settings.rerank_top_k,
+        gloss_tanglish=settings.gloss_tanglish,
+    )
 
     # First, run retrieval once with threshold 0.0 to cache confidences
     logger.info("Computing retrieval confidences for %d questions...", len(questions))
@@ -100,7 +126,7 @@ def main():
         f"**Generated:** {now_str}  ",
         f"**Git Commit:** `{commit}` ({clean_flag})  ",
         f"**Default Refusal Threshold:** `{settings.refusal_threshold}` (active)  ",
-        f"**Qdrant Collection:** `{settings.qdrant_collection}`  ",
+        f"**Qdrant Collection:** `{collection}`  ",
         f"**Total Questions:** {len(questions)}  ",
         "",
         "---",

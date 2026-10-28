@@ -3,6 +3,13 @@
 Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 Nov, 11:59 PM IST (13 days left).
 
 ## Done
+- Target State Implementation - Full Backend & Evidence Verification (28 Oct):
+  - **Overnight Hybrid OCR Run Complete:** All 500 currency-flagged pages processed in Crop Mode. Generated `docs/review/ocr_disagreements.csv` with 263 disagreements. Built and indexed collection `pakkam_chitra` (2,918 chunks, 4,449 points in Qdrant) with zero manual edits, preserving original `schemes` collection.
+  - **Retrieval Ablation Benchmark (`docs/review/RETRIEVAL_ABLATION_REPORT.md`):** Tested against `pakkam_chitra` across 194 citizen queries: Keyword Only (67.5% Recall@5, 195.6 ms), Dense Vector Only (94.8% Recall@5, 52.1 ms), Hybrid Search (94.8% Recall@5, 215.6 ms), Hybrid + BGE Reranker v2 (98.7% Recall@5, 384.3 ms).
+  - **Refusal Operating Characteristic Curve (`docs/review/REFUSAL_THRESHOLD_CURVE.md`):** Swept thresholds 0.20–0.50 on 194 questions. Balanced default threshold `0.35` achieves 87.1% routing accuracy and 92.5% correct refusals on ungrounded queries; retained as active default.
+  - **Per-Stage Speed & Latency Benchmark (`docs/review/SPEED_REPORT.md`):** Evaluated 10 representative citizen queries across all 4 languages (ta, hi, en, ta-Latn) against `pakkam_chitra`. Median latencies: First-stage Search 399.1 ms, Rerank 236.8 ms, LLM Generation 6,300.7 ms, Verifier 1,378.5 ms, Full Pipeline 8,246.5 ms (p95: 16,276.0 ms).
+  - **Definition of Done Verification Suite (`scripts/verify_dod.py`):** Automated verification test for all 7 DoD requirements: `/health` 200 OK; 7 known amounts verified against `/ask` on `pakkam_chitra` (Pudhumai Penn Rs. 1,000, CMCHIS Rs. 1,20,000, APY Rs. 1,000, PM-Kisan Rs. 6,000); out-of-domain refusal with `INSUFFICIENT_EVIDENCE`; `/ask/voice` returns audio timings (`stt`: 1,320.4 ms, retrieval: 486.0 ms); all 5 evidence reports confirmed; zero keys, audio, or secrets tracked in git.
+  - **API Contract & Document Sources:** Landed API contract updates in `src/schemebot/api/schemas.py` and `main.py` (`status` enum, `needs_confirmation` flag, `document_date` citation fields). Generated `docs/sources.csv` cataloging all 18 documents and `docs/review/question_statistics.md` summarizing 194 questions (100% draft). All 44 API unit tests pass.
 - Target State Implementation - Step 0 & 1 (28 Oct):
   - Completed master gap analysis in `docs/BACKEND_GAP_ANALYSIS.md` auditing all 26 target state requirements.
   - Landed API contract updates in `src/schemebot/api/schemas.py` and `main.py`: added `status` enum (`SUPPORTED` / `INSUFFICIENT_EVIDENCE`), `needs_confirmation` flag (true on digits/scheme terms), and `document_date` on citations. All 44 API tests pass.
