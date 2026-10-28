@@ -39,3 +39,6 @@ data/audio_cache/
 *.wav
 *.mp3
 
+
+data/eval/answer_eval_raw/
+
