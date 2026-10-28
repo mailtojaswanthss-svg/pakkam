@@ -36,6 +36,10 @@ _END_PUNCTUATION = "?？.!।॥ "
 
 
 class AnswerService(Protocol):
+    @property
+    def retriever(self):
+        return getattr(self._service, "retriever", None)
+
     def answer(self, question: str) -> Answer: ...
 
 
