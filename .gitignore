@@ -34,3 +34,8 @@ tools/
 
 # Voice recordings and their transcripts (python -m schemebot.voice): never committed
 data/voice/
+
+data/audio_cache/
+*.wav
+*.mp3
+

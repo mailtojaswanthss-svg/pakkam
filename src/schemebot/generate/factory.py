@@ -46,13 +46,23 @@ def build_llm(settings: Settings, role: LlmRole) -> ConfiguredJsonLlm:
 
 def build_answerer(settings: Settings, retriever: Retriever | None = None) -> Answerer:
     """`retriever` lets callers share already-loaded models instead of loading them twice."""
+    from schemebot.generate.fact_cards import FactCardMatcher, load_verified_cards
+
+    retriever_obj = retriever or build_retriever(settings)
     verifier = build_llm(settings, "verifier") if settings.verify_answers else None
     contacts = load_contacts(settings.data_dir / CONTACTS_NAME)
+    cards_path = settings.data_dir / "fact_cards.json"
+    cards = load_verified_cards(cards_path)
+    matcher = None
+    if cards and hasattr(retriever_obj, "_first_stage") and hasattr(retriever_obj._first_stage, "_encoder"):
+        matcher = FactCardMatcher(cards, encoder=retriever_obj._first_stage._encoder)
+
     return Answerer(
-        retriever or build_retriever(settings),
+        retriever_obj,
         build_llm(settings, "answer"),
         verifier,
         settings.refusal_threshold,
         contacts,
         load_corrections(settings.data_dir / CORRECTIONS_NAME),
+        fact_cards=matcher,
     )
