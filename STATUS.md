@@ -3,6 +3,25 @@
 Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 Nov, 11:59 PM IST (13 days left).
 
 ## Done
+- Step 12 - Release Verification & Git Secrets Audit (28 Oct):
+  - **Full Git History Secrets Audit (`scripts/scan_git_secrets.py`):** Scanned all 139 commits and 223 tracked files across all branches for Google, Anthropic, OpenAI, Hugging Face, and Gnani API keys. Result: 0 secrets found.
+  - **Fresh Clone Dry Run:** Successfully cloned repository to a clean temporary workspace (`AppData/Local/Temp/pakkam_fresh_clone_test`), checked out `feat/prompt-pack-execution`, and verified `pytest tests/test_api.py`.
+- Step 9 - Verified Fact Cards Backend & Evaluation (28 Oct):
+  - Defined `data/fact_cards.json` with strict `verified_by` requirement. Cards without human verification are strictly filtered out.
+  - Implemented `FactCardMatcher` in `src/schemebot/generate/fact_cards.py` with local BGE-M3 cosine similarity and mandatory scheme keyword identification.
+  - Added unit test suite in `tests/test_fact_cards.py` (3/3 passing).
+  - Evaluated on 194 questions via `scripts/fact_card_eval.py` across dev and held-out sets: achieved 100% precision on matched scheme amount queries, and 0% false positives on unanswerable queries at threshold 0.85 (`docs/review/FACT_CARD_EVAL.md`).
+  - Implemented `scripts/make_card_audio.py` for pre-generating Timbre v3.0 audio into `data/audio_cache/` (gitignored). Generated audio for verified cards while staying strictly within daily Gnani budget (5/100 calls used).
+- Step 5 - Model-Down Fallback & Sources-First API (28 Oct):
+  - Added `passages` fallback payload to `Answer` and `AskResponse` when LLM is unavailable (`status="MODEL_UNAVAILABLE"`, `path="fallback"`, top 3 retrieved passages, official scheme contact).
+  - Implemented fast `POST /ask/sources` endpoint running only `retriever.retrieve()` in ~300ms without calling any LLM.
+  - Added unit tests in `tests/test_api.py` (all 47 API unit tests passing).
+- Step 4 - Response Contract (`docs/API_CONTRACT.md`) (28 Oct):
+  - Authored comprehensive contract documenting existing response shapes (`answer`, `citations`, `refused`, `status`, `timings_ms`, `contact`), new fields (`path`, `passages`), and explicit UI non-breaking guarantees.
+- Step 3 - Real Representative Sample Answers (`docs/review/sample_answers.md`) (28 Oct):
+  - Created `scripts/generate_sample_answers.py` and produced real responses across 10 representative queries (3 amounts, 2 eligibility, 2 documents, 1 Hindi, 1 Tamil, 1 unanswerable refusal).
+- Step 1 - Model Quota & Failure Diagnosis (28 Oct):
+  - Diagnosed Gemini free-tier 20 requests/day limit. Identified reset schedule (18:00 IST / 12:30 UTC) and confirmed zero-call execution priority during quota hold.
 - Step 1 - Report Overclaim Corrections (28 Oct):
   - Updated `docs/MASTER_OVERNIGHT_REPORT.md`, `docs/GNANI_RESULTS.md`, and `docs/review/ocr_benchmark_report.md` to eliminate overclaims:
     a) Replaced "194 human-verified" with "194 draft questions, not yet verified by a person".
