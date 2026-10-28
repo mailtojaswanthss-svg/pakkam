@@ -23,6 +23,7 @@ from schemebot.generate.messages import RefusalReason, contact_text, disclaimer,
 from schemebot.generate.prompt import (
     ANSWER_SCHEMA,
     SYSTEM_PROMPT,
+    VOICE_SYSTEM_PROMPT,
     AnswerReply,
     build_user_message,
 )
@@ -139,7 +140,7 @@ class Answerer:
     def retriever(self) -> Retriever:
         return self._retriever
 
-    def answer(self, question: str) -> Answer:
+    def answer(self, question: str, voice_mode: bool = False) -> Answer:
         timings: dict[str, float] = {}
         started = time.perf_counter()
         language = detect_language(question)
@@ -218,7 +219,8 @@ class Answerer:
         if confidence < self._refusal_threshold:
             return refuse("low_confidence")
 
-        passages = retrieval.passages
+        prompt_to_use = VOICE_SYSTEM_PROMPT if voice_mode else SYSTEM_PROMPT
+        passages = retrieval.passages[:3] if voice_mode else retrieval.passages
         passage_texts = [passage.chunk.text for passage in passages]
         misread = [_misread_in(passage.chunk, self._misread) for passage in passages]
         generation_started = time.perf_counter()
@@ -226,15 +228,20 @@ class Answerer:
             reply = parse_reply(
                 AnswerReply,
                 self._llm.complete_json(
-                    SYSTEM_PROMPT, build_user_message(question, language, passages), ANSWER_SCHEMA
+                    prompt_to_use, build_user_message(question, language, passages), ANSWER_SCHEMA
                 ),
             )
             timings["llm_answer"] = (time.perf_counter() - generation_started) * 1000
             drafts = [DraftSentence(s.text.strip(), s.sources) for s in reply.sentences]
             if not reply.answerable or not drafts:
                 return refuse("not_in_documents")
+            
+            # Voice optimization: skip LLM verifier if answer text has no numbers or dates
+            has_numbers = any(bool(numbers_in(s.text)) for s in drafts)
+            verifier_to_use = None if (voice_mode and not has_numbers) else self._verifier
+            
             verify_started = time.perf_counter()
-            checked = check_answer(drafts, passage_texts, self._verifier, misread)
+            checked = check_answer(drafts, passage_texts, verifier_to_use, misread)
             # Guardrail checks plus the verifier call (when one is configured).
             timings["verifier"] = (time.perf_counter() - verify_started) * 1000
         except LlmDeclinedError:

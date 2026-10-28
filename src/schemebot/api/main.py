@@ -64,7 +64,7 @@ AUDIT_LOG_NAME = "requests.jsonl"
 
 
 class AnswerService(Protocol):
-    def answer(self, question: str) -> Answer: ...
+    def answer(self, question: str, voice_mode: bool = False) -> Answer: ...
 
 
 class AppState:
@@ -298,7 +298,7 @@ def create_app(
         The chat page uses `/transcribe` and then `/ask` instead, to show the transcript
         before the answer is ready. This one-call route stays for scripts and the API."""
         question, language_code, stt_ms = heard_question(state, audio, language)
-        answer = state.service.answer(question)
+        answer = state.service.answer(question, voice_mode=True)
         state.audit.record(request.state.request_id, answer, {"stt": stt_ms})
         response = AskResponse.from_answer(answer, state.titles, state.doc_dates)
         response.timings_ms["stt"] = round(stt_ms, 1)

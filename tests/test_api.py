@@ -48,7 +48,7 @@ class FakeService:
         self._answer = answer or CITED
         self._error = error
 
-    def answer(self, question: str) -> Answer:
+    def answer(self, question: str, voice_mode: bool = False) -> Answer:
         self.questions.append(question)
         if self._error:
             raise self._error
@@ -81,7 +81,7 @@ class MeetingService(FakeService):
         super().__init__()
         self._both_running = threading.Barrier(2, timeout=5)
 
-    def answer(self, question: str) -> Answer:
+    def answer(self, question: str, voice_mode: bool = False) -> Answer:
         self._both_running.wait()
         return super().answer(question)
 

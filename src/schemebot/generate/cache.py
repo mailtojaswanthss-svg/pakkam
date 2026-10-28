@@ -40,7 +40,7 @@ class AnswerService(Protocol):
     def retriever(self):
         return getattr(self._service, "retriever", None)
 
-    def answer(self, question: str) -> Answer: ...
+    def answer(self, question: str, voice_mode: bool = False) -> Answer: ...
 
 
 def normalize_question(question: str) -> str:
@@ -49,9 +49,10 @@ def normalize_question(question: str) -> str:
     return text.strip().rstrip(_END_PUNCTUATION)
 
 
-def cache_key(question: str, fingerprint: str = "") -> str:
+def cache_key(question: str, fingerprint: str = "", voice_mode: bool = False) -> str:
     language = detect_language(question)
-    return "\x1f".join((fingerprint, language, normalize_question(question)))
+    mode_str = "voice" if voice_mode else "text"
+    return "\x1f".join((fingerprint, mode_str, language, normalize_question(question)))
 
 
 def _digest_files(paths: list[Path], root: Path) -> str:
@@ -114,9 +115,9 @@ class CachedAnswerer:
         self._entries: OrderedDict[str, _Entry] = OrderedDict()
         self._lock = threading.Lock()
 
-    def answer(self, question: str) -> Answer:
+    def answer(self, question: str, voice_mode: bool = False) -> Answer:
         started = time.perf_counter()
-        key = cache_key(question, self._fingerprint)
+        key = cache_key(question, self._fingerprint, voice_mode)
         cached = self._get(key)
         if cached is not None:
             # The stage timings of the first answer would be misleading here.
@@ -125,7 +126,7 @@ class CachedAnswerer:
 
         # Two people asking the same new question at once both reach the service; the
         # second answer simply replaces the first. Not worth a per-question lock.
-        answer = self._service.answer(question)
+        answer = self._service.answer(question, voice_mode=voice_mode)
         if answer.refusal_reason not in _PASSING_FAILURES:
             self._put(key, answer)
         return answer
