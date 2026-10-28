@@ -18,7 +18,7 @@ Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 N
 
 ### 2. What is Proven (with Source Scripts)
 - **Problem-Page Numeral Accuracy:** Chitrapathak-2 Crop Mode 7/7 (100.0%) vs Tesseract 0/7 (0.0%) on known failure pages (scripts/run_hybrid_ocr.py, n=7).
-- **OCR Crop Mode Speedup:** ~12.0s per page vs ~95s full-page GPU and 6-7 min CPU (scripts/run_hybrid_ocr.py, n=500 pages).
+- **OCR Crop Mode Speedup:** ~12.0s per page vs ~95s full-page GPU and earlier 6-7 min/page on GPU unreconciled without log (scripts/run_hybrid_ocr.py, n=500 pages).
 - **Retrieval Recall@5:** 98.7% for Hybrid RRF + BGE-Reranker-v2 on draft questions (scripts/ablate_retrieval.py, n=194).
 - **Refusal Calibration:** 87.1% routing accuracy and 92.5% ungrounded queries refused at threshold 0.35 on draft questions (scripts/evaluate_refusal_curve.py, n=194).
 - **Fact Card Matching Precision:** 100.0% precision on draft test questions (4/4) and 0% false positives on unanswerables (0/40) (scripts/fact_card_eval.py, n=44).

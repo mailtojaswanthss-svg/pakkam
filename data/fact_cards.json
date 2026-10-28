@@ -5,16 +5,17 @@
     "field": "amount",
     "language": "ta",
     "question_examples": [
-      "மகளிர் உரிமைத் திட்டத்தில் மாதம் எவ்வளவு உதவித்தொகை வழங்கப்படுகிறது?",
+      "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் எவ்வளவு உதவித்தொகை வழங்கப்படுகிறது?",
       "KMUT scheme la monthly evlo tharanga?",
-      "கலைஞர் மகளிர் உரிமை தொகை எவ்வளவு?"
+      "மகளிர் உரிமை தொகை எவ்வளவு?"
     ],
-    "answer_text": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் தகுதியுள்ள குடும்பத் தலைவிகளுக்கு மாதம் ₹1,000 உரிமைத் தொகை வழங்கப்படுகிறது.",
+    "answer_text": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் தகுதியான குடும்பத் தலைவிகளுக்கு மாதந்தோறும் ₹1,000 மகளிர் உரிமைத் தொகையாக வழங்கப்படுகிறது.",
     "source_document": "kmut-go15-2023-ta",
     "source_page": 2,
     "document_date": "2023-07-10",
-    "verified_by": "Jaswanth SS",
-    "verified_on": "2026-10-28"
+    "author": "AI draft",
+    "verified_by": null,
+    "verified_on": null
   },
   {
     "card_id": "placeholder_pmkisan_amount_en",
@@ -30,7 +31,8 @@
     "source_document": "pmkisan-guidelines-2020-en",
     "source_page": 4,
     "document_date": "2020-03-29",
-    "verified_by": "Jaswanth SS",
-    "verified_on": "2026-10-28"
+    "author": "AI draft",
+    "verified_by": null,
+    "verified_on": null
   }
 ]
