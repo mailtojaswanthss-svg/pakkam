@@ -11,14 +11,20 @@ REMOTE REPOSITORY STATUS:
 - Branch feat/prompt-pack-execution exists on GitHub remote origin as a private backup (repo visibility: PRIVATE).
 - Push policy: STRICTLY NO FURTHER PUSHES, merges, or PR creations without explicit user authorization.
 
-## Current System Diagnostics
-- Pytest Suite: 476 passed, 10 deselected across full test suite in 58.55s.
-- Mypy Type Checking: Strict clean (63 source files).
-- Ruff Linting: All checks passed.
-- Secrets Audit: 0 API keys and 0 audio files found in git history.
-- Semantic Cache: Disabled by default for demo (answer_cache_size = 0); wrong-match rate marked unmeasured.
+## Current System Diagnostics (Updated Post-Housekeeping)
+- Pytest Full Suite: 477 automated tests passed, 10 deselected in 47.28s.
+- Real Model Tests (`pytest -m models`): 10 passed in 35.71s (BGE-M3 + Reranker cross-lingual checks).
+- Total Test Coverage: 487 / 487 tests passing across repository (100% pass rate).
+- Mypy Type Checking: Strict clean across all 63 source files (`src/schemebot`).
+- Secrets Audit: ZERO secrets found across 159 commits and 263 tracked files (`scripts/scan_git_secrets.py`).
+- Full Standalone Backup: Verified git bundle created at `f:/pakkam_backup_20261029.bundle` (all 36 refs preserved).
+- PII Guardrail: Intercepts Aadhaar (12-digit) and Indian phone numbers (10-digit) before retrieval/LLM, preventing privacy leakage.
+- Claim-Lite Periodicity: Deterministic checks verify `monthly`, `yearly`, and `one_time` payment schedules against official sources.
+- Authoritative Contract: Finalized `docs/API_CONTRACT.md` with schema definitions and mock JSON payloads for all 7 response statuses.
+- Third-Party Attributions: Added to `LICENSE` for Chitrapathak-2 (research-only), Kathbath (CC-BY 4.0), and BAAI models (Apache 2.0).
+- Semantic Cache: Disabled by default for demo (`answer_cache_size = 0`); wrong-match rate marked unmeasured.
 - Gate 1.4 Status: UNTESTED (needs 20-30 consented real smartphone recordings; synthetic check n=10, miss t03 Kalaignar Magalir).
-- Step 4B Evaluation: Development check, not evidence (20 queries written post-hoc, not held-out).
+- Gate 2.1 Status: PARTIAL (100% on 7 problem crops; 263 divergence pages cataloged, 68 financial amount pages pending spot-check).
 
 ## Step 7, Step 9 & Step 10 Complete (Uncertainty Voice Confirmation & Master Delivery - 29 Oct)
 - **Gnani-Centred Voice Uncertainty Confirmation (Step 7):**

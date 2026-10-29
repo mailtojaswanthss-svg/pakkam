@@ -20,6 +20,7 @@ from schemebot.generate.guardrails import (
 )
 from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError, parse_reply
 from schemebot.generate.messages import (
+    contains_pii,
     RefusalReason,
     clarification_text,
     contact_text,
@@ -161,6 +162,25 @@ class Answerer:
         timings: dict[str, float] = {}
         started = time.perf_counter()
         language = detect_language(question)
+
+        # Privacy guardrail: intercept Aadhaar or mobile phone numbers before retrieval or LLM
+        if contains_pii(question):
+            timings["total"] = (time.perf_counter() - started) * 1000
+            return Answer(
+                question=question,
+                language=language,
+                text=refusal_text("pii_detected", language),
+                sentences=[],
+                citations=[],
+                refused=True,
+                refusal_reason="pii_detected",
+                confidence=0.0,
+                disclaimer=disclaimer(language),
+                timings_ms=timings,
+                status="INSUFFICIENT_EVIDENCE",
+                path="rag",
+                understood_query=clean_query(question),
+            )
 
         # Step 4B: Deterministic cleanup & alias expansion
         cleaned_q = clean_query(question)
