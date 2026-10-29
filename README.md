@@ -280,9 +280,11 @@ scripts/
 
 ---
 
-## Licensing & Research Prototype Notice
+## Licensing & Third-Party Attributions
 
 - **Code:** Licensed under the [MIT License](LICENSE).
-- **Government PDFs:** Remain property of their respective publishing departments; not distributed in this repository.
-- **Chitrapathak-2:** Released under the Krutrim Community License Version 1.0 for non-commercial research use. Collection `pakkam_chitra` is maintained as a research prototype.
+- **Government PDFs:** Remain property of their respective publishing departments; cataloged in [docs/sources.csv](docs/sources.csv).
+- **Krutrim Chitrapathak-2 Attribution (Clause 10 Compliance):** Scanned document OCR evaluation and crop-mode text extractions utilize `krutrim-ai-labs/Chitrapathak-2` developed by **Krutrim AI Labs**. Distributed under the Krutrim Community License Agreement Version 1.0 for non-commercial academic research and educational evaluation. All benchmark comparisons, OCR evaluations, and model outputs in this research prototype are visibly attributed to Krutrim. See [docs/LICENSE_NOTES.md](docs/LICENSE_NOTES.md) for quoted license clauses.
+- **BAAI Models:** `BAAI/bge-m3` (MIT License) and `BAAI/bge-reranker-v2-m3` (Apache 2.0 License) by Beijing Academy of Artificial Intelligence.
+- **Kathbath Dataset:** Read speech audio evaluation clips from `ai4bharat/Kathbath` by AI4Bharat under CC-BY 4.0 license.
 - **Photos:** Web UI assets under Unsplash License ([CREDITS.md](CREDITS.md)).
