@@ -16,6 +16,7 @@ RefusalReason = Literal[
     "model_declined",  # the model's safety filter declined
     "service_unavailable",  # the API failed
     "pii_detected",  # Aadhaar or phone number detected in question
+    "unsupported_language",  # question is in an unsupported language or script
 ]
 
 MessageLanguage = Literal["en", "ta", "hi", "ta-Latn"]
@@ -124,6 +125,17 @@ CONTACT_WEBSITE_ONLY: dict[MessageLanguage, str] = {
 }
 
 
+UNSUPPORTED_LANGUAGE: dict[MessageLanguage, str] = {
+    "en": (
+        "Pakkam only supports questions in Tamil, Hindi, English, and Tanglish. "
+        "Please ask in one of these languages."
+    ),
+    "ta": "பக்கம் தமிழ், இந்தி, ஆங்கிலம் மற்றும் தங்கிலீஷ் மொழிகளில் மட்டுமே கேள்விகளை ஆதரிக்கிறது.",
+    "hi": "पक्कम केवल तमिल, हिंदी, अंग्रेजी और तांगलिश में प्रश्नों का समर्थन करता है।",
+    "ta-Latn": "Pakkam Tamil, Hindi, English mattrum Tanglish-la mattum dhaan support pannum.",
+}
+
+
 def message_language(language: Language) -> MessageLanguage:
     return "en" if language == "unknown" else language
 
@@ -133,6 +145,8 @@ def refusal_text(reason: RefusalReason, language: Language) -> str:
         texts = PII_WARNING
     elif reason == "service_unavailable":
         texts = UNAVAILABLE
+    elif reason == "unsupported_language":
+        texts = UNSUPPORTED_LANGUAGE
     else:
         texts = NOT_FOUND
     return texts[message_language(language)]

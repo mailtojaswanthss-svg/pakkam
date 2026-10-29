@@ -61,6 +61,10 @@ class Settings(BaseSettings):
     # For a long evaluation run on Gemini's free tier, raise the retries (e.g. 7).
     llm_timeout_seconds: float = Field(default=60.0, gt=0)
     llm_retries: int = Field(default=2, ge=0, le=10)
+    max_daily_llm_calls: int = Field(default=20, ge=1)
+    llm_reset_time: str = Field(default="unknown")
+    max_question_length: int = Field(default=500, ge=10, le=5000)
+    cors_origins: list[str] = Field(default_factory=lambda: ["*"])
 
     # Gemini (llm_provider = "gemini"). With no key set, the SDK falls back to GEMINI_API_KEY.
     gemini_api_key: SecretStr | None = None

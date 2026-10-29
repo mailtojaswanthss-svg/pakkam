@@ -93,6 +93,7 @@ class Answer:
         "MODEL_UNAVAILABLE",
         "needs_clarification",
         "PII_DETECTED",
+        "UNSUPPORTED_LANGUAGE",
     ] = "SUPPORTED"
     """Status: SUPPORTED, INSUFFICIENT_EVIDENCE, MODEL_UNAVAILABLE, or needs_clarification."""
     understood_query: str | None = None
@@ -194,6 +195,31 @@ class Answerer:
                 path="guardrail",
                 understood_query=clean_query(question),
             )
+
+        if language == "unknown":
+            has_supported = any(
+                0x0B80 <= ord(c) <= 0x0BFF
+                or 0x0900 <= ord(c) <= 0x097F
+                or ("a" <= c.lower() <= "z")
+                for c in question
+            )
+            if not has_supported:
+                timings["total"] = (time.perf_counter() - started) * 1000
+                return Answer(
+                    question=question,
+                    language="en",
+                    text=refusal_text("unsupported_language", "en"),
+                    sentences=[],
+                    citations=[],
+                    refused=True,
+                    refusal_reason="unsupported_language",
+                    confidence=0.0,
+                    disclaimer=disclaimer("en"),
+                    timings_ms=timings,
+                    status="UNSUPPORTED_LANGUAGE",
+                    path="guardrail",
+                    understood_query=clean_query(question),
+                )
 
         # Step 4B: Deterministic cleanup & alias expansion
         cleaned_q = clean_query(question)

@@ -34,6 +34,13 @@ def model_for(settings: Settings, role: LlmRole) -> str:
 def _build_provider_llm(
     settings: Settings, role: LlmRole, provider: LlmProvider
 ) -> ConfiguredJsonLlm:
+    from schemebot.generate.budget import shared_llm_budget
+
+    budget = shared_llm_budget(
+        settings.data_dir / "llm-calls.json",
+        settings.max_daily_llm_calls,
+        settings.llm_reset_time,
+    )
     effort: Effort = {"answer": settings.llm_effort, "verifier": "low", "judge": "medium"}[role]
     model = model_for_provider(settings, role, provider)
     limits = (settings.llm_timeout_seconds, settings.llm_retries)
@@ -41,12 +48,16 @@ def _build_provider_llm(
         from schemebot.generate.gemini import GeminiJsonLlm
 
         key = settings.gemini_api_key
-        return GeminiJsonLlm(model, key.get_secret_value() if key else None, effort, *limits)
+        return GeminiJsonLlm(
+            model, key.get_secret_value() if key else None, effort, *limits, budget=budget
+        )
 
     from schemebot.generate.llm import ClaudeJsonLlm
 
     key = settings.anthropic_api_key
-    return ClaudeJsonLlm(model, key.get_secret_value() if key else None, effort, *limits)
+    return ClaudeJsonLlm(
+        model, key.get_secret_value() if key else None, effort, *limits, budget=budget
+    )
 
 
 def build_llm(settings: Settings, role: LlmRole) -> ConfiguredJsonLlm:
