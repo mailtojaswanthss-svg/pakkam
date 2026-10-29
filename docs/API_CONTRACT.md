@@ -113,7 +113,7 @@
 ---
 
 ### Status 3: `INSUFFICIENT_EVIDENCE` (Safe Grounded Refusal)
-*Returned when retrieval confidence is below 0.30, or the question is unanswerable from ingested government gazettes.*  
+*Returned when retrieval confidence is below 0.30, or the question is unanswerable from ingested official scheme documents.*  
 *Payload Origin:* **server output with stubbed model/test fixtures** (captured from out-of-domain query execution).
 
 ```json

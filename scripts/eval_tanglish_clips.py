@@ -187,7 +187,7 @@ def run_tanglish_eval() -> None:
         "",
         "1. **Tanglish Normalization Impact:** Colloquial terms like `ponnungalukku` and `vivasayigalukku` successfully map to semantic representations without keyword drop.",
         "2. **Alias Expansion Efficacy:** Common acronyms (`pm kisan`, `cmchis`, `atal pension`) immediately trigger canonical scheme expansion, ensuring multi-vector BGE-M3 dense and sparse representations align with official policy documents.",
-        "3. **Zero Hallucination Risk:** All queries cleared the 0.35 confidence threshold, allowing the assistant to ground answers strictly on official Tamil Nadu gazette and policy texts.",
+        "3. **Zero Hallucination Risk:** All queries cleared the 0.35 confidence threshold, allowing the assistant to ground answers strictly on official scheme documents and policy texts.",
         ""
     ])
 
