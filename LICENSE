@@ -22,12 +22,19 @@ SOFTWARE.
 
 ---
 
-### Third-Party Data & Model Attributions
+### Third-Party Model & Dataset Card Licenses (Exact Quotations)
 
-1. **Chitrapathak-2 OCR (AI4Bharat / IIT Madras):**
-   - The Chitrapathak-2 model weights and architecture are governed by their original academic/research-only license. Used here strictly for research, benchmark evaluation, and non-commercial public interest verification.
-2. **Kathbath Speech Dataset (AI4Bharat):**
-   - Clean read speech audio samples from the Kathbath dataset are used under the **Creative Commons Attribution 4.0 International (CC-BY 4.0)** license.
-   - Citation: AI4Bharat, *Kathbath: An Open-Source Audio Dataset for Indic Languages*.
-3. **BAAI Embedding Models (Beijing Academy of Artificial Intelligence):**
-   - `BAAI/bge-m3` and `BAAI/bge-reranker-v2-m3` are distributed under the **Apache 2.0** license.
+1. **BAAI/bge-m3 (Beijing Academy of Artificial Intelligence):**
+   - Model Card YAML: `license: mit`
+
+2. **BAAI/bge-reranker-v2-m3 (Beijing Academy of Artificial Intelligence):**
+   - Model Card YAML: `license: apache-2.0`
+
+3. **krutrim-ai-labs/Chitrapathak-2 (Krutrim AI Labs):**
+   - Model Card YAML: `license: other`
+   - Model Card Metadata: `license_name: krutrim-community-license-agreement-version-1.0`
+   - Model Card Scope Note: *"released only for research purposes"*
+
+4. **ai4bharat/Kathbath (AI4Bharat):**
+   - Dataset Card YAML: `license: cc-by-4.0`
+   - Dataset Packaging Note: *"We license the actual packaging of all this data under the Creative Commons CC0 license ('no rights reserved')."*
