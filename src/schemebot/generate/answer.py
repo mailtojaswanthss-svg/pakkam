@@ -19,7 +19,13 @@ from schemebot.generate.guardrails import (
     numbers_in,
 )
 from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError, parse_reply
-from schemebot.generate.messages import RefusalReason, contact_text, disclaimer, refusal_text
+from schemebot.generate.messages import (
+    RefusalReason,
+    clarification_text,
+    contact_text,
+    disclaimer,
+    refusal_text,
+)
 from schemebot.generate.prompt import (
     ANSWER_SCHEMA,
     SYSTEM_PROMPT,
@@ -31,6 +37,7 @@ from schemebot.ingest.corrections import CORRECTED, OcrCorrection
 from schemebot.ingest.langid import Language, detect_language
 from schemebot.ingest.models import Chunk
 from schemebot.retrieve.retriever import RetrievedPassage, Retriever
+from schemebot.text import clean_query
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +140,7 @@ class Answerer:
         contacts: dict[str, Contact] | None = None,
         corrections: list[OcrCorrection] | None = None,
         fact_cards: Any | None = None,
+        alias_matcher: Any | None = None,
     ) -> None:
         self._retriever = retriever
         self._llm = llm
@@ -143,6 +151,7 @@ class Answerer:
         # rebuilt the passage still holds the misreading.
         self._misread = misread_numbers_by_page(corrections or [])
         self._fact_cards = fact_cards
+        self._alias_matcher = alias_matcher
 
     @property
     def retriever(self) -> Retriever:
@@ -153,9 +162,15 @@ class Answerer:
         started = time.perf_counter()
         language = detect_language(question)
 
+        # Step 4B: Deterministic cleanup & alias expansion
+        cleaned_q = clean_query(question)
+        search_q = cleaned_q
+        if self._alias_matcher is not None:
+            search_q = self._alias_matcher.expand_query(cleaned_q)
+
         if self._fact_cards is not None:
             card_started = time.perf_counter()
-            card, card_score = self._fact_cards.match(question)
+            card, card_score = self._fact_cards.match(cleaned_q)
             card_ms = (time.perf_counter() - card_started) * 1000
             timings["fact_card_match"] = card_ms
             if card is not None:
@@ -186,9 +201,11 @@ class Answerer:
                     timings_ms=timings,
                     contact=contact,
                     path="fact_card",
+                    status="SUPPORTED",
+                    understood_query=cleaned_q,
                 )
 
-        retrieval = self._retriever.retrieve(question)
+        retrieval = self._retriever.retrieve(search_q)
         timings["retrieval"] = (time.perf_counter() - started) * 1000
         timings.update(retrieval.timings_ms)  # "search" and "rerank" inside "retrieval"
         confidence = retrieval.confidence
@@ -198,16 +215,31 @@ class Answerer:
             logger.info("refused (%s), confidence %.3f", reason, confidence)
             text = refusal_text(reason, language)
             contact: Contact | None = None
-            # Past the confidence check the question is about a scheme we hold documents
-            # for, so point to that scheme's official contact. Below it we don't know which
-            # scheme (if any) the question is about, so the generic advice stays.
             if reason != "low_confidence" and retrieval.passages:
                 contact = self._contacts.get(retrieval.passages[0].chunk.scheme)
                 if contact:
                     text += " " + contact_text(
                         contact.scheme, contact.helpline, str(contact.website), language
                     )
-            fallback_passages = retrieval.passages[:3] if reason == "service_unavailable" else []
+            if reason == "service_unavailable":
+                return Answer(
+                    question=question,
+                    language=language,
+                    text=text,
+                    sentences=[],
+                    citations=[],
+                    refused=True,
+                    refusal_reason=reason,
+                    confidence=confidence,
+                    disclaimer=disclaimer(language),
+                    rejected=rejected or [],
+                    timings_ms=timings,
+                    contact=contact,
+                    passages=retrieval.passages[:3],
+                    status="MODEL_UNAVAILABLE",
+                    path="fallback",
+                    understood_query=cleaned_q,
+                )
             return Answer(
                 question=question,
                 language=language,
@@ -221,10 +253,41 @@ class Answerer:
                 rejected=rejected or [],
                 timings_ms=timings,
                 contact=contact,
-                passages=fallback_passages,
+                passages=[],
+                status="INSUFFICIENT_EVIDENCE",
+                path="rag",
+                understood_query=cleaned_q,
             )
 
         if confidence < self._refusal_threshold:
+            # Step 4B: Near-threshold clarification band [0.30, 0.35)
+            if confidence >= 0.30 and retrieval.passages:
+                candidates = list(
+                    dict.fromkeys(
+                        p.chunk.scheme for p in retrieval.passages if p.chunk.scheme
+                    )
+                )[:2]
+                if candidates:
+                    timings["total"] = (time.perf_counter() - started) * 1000
+                    contact = self._contacts.get(candidates[0])
+                    return Answer(
+                        question=question,
+                        language=language,
+                        text=clarification_text(candidates, language),
+                        sentences=[],
+                        citations=[],
+                        refused=False,
+                        refusal_reason=None,
+                        confidence=confidence,
+                        disclaimer=disclaimer(language),
+                        timings_ms=timings,
+                        contact=contact,
+                        passages=retrieval.passages[:2],
+                        path="rag",
+                        status="needs_clarification",
+                        understood_query=cleaned_q,
+                        candidate_schemes=candidates,
+                    )
             return refuse("low_confidence")
 
         prompt_to_use = VOICE_SYSTEM_PROMPT if voice_mode else SYSTEM_PROMPT
@@ -289,4 +352,6 @@ class Answerer:
             disclaimer=disclaimer(language),
             rejected=checked.rejected,
             timings_ms=timings,
+            status="SUPPORTED",
+            understood_query=cleaned_q,
         )

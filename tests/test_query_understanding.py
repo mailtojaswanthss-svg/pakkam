@@ -79,3 +79,93 @@ def test_alias_matcher_suggest_candidates(alias_matcher: AliasMatcher) -> None:
     candidates = alias_matcher.suggest_candidates("pension and marriage assistance", top_k=2)
     assert len(candidates) > 0
     assert any("Pension" in c or "Marriage" in c for c in candidates)
+
+
+def test_near_threshold_clarification() -> None:
+    import datetime
+    from typing import Any, cast
+
+    from schemebot.generate.answer import Answerer
+    from schemebot.generate.contacts import Contact
+    from schemebot.ingest.models import Chunk
+    from schemebot.retrieve.retriever import RetrievalResult, RetrievedPassage, Retriever
+    chunk1 = Chunk(
+        chunk_id="c1",
+        doc_id="doc1",
+        scheme="Pudhumai Penn Scheme",
+        section="main",
+        doc_date=datetime.date(2026, 1, 1),
+        page_start=1,
+        page_end=1,
+        text="Sample text about higher education aid.",
+        extraction="text",
+        source_url="https://example.com/1",
+        language="en",
+    )
+    chunk2 = Chunk(
+        chunk_id="c2",
+        doc_id="doc2",
+        scheme="Kalaignar Magalir Urimai Thittam",
+        section="main",
+        doc_date=datetime.date(2026, 1, 1),
+        page_start=1,
+        page_end=1,
+        text="Sample text about monthly basic income.",
+        extraction="text",
+        source_url="https://example.com/2",
+        language="en",
+    )
+
+    class MockRetriever:
+        def __init__(self, score: float) -> None:
+            self.score = score
+
+        def retrieve(self, query: str) -> RetrievalResult:
+            p1 = RetrievedPassage(chunk=chunk1, relevance=self.score)
+            p2 = RetrievedPassage(chunk=chunk2, relevance=self.score * 0.95)
+            return RetrievalResult(
+                query=query, passages=[p1, p2], timings_ms={"retrieval": 10.0}
+            )
+
+
+    class MockLlm:
+        def complete_json(self, *args: object, **kwargs: object) -> object:
+            raise RuntimeError("Should not be called for clarification")
+
+    contacts = {
+        "Pudhumai Penn Scheme": Contact(
+            scheme="Pudhumai Penn Scheme",
+            helpline="14417",
+            helpline_source="Pudhumai Penn Helpline 14417",
+            website="https://pudhumai.tn.gov.in",
+        )
+    }
+
+    # Case 1: score = 0.32 in near-threshold band [0.30, 0.35)
+    near_answerer = Answerer(
+        retriever=cast(Retriever, MockRetriever(0.32)),
+        llm=cast(Any, MockLlm()),
+        verifier=None,
+        refusal_threshold=0.35,
+        contacts=contacts,
+    )
+    ans = near_answerer.answer("tell me about monthly college money for girls")
+    assert ans.status == "needs_clarification"
+    assert not ans.refused
+    assert "Did you mean" in ans.text
+    assert ans.candidate_schemes == ["Pudhumai Penn Scheme", "Kalaignar Magalir Urimai Thittam"]
+    assert ans.understood_query is not None
+    assert len(ans.passages) == 2
+
+    # Case 2: score = 0.22 below 0.30 refusal bound
+    far_answerer = Answerer(
+        retriever=cast(Retriever, MockRetriever(0.22)),
+        llm=cast(Any, MockLlm()),
+        verifier=None,
+        refusal_threshold=0.35,
+        contacts=contacts,
+    )
+    ans_far = far_answerer.answer("totally random unrelated inquiry")
+    assert ans_far.refused
+    assert ans_far.refusal_reason == "low_confidence"
+    assert ans_far.status == "INSUFFICIENT_EVIDENCE"

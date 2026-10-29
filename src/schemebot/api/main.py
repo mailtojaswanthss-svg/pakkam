@@ -179,8 +179,8 @@ def create_app(
 
     def heard_question(
         state: AppState, audio: UploadFile, language: VoiceLanguage
-    ) -> tuple[str, str, float]:
-        """Gnani speech to text for one clip: (question, Gnani language code, stt ms)."""
+    ) -> tuple[str, str, float, float | None]:
+        """Gnani STT for one clip: (question, lang code, stt ms, confidence)."""
         if state.transcriber is None:
             raise HTTPException(status_code=503, detail="Voice input is not set up on this server.")
         settings = get_settings()
@@ -195,6 +195,7 @@ def create_app(
         except SttError as error:
             raise HTTPException(status_code=error.status_code, detail=error.message) from error
         stt_ms = (time.perf_counter() - started) * 1000
+        stt_conf: float | None = getattr(state.transcriber, "last_confidence", None)
 
         try:
             question = AskRequest(question=transcript).question
@@ -202,7 +203,7 @@ def create_app(
             raise HTTPException(
                 status_code=422, detail="Pakkam could not hear a question. Try again."
             ) from error
-        return question, language_code, stt_ms
+        return question, language_code, stt_ms, stt_conf
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -301,33 +302,65 @@ def create_app(
 
         The chat page uses `/transcribe` and then `/ask` instead, to show the transcript
         before the answer is ready. This one-call route stays for scripts and the API."""
-        question, language_code, stt_ms = heard_question(state, audio, language)
+        question, language_code, stt_ms, stt_conf = heard_question(state, audio, language)
         answer = state.service.answer(question, voice_mode=True)
         state.audit.record(request.state.request_id, answer, {"stt": stt_ms})
         response = AskResponse.from_answer(answer, state.titles, state.doc_dates)
         response.timings_ms["stt"] = round(stt_ms, 1)
+
+        # Step 7: Gnani-centred voice uncertainty confirmation
+        # Triggers when retrieval confidence falls in [0.30, 0.40] band
+        # OR when STT confidence is low (< 0.60, if provided by API).
+        # Per instruction, the "under 3 words" rule is explicitly dropped.
+        confirm_text: str | None = None
+        is_uncertain_score = 0.30 <= answer.confidence <= 0.40
+        is_low_stt = stt_conf is not None and stt_conf < 0.60
+        if is_uncertain_score or is_low_stt:
+            target_scheme: str | None = None
+            if getattr(answer, "candidate_schemes", None):
+                target_scheme = answer.candidate_schemes[0]
+            elif getattr(answer, "passages", None) and len(answer.passages) > 0:
+                target_scheme = answer.passages[0].chunk.scheme
+            elif answer.citations:
+                target_scheme = answer.citations[0].scheme
+            elif answer.contact:
+                target_scheme = answer.contact.scheme
+
+            if target_scheme:
+                from schemebot.generate.messages import confirmation_text
+
+                confirm_text = confirmation_text(target_scheme, answer.language)
+                response.needs_confirmation = True
+
         return VoiceAskResponse(
             **response.model_dump(),
             transcript=question,
             stt_language_code=language_code,
             stt_ms=round(stt_ms, 1),
+            stt_confidence=stt_conf,
+            confirmation_text=confirm_text,
         )
 
 
     @app.post("/feedback")
     def feedback(body: FeedbackRequest, state: StateDep) -> FeedbackResponse:
-        """Citizen feedback loop: records ratings and critique without any PII or audio."""
+        """Citizen feedback loop: records ratings, status, language, timings; text only if opted in."""
         log_dir = PROJECT_ROOT / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         fb_path = log_dir / "feedback.jsonl"
-        entry = {
+        entry: dict[str, object] = {
             "timestamp": time.time(),
-            "question": body.question,
             "status": body.status,
+            "language": body.language,
             "thumbs": body.thumbs,
-            "reason": body.reason,
             "timings_ms": body.timings_ms,
+            "include_text": body.include_text,
         }
+        if body.include_text:
+            if body.question is not None:
+                entry["question"] = body.question
+            if body.reason is not None:
+                entry["reason"] = body.reason
         with open(fb_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
         return FeedbackResponse()
@@ -341,7 +374,7 @@ def create_app(
     ) -> TranscribeResponse:
         """Speech to text only (1 Gnani call), so the page can show what it heard at once
         and then send that text to `/ask`."""
-        question, language_code, stt_ms = heard_question(state, audio, language)
+        question, language_code, stt_ms, _ = heard_question(state, audio, language)
         state.audit.record_transcript(request.state.request_id, language_code, stt_ms)
         return TranscribeResponse(
             transcript=question, stt_language_code=language_code, stt_ms=round(stt_ms, 1)

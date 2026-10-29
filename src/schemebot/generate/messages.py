@@ -103,3 +103,44 @@ def contact_text(scheme: str, helpline: str | None, website: str, language: Lang
 
 def disclaimer(language: Language) -> str:
     return DISCLAIMER[message_language(language)]
+
+
+CONFIRMATION: dict[MessageLanguage, str] = {
+    "en": "I heard {scheme}. Is that right?",
+    "ta": "நான் {scheme} என்று கேட்டேன். சரியா?",
+    "hi": "मैंने {scheme} सुना। क्या यह सही है?",
+    "ta-Latn": "Naan {scheme} nu ketten. Sariyaa?",
+}
+
+
+def confirmation_text(scheme: str, language: Language) -> str:
+    return CONFIRMATION[message_language(language)].format(scheme=scheme)
+
+
+def clarification_text(candidates: list[str], language: Language) -> str:
+    lang = message_language(language)
+    if not candidates:
+        return NOT_FOUND[lang]
+    if len(candidates) == 1:
+        c1 = candidates[0]
+        templates = {
+            "en": f"Did you mean {c1}? Here is what the official document states:",
+            "ta": f"நீங்கள் {c1} பற்றிக் கேட்கிறீர்களா? அதிகாரப்பூர்வ ஆவணத்தில் உள்ள தகவல் இதோ:",
+            "hi": f"क्या आपका मतलब {c1} से था? आधिकारिक दस्तावेज़ में यह जानकारी दी गई है:",
+            "ta-Latn": (
+                f"Neenga {c1} pathi kekkareengala? "
+                "Official document-la irukkura thagaval idho:"
+            ),
+        }
+        return templates[lang]
+    c1, c2 = candidates[0], candidates[1]
+    templates = {
+        "en": f"Did you mean {c1} or {c2}? Here is what the official document states:",
+        "ta": f"நீங்கள் {c1} அல்லது {c2} பற்றிக் கேட்கிறீர்களா? அதிகாரப்பூர்வ ஆவணத்தில் உள்ள தகவல் இதோ:",
+        "hi": f"क्या आपका मतलब {c1} या {c2} से था? आधिकारिक दस्तावेज़ में यह जानकारी दी गई है:",
+        "ta-Latn": (
+            f"Neenga {c1} illa {c2} pathi kekkareengala? "
+            "Official document-la irukkura thagaval idho:"
+        ),
+    }
+    return templates[lang]
