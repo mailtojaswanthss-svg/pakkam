@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 The Pakkam authors
+Copyright (c) 2026 The Pakkam Authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+### Third-Party Data & Model Attributions
+
+1. **Chitrapathak-2 OCR (AI4Bharat / IIT Madras):**
+   - The Chitrapathak-2 model weights and architecture are governed by their original academic/research-only license. Used here strictly for research, benchmark evaluation, and non-commercial public interest verification.
+2. **Kathbath Speech Dataset (AI4Bharat):**
+   - Clean read speech audio samples from the Kathbath dataset are used under the **Creative Commons Attribution 4.0 International (CC-BY 4.0)** license.
+   - Citation: AI4Bharat, *Kathbath: An Open-Source Audio Dataset for Indic Languages*.
+3. **BAAI Embedding Models (Beijing Academy of Artificial Intelligence):**
+   - `BAAI/bge-m3` and `BAAI/bge-reranker-v2-m3` are distributed under the **Apache 2.0** license.

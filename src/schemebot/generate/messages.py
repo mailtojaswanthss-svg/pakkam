@@ -14,6 +14,7 @@ RefusalReason = Literal[
     "unsupported",  # the guardrail removed every sentence
     "model_declined",  # the model's safety filter declined
     "service_unavailable",  # the API failed
+    "pii_detected",  # Aadhaar or phone number detected in question
 ]
 
 MessageLanguage = Literal["en", "ta", "hi", "ta-Latn"]
@@ -38,6 +39,35 @@ NOT_FOUND: dict[MessageLanguage, str] = {
         "Ennidam irukkura official scheme documents-la indha thagaval kidaikkala, adhanala "
         "nambagamaa badhil solla mudiyala. Scheme-oda official website-a paarunga, illa "
         "pakkathula irukkura arasu sevai maiyathula kelunga."
+    ),
+}
+
+import re
+
+AADHAAR_PATTERN = re.compile(r"\b[2-9]\d{3}[ -]?\d{4}[ -]?\d{4}\b")
+PHONE_PATTERN = re.compile(r"\b(?:\+91[ -]?)?[6-9]\d{9}\b")
+
+
+def contains_pii(text: str) -> bool:
+    return bool(AADHAAR_PATTERN.search(text) or PHONE_PATTERN.search(text))
+
+
+PII_WARNING: dict[MessageLanguage, str] = {
+    "en": (
+        "For your privacy and security, please do not share personal numbers such as Aadhaar or "
+        "phone numbers. Pakkam only provides general scheme eligibility information."
+    ),
+    "ta": (
+        "உங்கள் தனியுரிமை மற்றும் பாதுகாப்பிற்காக, ஆதார் எண் அல்லது தொலைபேசி எண் போன்ற தனிநபர் "
+        "எண்களைப் பகிர வேண்டாம். திட்டம் பற்றிய பொதுவான தகவல்களை மட்டுமே பாக்கம் வழங்கும்."
+    ),
+    "hi": (
+        "आपकी सुरक्षा और गोपनीयता के लिए, कृपया आधार या फोन नंबर जैसी व्यक्तिगत जानकारी साझा न करें। "
+        "पक्कम केवल सामान्य योजना पात्रता जानकारी प्रदान करता है।"
+    ),
+    "ta-Latn": (
+        "Ungal privacy kaaga, Aadhaar number alladhu phone number share panna vendaam. "
+        "Pakkam general scheme thagavalgalai mattume vazhangum."
     ),
 }
 
@@ -90,7 +120,12 @@ def message_language(language: Language) -> MessageLanguage:
 
 
 def refusal_text(reason: RefusalReason, language: Language) -> str:
-    texts = UNAVAILABLE if reason == "service_unavailable" else NOT_FOUND
+    if reason == "pii_detected":
+        texts = PII_WARNING
+    elif reason == "service_unavailable":
+        texts = UNAVAILABLE
+    else:
+        texts = NOT_FOUND
     return texts[message_language(language)]
 
 

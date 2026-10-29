@@ -4,7 +4,7 @@ Each claim returned by the answering model is checked against official source ch
 1. chunk_id was among the retrieved chunks.
 2. quote appears in the chunk text after Unicode and whitespace normalisation.
 3. Every number and date in the claim also appears in the quote.
-4. If period is 'monthly' or 'yearly', the quote or chunk must support that periodicity.
+4. If period is 'monthly', 'yearly', or 'one_time', the quote or chunk must support that periodicity.
 
 Failing any check marks the claim INSUFFICIENT_EVIDENCE.
 If an amount claim fails, the entire answer is refused to prevent financial harm.
@@ -24,9 +24,17 @@ from schemebot.text import normalize_for_search
 ClaimType = Literal["amount", "date", "condition", "description"]
 ClaimPeriod = Literal["monthly", "yearly", "one_time", "unknown"]
 
-MONTHLY_KEYWORDS = ("month", "monthly", "மாத", "மாதந்தோறும்", "மாதம்", "प्रति माह", "मासिक")
+MONTHLY_KEYWORDS = (
+    "month", "monthly", "மாதம்", "மாதாந்திர", "மாதந்தோறும்", "மாதம் தோறும்",
+    "प्रति माह", "मासिक", "महीना", "माह"
+)
 YEARLY_KEYWORDS = (
-    "year", "yearly", "annual", "annum", "ஆண்டு", "வருட", "வருடாந்திர", "प्रति वर्ष", "सालाना", "वार्षिक"
+    "year", "yearly", "annual", "annum", "ஆண்டு", "ஆண்டுக்கு", "ஆண்டிற்கு",
+    "வருடம்", "வருடாந்திர", "வருடத்திற்கு", "प्रति वर्ष", "वार्षिक", "साल", "वर्ष"
+)
+ONE_TIME_KEYWORDS = (
+    "one-time", "one time", "lump sum", "single installment",
+    "ஒரே முறை", "ஒரு முறை", "ஒருமுறை", "ஒற்றை", "एकमुश्त", "एक बार"
 )
 
 
@@ -80,6 +88,11 @@ def verify_claim(claim: Claim, retrieved_chunks: dict[str, Chunk]) -> tuple[bool
         c_lower = norm_chunk
         if not any(k in q_lower or k in c_lower for k in YEARLY_KEYWORDS):
             return False, "yearly_period_not_found_in_source"
+    elif claim.period == "one_time":
+        q_lower = norm_quote
+        c_lower = norm_chunk
+        if not any(k in q_lower or k in c_lower for k in ONE_TIME_KEYWORDS):
+            return False, "one_time_period_not_found_in_source"
 
     return True, "SUPPORTED"
 
