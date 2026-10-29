@@ -77,12 +77,16 @@ class AskResponse(BaseModel):
     language: Language
     refused: bool
     status: Literal[
-        "SUPPORTED", "INSUFFICIENT_EVIDENCE", "MODEL_UNAVAILABLE", "needs_clarification"
+        "SUPPORTED",
+        "INSUFFICIENT_EVIDENCE",
+        "MODEL_UNAVAILABLE",
+        "needs_clarification",
+        "PII_DETECTED",
     ] = Field(
         default="SUPPORTED",
-        description="SUPPORTED, INSUFFICIENT_EVIDENCE, MODEL_UNAVAILABLE, or needs_clarification.",
+        description="Response status indicating outcome and validity.",
     )
-    path: Literal["rag", "fact_card", "fallback", "semantic_cache"] = Field(
+    path: Literal["rag", "fact_card", "fallback", "semantic_cache", "guardrail"] = Field(
         default="rag",
         description="Path taken to answer: 'rag', 'fact_card', 'fallback', or 'semantic_cache'.",
     )
@@ -172,6 +176,13 @@ class AskResponse(BaseModel):
                 )
                 for p in getattr(answer, "passages", [])
             ]
+        elif (
+            answer.refusal_reason == "pii_detected"
+            or getattr(answer, "status", None) == "PII_DETECTED"
+        ):
+            status_val = "PII_DETECTED"
+            path_val = "guardrail"
+            fallback_passages = None
         elif answer.refused:
             status_val = "INSUFFICIENT_EVIDENCE"
             path_val = getattr(answer, "path", "rag")

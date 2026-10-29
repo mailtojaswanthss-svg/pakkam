@@ -175,7 +175,36 @@ Returned on LLM 429 rate limit, timeout, or external API disruption. Surfaces to
 
 ---
 
-### Status 5: Spoken Voice Response (`POST /ask/voice`)
+### Status 5: `PII_DETECTED` (Privacy Guardrail Interception)
+Returned immediately before retrieval or LLM execution if the query contains personal identifying numbers (Aadhaar or 10-digit Indian mobile numbers in ASCII or Indic Tamil/Devanagari numerals).
+
+```json
+{
+  "answer": "For your privacy and security, please do not share personal numbers such as Aadhaar or phone numbers. Pakkam only provides general scheme eligibility information.",
+  "language": "en",
+  "refused": true,
+  "status": "PII_DETECTED",
+  "path": "guardrail",
+  "needs_confirmation": false,
+  "refusal_reason": "pii_detected",
+  "understood_query": "my aadhaar is [intercepted] can i apply",
+  "sentences": [],
+  "citations": [],
+  "confidence": 0.0,
+  "disclaimer": "Informational only; not an official government service. Verify with official sources.",
+  "latency_ms": 1.2,
+  "timings_ms": {
+    "total": 1.2
+  },
+  "contact": null
+}
+```
+
+> **Note on Spoken Digit Words:** The PII guard detects digit sequences (ASCII digits, spaced, hyphenated, and Indic Tamil `\u0be6-\u0bef` / Devanagari `\u0966-\u096f` numerals). Spoken number words (e.g. "nine eight seven..." or "ஒன்பது எட்டு ஏழு...") are not converted to digits before regex matching and are currently unintercepted; speech transcripts with spelled-out number words rather than digits require an STT text-to-numeral normalizer before the PII filter.
+
+---
+
+### Status 6: Spoken Voice Response (`POST /ask/voice`)
 Evaluates audio through Gnani Prisma STT, answers in short voice mode, and includes spoken confirmation prompts if retrieval score is ambiguous $[0.30, 0.40]$.
 
 ```json
@@ -215,7 +244,7 @@ When retrieval score is in $[0.30, 0.40]$ band:
 
 ---
 
-### Status 6: Fast Sources-First Pre-Fetch (`POST /ask/sources`)
+### Status 7: Fast Sources-First Pre-Fetch (`POST /ask/sources`)
 Fired in parallel from client submit; returns top official citations in <400ms before LLM generation finishes.
 
 ```json

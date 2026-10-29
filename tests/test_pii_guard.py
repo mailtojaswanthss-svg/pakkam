@@ -56,5 +56,7 @@ def test_pii_guard_voice_transcript_flow(corpus: list[Chunk]) -> None:
     ans = answer_with(llm, corpus, voice_transcript_tamil)
     assert ans.refused
     assert ans.refusal_reason == "pii_detected"
+    assert ans.status == "PII_DETECTED"
+    assert ans.path == "guardrail"
     assert "பாதுகாப்பிற்காக" in ans.text
     assert len(llm.user_messages) == 0
