@@ -17,6 +17,9 @@ from typing import Literal
 import pymupdf
 
 from schemebot.ingest.langid import Language
+from schemebot.text import (
+    normalize_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -79,10 +82,7 @@ OCR_LANGUAGES: dict[Language, str] = {
     "unknown": "tam+hin+eng",
 }
 
-NO_BREAK_SPACE = 0x00A0
 REPLACEMENT_CHAR = 0xFFFD
-ZERO_WIDTH_CHARS = (0x200B, 0x200C, 0x200D)  # space, non-joiner, joiner
-_ZERO_WIDTH = re.compile("[" + "".join(map(chr, ZERO_WIDTH_CHARS)) + "]")
 PRIVATE_USE_RANGE = (0xE000, 0xF8FF)
 BULLET = chr(0x2022)
 _PRIVATE_USE = re.compile(f"[{chr(PRIVATE_USE_RANGE[0])}-{chr(PRIVATE_USE_RANGE[1])}]")
@@ -104,19 +104,6 @@ class PageText:
     text: str
     method: ExtractionMethod
 
-
-def normalize_text(text: str) -> str:
-    """NFC-normalise and tidy whitespace without changing the words."""
-    text = unicodedata.normalize("NFC", text)
-    text = text.replace(chr(NO_BREAK_SPACE), " ")
-    # Zero-width space / non-joiner / joiner: OCR inserts them after Tamil virama, and they
-    # silently break keyword matching while changing nothing a reader can see.
-    text = _ZERO_WIDTH.sub("", text)
-    # Re-join English words hyphenated across a line break.
-    text = re.sub(r"([a-z])-\n([a-z])", r"\1\2", text)
-    lines = [re.sub(r"[ \t]+", " ", line).strip() for line in text.splitlines()]
-    text = "\n".join(lines)
-    return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 
 def _is_bad_char(char: str) -> bool:
