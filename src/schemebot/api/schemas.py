@@ -200,7 +200,9 @@ class AskResponse(BaseModel):
             path=path_val,
             passages=fallback_passages,
             needs_confirmation=needs_confirm,
-            understood_query=getattr(answer, "understood_query", None),
+            understood_query=(
+                getattr(answer, "understood_query", None) or getattr(answer, "question", None)
+            ),
             candidate_schemes=getattr(answer, "candidate_schemes", []),
             refusal_reason=answer.refusal_reason,
             sentences=[SentenceOut(text=s.text, citations=s.citations) for s in answer.sentences],

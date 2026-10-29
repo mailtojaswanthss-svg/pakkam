@@ -1,29 +1,30 @@
 # Pakkam API Response Contract Specification (Finalized)
 
 **Status:** Authoritative API Contract  
-**Last Updated:** 2026-10-29  
+**Last Updated:** 2026-10-30  
 **Scope:** Defines public endpoint contracts, supported statuses, payload schemas, and mock response samples for backend and frontend integration.
 
 ---
 
 ## 1. Endpoints Overview
 
-| Method | Endpoint | Description | Primary Payload Keys |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/ask` | Text inquiry answering (RAG, fact card, or fallback) | `answer`, `status`, `citations`, `timings_ms` |
-| `POST` | `/ask/sources` | Instant sources pre-fetch (<400ms) | `sources [{doc_id, title, page, snippet}]` |
-| `POST` | `/ask/voice` | End-to-end voice question answering | Inherits `/ask` + `transcript`, `stt_ms`, `confirmation_text` |
-| `POST` | `/transcribe` | Single-stage speech-to-text (Gnani Prisma) | `transcript`, `stt_language_code`, `stt_ms` |
-| `POST` | `/speak` | Spoken sentence synthesis (Gnani Timbre WAV) | Binary `audio/wav` response |
-| `POST` | `/feedback` | Citizen feedback & rating | `recorded: true` (privacy-safe, text opt-in only) |
-| `GET` | `/health` | Health & subsystem readiness check | `status: "ok"`, subsystem details |
+| Method | Endpoint | Description | Primary Payload Keys | Origin / Real Output Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/ask` | Text inquiry answering (RAG, fact card, or fallback) | `answer`, `status`, `sentences`, `citations`, `timings_ms`, `understood_query` | **Real Server Output** |
+| `POST` | `/ask/sources` | Instant sources pre-fetch (<400ms) | `passages [{scheme, doc_id, document, page, text, source_url}]`, `timings_ms` | **Real Server Output** |
+| `POST` | `/ask/voice` | End-to-end voice question answering | Inherits `/ask` + `transcript`, `stt_ms`, `confirmation_text` | **Hand-Written Mock** |
+| `POST` | `/transcribe` | Single-stage speech-to-text (Gnani Prisma) | `transcript`, `stt_language_code`, `stt_ms` | **Hand-Written Mock** |
+| `POST` | `/speak` | Spoken sentence synthesis (Gnani Timbre WAV) | Binary `audio/wav` response | **Real Server Output** |
+| `POST` | `/feedback` | Citizen feedback & rating | `recorded: true` (privacy-safe, text opt-in only) | **Real Server Output** |
+| `GET` | `/health` | Health & subsystem readiness check | `status: "ok"` | **Real Server Output** |
 
 ---
 
 ## 2. Response Statuses and Payload Samples
 
 ### Status 1: `SUPPORTED` (Grounded Answer with Citations)
-Returned when retrieval confidence is high ($\ge 0.35$) and the LLM produces a grounded, verified answer.
+*Returned when retrieval confidence is high ($\ge 0.35$) and the LLM produces a grounded, verified answer.*  
+*Payload Origin:* **Real Server Output** (captured from live pipeline execution on PM-KISAN inquiry).
 
 ```json
 {
@@ -34,6 +35,9 @@ Returned when retrieval confidence is high ($\ge 0.35$) and the LLM produces a g
   "path": "rag",
   "needs_confirmation": false,
   "refusal_reason": null,
+  "understood_query": "PM Kisan ku evlo panam kidaikum?",
+  "candidate_schemes": [],
+  "passages": null,
   "sentences": [
     {
       "text": "Under the PM-KISAN scheme, eligible landholding farmer families receive Rs 6,000 per year in three equal installments of Rs 2,000 each.",
@@ -74,7 +78,8 @@ Returned when retrieval confidence is high ($\ge 0.35$) and the LLM produces a g
 ---
 
 ### Status 2: `needs_clarification` (Near-Threshold Ambiguity)
-Returned when top retrieval score falls in the near-threshold band $[0.30, 0.35)$. Prompts the citizen with candidate schemes rather than flat refusal.
+*Returned when top retrieval score falls in the near-threshold band $[0.30, 0.35)$. Prompts the citizen with candidate schemes rather than flat refusal.*  
+*Payload Origin:* **Hand-Written Mock Payload for Client Prototyping** (illustrates near-threshold disambiguation prompt shape).
 
 ```json
 {
@@ -85,14 +90,15 @@ Returned when top retrieval score falls in the near-threshold band $[0.30, 0.35)
   "path": "rag",
   "needs_confirmation": false,
   "refusal_reason": null,
+  "understood_query": "monthly college aid for women",
   "candidate_schemes": [
     "Pudhumai Penn Scheme",
     "Kalaignar Magalir Urimai Thittam"
   ],
-  "understood_query": "monthly college aid for women",
+  "passages": null,
   "sentences": [],
   "citations": [],
-  "confidence": 0.3240,
+  "confidence": 0.324,
   "disclaimer": "Informational only; not an official government service. Verify with official sources.",
   "latency_ms": 382.1,
   "timings_ms": {
@@ -107,7 +113,8 @@ Returned when top retrieval score falls in the near-threshold band $[0.30, 0.35)
 ---
 
 ### Status 3: `INSUFFICIENT_EVIDENCE` (Safe Grounded Refusal)
-Returned when retrieval confidence is below 0.30, or the question is unanswerable from ingested government gazettes.
+*Returned when retrieval confidence is below 0.30, or the question is unanswerable from ingested government gazettes.*  
+*Payload Origin:* **Real Server Output** (captured from out-of-domain query execution).
 
 ```json
 {
@@ -118,9 +125,12 @@ Returned when retrieval confidence is below 0.30, or the question is unanswerabl
   "path": "rag",
   "needs_confirmation": false,
   "refusal_reason": "low_confidence",
+  "understood_query": "how to apply for driving license renewal online",
+  "candidate_schemes": [],
+  "passages": null,
   "sentences": [],
   "citations": [],
-  "confidence": 0.1250,
+  "confidence": 0.125,
   "disclaimer": "Informational only; not an official government service. Verify with official sources.",
   "latency_ms": 412.3,
   "timings_ms": {
@@ -135,7 +145,8 @@ Returned when retrieval confidence is below 0.30, or the question is unanswerabl
 ---
 
 ### Status 4: `MODEL_UNAVAILABLE` (Never Fail Visibly Fallback)
-Returned on LLM 429 rate limit, timeout, or external API disruption. Surfaces top retrieved passages and official helpline without hallucination.
+*Returned on LLM 429 rate limit, timeout, or external API disruption. Surfaces top retrieved passages and official helpline without hallucination.*  
+*Payload Origin:* **Real Server Output** (captured during simulated model unavailable / timeout failover).
 
 ```json
 {
@@ -146,10 +157,13 @@ Returned on LLM 429 rate limit, timeout, or external API disruption. Surfaces to
   "path": "fallback",
   "needs_confirmation": false,
   "refusal_reason": "service_unavailable",
+  "understood_query": "PM Kisan pension payment amount",
+  "candidate_schemes": [],
   "passages": [
     {
       "text": "Under the PM-KISAN scheme, landholding farmer families receive financial assistance of Rs. 6000 per year in three equal installments.",
       "scheme": "PM-KISAN",
+      "doc_id": "pmkisan-guidelines-2020-en",
       "document": "PM-KISAN Operational Guidelines",
       "page": 2,
       "source_url": "https://pmkisan.gov.in/"
@@ -161,8 +175,9 @@ Returned on LLM 429 rate limit, timeout, or external API disruption. Surfaces to
     "helpline_source": null,
     "website": "https://pmkisan.gov.in"
   },
+  "sentences": [],
   "citations": [],
-  "confidence": 0.9450,
+  "confidence": 0.945,
   "disclaimer": "Informational only; not an official government service. Verify with official sources.",
   "latency_ms": 1150.2,
   "timings_ms": {
@@ -176,7 +191,8 @@ Returned on LLM 429 rate limit, timeout, or external API disruption. Surfaces to
 ---
 
 ### Status 5: `PII_DETECTED` (Privacy Guardrail Interception)
-Returned immediately before retrieval or LLM execution if the query contains personal identifying numbers (Aadhaar or 10-digit Indian mobile numbers in ASCII or Indic Tamil/Devanagari numerals).
+*Returned immediately before retrieval or LLM execution if the query contains personal identifying numbers (Aadhaar or 10-digit Indian mobile numbers in ASCII or Indic Tamil/Devanagari numerals).*  
+*Payload Origin:* **Real Server Output** (captured from live query with Aadhaar number).
 
 ```json
 {
@@ -188,6 +204,8 @@ Returned immediately before retrieval or LLM execution if the query contains per
   "needs_confirmation": false,
   "refusal_reason": "pii_detected",
   "understood_query": "my aadhaar is [intercepted] can i apply",
+  "candidate_schemes": [],
+  "passages": null,
   "sentences": [],
   "citations": [],
   "confidence": 0.0,
@@ -205,7 +223,8 @@ Returned immediately before retrieval or LLM execution if the query contains per
 ---
 
 ### Status 6: Spoken Voice Response (`POST /ask/voice`)
-Evaluates audio through Gnani Prisma STT, answers in short voice mode, and includes spoken confirmation prompts if retrieval score is ambiguous $[0.30, 0.40]$.
+*Evaluates audio through Gnani Prisma STT, answers in short voice mode, and includes spoken confirmation prompts if retrieval score is ambiguous $[0.30, 0.40]$.*  
+*Payload Origin:* **Hand-Written Mock Payload for Client Prototyping** (shows end-to-end voice envelope for teammate frontend integration while physical mic is offline).
 
 ```json
 {
@@ -213,20 +232,43 @@ Evaluates audio through Gnani Prisma STT, answers in short voice mode, and inclu
   "stt_language_code": "ta-IN",
   "stt_ms": 1450.2,
   "stt_confidence": null,
+  "confirmation_text": null,
   "answer": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் குடும்பத் தலைவிகளுக்கு மாதம் ரூ. 1,000 வழங்கப்படுகிறது. [1]",
   "language": "ta",
   "refused": false,
   "status": "SUPPORTED",
   "path": "rag",
   "needs_confirmation": false,
-  "confirmation_text": null,
+  "refusal_reason": null,
+  "understood_query": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் எவ்வளவு பணம் கிடைக்கும்?",
+  "candidate_schemes": [],
+  "passages": null,
   "sentences": [
     {
       "text": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் குடும்பத் தலைவிகளுக்கு மாதம் ஆயிரம் ரூபாய் வழங்கப்படுகிறது.",
       "citations": [1]
     }
   ],
-  "citations": [ ... ],
+  "citations": [
+    {
+      "number": 1,
+      "scheme": "Kalaignar Magalir Urimai Thittam",
+      "doc_id": "kmut-guidelines-2023-ta",
+      "document": "KMUT Implementation Guidelines",
+      "page": 1,
+      "page_start": 1,
+      "page_end": 1,
+      "source_url": "https://kmut.tn.gov.in/",
+      "excerpt": "குடும்பத் தலைவிகளுக்கு மாதம் ரூ. 1,000 உரிமைத் தொகை...",
+      "snippet": "குடும்பத் தலைவிகளுக்கு மாதம் ரூ. 1,000...",
+      "document_date": "2023-08-01",
+      "language": "ta",
+      "ocr_corrected": false
+    }
+  ],
+  "confidence": 0.952,
+  "disclaimer": "Informational only; not an official government service. Verify with official sources.",
+  "latency_ms": 6367.8,
   "timings_ms": {
     "stt": 1450.2,
     "search": 210.1,
@@ -234,7 +276,8 @@ Evaluates audio through Gnani Prisma STT, answers in short voice mode, and inclu
     "llm_answer": 4562.5,
     "verifier": 0.0,
     "total": 6367.8
-  }
+  },
+  "contact": null
 }
 ```
 
@@ -245,27 +288,21 @@ When retrieval score is in $[0.30, 0.40]$ band:
 ---
 
 ### Status 7: Fast Sources-First Pre-Fetch (`POST /ask/sources`)
-Fired in parallel from client submit; returns top official citations in <400ms before LLM generation finishes.
+*Fired in parallel from client submit; returns top official citations in <400ms before LLM generation finishes.*  
+*Payload Origin:* **Real Server Output** (captured from live Qdrant hybrid retrieval execution).
 
 ```json
 {
-  "question": "PM Kisan eligibility and amount",
-  "sources": [
+  "passages": [
     {
-      "doc_id": "pmkisan-guidelines-2020-en",
       "scheme": "PM-KISAN",
-      "title": "PM-KISAN Operational Guidelines",
+      "doc_id": "pmkisan-guidelines-2020-en",
+      "document": "PM-KISAN Operational Guidelines",
       "page": 2,
-      "page_start": 2,
-      "page_end": 2,
-      "source_url": "https://pmkisan.gov.in/",
-      "snippet": "Under the scheme, financial assistance of Rs. 6000/- per annum is provided...",
-      "relevance": 0.965,
-      "document_date": "2020-02-01",
-      "language": "en"
+      "text": "Under the scheme, financial assistance of Rs. 6000/- per annum is provided...",
+      "source_url": "https://pmkisan.gov.in/"
     }
   ],
-  "latency_ms": 352.9,
   "timings_ms": {
     "search": 205.6,
     "rerank": 145.0,
@@ -276,26 +313,19 @@ Fired in parallel from client submit; returns top official citations in <400ms b
 
 ---
 
-### Status 7: Privacy-Safe Citizen Feedback (`POST /feedback`)
-Opt-in design. By default, records only performance and thumbs rating.
+### Status 8: Privacy-Safe Citizen Feedback (`POST /feedback`)
+*Opt-in design. By default, records only performance and thumbs rating.*  
+*Payload Origin:* **Real Server Output** (captured from default submission).
 
-**Request:**
-```json
-{
-  "status": "SUPPORTED",
-  "thumbs": "up",
-  "language": "ta",
-  "timings_ms": {"total": 420.5},
-  "include_text": false,
-  "question": null,
-  "reason": null
-}
-```
-
-**Response:**
 ```json
 {
   "recorded": true,
-  "message": "Feedback recorded. Thank you for improving Pakkam."
+  "retained_fields": [
+    "status",
+    "thumbs",
+    "language",
+    "timings_ms"
+  ],
+  "message": "Feedback recorded anonymously without personal data."
 }
 ```
