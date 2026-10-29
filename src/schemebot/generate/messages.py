@@ -4,6 +4,7 @@ These are shown when the system refuses, so they must be correct without any mod
 loop. The Tamil and Hindi wording should be reviewed by a native speaker before release.
 """
 
+import re
 from typing import Literal
 
 from schemebot.ingest.langid import Language
@@ -42,14 +43,22 @@ NOT_FOUND: dict[MessageLanguage, str] = {
     ),
 }
 
-import re
+INDIC_TO_ASCII = str.maketrans({
+    "०": "0", "१": "1", "२": "2", "३": "3", "४": "4",
+    "५": "5", "६": "6", "७": "7", "८": "8", "९": "9",
+    "௦": "0", "௧": "1", "௨": "2", "௩": "3", "௪": "4",
+    "௫": "5", "௬": "6", "௭": "7", "௮": "8", "௯": "9",
+})
 
 AADHAAR_PATTERN = re.compile(r"\b[2-9]\d{3}[ -]?\d{4}[ -]?\d{4}\b")
-PHONE_PATTERN = re.compile(r"\b(?:\+91[ -]?)?[6-9]\d{9}\b")
+PHONE_PATTERN = re.compile(
+    r"(?:\b(?:\+91|0)[ -]?)?[6-9]\d{4}[ -]?\d{5}\b|" r"\b(?:\+91|0)?[6-9]\d{9}\b"
+)
 
 
 def contains_pii(text: str) -> bool:
-    return bool(AADHAAR_PATTERN.search(text) or PHONE_PATTERN.search(text))
+    norm = text.translate(INDIC_TO_ASCII)
+    return bool(AADHAAR_PATTERN.search(norm) or PHONE_PATTERN.search(norm))
 
 
 PII_WARNING: dict[MessageLanguage, str] = {

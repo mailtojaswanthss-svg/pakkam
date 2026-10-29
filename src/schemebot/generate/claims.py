@@ -4,7 +4,7 @@ Each claim returned by the answering model is checked against official source ch
 1. chunk_id was among the retrieved chunks.
 2. quote appears in the chunk text after Unicode and whitespace normalisation.
 3. Every number and date in the claim also appears in the quote.
-4. If period is 'monthly', 'yearly', or 'one_time', the quote or chunk must support that periodicity.
+4. If period is 'monthly', 'yearly', or 'one_time', source must support that periodicity.
 
 Failing any check marks the claim INSUFFICIENT_EVIDENCE.
 If an amount claim fails, the entire answer is refused to prevent financial harm.
@@ -34,7 +34,7 @@ YEARLY_KEYWORDS = (
 )
 ONE_TIME_KEYWORDS = (
     "one-time", "one time", "lump sum", "single installment",
-    "ஒரே முறை", "ஒரு முறை", "ஒருமுறை", "ஒற்றை", "एकमुश्त", "एक बार"
+    "ஒரே முறை", "ஒரு முறை", "ஒற்றை", "एकमुश्त", "एक बार"
 )
 
 
