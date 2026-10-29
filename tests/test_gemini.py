@@ -121,7 +121,7 @@ def test_missing_key_is_unavailable_without_calling_the_api(
 
 def test_provider_setting_picks_the_client_and_models() -> None:
     gemini = Settings(llm_provider="gemini", gemini_api_key="test-key")  # type: ignore[arg-type]
-    claude = Settings(anthropic_api_key="test-key")  # type: ignore[arg-type]
+    claude = Settings(llm_provider="claude", anthropic_api_key="test-key")  # type: ignore[arg-type]
 
     assert isinstance(build_llm(gemini, "answer"), GeminiJsonLlm)
     assert isinstance(build_llm(claude, "answer"), ClaudeJsonLlm)
@@ -135,7 +135,7 @@ def test_llm_limits_reach_both_clients() -> None:
     # a visitor waiting on an answer.
     limits: dict[str, Any] = {"llm_timeout_seconds": 12, "llm_retries": 1}
     gemini = build_llm(Settings(llm_provider="gemini", gemini_api_key="k", **limits), "answer")  # type: ignore[arg-type]
-    claude = build_llm(Settings(anthropic_api_key="k", **limits), "verifier")  # type: ignore[arg-type]
+    claude = build_llm(Settings(llm_provider="claude", anthropic_api_key="k", **limits), "verifier")  # type: ignore[arg-type]
 
     assert isinstance(gemini, GeminiJsonLlm)
     options = gemini._client._api_client._http_options

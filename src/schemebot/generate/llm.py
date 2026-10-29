@@ -144,3 +144,49 @@ class ClaudeJsonLlm:
         except json.JSONDecodeError as error:
             raise LlmUnavailableError("the response was not valid JSON") from error
         return result
+
+
+class FailoverJsonLlm:
+    """Wraps a primary JsonLlm and falls back to a secondary on outage/rate-limit.
+
+    Failover triggers ONLY when fallback_enabled is True and secondary.configured is True.
+    A model refusal (LlmDeclinedError) is never failed over because it represents a policy decision,
+    not an infrastructure failure.
+    """
+
+    def __init__(
+        self,
+        primary: ConfiguredJsonLlm,
+        secondary: ConfiguredJsonLlm | None = None,
+        *,
+        fallback_enabled: bool = False,
+    ) -> None:
+        self._primary = primary
+        self._secondary = secondary
+        self._fallback_enabled = fallback_enabled
+
+    @property
+    def configured(self) -> bool:
+        return self._primary.configured or (
+            self._fallback_enabled and self._secondary is not None and self._secondary.configured
+        )
+
+    def complete_json(
+        self, system: str, user: str, schema: dict[str, object]
+    ) -> dict[str, Any]:
+        try:
+            return self._primary.complete_json(system, user, schema)
+        except LlmUnavailableError as primary_err:
+            if not self._fallback_enabled:
+                raise
+            if self._secondary is None or not self._secondary.configured:
+                logger.warning(
+                    "Primary LLM failed (%s), secondary not configured; cannot fail over.",
+                    primary_err,
+                )
+                raise
+            logger.warning(
+                "Primary LLM unavailable (%s); failing over to secondary provider.",
+                primary_err,
+            )
+            return self._secondary.complete_json(system, user, schema)

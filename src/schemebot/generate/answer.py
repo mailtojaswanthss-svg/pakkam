@@ -77,8 +77,16 @@ class Answer:
     """On a refusal about a scheme we hold documents for: its official contact."""
     passages: list[RetrievedPassage] = field(default_factory=list)
     """Retrieved passages, populated on fallback when model is unavailable."""
-    path: Literal["rag", "fact_card", "fallback"] = "rag"
+    path: Literal["rag", "fact_card", "fallback", "semantic_cache"] = "rag"
     """The pipeline path that produced this answer."""
+    status: Literal[
+        "SUPPORTED", "INSUFFICIENT_EVIDENCE", "MODEL_UNAVAILABLE", "needs_clarification"
+    ] = "SUPPORTED"
+    """Status: SUPPORTED, INSUFFICIENT_EVIDENCE, MODEL_UNAVAILABLE, or needs_clarification."""
+    understood_query: str | None = None
+    """The cleaned, normalized query understood by the system."""
+    candidate_schemes: list[str] = field(default_factory=list)
+    """Candidate schemes when query is near-threshold or ambiguous."""
 
 
 def _citation(number: int, passage: RetrievedPassage) -> Citation:
@@ -159,7 +167,7 @@ class Answerer:
                     scheme=card.scheme,
                     page_start=card.source_page,
                     page_end=card.source_page,
-                    source_url=str(contact.website) if contact else f"https://www.tn.gov.in",
+                    source_url=str(contact.website) if contact else "https://www.tn.gov.in",
                     text=card.answer_text,
                     language=card.language,
                     ocr_corrected=False,
@@ -235,11 +243,11 @@ class Answerer:
             drafts = [DraftSentence(s.text.strip(), s.sources) for s in reply.sentences]
             if not reply.answerable or not drafts:
                 return refuse("not_in_documents")
-            
+
             # Voice optimization: skip LLM verifier if answer text has no numbers or dates
             has_numbers = any(bool(numbers_in(s.text)) for s in drafts)
             verifier_to_use = None if (voice_mode and not has_numbers) else self._verifier
-            
+
             verify_started = time.perf_counter()
             checked = check_answer(drafts, passage_texts, verifier_to_use, misread)
             # Guardrail checks plus the verifier call (when one is configured).
@@ -257,8 +265,8 @@ class Answerer:
 
         # Renumber citations so the user sees [1], [2], ... in order of first use.
         cited_order: list[int] = []
-        for sentence in checked.kept:
-            for source in sentence.sources:
+        for kept_s in checked.kept:
+            for source in kept_s.sources:
                 if source not in cited_order:
                     cited_order.append(source)
         renumber = {source: new for new, source in enumerate(cited_order, start=1)}

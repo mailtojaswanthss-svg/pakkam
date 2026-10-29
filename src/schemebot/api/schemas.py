@@ -1,7 +1,7 @@
 """Public request and response shapes of the HTTP API."""
 
-from collections.abc import Mapping
 import re
+from collections.abc import Mapping
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, StringConstraints
@@ -41,7 +41,9 @@ class CitationOut(BaseModel):
     source_url: str
     excerpt: str = Field(description="The cited passage, as extracted from the document.")
     snippet: str = Field(default="", description="Alias for excerpt snippet.")
-    document_date: str | None = Field(default=None, description="Official publication date of source document.")
+    document_date: str | None = Field(
+        default=None, description="Official publication date of source document."
+    )
     language: Language
     ocr_corrected: bool = Field(
         default=False,
@@ -74,13 +76,23 @@ class AskResponse(BaseModel):
     answer: str = Field(description="Full answer with [n] markers, or the refusal message.")
     language: Language
     refused: bool
-    status: Literal["SUPPORTED", "INSUFFICIENT_EVIDENCE", "MODEL_UNAVAILABLE"] = Field(
+    status: Literal[
+        "SUPPORTED", "INSUFFICIENT_EVIDENCE", "MODEL_UNAVAILABLE", "needs_clarification"
+    ] = Field(
         default="SUPPORTED",
-        description="SUPPORTED when verified by citations, INSUFFICIENT_EVIDENCE on refusal, MODEL_UNAVAILABLE on LLM failure.",
+        description="SUPPORTED, INSUFFICIENT_EVIDENCE, MODEL_UNAVAILABLE, or needs_clarification.",
     )
-    path: Literal["rag", "fact_card", "fallback"] = Field(
+    path: Literal["rag", "fact_card", "fallback", "semantic_cache"] = Field(
         default="rag",
-        description="Path taken to answer: 'rag', 'fact_card', or 'fallback'.",
+        description="Path taken to answer: 'rag', 'fact_card', 'fallback', or 'semantic_cache'.",
+    )
+    understood_query: str | None = Field(
+        default=None,
+        description="The normalized and cleaned query understood by the system.",
+    )
+    candidate_schemes: list[str] = Field(
+        default_factory=list,
+        description="Candidate schemes suggested on needs_clarification.",
     )
     passages: list[FallbackPassage] | None = Field(
         default=None,
@@ -88,7 +100,7 @@ class AskResponse(BaseModel):
     )
     needs_confirmation: bool = Field(
         default=False,
-        description="True when query/transcript contains numbers or a scheme name requiring confirmation.",
+        description="True when query contains numbers or scheme requiring confirmation.",
     )
     refusal_reason: RefusalReason | None
     sentences: list[SentenceOut]
@@ -118,17 +130,37 @@ class AskResponse(BaseModel):
         has_scheme = any(
             s in q_lower
             for s in (
-                "pudhumai penn", "புதுமைப்பெண்", "cmchis", "முதலமைச்சர்", "maruthuva",
-                "apy", "atal pension", "pm kisan", "pmkisan", "pmuy", "ujjwala",
-                "kmut", "magalir urimai", "மகளிர் உரிமை", "moovalur", "muthulakshmi", "hostel", "விடுதி"
+                "pudhumai penn",
+                "புதுமைப்பெண்",
+                "cmchis",
+                "முதலமைச்சர்",
+                "maruthuva",
+                "apy",
+                "atal pension",
+                "pm kisan",
+                "pmkisan",
+                "pmuy",
+                "ujjwala",
+                "kmut",
+                "magalir urimai",
+                "மகளிர் உரிமை",
+                "moovalur",
+                "muthulakshmi",
+                "hostel",
+                "விடுதி",
             )
         )
         needs_confirm = has_digits or has_scheme
-        if answer.refusal_reason == "service_unavailable":
-            status_val: Literal["SUPPORTED", "INSUFFICIENT_EVIDENCE", "MODEL_UNAVAILABLE"] = (
-                "MODEL_UNAVAILABLE"
-            )
-            path_val: Literal["rag", "fact_card", "fallback"] = "fallback"
+        if getattr(answer, "status", None) == "needs_clarification":
+            status_val = "needs_clarification"
+            path_val = getattr(answer, "path", "rag")
+            fallback_passages = None
+        elif (
+            answer.refusal_reason == "service_unavailable"
+            or getattr(answer, "path", None) == "fallback"
+        ):
+            status_val = "MODEL_UNAVAILABLE"
+            path_val = "fallback"
             fallback_passages = [
                 FallbackPassage(
                     scheme=p.chunk.scheme,
@@ -145,7 +177,7 @@ class AskResponse(BaseModel):
             path_val = getattr(answer, "path", "rag")
             fallback_passages = None
         else:
-            status_val = "SUPPORTED"
+            status_val = getattr(answer, "status", "SUPPORTED")
             path_val = getattr(answer, "path", "rag")
             fallback_passages = None
 
@@ -157,6 +189,8 @@ class AskResponse(BaseModel):
             path=path_val,
             passages=fallback_passages,
             needs_confirmation=needs_confirm,
+            understood_query=getattr(answer, "understood_query", None),
+            candidate_schemes=getattr(answer, "candidate_schemes", []),
             refusal_reason=answer.refusal_reason,
             sentences=[SentenceOut(text=s.text, citations=s.citations) for s in answer.sentences],
             citations=[

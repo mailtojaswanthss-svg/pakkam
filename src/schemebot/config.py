@@ -43,6 +43,8 @@ class Settings(BaseSettings):
 
     # LLM provider for answers, the verifier and the evaluation judge
     llm_provider: LlmProvider = "claude"
+    llm_fallback_enabled: bool = False
+    """When True, switches to secondary provider on unavailable error (429/timeout)."""
 
     # Claude. With no key set, the SDK falls back to ANTHROPIC_API_KEY or `ant auth login`.
     anthropic_api_key: SecretStr | None = None

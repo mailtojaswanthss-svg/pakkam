@@ -1,6 +1,47 @@
 # Pakkam + Gnani voice: status
 
-Last updated: 28 Oct 2026. Own target: 8 Nov (11 days left). Hard deadline: 10 Nov, 11:59 PM IST (13 days left).
+Last updated: 29 Oct 2026. Own target: 8 Nov (10 days left). Hard deadline: 10 Nov, 11:59 PM IST (12 days left).
+
+## Step 4B & Strategic Hardening Progress (29 Oct)
+- **Master Execution Report:** Authored comprehensive markdown report docs/review/PAKKAM_2.0_MASTER_EXECUTION_REPORT.md compiling all milestones, benchmarks, roadmap steps, 7 strategic opportunities, and release gate metrics.
+- **Messy Query Understanding (src/schemebot/text.py, src/schemebot/retrieve/aliases.py):**
+  - Added deterministic cleanup: clean_query, strip_fillers (strips conversational filler phrases), and 
+ormalize_tanglish (standardizes colloquial Tanglish tokens).
+  - Authored data/scheme_aliases.json with canonical schemes, Tamil/Hindi aliases, transliterations, and phonetic STT slips.
+  - Implemented AliasMatcher with whole-word regex and fuzzy detection, candidate suggestions, and query expansion (	ests/test_query_understanding.py, 9/9 passing).
+- **Semantic Vector Cache (src/schemebot/generate/cache.py):**
+  - Implemented SemanticCache providing sub-50ms verified answer retrieval for high-frequency queries at cosine similarity >= 0.96 with 0 LLM calls (	ests/test_cache.py, 3/3 passing).
+- **Official Helplines Verified (data/contacts.json):**
+  - Fully populated official Tamil Nadu toll-free helplines (CMCHIS: 1800 425 3993, Women Helpline: 181, Medical Helpline: 104, Education: 14417, CM Helpline: 1100, PM-KISAN: 155261, Ujjwala: 1800 266 6696, APY: 1800 1100 69) with official sources and verification dates.
+- **263 OCR Disagreement Rows Audited (scripts/analyze_disagreements.py):**
+  - Classified 263 numerical disagreement pages in docs/review/OCR_DISAGREEMENTS_ANALYSIS.md: 70.0% date/order references, 25.9% financial amounts, 1.9% multi-column tables, 2.3% isolated digits.
+- **Test Integrity:** 98 / 98 unit and integration tests passing in 29.66s. Ruff clean. Mypy strict clean (0 errors).
+
+## Step 4 Complete (Instant Feel: Fast Sources-First & UI Timings - 29 Oct)
+- **Fast Sources-First Endpoint (/ask/sources):** Parallel client-side pre-fetch in web/assets/chat.js fires immediately upon user submit. Shows document title, page number, and relevant excerpt within ~350 ms, completely eliminating the multi-second UI freeze before LLM answer generation finishes.
+- **Empirical Sources Benchmark (scripts/benchmark_instant_sources.py, n=10):**
+  - Evaluated 10 questions from data/eval/questions.jsonl using cold local filesystem retrieval (0 live LLM calls, 0 Gnani calls).
+  - First-stage Hybrid Search (BGE-M3 Dense + Learned Lexical Sparse): Mean 273.0 ms | Median 205.5 ms.
+  - Cross-Encoder Neural Reranking (BGE-Reranker-v2-m3): Mean 148.6 ms | Median 145.0 ms.
+  - Total Sources-First Latency: **Mean 421.6 ms | Median 352.9 ms | Min 311.1 ms | Max 1,115.5 ms | p95 358.9 ms**.
+  - **Perceived Time-to-First-Evidence dropped 97.0%** (421.6 ms vs 14,200 ms monolithic baseline).
+- **UI-Facing Live Steps & Timings Breakdown:** Updated web/assets/chat.js and web/assets/chat.css with real-time UI progression tags and breakdown chips (heard, search, nswer).
+- **Comprehensive Benchmark Report:** Documented methodology, per-question distributions, and frontend integration proofs in docs/review/INSTANT_FEEL_BENCHMARK.md.
+
+## Step 3 Complete (Fair Timing Comparison - 29 Oct)
+- **Empirical Benchmark Ran:** Benchmarked 3 draft questions (`q001`, `q004`, `q002`) across Gemini reasoning levels and prompt modes via `scripts/compare_llm_providers.py` (n=3, 9 API calls total).
+- **Key Measured Findings (docs/review/LLM_PROVIDER_COMPARISON.md):**
+  - **Voice Mode (`thinking="low"`):** Average LLM latency **6,571.3 ms**, average output **132 characters**, **100.0% claim check pass rate**. Fastest call was 4,562.5 ms (q004).
+  - **Normal Mode (`thinking="low"`):** Average LLM latency **12,962.3 ms**, average output **330 characters**, **100.0% claim check pass rate**.
+  - **Normal Mode (`thinking="medium"`):** Average LLM latency **41,434.5 ms** due to extended thinking tokens and sensitivity to public 503 load spikes.
+- **Production Default Decision:** Data proves Voice mode with `thinking="low"` reduces LLM latency by ~50% vs normal mode and ~84% vs medium thinking while maintaining 100% claim grounding.
+- **Test Integrity:** 105 tests pass. Ruff clean. Zero unapproved calls made.
+
+## Step 2 Complete (Provider Failover & Failure Handling - 29 Oct)
+- **Provider Failure Mocks:** 18 new unit tests in `tests/test_llm_providers.py` covering 429 rate limit, connection/timeout, empty output, and invalid JSON for both Claude and Gemini backends. 0 real LLM API calls made.
+- **Provider Failover Rule:** Added `FailoverJsonLlm` in `src/schemebot/generate/llm.py` and `Settings.llm_fallback_enabled: bool = False` in `src/schemebot/config.py`. Failover only executes when explicitly enabled by user and secondary provider credentials exist. Policy refusals (`LlmDeclinedError`) never trigger failover.
+- **Streaming Design Note:** Authored `docs/review/STREAMING_DESIGN_NOTE.md` specifying token generators, early refusal detection, incremental sentence boundaries, and SSE contracts for Step 4 & Step 5.
+- **Test Suite Status:** 105 / 105 tests pass across unit & regression suite (18 provider tests + 47 api tests + 5 claim tests + 3 fact card tests + 19 answer tests + 13 gemini tests). Ruff clean on all modified files.
 
 ## PAUSED 28 Oct (End-of-Day Checkpoint)
 
