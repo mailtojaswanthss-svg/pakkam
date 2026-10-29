@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from schemebot.config import Effort, Settings
+from schemebot.config import Effort, LlmProvider, Settings
 from schemebot.generate.answer import Answerer
 from schemebot.generate.contacts import CONTACTS_NAME, load_contacts
 from schemebot.generate.llm import ConfiguredJsonLlm
@@ -13,8 +13,8 @@ from schemebot.retrieve.retriever import Retriever
 LlmRole = Literal["answer", "verifier", "judge"]
 
 
-def model_for(settings: Settings, role: LlmRole) -> str:
-    if settings.llm_provider == "gemini":
+def model_for_provider(settings: Settings, role: LlmRole, provider: LlmProvider) -> str:
+    if provider == "gemini":
         return {
             "answer": settings.gemini_model,
             "verifier": settings.gemini_verifier_model,
@@ -27,12 +27,17 @@ def model_for(settings: Settings, role: LlmRole) -> str:
     }[role]
 
 
-def build_llm(settings: Settings, role: LlmRole) -> ConfiguredJsonLlm:
-    # The verifier only reads and judges, so a fast model at low effort is enough.
+def model_for(settings: Settings, role: LlmRole) -> str:
+    return model_for_provider(settings, role, settings.llm_provider)
+
+
+def _build_provider_llm(
+    settings: Settings, role: LlmRole, provider: LlmProvider
+) -> ConfiguredJsonLlm:
     effort: Effort = {"answer": settings.llm_effort, "verifier": "low", "judge": "medium"}[role]
-    model = model_for(settings, role)
+    model = model_for_provider(settings, role, provider)
     limits = (settings.llm_timeout_seconds, settings.llm_retries)
-    if settings.llm_provider == "gemini":
+    if provider == "gemini":
         from schemebot.generate.gemini import GeminiJsonLlm
 
         key = settings.gemini_api_key
@@ -42,6 +47,18 @@ def build_llm(settings: Settings, role: LlmRole) -> ConfiguredJsonLlm:
 
     key = settings.anthropic_api_key
     return ClaudeJsonLlm(model, key.get_secret_value() if key else None, effort, *limits)
+
+
+def build_llm(settings: Settings, role: LlmRole) -> ConfiguredJsonLlm:
+    primary = _build_provider_llm(settings, role, settings.llm_provider)
+    if not settings.llm_fallback_enabled:
+        return primary
+
+    secondary_provider: LlmProvider = "claude" if settings.llm_provider == "gemini" else "gemini"
+    secondary = _build_provider_llm(settings, role, secondary_provider)
+    from schemebot.generate.llm import FailoverJsonLlm
+
+    return FailoverJsonLlm(primary, secondary, fallback_enabled=True)
 
 
 def build_answerer(settings: Settings, retriever: Retriever | None = None) -> Answerer:
@@ -54,7 +71,11 @@ def build_answerer(settings: Settings, retriever: Retriever | None = None) -> An
     cards_path = settings.data_dir / "fact_cards.json"
     cards = load_verified_cards(cards_path)
     matcher = None
-    if cards and hasattr(retriever_obj, "_first_stage") and hasattr(retriever_obj._first_stage, "_encoder"):
+    if (
+        cards
+        and hasattr(retriever_obj, "_first_stage")
+        and hasattr(retriever_obj._first_stage, "_encoder")
+    ):
         matcher = FactCardMatcher(cards, encoder=retriever_obj._first_stage._encoder)
 
     return Answerer(

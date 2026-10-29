@@ -262,6 +262,14 @@
     // Listen sits beside the time; the source lines above replace the old "N sources" button.
     meta.append(listenButton(data));
     if (data.latency_ms && !refused) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
+    if (data.timings_ms && !refused) {
+      const steps = [];
+      if (data.timings_ms.stt) steps.push(`heard ${Math.round(data.timings_ms.stt)}ms`);
+      const searchMs = (data.timings_ms.search || 0) + (data.timings_ms.rerank || 0);
+      if (searchMs > 0) steps.push(`search ${Math.round(searchMs)}ms`);
+      if (data.timings_ms.llm_answer) steps.push(`answer ${Math.round(data.timings_ms.llm_answer)}ms`);
+      if (steps.length > 0) meta.append(el('span', 'a-breakdown', `(${steps.join(' · ')})`));
+    }
     const disclaimer = el('p', 'disclaimer', data.disclaimer);
     setLang(disclaimer, data.language);
     body.append(meta, disclaimer);
@@ -388,9 +396,34 @@
     const questionItem = el('li', 'msg q');
     const bubble = el('p', null, label);
     questionItem.append(bubble);
-    const pending = assistantItem('pending', [el('p', 'wait', TEXT.waiting), el('span', 'wait-bar')]);
+    const waitMsg = el('p', 'wait', TEXT.waiting);
+    const waitBar = el('span', 'wait-bar');
+    const previewBox = el('div', 'source-preview-box');
+    previewBox.hidden = true;
+    const pending = assistantItem('pending', [waitMsg, waitBar, previewBox]);
     log.append(questionItem, pending);
     scrollToEnd();
+
+    const questionText = typeof label === 'string' && label !== TEXT.voiceQuestion ? label : null;
+    if (questionText) {
+      fetch('/ask/sources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: questionText }),
+      }).then(async (res) => {
+        if (!res.ok) return;
+        const sdata = await res.json();
+        if (sdata.passages && sdata.passages.length > 0 && pending.isConnected) {
+          const first = sdata.passages[0];
+          waitMsg.textContent = `Found in ${first.document} (page ${first.page}) · Checking details...`;
+          previewBox.textContent = '';
+          const snippet = el('blockquote', 'source-preview-snippet', first.text.length > 140 ? first.text.slice(0, 137) + '...' : first.text);
+          previewBox.append(snippet);
+          previewBox.hidden = false;
+          scrollToEnd();
+        }
+      }).catch(() => {});
+    }
 
     try {
       let response;
