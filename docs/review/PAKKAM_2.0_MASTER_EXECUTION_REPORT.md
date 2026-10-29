@@ -56,7 +56,7 @@ To guarantee execution discipline without operational instability, the roadmap i
 | **Semantic Vector Cache** | Exact match cache at cosine $\ge 0.96$. | **Wrong-match rate unmeasured**; **disabled for demo** (`answer_cache_size = 0`). | `src/schemebot/generate/cache.py`<br>`src/schemebot/config.py` |
 | **Official Helplines Status** | In `data/contacts.json`, only Atal Pension Yojana has a cited brochure source URL. | **Other 9 schemes remain null/unverified** pending manual source URL confirmation. | `data/contacts.json`<br>`tests/test_contacts.py` |
 | **OCR Disagreements Audit** | Complete classification of 263 numerical discrepancy pages between Tesseract & Chitrapathak-2. | **70.0% order dates, 25.9% amounts, 1.9% tables, 2.3% digits**. Evaluated crop mode on 7 problem pages (7/7). | `scripts/analyze_disagreements.py`<br>`docs/review/OCR_DISAGREEMENTS_ANALYSIS.md` |
-| **Claim Guardrails** | Deterministic quote, amount, date, and periodicity containment verification in `claims.py`. | **5 / 5 unit tests pass**. Rejects out-of-context amounts and unsupported assertions. | `tests/test_claims.py` |
+| **Claim Guardrails & Periodicity** | Deterministic quote, amount, date, and periodicity (`monthly`, `yearly`, `one_time`) containment verification in `claims.py`. | **6 / 6 unit tests pass**. Historical replay: **0 newly rejected from manual inspection of 8 stored answers** (the automated period check cannot execute deterministically on historical runs without structured claim breakdown); remaining 186 draft questions without stored answers are **unmeasured**. | `src/schemebot/generate/claims.py`<br>`tests/test_claims.py` |
 
 ---
 

@@ -24,6 +24,7 @@ MANDATORY_SOURCES = {
     "tanglish": PROJECT_ROOT / "docs" / "review" / "TANGLISH_EVAL_REPORT.md",
     "paraphrase": PROJECT_ROOT / "docs" / "review" / "PARAPHRASE_EVAL_REPORT.md",
     "ocr_crops": PROJECT_ROOT / "docs" / "review" / "ocr_crop_mode_results.json",
+    "master_report": PROJECT_ROOT / "docs" / "review" / "PAKKAM_2.0_MASTER_EXECUTION_REPORT.md",
     "stt_results": PROJECT_ROOT / "data" / "voice" / "stt_eval_results.json",
     "contacts": PROJECT_ROOT / "data" / "contacts.json",
     "sources": PROJECT_ROOT / "data" / "sources.json",
