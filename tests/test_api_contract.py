@@ -24,7 +24,7 @@ from schemebot.api.schemas import (
     VoiceAskResponse,
 )
 from schemebot.generate.answer import Answerer
-from schemebot.retrieve.retriever import RetrievedPassage
+from schemebot.retrieve.retriever import RetrievalResult, RetrievedPassage
 from tests.test_answer import FakeLlm
 
 
@@ -105,8 +105,6 @@ def test_real_server_output_conforms_to_api_contract(tmp_path: Path) -> None:
     from tests.conftest import make_chunk
     chunk = make_chunk("apy-2020-001", "Citizens aged 18 to 40 can join the scheme.")
 
-    from schemebot.retrieve.retriever import RetrievalResult
-
     class RealTestRetriever:
         def retrieve(self, q: str, top_k: int = 5) -> RetrievalResult:
             passage = RetrievedPassage(chunk=chunk, relevance=0.92)
@@ -172,3 +170,57 @@ def test_real_server_output_conforms_to_api_contract(tmp_path: Path) -> None:
         data_fb = res_fb.json()
         validated_fb = FeedbackResponse.model_validate(data_fb)
         assert validated_fb.recorded is True
+
+
+def test_real_ask_voice_endpoint_conforms_to_contract(tmp_path: Path) -> None:
+    """Verifies that live /ask/voice endpoint output conforms strictly to VoiceAskResponse
+
+    and has no Prisma confidence field.
+    """
+    from tests.conftest import make_chunk
+    from tests.test_api import FakeStt, FakeTts, short_wav
+
+    chunk = make_chunk("apy-2020-001", "Citizens aged 18 to 40 can join the scheme.")
+
+    class RealTestRetriever:
+        def retrieve(self, q: str, top_k: int = 5) -> RetrievalResult:
+            passage = RetrievedPassage(chunk=chunk, relevance=0.92)
+            return RetrievalResult(
+                query=q,
+                passages=[passage],
+                timings_ms={"search": 10.0, "rerank": 5.0},
+            )
+
+    llm_reply = {
+        "answerable": True,
+        "sentences": [{"text": "Citizens aged 18 to 40 can join.", "sources": [1]}],
+    }
+    answerer = Answerer(
+        retriever=cast(Any, RealTestRetriever()),
+        llm=FakeLlm(llm_reply),
+        verifier=None,
+        refusal_threshold=0.35,
+    )
+
+    app = create_app(
+        lambda: answerer,
+        build_stt=lambda: FakeStt("What is APY eligibility?"),
+        build_tts=lambda: FakeTts(),
+        log_dir=tmp_path,
+    )
+
+    with TestClient(app) as client:
+        res = client.post(
+            "/ask/voice",
+            files={"audio": ("q.wav", short_wav(), "audio/wav")},
+            data={"language": "en"},
+        )
+        assert res.status_code == 200
+        data = res.json()
+        validated = VoiceAskResponse.model_validate(data)
+        assert validated.transcript == "What is APY eligibility?"
+        assert validated.stt_language_code == "en-IN"
+        assert validated.status == "SUPPORTED"
+        assert validated.stt_confidence is None  # Prisma returns no confidence
+        assert "stt" in validated.timings_ms
+        assert len(validated.sentences) > 0

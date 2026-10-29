@@ -10,13 +10,13 @@
 
 | Method | Endpoint | Description | Primary Payload Keys | Origin / Real Output Status |
 | :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/ask` | Text inquiry answering (RAG, fact card, or fallback) | `answer`, `status`, `sentences`, `citations`, `timings_ms`, `understood_query` | **Real Server Output** |
-| `POST` | `/ask/sources` | Instant sources pre-fetch (<400ms) | `passages [{scheme, doc_id, document, page, text, source_url}]`, `timings_ms` | **Real Server Output** |
+| `POST` | `/ask` | Text inquiry answering (RAG, fact card, or fallback) | `answer`, `status`, `sentences`, `citations`, `timings_ms`, `understood_query` | **server output with stubbed model/test fixtures** |
+| `POST` | `/ask/sources` | Instant sources pre-fetch (<400ms) | `passages [{scheme, doc_id, document, page, text, source_url}]`, `timings_ms` | **server output with stubbed model/test fixtures** |
 | `POST` | `/ask/voice` | End-to-end voice question answering | Inherits `/ask` + `transcript`, `stt_ms`, `confirmation_text` | **Hand-Written Mock** |
 | `POST` | `/transcribe` | Single-stage speech-to-text (Gnani Prisma) | `transcript`, `stt_language_code`, `stt_ms` | **Hand-Written Mock** |
-| `POST` | `/speak` | Spoken sentence synthesis (Gnani Timbre WAV) | Binary `audio/wav` response | **Real Server Output** |
-| `POST` | `/feedback` | Citizen feedback & rating | `recorded: true` (privacy-safe, text opt-in only) | **Real Server Output** |
-| `GET` | `/health` | Health & subsystem readiness check | `status: "ok"` | **Real Server Output** |
+| `POST` | `/speak` | Spoken sentence synthesis (Gnani Timbre WAV) | Binary `audio/wav` response | **server output with stubbed model/test fixtures** |
+| `POST` | `/feedback` | Citizen feedback & rating | `recorded: true` (privacy-safe, text opt-in only) | **server output with stubbed model/test fixtures** |
+| `GET` | `/health` | Health & subsystem readiness check | `status: "ok"` | **server output with stubbed model/test fixtures** |
 
 ---
 
@@ -24,7 +24,7 @@
 
 ### Status 1: `SUPPORTED` (Grounded Answer with Citations)
 *Returned when retrieval confidence is high ($\ge 0.35$) and the LLM produces a grounded, verified answer.*  
-*Payload Origin:* **Real Server Output** (captured from live pipeline execution on PM-KISAN inquiry).
+*Payload Origin:* **server output with stubbed model/test fixtures** (captured from test pipeline execution on PM-KISAN inquiry).
 
 ```json
 {
@@ -114,7 +114,7 @@
 
 ### Status 3: `INSUFFICIENT_EVIDENCE` (Safe Grounded Refusal)
 *Returned when retrieval confidence is below 0.30, or the question is unanswerable from ingested government gazettes.*  
-*Payload Origin:* **Real Server Output** (captured from out-of-domain query execution).
+*Payload Origin:* **server output with stubbed model/test fixtures** (captured from out-of-domain query execution).
 
 ```json
 {
@@ -146,7 +146,7 @@
 
 ### Status 4: `MODEL_UNAVAILABLE` (Never Fail Visibly Fallback)
 *Returned on LLM 429 rate limit, timeout, or external API disruption. Surfaces top retrieved passages and official helpline without hallucination.*  
-*Payload Origin:* **Real Server Output** (captured during simulated model unavailable / timeout failover).
+*Payload Origin:* **simulated 429** (captured during simulated model unavailable / timeout failover).
 
 ```json
 {
@@ -192,7 +192,7 @@
 
 ### Status 5: `PII_DETECTED` (Privacy Guardrail Interception)
 *Returned immediately before retrieval or LLM execution if the query contains personal identifying numbers (Aadhaar or 10-digit Indian mobile numbers in ASCII or Indic Tamil/Devanagari numerals).*  
-*Payload Origin:* **Real Server Output** (captured from live query with Aadhaar number).
+*Payload Origin:* **server output with stubbed model/test fixtures** (captured from test query with Aadhaar number).
 
 ```json
 {
@@ -231,7 +231,6 @@
   "transcript": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் எவ்வளவு பணம் கிடைக்கும்?",
   "stt_language_code": "ta-IN",
   "stt_ms": 1450.2,
-  "stt_confidence": null,
   "confirmation_text": null,
   "answer": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் குடும்பத் தலைவிகளுக்கு மாதம் ரூ. 1,000 வழங்கப்படுகிறது. [1]",
   "language": "ta",
@@ -289,7 +288,7 @@ When retrieval score is in $[0.30, 0.40]$ band:
 
 ### Status 7: Fast Sources-First Pre-Fetch (`POST /ask/sources`)
 *Fired in parallel from client submit; returns top official citations in <400ms before LLM generation finishes.*  
-*Payload Origin:* **Real Server Output** (captured from live Qdrant hybrid retrieval execution).
+*Payload Origin:* **server output with stubbed model/test fixtures** (captured from test Qdrant hybrid retrieval execution).
 
 ```json
 {
@@ -315,7 +314,7 @@ When retrieval score is in $[0.30, 0.40]$ band:
 
 ### Status 8: Privacy-Safe Citizen Feedback (`POST /feedback`)
 *Opt-in design. By default, records only performance and thumbs rating.*  
-*Payload Origin:* **Real Server Output** (captured from default submission).
+*Payload Origin:* **server output with stubbed model/test fixtures** (captured from default submission).
 
 ```json
 {
