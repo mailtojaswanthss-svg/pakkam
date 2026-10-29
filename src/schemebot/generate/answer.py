@@ -20,10 +20,10 @@ from schemebot.generate.guardrails import (
 )
 from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError, parse_reply
 from schemebot.generate.messages import (
-    contains_pii,
     RefusalReason,
     clarification_text,
     contact_text,
+    contains_pii,
     disclaimer,
     refusal_text,
 )
@@ -85,10 +85,14 @@ class Answer:
     """On a refusal about a scheme we hold documents for: its official contact."""
     passages: list[RetrievedPassage] = field(default_factory=list)
     """Retrieved passages, populated on fallback when model is unavailable."""
-    path: Literal["rag", "fact_card", "fallback", "semantic_cache"] = "rag"
+    path: Literal["rag", "fact_card", "fallback", "semantic_cache", "guardrail"] = "rag"
     """The pipeline path that produced this answer."""
     status: Literal[
-        "SUPPORTED", "INSUFFICIENT_EVIDENCE", "MODEL_UNAVAILABLE", "needs_clarification"
+        "SUPPORTED",
+        "INSUFFICIENT_EVIDENCE",
+        "MODEL_UNAVAILABLE",
+        "needs_clarification",
+        "PII_DETECTED",
     ] = "SUPPORTED"
     """Status: SUPPORTED, INSUFFICIENT_EVIDENCE, MODEL_UNAVAILABLE, or needs_clarification."""
     understood_query: str | None = None
@@ -177,8 +181,8 @@ class Answerer:
                 confidence=0.0,
                 disclaimer=disclaimer(language),
                 timings_ms=timings,
-                status="INSUFFICIENT_EVIDENCE",
-                path="rag",
+                status="PII_DETECTED",
+                path="guardrail",
                 understood_query=clean_query(question),
             )
 

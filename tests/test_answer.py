@@ -272,6 +272,7 @@ def test_aadhaar_and_phone_pii_interception(corpus: list[Chunk]) -> None:
     ans_aadhaar = answer_with(llm, corpus, "My aadhaar is 2345 6789 0123 can I apply for scheme?")
     assert ans_aadhaar.refused
     assert ans_aadhaar.refusal_reason == "pii_detected"
+    assert ans_aadhaar.status == "PII_DETECTED"
     assert "privacy and security" in ans_aadhaar.text
     assert len(llm.user_messages) == 0  # 0 LLM calls made!
 
@@ -280,4 +281,5 @@ def test_aadhaar_and_phone_pii_interception(corpus: list[Chunk]) -> None:
     ans_phone = answer_with(llm2, corpus, "Call me at 9876543210 for pension")
     assert ans_phone.refused
     assert ans_phone.refusal_reason == "pii_detected"
+    assert ans_phone.status == "PII_DETECTED"
     assert len(llm2.user_messages) == 0
