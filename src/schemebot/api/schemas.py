@@ -262,3 +262,16 @@ class SourceOut(BaseModel):
     language: Language
     source_url: str
     doc_date: str | None
+
+class FeedbackRequest(BaseModel):
+    question: str = Field(description="The citizen question text.")
+    status: str = Field(description="The response status (e.g. SUPPORTED, INSUFFICIENT_EVIDENCE).")
+    thumbs: Literal["up", "down"] = Field(description="User feedback direction.")
+    reason: str | None = Field(default=None, description="Optional wrong-answer reason or critique.")
+    timings_ms: dict[str, float] = Field(default_factory=dict, description="Stage timings.")
+
+
+class FeedbackResponse(BaseModel):
+    recorded: bool = Field(default=True, description="Whether feedback was persisted.")
+    message: str = Field(default="Feedback recorded. Thank you for improving Pakkam.")
+

@@ -29,6 +29,7 @@ WHITELIST = [
     "placeholder",
     "your_key_here",
     "hf_your_token_here",
+    "test-anthropic-key",
 ]
 
 

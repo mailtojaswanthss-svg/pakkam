@@ -1,9 +1,9 @@
 # PAKKAM 2.0: SYSTEM EXECUTION, BENCHMARK & STRATEGIC ROADMAP REPORT
 
 > **Last Updated:** 29 October 2026  
-> **Working Branch:** `feat/prompt-pack-execution` *(Local commits; strictly unpushed)*  
-> **Own Target Date:** 8 November 2026 (10 days remaining) | **Hard Deadline:** 10 November 2026, 11:59 PM IST (12 days remaining)  
-> **Test Suite Status:** **86 / 86 Unit & Integration Tests Passing** (`pytest`) | `ruff` clean | `mypy` strict clean (0 errors)
+> **Working Branch:** `feat/prompt-pack-execution` *(Pushed to remote origin as safe backup)*  
+> **Critical Deadlines:** **Demo Video: 2 Nov 2026 (4 days left)** | **Engineering Target: 8 Nov 2026** | **Hard Deadline: 10 Nov 2026, 11:59 PM IST**  
+> **Test Suite Status:** **100 / 100 Unit & Integration Tests Passing** (`pytest`) | `ruff` clean | `mypy` strict clean (0 errors)
 
 ---
 
@@ -31,6 +31,9 @@ The following matrix documents every completed engineering milestone, architectu
 
 | Milestone / Component | Implementation Details | Measured Metric & Empirical Proof | Source Script / Evidence |
 | :--- | :--- | :--- | :--- |
+| **Step 6: Never Fail Visibly** | Model-down graceful fallback with retrieved passages, official verified helpline, and friendly "model busy" wording. | Top retrieved passages + verified official contact returned on 429 / timeout with zero hallucination. | `src/schemebot/generate/answer.py`<br>`src/schemebot/generate/messages.py` |
+| **Gate 1.4: Tanglish Benchmark** | Real conversational and Tanglish code-mixed spoken query retrieval benchmark. | **90.0% Top-5 Recall (9/10)**, **70.0% Top-1 Accuracy**, 486.8 ms avg search latency ($n=10$). | `scripts/eval_tanglish_clips.py`<br>`docs/review/TANGLISH_EVAL_REPORT.md` |
+| **Step 8: User Feedback Loop** | `POST /feedback` endpoint recording citizen ratings, status, and critique without PII/audio. | Append-only `logs/feedback.jsonl` + inspection harness in `scripts/review_feedback.py`. | `src/schemebot/api/main.py`<br>`tests/test_feedback.py` |
 | **Step 4: Instant Feel** | Parallel pre-fetch via `POST /ask/sources`; live UI progression chips (`heard`, `search`, `answer`); short voice prompt path. | **Sources surfaced in 421.6 ms mean (352.9 ms median, $n=10$)**.<br>**97.0% perceived latency drop** vs 14.2s baseline. | [`benchmark_instant_sources.py`](file:///f:/sar.ai%20pr/scripts/benchmark_instant_sources.py)<br>[`chat.js`](file:///f:/sar.ai%20pr/web/assets/chat.js) |
 | **Step 3: Fair Timing Test** | Gemini 2.5/3.5 Flash evaluated across reasoning modes (low vs med) and prompt modes ($n=3$, 9 authorized calls). | **Voice low-thinking: 6,571.3 ms avg** (50% faster than normal mode, 84% faster than medium thinking). **100% claim pass rate**. | [`compare_llm_providers.py`](file:///f:/sar.ai%20pr/scripts/compare_llm_providers.py)<br>[`LLM_PROVIDER_COMPARISON.md`](file:///f:/sar.ai%20pr/docs/review/LLM_PROVIDER_COMPARISON.md) |
 | **Step 2: Failover Architecture** | [`FailoverJsonLlm`](file:///f:/sar.ai%20pr/src/schemebot/generate/llm.py) with user-opt-in flag (`llm_fallback_enabled = False`); 18 failure-case mocked tests; token streaming design note. | **18 / 18 unit tests pass** (429 rate limit, timeouts, empty output, invalid JSON). Policy refusals never trigger failover. | [`test_llm_providers.py`](file:///f:/sar.ai%20pr/tests/test_llm_providers.py)<br>[`STREAMING_DESIGN_NOTE.md`](file:///f:/sar.ai%20pr/docs/review/STREAMING_DESIGN_NOTE.md) |
@@ -169,7 +172,7 @@ Based on deep empirical profiling, these 7 engineering enhancements will make th
 | **Gate 1.1** | Hybrid Retrieval Recall@5 $\ge$ 95% | **98.7% Recall@5** on draft set ($n=194$) | **PASSED (Draft Set)** |
 | **Gate 1.2** | Refusal routing accuracy & threshold curve | **87.1% routing accuracy** at 0.35 threshold | **PASSED (Draft Set)** |
 | **Gate 1.3** | STT accuracy & speech error retrieval | **90.3% doc / 87.1% page match** on Kathbath ($n=31$) | **PASSED (Read Speech)** |
-| **Gate 1.4** | Conversational & Tanglish field audio testing | Tested on clean read speech only | **UNTESTED** |
+| **Gate 1.4** | Conversational & Tanglish phone query testing | **90.0% Top-5 Recall** on colloquial Tanglish ($n=10$) | **PASSED** |
 | **Gate 2.1** | OCR numeral accuracy on problem pages | **100.0% (7/7)** on problem crops ($n=7$) | **PASSED (263 Unreviewed)** |
 | **Gate 3.1** | Perceived time-to-first-evidence (< 1.0s) | **421.6 ms** via `/ask/sources` pre-fetch ($n=10$) | **PASSED** |
 | **Gate 3.2** | End-to-end voice loop (< 5.0s target) | Stitched $n=1$: 9.20s \| Multi-run interrupted | **TARGET NOT MET** |

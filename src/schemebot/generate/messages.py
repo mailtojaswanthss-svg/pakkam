@@ -42,10 +42,10 @@ NOT_FOUND: dict[MessageLanguage, str] = {
 }
 
 UNAVAILABLE: dict[MessageLanguage, str] = {
-    "en": "The answering service is not available right now. Please try again later.",
-    "ta": "பதில் அளிக்கும் சேவை இப்போது கிடைக்கவில்லை. சிறிது நேரம் கழித்து மீண்டும் முயலவும்.",
-    "hi": "जवाब देने की सेवा अभी उपलब्ध नहीं है। कृपया थोड़ी देर बाद फिर से कोशिश करें।",
-    "ta-Latn": "Badhil sollum sevai ippo kidaikkala. Konjam neram kazhichu thirumba try pannunga.",
+    "en": "The answering model is currently busy. Here is what the official document states:",
+    "ta": "மாதிரி தற்போது பிஸியாக உள்ளது. அதிகாரப்பூர்வ ஆவணத்தில் உள்ள தகவல் இதோ:",
+    "hi": "मॉडल अभी व्यस्त है। आधिकारिक दस्तावेज़ में यह जानकारी दी गई है:",
+    "ta-Latn": "Model ippo busy-aa irukku. Official document-la irukkura thagaval idho:",
 }
 
 DISCLAIMER: dict[MessageLanguage, str] = {

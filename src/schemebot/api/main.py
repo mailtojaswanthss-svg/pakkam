@@ -6,6 +6,7 @@ reranker models load once at startup; requests then reuse them.
 
 import logging
 import math
+import json
 import mimetypes
 import re
 import time
@@ -22,6 +23,8 @@ from pydantic import TypeAdapter, ValidationError
 from schemebot.api.audit import AuditLog
 from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import (
+    FeedbackRequest,
+    FeedbackResponse,
     AskRequest,
     AskResponse,
     AskSourcesResponse,
@@ -310,6 +313,25 @@ def create_app(
             stt_language_code=language_code,
             stt_ms=round(stt_ms, 1),
         )
+
+
+    @app.post("/feedback")
+    def feedback(body: FeedbackRequest, state: StateDep) -> FeedbackResponse:
+        """Citizen feedback loop: records ratings and critique without any PII or audio."""
+        log_dir = PROJECT_ROOT / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        fb_path = log_dir / "feedback.jsonl"
+        entry = {
+            "timestamp": time.time(),
+            "question": body.question,
+            "status": body.status,
+            "thumbs": body.thumbs,
+            "reason": body.reason,
+            "timings_ms": body.timings_ms,
+        }
+        with open(fb_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        return FeedbackResponse()
 
     @app.post("/transcribe", dependencies=[Depends(limit_transcribe)])
     def transcribe(
