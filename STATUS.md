@@ -7,7 +7,21 @@ CRITICAL TIMELINE & DEADLINES:
 - Hard Submission Deadline: 10 Nov 2026, 11:59 PM IST (12 days left)
 
 REMOTE BACKUP STATUS:
-- Branch feat/prompt-pack-execution successfully pushed to remote origin (commit 07071e3). Safe backup verified.
+- Branch feat/prompt-pack-execution successfully pushed to remote origin (commit 4a82279). Safe backup verified.
+
+## Step 5 Complete (Sentence-by-Sentence Speech Synthesis & Queueing - 29 Oct)
+- **Sentence Pipelining Architecture (`src/schemebot/voice/sentence_speaker.py`):**
+  - Implemented `SentenceSpeaker` and `split_sentences` with intelligent abbreviation protection (`Rs.`, `ரூ.`, `रु.`, `No.`, `Dr.`, `p.`) preventing false sentence boundary splits on financial amounts.
+  - Decomposes verified multi-sentence answers into clean, individual utterances synthesized on-demand or pipelined sequentially.
+- **Indic Spelled-Out Numbers Integration:**
+  - Fully integrated `spell_amounts` from `src/schemebot/voice/numbers.py`: currency markers and numerals (e.g. ₹1,000 / மாதம் ரூ. 1,000) are deterministically converted into Indic word forms (*ஆயிரம் ரூபாய்* / *एक हज़ार रुपये*) before synthesis, preventing awkward robotic digit-by-digit TTS reading.
+- **Frontend Queueing & Instant Stop Control (`web/assets/chat.js`):**
+  - Enhanced client `listen()` handler: fetches sentence 1 audio first to deliver minimal Time-to-First-Audio (TTFA).
+  - While sentence 1 is playing, sentence 2 audio is pre-fetched and placed into the playback queue.
+  - Tapping "Stop" instantly aborts active in-flight network requests (`AbortController.abort()`), pauses playing audio, revokes object URLs, and resets state.
+- **Unit Test Coverage (`tests/test_sentence_speech.py`):**
+  - 4 unit tests verifying sentence splitting, Indic amount spelling, pipelining sequence, and early stop-flag termination. All pass with 0 real Gnani calls.
+- **Test Integrity:** **104 / 104 tests passing** in 28.36s. Ruff clean. Mypy strict clean (0 errors across 64 source files).
 
 ## Step 6, Gate 1.4 & Step 8 Complete (Pragmatic Scope Hardening - 29 Oct)
 - **Remote Push Complete:** Branch feat/prompt-pack-execution pushed to GitHub remote origin as safe backup. Full history secrets scan: 0 secrets.
