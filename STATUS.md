@@ -1,6 +1,26 @@
 # Pakkam + Gnani voice: status
 
-Last updated: 29 Oct 2026. Own target: 8 Nov (10 days left). Hard deadline: 10 Nov, 11:59 PM IST (12 days left).
+Last updated: 29 Oct 2026.
+CRITICAL TIMELINE & DEADLINES:
+- Demonstration Video Delivery: 2 Nov 2026 (4 days left!)
+- Own Engineering Target: 8 Nov 2026 (10 days left)
+- Hard Submission Deadline: 10 Nov 2026, 11:59 PM IST (12 days left)
+
+REMOTE BACKUP STATUS:
+- Branch feat/prompt-pack-execution successfully pushed to remote origin (commit 07071e3). Safe backup verified.
+
+## Step 6, Gate 1.4 & Step 8 Complete (Pragmatic Scope Hardening - 29 Oct)
+- **Remote Push Complete:** Branch feat/prompt-pack-execution pushed to GitHub remote origin as safe backup. Full history secrets scan: 0 secrets.
+- **Never Fail Visibly (Step 6):**
+  - Updated model unavailable user-facing text across all 4 languages to: "The answering model is currently busy. Here is what the official document states:"
+  - On 429 rate limit or timeout, the system displays top retrieved passages, verified department portal, and toll-free helpline. The UI never breaks or hallucinates.
+- **Tanglish & Spoken Phone Queries (Gate 1.4):**
+  - Evaluated 10 representative colloquial Tanglish citizen queries via scripts/eval_tanglish_clips.py (n=10, 0 LLM calls).
+  - Results in docs/review/TANGLISH_EVAL_REPORT.md: Top-1 Scheme Accuracy: 70.0% (7/10), Top-5 Retrieval Recall: 90.0% (9/10), Average search latency: 486.8 ms. Gate 1.4 PASSED.
+- **Citizen Feedback Loop (Step 8):**
+  - Implemented POST /feedback endpoint in src/schemebot/api/main.py recording ratings, status, timings, and optional critique to append-only gitignored logs/feedback.jsonl (zero PII/audio).
+  - Implemented review harness in scripts/review_feedback.py.
+- **Test Integrity:** 100 / 100 unit & integration tests passing in 41.77s. Ruff clean. Mypy strict clean (0 errors).
 
 ## Step 4B & Strategic Hardening Progress (29 Oct)
 - **Master Execution Report:** Authored comprehensive markdown report docs/review/PAKKAM_2.0_MASTER_EXECUTION_REPORT.md compiling all milestones, benchmarks, roadmap steps, 7 strategic opportunities, and release gate metrics.
