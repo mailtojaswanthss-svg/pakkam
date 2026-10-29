@@ -91,7 +91,8 @@ class Settings(BaseSettings):
     # Public demo limits on POST /ask (each question can cost two LLM calls)
     ask_limit_per_client_per_minute: int = Field(default=10, ge=1)
     ask_limit_total_per_day: int = Field(default=500, ge=1)
-    answer_cache_size: int = Field(default=0, ge=0)  # disabled for demo: wrong-match rate unmeasured
+    # disabled for demo: wrong-match rate unmeasured
+    answer_cache_size: int = Field(default=0, ge=0)
     """Answers kept in memory so a repeated question costs no LLM call; 0 turns it off."""
     answer_cache_ttl_seconds: float = Field(default=6 * 3600, gt=0)
 

@@ -7,7 +7,23 @@ document and "2.5 லட்சம்" in a question would never match.
 import re
 import unicodedata
 
-from schemebot.ingest.extract import normalize_text
+NO_BREAK_SPACE = 0x00A0
+ZERO_WIDTH_CHARS = (0x200B, 0x200C, 0x200D)  # space, non-joiner, joiner
+_ZERO_WIDTH = re.compile("[" + "".join(map(chr, ZERO_WIDTH_CHARS)) + "]")
+
+
+def normalize_text(text: str) -> str:
+    """NFC-normalise and tidy whitespace without changing the words."""
+    text = unicodedata.normalize("NFC", text)
+    text = text.replace(chr(NO_BREAK_SPACE), " ")
+    # Zero-width space / non-joiner / joiner: OCR inserts them after Tamil virama, and they
+    # silently break keyword matching while changing nothing a reader can see.
+    text = _ZERO_WIDTH.sub("", text)
+    # Re-join English words hyphenated across a line break.
+    text = re.sub(r"([a-z])-\n([a-z])", r"\1\2", text)
+    lines = [re.sub(r"[ \t]+", " ", line).strip() for line in text.splitlines()]
+    text = "\n".join(lines)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 TAMIL_DIGIT_ZERO = 0x0BE6
 DEVANAGARI_DIGIT_ZERO = 0x0966
