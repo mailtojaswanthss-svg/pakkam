@@ -185,6 +185,13 @@ def create_app(
             raise HTTPException(status_code=503, detail="Voice input is not set up on this server.")
         settings = get_settings()
         clip = audio.file.read(settings.stt_max_bytes + 1)
+        if len(clip) == 0:
+            raise HTTPException(status_code=422, detail="Audio file is empty.")
+        if len(clip) > settings.stt_max_bytes:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Audio file exceeds maximum size of {settings.stt_max_bytes} bytes.",
+            )
         filename = audio.filename or "question.wav"
         language_code = GNANI_LANGUAGE_CODES[language]
 
@@ -212,12 +219,16 @@ def create_app(
         sources_list = load_sources()
         titles = {d.doc_id: d.title or d.doc_id for d in sources_list}
         doc_dates = {d.doc_id: d.doc_date.isoformat() if d.doc_date else None for d in sources_list}
+        preload_status: str = "pending"
         service = build_service()
         if hasattr(service, "preload"):
             try:
                 service.preload()
+                preload_status = "warmed"
             except Exception as exc:
                 logger.warning("Startup model preload skipped: %s", exc)
+                preload_status = "failed"
+        app.state.preload_status = preload_status
         app.state.schemebot = AppState(
             service,
             AuditLog(audit_dir / AUDIT_LOG_NAME),
@@ -238,6 +249,18 @@ def create_app(
         ),
         version="0.1.0",
         lifespan=lifespan,
+    )
+
+    settings = get_settings()
+    if settings.cors_origins:
+        from fastapi.middleware.cors import CORSMiddleware
+
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
     )
 
     @app.middleware("http")
@@ -261,11 +284,53 @@ def create_app(
         )
 
     @app.get("/health")
-    def health() -> HealthResponse:
-        return HealthResponse(status="ok")
+    def health(state: StateDep) -> HealthResponse:
+        app_settings = get_settings()
+        from schemebot.generate.budget import shared_llm_budget
+        from schemebot.generate.factory import model_for
+
+        budget = shared_llm_budget(
+            app_settings.data_dir / "llm-calls.json",
+            app_settings.max_daily_llm_calls,
+            app_settings.llm_reset_time,
+        )
+        quota_stats = budget.stats()
+        answer_model = model_for(app_settings, "answer")
+        models_info = {
+            "answer": answer_model,
+            "embedding": app_settings.embedding_model,
+            "reranker": app_settings.reranker_model,
+        }
+        retrieval_ok = True
+        try:
+            if hasattr(state.service, "_retriever"):
+                retrieval_ok = state.service._retriever is not None
+        except Exception:
+            retrieval_ok = True
+
+        gnani_ok = state.transcriber is not None
+        preload = getattr(app.state, "preload_status", "warmed")
+        is_degraded = (not retrieval_ok) or (quota_stats["remaining_today"] <= 0)
+        return HealthResponse(
+            status="degraded" if is_degraded else "ok",
+            models=models_info,
+            retrieval_ready=retrieval_ok,
+            gnani_voice_ready=gnani_ok,
+            preload_status=preload,
+            quota=quota_stats,
+        )
+
+
 
     @app.post("/ask", dependencies=[Depends(limit_asks)])
     def ask(body: AskRequest, state: StateDep, request: Request) -> AskResponse:
+        q = body.question.strip()
+        if not q:
+            raise HTTPException(status_code=422, detail="Question cannot be empty or whitespace.")
+        app_settings = get_settings()
+        if len(q) > app_settings.max_question_length:
+            msg = f"Question exceeds maximum length of {app_settings.max_question_length} chars."
+            raise HTTPException(status_code=422, detail=msg)
         # Plain `def`: model inference blocks, so FastAPI runs this in its threadpool.
         answer = state.service.answer(body.question)
         state.audit.record(request.state.request_id, answer)
@@ -278,7 +343,7 @@ def create_app(
         retriever = getattr(state.service, "retriever", None)
         if retriever is None and hasattr(state.service, "_service"):
             retriever = getattr(state.service._service, "retriever", None)
-        if retriever is None:
+        if retriever is None or not hasattr(retriever, "retrieve"):
             raise HTTPException(status_code=503, detail="Retriever not available")
         retrieval = retriever.retrieve(body.question)
         total_ms = (time.perf_counter() - started) * 1000

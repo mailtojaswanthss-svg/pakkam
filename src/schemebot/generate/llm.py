@@ -11,6 +11,7 @@ from typing import Any, Protocol, TypeVar
 from pydantic import BaseModel, ValidationError
 
 from schemebot.config import Effort
+from schemebot.generate.budget import BudgetExhausted, LlmBudget
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,7 @@ class ClaudeJsonLlm:
         effort: Effort,
         timeout_seconds: float = 60.0,
         retries: int = 2,
+        budget: LlmBudget | None = None,
     ) -> None:
         import anthropic
 
@@ -82,6 +84,7 @@ class ClaudeJsonLlm:
         self._anthropic = anthropic
         self._model = model
         self._effort = effort
+        self._budget = budget
         if not has_credentials(self._client):
             logger.warning(
                 "No Claude API credentials found; questions that reach the LLM will be "
@@ -101,6 +104,13 @@ class ClaudeJsonLlm:
         # genuine programming errors).
         if not has_credentials(self._client):
             raise LlmUnavailableError("no Claude API credentials configured")
+
+        if self._budget is not None:
+            try:
+                self._budget.take(model=self._model)
+            except BudgetExhausted as exc:
+                logger.warning("Claude call blocked by daily budget: %s", exc)
+                raise LlmUnavailableError(str(exc)) from exc
 
         anthropic = self._anthropic
         messages: list[BetaMessageParam] = [{"role": "user", "content": user}]
@@ -126,6 +136,8 @@ class ClaudeJsonLlm:
         except anthropic.APIConnectionError as error:
             raise LlmUnavailableError("could not reach the Claude API") from error
         except anthropic.RateLimitError as error:
+            if self._budget is not None:
+                self._budget.record_429(model=self._model)
             raise LlmUnavailableError("Claude API rate limit reached") from error
         except anthropic.APIStatusError as error:
             logger.error("Claude API error %s (request %s)", error.status_code, error.request_id)

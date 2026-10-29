@@ -2,7 +2,7 @@
 
 import re
 from collections.abc import Mapping
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field, StringConstraints
 
@@ -82,6 +82,7 @@ class AskResponse(BaseModel):
         "MODEL_UNAVAILABLE",
         "needs_clarification",
         "PII_DETECTED",
+        "UNSUPPORTED_LANGUAGE",
     ] = Field(
         default="SUPPORTED",
         description="Response status indicating outcome and validity.",
@@ -177,10 +178,14 @@ class AskResponse(BaseModel):
                 for p in getattr(answer, "passages", [])
             ]
         elif (
-            answer.refusal_reason == "pii_detected"
-            or getattr(answer, "status", None) == "PII_DETECTED"
+            answer.refusal_reason in ("pii_detected", "unsupported_language")
+            or getattr(answer, "status", None) in ("PII_DETECTED", "UNSUPPORTED_LANGUAGE")
         ):
-            status_val = "PII_DETECTED"
+            is_unsupported = (
+                answer.refusal_reason == "unsupported_language"
+                or getattr(answer, "status", None) == "UNSUPPORTED_LANGUAGE"
+            )
+            status_val = "UNSUPPORTED_LANGUAGE" if is_unsupported else "PII_DETECTED"
             path_val = "guardrail"
             fallback_passages = None
         elif answer.refused:
@@ -271,7 +276,12 @@ class AskSourcesResponse(BaseModel):
 
 
 class HealthResponse(BaseModel):
-    status: Literal["ok"]
+    status: Literal["ok", "degraded"] = "ok"
+    models: dict[str, str] = Field(default_factory=dict)
+    retrieval_ready: bool = True
+    gnani_voice_ready: bool = False
+    preload_status: Literal["warmed", "pending", "failed"] = "warmed"
+    quota: dict[str, Any] | None = None
 
 
 class SourceOut(BaseModel):
