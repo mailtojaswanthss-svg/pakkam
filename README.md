@@ -216,14 +216,16 @@ Returns official document citations in **~300 ms** using 0 LLM calls:
 cp .env.example .env
 # Edit .env with your SCHEMEBOT_GEMINI_API_KEY, SCHEMEBOT_GNANI_API_KEY, etc.
 
-# 2. Run automated test suite (55 unit tests)
-$env:PYTHONPATH="src"
-pytest tests/test_api.py tests/test_fact_cards.py tests/test_claims.py
+# 2. Install dependencies via uv
+uv sync --extra api --extra store --extra eval --extra generate --extra gemini --extra ingest
 
-# 3. Launch live API & web interface
+# 3. Run automated test suite (521 unit & integration tests)
+uv run pytest -q
+
+# 4. Launch live API & web interface
 $env:PYTHONPATH="src"
 $env:SCHEMEBOT_QDRANT_COLLECTION="pakkam_chitra"
-python -m uvicorn schemebot.api.main:app --host 0.0.0.0 --port 8000
+uv run python -m uvicorn schemebot.api.main:app --host 0.0.0.0 --port 8000
 ```
 
 Access in your browser:
