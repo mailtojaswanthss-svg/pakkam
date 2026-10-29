@@ -267,7 +267,9 @@ class FeedbackRequest(BaseModel):
     question: str = Field(description="The citizen question text.")
     status: str = Field(description="The response status (e.g. SUPPORTED, INSUFFICIENT_EVIDENCE).")
     thumbs: Literal["up", "down"] = Field(description="User feedback direction.")
-    reason: str | None = Field(default=None, description="Optional wrong-answer reason or critique.")
+    reason: str | None = Field(
+        default=None, description="Optional wrong-answer reason or critique."
+    )
     timings_ms: dict[str, float] = Field(default_factory=dict, description="Stage timings.")
 
 

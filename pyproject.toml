@@ -91,7 +91,7 @@ plugins = ["pydantic.mypy"]
 
 # Third-party libraries without type information, or not installed in CI (torch, transformers).
 [[tool.mypy.overrides]]
-module = ["pytesseract", "FlagEmbedding", "huggingface_hub", "torch", "torch.*", "transformers", "transformers.*", "anthropic", "anthropic.*", "google", "google.*", "pymupdf"]
+module = ["pytesseract", "FlagEmbedding", "huggingface_hub", "torch", "torch.*", "transformers", "transformers.*", "anthropic", "anthropic.*", "google", "google.*", "pymupdf", "PIL", "PIL.*", "qdrant_client", "qdrant_client.*"]
 ignore_missing_imports = true
 
 # pymupdf ships no type hints for its constructors, so allow calling it from these modules.

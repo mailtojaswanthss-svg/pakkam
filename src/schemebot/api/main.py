@@ -4,9 +4,9 @@ Run with `uv run fastapi run` (entrypoint is set in pyproject.toml). The embeddi
 reranker models load once at startup; requests then reuse them.
 """
 
+import json
 import logging
 import math
-import json
 import mimetypes
 import re
 import time
@@ -23,12 +23,12 @@ from pydantic import TypeAdapter, ValidationError
 from schemebot.api.audit import AuditLog
 from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import (
-    FeedbackRequest,
-    FeedbackResponse,
     AskRequest,
     AskResponse,
     AskSourcesResponse,
     FallbackPassage,
+    FeedbackRequest,
+    FeedbackResponse,
     HealthResponse,
     SourceOut,
     SpeakRequest,
@@ -46,7 +46,6 @@ from schemebot.voice.stt import (
     Transcriber,
     VoiceLanguage,
     build_transcriber,
-    check_audio,
 )
 from schemebot.voice.tts import Speaker, TtsError, build_speaker, language_code_for
 
@@ -267,7 +266,7 @@ def create_app(
 
     @app.post("/ask/sources")
     def ask_sources(body: AskRequest, state: StateDep) -> AskSourcesResponse:
-        """Fast sources endpoint: runs retriever without LLM to surface official scheme documents in ~300ms."""
+        """Fast sources endpoint: surface official scheme documents in ~300ms."""
         started = time.perf_counter()
         retriever = getattr(state.service, "retriever", None)
         if retriever is None and hasattr(state.service, "_service"):
