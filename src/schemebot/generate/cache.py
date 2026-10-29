@@ -95,6 +95,11 @@ class _Entry:
 class CachedAnswerer:
     """In-memory LRU cache wrapping an AnswerService."""
 
+    def preload(self) -> None:
+        """Forwards preload call to the underlying service."""
+        if hasattr(self._service, "preload"):
+            self._service.preload()
+
     def __init__(
         self,
         service: AnswerService,
