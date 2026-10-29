@@ -1,0 +1,10 @@
+{
+  "status": "COMPLETED",
+  "iterations": 10,
+  "stt_ms": 1320.4,
+  "median_retrieval_ms": 452.4,
+  "p95_retrieval_ms": 520.0,
+  "llm_ms": 3850.0,
+  "ttfa_ms": 2795.1,
+  "perceived_start_ms": 8417.9
+}
