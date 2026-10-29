@@ -136,6 +136,15 @@ def _misread_in(chunk: Chunk, misread: dict[tuple[str, int], set[str]]) -> set[s
 
 
 class Answerer:
+    def preload(self) -> None:
+        """Preloads and warms up retrieval models to eliminate cold-start latency."""
+        if hasattr(self._retriever, "retrieve"):
+            try:
+                self._retriever.retrieve("warmup")
+                logger.info("Retriever models preloaded and warmed up successfully.")
+            except Exception as exc:
+                logger.debug("Preload retrieve skipped or failed: %s", exc)
+
     def __init__(
         self,
         retriever: Retriever,

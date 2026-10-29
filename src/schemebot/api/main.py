@@ -212,8 +212,14 @@ def create_app(
         sources_list = load_sources()
         titles = {d.doc_id: d.title or d.doc_id for d in sources_list}
         doc_dates = {d.doc_id: d.doc_date.isoformat() if d.doc_date else None for d in sources_list}
+        service = build_service()
+        if hasattr(service, "preload"):
+            try:
+                service.preload()
+            except Exception as exc:
+                logger.warning("Startup model preload skipped: %s", exc)
         app.state.schemebot = AppState(
-            build_service(),
+            service,
             AuditLog(audit_dir / AUDIT_LOG_NAME),
             titles,
             build_stt(),
@@ -344,7 +350,9 @@ def create_app(
 
     @app.post("/feedback")
     def feedback(body: FeedbackRequest, state: StateDep) -> FeedbackResponse:
-        """Citizen feedback loop: records ratings, status, language, timings; text only if opted in."""
+        """Citizen feedback loop: records ratings, status, language, timings.
+        Text only saved if opted in.
+        """
         log_dir = PROJECT_ROOT / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         fb_path = log_dir / "feedback.jsonl"
