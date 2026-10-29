@@ -5,11 +5,36 @@ page recorded in `helpline_source`), following the project rule that every numbe
 from a source. Websites are the schemes' official portals from docs/data_sources.md.
 """
 
+import csv
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, HttpUrl, TypeAdapter, model_validator
 
 CONTACTS_NAME = "contacts.json"
+
+
+def verify_helplines(csv_path: Path) -> list[str]:
+    """Verify that every non-null helpline in the check sheet has a source and verifier."""
+    errors: list[str] = []
+    if not csv_path.exists():
+        return [f"Helpline verification sheet not found at {csv_path}"]
+
+    with csv_path.open("r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for idx, row in enumerate(reader, start=2):
+            scheme = (row.get("scheme") or "").strip()
+            helpline = (row.get("helpline") or "").strip()
+            source_url = (row.get("source_url") or "").strip()
+            verified_by = (row.get("verified_by") or "").strip()
+
+            if helpline:
+                if not source_url:
+                    errors.append(f"Row {idx} ({scheme}): helpline '{helpline}' lacks source_url.")
+                if not verified_by:
+                    errors.append(
+                        f"Row {idx} ({scheme}): helpline '{helpline}' lacks human verified_by."
+                    )
+    return errors
 
 
 class Contact(BaseModel):

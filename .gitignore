@@ -34,6 +34,8 @@ tools/
 
 # Voice recordings and their transcripts (python -m schemebot.voice): never committed
 data/voice/
+data/voice/field_clips/
+data/voice/prisma_raw_sample.json
 
 data/audio_cache/
 *.wav

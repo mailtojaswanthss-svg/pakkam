@@ -13,13 +13,21 @@ from collections import Counter
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CSV = PROJECT_ROOT / "docs" / "review" / "answer_eval.csv"
+DEFAULT_CSV_1 = PROJECT_ROOT / "docs" / "review" / "grading_sheet.csv"
+DEFAULT_CSV_2 = PROJECT_ROOT / "docs" / "review" / "answer_eval.csv"
 
 
 def main():
-    csv_path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_CSV
+    if len(sys.argv) > 1:
+        csv_path = Path(sys.argv[1])
+    elif DEFAULT_CSV_1.is_file():
+        csv_path = DEFAULT_CSV_1
+    else:
+        csv_path = DEFAULT_CSV_2
+
     if not csv_path.is_file():
-        print(f"Error: CSV file not found at {csv_path}")
+        print(f"Error: Neither {DEFAULT_CSV_1} nor {DEFAULT_CSV_2} exists.")
+        print("Run scripts/make_grading_sheet.py to create one.")
         return
 
     with csv_path.open(encoding="utf-8") as f:
@@ -60,17 +68,21 @@ def main():
     print("-" * 60)
 
     if num_total > 0:
-        print(f"Numeric Accuracy:         {num_acc:5.1f}%  (n={num_total}: {num_y} correct, {num_n} wrong, {num_counts.get('na', 0)} n/a)")
+        na_cnt = num_counts.get("na", 0)
+        c_str = f"{num_y} y, {num_n} n, {na_cnt} n/a"
+        print(f"Numeric Accuracy:         {num_acc:5.1f}%  (n={num_total}: {c_str})")
     else:
         print("Numeric Accuracy:         Awaiting human grades in 'number_correct' column")
 
     if cite_total > 0:
-        print(f"Citation Precision:       {cite_prec:5.1f}%  (n={cite_total}: {cite_y} supported, {cite_n} unsupported)")
+        c_str = f"{cite_y} y, {cite_n} n"
+        print(f"Citation Precision:       {cite_prec:5.1f}%  (n={cite_total}: {c_str})")
     else:
         print("Citation Precision:       Awaiting human grades in 'citation_supports' column")
 
     if unsupp_total > 0:
-        print(f"Unsupported-Claim Rate:   {unsupp_rate:5.1f}%  (n={unsupp_total}: {unsupp_y} unsupported, {unsupp_n} supported)")
+        c_str = f"{unsupp_y} y, {unsupp_n} n"
+        print(f"Unsupported-Claim Rate:   {unsupp_rate:5.1f}%  (n={unsupp_total}: {c_str})")
     else:
         print("Unsupported-Claim Rate:   Awaiting human grades in 'unsupported_claim' column")
 
