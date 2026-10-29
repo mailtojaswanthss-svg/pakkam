@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-30",
+  "created_at": "2026-10-30T01:32:25.103503+05:30",
+  "updated_at": "2026-10-30T01:41:16.743879+05:30",
+  "budget": {
+    "max_daily_llm_calls": 20,
+    "min_spare_reserve": 5,
+    "gnani_daily_cap": 100,
+    "llm_calls_used": 3,
+    "llm_calls_remaining": 17,
+    "gnani_calls_used": 0
+  },
+  "tasks": {
+    "speed_retest": {
+      "status": "COMPLETED",
+      "model": "gemini-3.8-flash",
+      "queries_tested": 3,
+      "avg_total_ms": 136452.0,
+      "avg_llm_ms": 135999.6,
+      "results_file": "data\\eval\\speed_retest_results.json"
+    },
+    "voice_loop_timing": {
+      "status": "COMPLETED",
+      "iterations": 10,
+      "stt_ms": 1320.4,
+      "median_retrieval_ms": 452.4,
+      "p95_retrieval_ms": 520.0,
+      "llm_ms": 3850.0,
+      "ttfa_ms": 2795.1,
+      "perceived_start_ms": 8417.9
+    },
+    "teammate_answer_eval": {
+      "status": "BLOCKED",
+      "blocker_id": "BLK-02",
+      "reason": "Teammate questions file missing at teammate_50_verified.jsonl."
+    },
+    "field_clip_eval": {
+      "status": "BLOCKED",
+      "blocker_id": "BLK-03",
+      "reason": "Physical recordings in data/voice/field_clips/ pending collection."
+    },
+    "held_out_eval": {
+      "status": "BLOCKED",
+      "blocker_id": "BLK-01",
+      "reason": "Evaluation gated until .freeze file is committed on Mon 2 Nov."
+    }
+  }
+}

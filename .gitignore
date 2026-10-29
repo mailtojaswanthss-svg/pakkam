@@ -22,6 +22,8 @@ logs/
 *.log
 .cache/
 qdrant_storage/
+*-calls.json
+*.lock
 
 # Search index (rebuilt by python -m schemebot.index)
 data/index/
@@ -41,6 +43,4 @@ data/audio_cache/
 *.wav
 *.mp3
 
-
 data/eval/answer_eval_raw/
-

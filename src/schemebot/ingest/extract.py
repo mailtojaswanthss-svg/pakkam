@@ -18,7 +18,7 @@ import pymupdf
 
 from schemebot.ingest.langid import Language
 from schemebot.text import (
-    normalize_text,
+    normalize_text as normalize_text,
 )
 
 logger = logging.getLogger(__name__)
