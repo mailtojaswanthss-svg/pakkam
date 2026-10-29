@@ -10,13 +10,12 @@ Responses served from fact cards have path="fact_card" and carry exact source pa
 
 from __future__ import annotations
 
-import json
 import logging
 import math
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import BaseModel, TypeAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,8 @@ CardField = Literal["amount", "who_qualifies", "documents", "how_to_apply"]
 
 SCHEME_ALIASES: dict[str, list[str]] = {
     "Kalaignar Magalir Urimai Thittam": [
-        "kmut", "magalir urimai", "மகளிர் உரிமை", "urimai thogai", "உரிமைத் தொகை", "kalaignar", "கலைஞர் மகளிர்"
+        "kmut", "magalir urimai", "மகளிர் உரிமை", "urimai thogai",
+        "உரிமைத் தொகை", "kalaignar", "கலைஞர் மகளிர்"
     ],
     "PM-KISAN": [
         "pm kisan", "pmkisan", "pm-kisan", "kisan samman", "किसान सम्मान", "விவசாயி"
@@ -70,7 +70,7 @@ def load_verified_cards(path: Path) -> list[FactCard]:
 
 
 def cosine_similarity(v1: list[float], v2: list[float]) -> float:
-    dot = sum(a * b for a, b in zip(v1, v2))
+    dot = sum(a * b for a, b in zip(v1, v2, strict=False))
     norm1 = math.sqrt(sum(a * a for a in v1))
     norm2 = math.sqrt(sum(b * b for b in v2))
     if norm1 == 0 or norm2 == 0:
@@ -106,6 +106,8 @@ class FactCardMatcher:
             self._precompute_embeddings()
 
     def _precompute_embeddings(self) -> None:
+        if self._encoder is None:
+            return
         self._card_embeddings = []
         for card in self.cards:
             if not card.question_examples:
@@ -114,8 +116,10 @@ class FactCardMatcher:
             self._card_embeddings.append((card, [e.dense for e in embs]))
 
     def match(self, question: str) -> tuple[FactCard | None, float]:
-        """Returns the best matching verified card and cosine score if score >= threshold and scheme matches."""
-        if not self.cards or not self._encoder or not self._card_embeddings:
+        """Returns the best matching verified card and cosine score
+        if score >= threshold and scheme matches.
+        """
+        if not self.cards or self._encoder is None or not self._card_embeddings:
             return None, 0.0
 
         # Encode user question

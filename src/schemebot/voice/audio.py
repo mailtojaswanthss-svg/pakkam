@@ -5,6 +5,7 @@ standard 16 kHz mono 16-bit PCM WAV. Caps audio at 30 seconds and raises a clear
 error if audio exceeds the time limit.
 """
 
+import contextlib
 import io
 import os
 import shutil
@@ -76,8 +77,7 @@ def convert_to_wav16k(
     try:
         proc = subprocess.run(
             cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             check=False,
         )
         if proc.returncode != 0:
@@ -87,21 +87,18 @@ def convert_to_wav16k(
         converted_wav = Path(out_path).read_bytes()
     finally:
         if os.path.exists(in_path):
-            try:
+            with contextlib.suppress(OSError):
                 os.remove(in_path)
-            except OSError:
-                pass
         if os.path.exists(out_path):
-            try:
+            with contextlib.suppress(OSError):
                 os.remove(out_path)
-            except OSError:
-                pass
 
     duration = get_audio_duration(converted_wav)
     if duration > max_seconds + 0.1:  # Allow 100ms jitter
-        raise SttError(
-            f"Recording is {duration:.1f}s long. Please keep questions under {max_seconds:.0f} seconds.",
-            400,
+        msg = (
+            f"Recording is {duration:.1f}s long. "
+            f"Please keep questions under {max_seconds:.0f} seconds."
         )
+        raise SttError(msg, 400)
 
     return converted_wav

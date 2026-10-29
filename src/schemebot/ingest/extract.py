@@ -255,7 +255,13 @@ def make_chitrapathak_ocr(language: Language) -> OcrFn:
                 "role": "user",
                 "content": [
                     {"type": "image", "image": image},
-                    {"type": "text", "text": "Extract all text from this image exactly as written. Output only the extracted text."},
+                    {
+                        "type": "text",
+                        "text": (
+                            "Extract all text from this image exactly as written. "
+                            "Output only the extracted text."
+                        ),
+                    },
                 ],
             }
         ]
@@ -270,12 +276,13 @@ def make_chitrapathak_ocr(language: Language) -> OcrFn:
         ).to(model.device)
         generated_ids = model.generate(**inputs, max_new_tokens=2048)
         generated_ids_trimmed = [
-            out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+            out_ids[len(in_ids):]
+            for in_ids, out_ids in zip(inputs.input_ids, generated_ids, strict=False)
         ]
         output_text = processor.batch_decode(
             generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
         )[0]
-        return output_text.strip()
+        return str(output_text).strip()
 
     return ocr_page
 

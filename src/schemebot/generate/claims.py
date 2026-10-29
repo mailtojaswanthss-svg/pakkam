@@ -25,7 +25,9 @@ ClaimType = Literal["amount", "date", "condition", "description"]
 ClaimPeriod = Literal["monthly", "yearly", "one_time", "unknown"]
 
 MONTHLY_KEYWORDS = ("month", "monthly", "மாத", "மாதந்தோறும்", "மாதம்", "प्रति माह", "मासिक")
-YEARLY_KEYWORDS = ("year", "yearly", "annual", "annum", "ஆண்டு", "வருட", "வருடாந்திர", "प्रति वर्ष", "सालाना", "वार्षिक")
+YEARLY_KEYWORDS = (
+    "year", "yearly", "annual", "annum", "ஆண்டு", "வருட", "வருடாந்திர", "प्रति वर्ष", "सालाना", "वार्षिक"
+)
 
 
 class Claim(BaseModel):

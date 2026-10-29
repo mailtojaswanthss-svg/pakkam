@@ -1,25 +1,150 @@
-"""Semantic vector cache for sub-50ms verified answer retrieval.
+"""Answer caching and semantic vector cache for instant response feel.
 
-Caches high-frequency welfare scheme questions and their verified answers.
-When an incoming query embedding matches a cached question with cosine
-similarity >= threshold (default 0.96), the answer is returned directly,
-incurring 0 LLM API calls and <30ms total latency.
+Provides:
+1. `CachedAnswerer`: In-memory LRU cache keyed on question text and index fingerprint.
+2. `SemanticCache`: Vector similarity cache (cosine >= threshold) for sub-50ms verified answers.
 """
 
+import hashlib
 import json
 import logging
 import math
+import re
+import threading
 import time
-from dataclasses import dataclass
+from collections import OrderedDict
+from collections.abc import Callable
+from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Self
+from typing import Protocol, Self
 
 from pydantic import BaseModel, ConfigDict
 
+from schemebot.config import Settings
 from schemebot.generate.answer import Answer, Citation
-from schemebot.ingest.langid import Language
+from schemebot.generate.messages import RefusalReason
+from schemebot.ingest.corrections import CORRECTIONS_NAME
+from schemebot.ingest.langid import Language, detect_language
+from schemebot.text import normalize_for_search
 
 logger = logging.getLogger(__name__)
+
+_PASSING_FAILURES: frozenset[RefusalReason] = frozenset({"service_unavailable", "model_declined"})
+_SPACES = re.compile(r"\s+")
+_END_PUNCTUATION = "?？.!।॥ "
+
+
+class AnswerService(Protocol):
+    def answer(self, question: str, voice_mode: bool = False) -> Answer: ...
+
+
+def normalize_question(question: str) -> str:
+    """'PM Kisan  amount?' and 'pm kisan amount' give the same text."""
+    text = _SPACES.sub(" ", normalize_for_search(question)).casefold()
+    return text.strip().rstrip(_END_PUNCTUATION)
+
+
+def cache_key(question: str, fingerprint: str = "", voice_mode: bool = False) -> str:
+    language = detect_language(question)
+    mode_str = "voice" if voice_mode else "text"
+    return "\x1f".join((fingerprint, mode_str, language, normalize_question(question)))
+
+
+def _digest_files(paths: list[Path], root: Path) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(paths):
+        digest.update(str(path.relative_to(root)).encode())
+        with path.open("rb") as file:
+            for block in iter(lambda: file.read(1 << 20), b""):
+                digest.update(block)
+    return digest.hexdigest()
+
+
+def answer_fingerprint(settings: Settings, answer_model: str, verifier_model: str) -> str:
+    """Hash of what an answer depends on besides the question. Read once at startup."""
+    index = settings.index_dir
+    found = index.rglob("*") if index.is_dir() else []
+    # Skip lock files: the store writes one while it is open, which is not a content change.
+    index_files = [p for p in found if p.is_file() and not p.name.startswith(".")]
+    corrections = settings.data_dir / CORRECTIONS_NAME
+    parts = {
+        "answer_model": answer_model,
+        "verifier_model": verifier_model if settings.verify_answers else "off",
+        "effort": settings.llm_effort,
+        "embedding": f"{settings.embedding_model}@{settings.embedding_revision}",
+        "reranker": f"{settings.reranker_model}@{settings.reranker_revision}",
+        "retrieval_top_k": settings.retrieval_top_k,
+        "rerank_top_k": settings.rerank_top_k,
+        "refusal_threshold": settings.refusal_threshold,
+        "gloss_tanglish": settings.gloss_tanglish,
+        "index": _digest_files(index_files, index),
+        "corrections": _digest_files([corrections], settings.data_dir)
+        if corrections.is_file()
+        else "none",
+    }
+    return hashlib.sha256(json.dumps(parts, sort_keys=True).encode()).hexdigest()[:16]
+
+
+@dataclass(frozen=True)
+class _Entry:
+    answer: Answer
+    stored_at: float
+
+
+class CachedAnswerer:
+    """In-memory LRU cache wrapping an AnswerService."""
+
+    def __init__(
+        self,
+        service: AnswerService,
+        max_entries: int = 128,
+        ttl_seconds: float = 3600.0,
+        fingerprint: str = "",
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
+        if max_entries < 1:
+            raise ValueError(f"max_entries must be >= 1, got {max_entries}")
+        self._service = service
+        self._max_entries = max_entries
+        self._ttl_seconds = ttl_seconds
+        self._fingerprint = fingerprint
+        self._clock = clock
+        self._lock = threading.Lock()
+        self._entries: OrderedDict[str, _Entry] = OrderedDict()
+
+    @property
+    def retriever(self) -> object:
+        return getattr(self._service, "retriever", None)
+
+    def answer(self, question: str, voice_mode: bool = False) -> Answer:
+        key = cache_key(question, self._fingerprint, voice_mode=voice_mode)
+        cached = self._get(key)
+        if cached is not None:
+            # Replaced question so subtle differences like whitespace match the caller
+            return replace(cached, question=question)
+
+        answer = self._service.answer(question, voice_mode=voice_mode)
+        if answer.refusal_reason not in _PASSING_FAILURES:
+            self._put(key, answer)
+        return answer
+
+    def _get(self, key: str) -> Answer | None:
+        with self._lock:
+            entry = self._entries.get(key)
+            if entry is None:
+                return None
+            if self._clock() - entry.stored_at > self._ttl_seconds:
+                del self._entries[key]
+                return None
+            self._entries.move_to_end(key)
+            return entry.answer
+
+    def _put(self, key: str, answer: Answer) -> None:
+        with self._lock:
+            self._entries[key] = _Entry(answer, self._clock())
+            self._entries.move_to_end(key)
+            while len(self._entries) > self._max_entries:
+                self._entries.popitem(last=False)
 
 
 def cosine_similarity(v1: list[float], v2: list[float]) -> float:
