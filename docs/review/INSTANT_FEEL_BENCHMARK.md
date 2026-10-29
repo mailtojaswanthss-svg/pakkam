@@ -16,7 +16,7 @@
 | **Median** | 205.6 ms | 145.0 ms | **352.9 ms** |
 | **Min** | 170.5 ms | 119.3 ms | **311.1 ms** |
 | **Max** | 931.8 ms | 183.2 ms | **1115.5 ms** |
-| **p95** | 213.9 ms | 163.4 ms | **358.9 ms** |
+*(Note: p95 omitted as statistically unrepresentative on sample size n=10; distribution reported via median 352.9 ms and max 1,115.5 ms).*
 
 ---
 

@@ -2,67 +2,61 @@
   {
     "scheme": "Atal Pension Yojana",
     "helpline": "1800 1100 69",
-    "helpline_source": "PFRDA APY Help Desk toll-free brochure (pfrda.org.in, verified Oct 2026)",
+    "helpline_source": "apy-brochure-en p1 (PFRDA APY help desk, toll free; current number to be confirmed by a person)",
     "website": "https://www.pfrda.org.in"
   },
   {
     "scheme": "PM-KISAN",
-    "helpline": "155261",
-    "helpline_source": "PM-KISAN Central Helpdesk toll-free (pmkisan.gov.in, verified Oct 2026)",
+    "helpline": null,
+    "helpline_source": null,
     "website": "https://pmkisan.gov.in"
   },
   {
     "scheme": "Pradhan Mantri Ujjwala Yojana",
-    "helpline": "1800 266 6696",
-    "helpline_source": "MoPNG Ujjwala Helpline toll-free (pmuy.gov.in, verified Oct 2026)",
+    "helpline": null,
+    "helpline_source": null,
     "website": "https://www.pmuy.gov.in"
   },
   {
     "scheme": "Kalaignar Magalir Urimai Thittam",
-    "helpline": "1100",
-    "helpline_source": "Tamil Nadu CM Helpline 1100 / Special Programme Implementation Dept (kmut.tn.gov.in, verified Oct 2026)",
+    "helpline": null,
+    "helpline_source": null,
     "website": "https://kmut.tn.gov.in"
   },
   {
     "scheme": "Chief Minister's Breakfast Scheme",
-    "helpline": "1100",
-    "helpline_source": "Tamil Nadu CM Helpline 1100 / Social Welfare and Women Rights Dept (tn.gov.in, verified Oct 2026)",
+    "helpline": null,
+    "helpline_source": null,
     "website": "https://www.tn.gov.in"
   },
   {
-    "scheme": "Chief Minister's Comprehensive Health Insurance Scheme",
-    "helpline": "1800 425 3993",
-    "helpline_source": "CMCHIS 24x7 Toll-Free Call Centre (cmchis.tn.gov.in, verified Oct 2026)",
-    "website": "https://cmchis.tn.gov.in"
-  },
-  {
     "scheme": "Tamil Nadu Social Welfare schemes (policy note)",
-    "helpline": "181",
-    "helpline_source": "Department of Social Welfare & Women Rights 24x7 Women Helpline 181 (tn.gov.in, verified Oct 2026)",
+    "helpline": null,
+    "helpline_source": null,
     "website": "https://www.tn.gov.in"
   },
   {
     "scheme": "Tamil Nadu Health and Family Welfare schemes (policy note)",
-    "helpline": "104",
-    "helpline_source": "Tamil Nadu Health Information & Medical Advice Helpline 104 (tnhealth.tn.gov.in, verified Oct 2026)",
+    "helpline": null,
+    "helpline_source": null,
     "website": "https://www.tn.gov.in"
   },
   {
     "scheme": "Tamil Nadu Higher Education schemes (policy note)",
-    "helpline": "14417",
-    "helpline_source": "Tamil Nadu Education Helpline & Guidance Centre 14417 (tndce.tn.gov.in, verified Oct 2026)",
+    "helpline": null,
+    "helpline_source": null,
     "website": "https://www.tn.gov.in"
   },
   {
     "scheme": "Tamil Nadu Adi Dravidar and Tribal Welfare schemes (policy note)",
-    "helpline": "1800 425 0099",
-    "helpline_source": "Directorate of Tribal Welfare / Adi Dravidar Welfare Toll-Free (tn.gov.in, verified Oct 2026)",
+    "helpline": null,
+    "helpline_source": null,
     "website": "https://www.tn.gov.in"
   },
   {
     "scheme": "Tamil Nadu BC, MBC and Minorities Welfare schemes (policy note)",
-    "helpline": "1100",
-    "helpline_source": "Tamil Nadu CM Helpline 1100 / Directorate of Backward Classes Welfare (tn.gov.in, verified Oct 2026)",
+    "helpline": null,
+    "helpline_source": null,
     "website": "https://www.tn.gov.in"
   }
 ]

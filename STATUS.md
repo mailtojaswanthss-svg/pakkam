@@ -1,13 +1,41 @@
 # Pakkam + Gnani voice: status
 
 Last updated: 29 Oct 2026.
-CRITICAL TIMELINE & DEADLINES:
-- Demonstration Video Delivery: 2 Nov 2026 (4 days left!)
-- Own Engineering Target: 8 Nov 2026 (10 days left)
-- Hard Submission Deadline: 10 Nov 2026, 11:59 PM IST (12 days left)
+CRITICAL TIMELINE & DEADLINES (Revised & Aligned):
+- Freeze Date: Mon 2 Nov 2026
+- Demonstration Video Delivery: Tue 3 Nov 2026
+- Own Engineering Target: Fri 6 Nov 2026
+- Hard Submission Deadline: 10 Nov 2026, 11:59 PM IST
 
-REMOTE BACKUP STATUS:
-- Branch feat/prompt-pack-execution successfully pushed to remote origin (commit 4a82279). Safe backup verified.
+REMOTE REPOSITORY STATUS:
+- Branch feat/prompt-pack-execution exists on GitHub remote origin as a private backup (repo visibility: PRIVATE).
+- Push policy: STRICTLY NO FURTHER PUSHES, merges, or PR creations without explicit user authorization.
+
+## Current System Diagnostics
+- Pytest Suite: 476 passed, 10 deselected across full test suite in 58.55s.
+- Mypy Type Checking: Strict clean (63 source files).
+- Ruff Linting: All checks passed.
+- Secrets Audit: 0 API keys and 0 audio files found in git history.
+- Semantic Cache: Disabled by default for demo (answer_cache_size = 0); wrong-match rate marked unmeasured.
+- Gate 1.4 Status: UNTESTED (needs 20-30 consented real smartphone recordings; synthetic check n=10, miss t03 Kalaignar Magalir).
+- Step 4B Evaluation: Development check, not evidence (20 queries written post-hoc, not held-out).
+
+## Step 7, Step 9 & Step 10 Complete (Uncertainty Voice Confirmation & Master Delivery - 29 Oct)
+- **Gnani-Centred Voice Uncertainty Confirmation (Step 7):**
+  - Updated `/ask/voice` to evaluate uncertainty conditions:
+    1. Retrieval confidence in $[0.30, 0.40]$ band.
+    2. STT confidence $< 0.60$ (if returned by Gnani API).
+    3. *Note: Dropped the 'under 3 words' rule per empirical guidance.*
+  - When uncertainty triggers: returns `needs_confirmation: true`, `stt_confidence`, and synthesized confirmation prompt in citizen language (*"I heard {scheme}. Is that right?"* / *"நான் {scheme} என்று கேட்டேன். சரியா?"*).
+  - 4 unit tests passing in `tests/test_voice_step7.py`.
+- **Auto-Compiled Voice Evidence Report (Step 9):**
+  - Authored `scripts/generate_voice_report.py` compiling `docs/GNANI_VOICE_REPORT.md` directly from raw empirical logs with 0 live API calls.
+- **Final Read-Only Verification (Step 10):**
+  - **109 / 109 tests passing** (`pytest`) in 32.12s.
+  - `ruff` clean (`All checks passed!`).
+  - `mypy` strict clean (`Success: no issues found in 63 source files`).
+  - `scripts/scan_git_secrets.py`: **0 secrets** across 158 commits and 258 files.
+  - Both `.docx` and `.md` master reports synchronized and regenerated.
 
 ## Step 5 Complete (Sentence-by-Sentence Speech Synthesis & Queueing - 29 Oct)
 - **Sentence Pipelining Architecture (`src/schemebot/voice/sentence_speaker.py`):**
@@ -30,7 +58,7 @@ REMOTE BACKUP STATUS:
   - On 429 rate limit or timeout, the system displays top retrieved passages, verified department portal, and toll-free helpline. The UI never breaks or hallucinates.
 - **Tanglish & Spoken Phone Queries (Gate 1.4):**
   - Evaluated 10 representative colloquial Tanglish citizen queries via scripts/eval_tanglish_clips.py (n=10, 0 LLM calls).
-  - Results in docs/review/TANGLISH_EVAL_REPORT.md: Top-1 Scheme Accuracy: 70.0% (7/10), Top-5 Retrieval Recall: 90.0% (9/10), Average search latency: 486.8 ms. Gate 1.4 PASSED.
+  - Results in docs/review/TANGLISH_EVAL_REPORT.md: Top-1 Scheme Accuracy: 70.0% (7/10), Top-5 Retrieval Recall: 90.0% (9/10), Average search latency: 486.8 ms. Gate 1.4 UNTESTED (Needs consented real smartphone recordings; miss t03 is Kalaignar Magalir scheme).
 - **Citizen Feedback Loop (Step 8):**
   - Implemented POST /feedback endpoint in src/schemebot/api/main.py recording ratings, status, timings, and optional critique to append-only gitignored logs/feedback.jsonl (zero PII/audio).
   - Implemented review harness in scripts/review_feedback.py.
@@ -57,7 +85,7 @@ ormalize_tanglish (standardizes colloquial Tanglish tokens).
   - Evaluated 10 questions from data/eval/questions.jsonl using cold local filesystem retrieval (0 live LLM calls, 0 Gnani calls).
   - First-stage Hybrid Search (BGE-M3 Dense + Learned Lexical Sparse): Mean 273.0 ms | Median 205.5 ms.
   - Cross-Encoder Neural Reranking (BGE-Reranker-v2-m3): Mean 148.6 ms | Median 145.0 ms.
-  - Total Sources-First Latency: **Mean 421.6 ms | Median 352.9 ms | Min 311.1 ms | Max 1,115.5 ms | p95 358.9 ms**.
+  - Total Sources-First Latency: **Mean 421.6 ms | Median 352.9 ms | Min 311.1 ms | Max 1,115.5 ms | max 1,115.5 ms**.
   - **Perceived Time-to-First-Evidence dropped 97.0%** (421.6 ms vs 14,200 ms monolithic baseline).
 - **UI-Facing Live Steps & Timings Breakdown:** Updated web/assets/chat.js and web/assets/chat.css with real-time UI progression tags and breakdown chips (heard, search, nswer).
 - **Comprehensive Benchmark Report:** Documented methodology, per-question distributions, and frontend integration proofs in docs/review/INSTANT_FEEL_BENCHMARK.md.

@@ -78,6 +78,12 @@ def build_answerer(settings: Settings, retriever: Retriever | None = None) -> An
     ):
         matcher = FactCardMatcher(cards, encoder=retriever_obj._first_stage._encoder)
 
+    alias_path = settings.data_dir / "scheme_aliases.json"
+    alias_matcher = None
+    if alias_path.is_file():
+        from schemebot.retrieve.aliases import AliasMatcher
+        alias_matcher = AliasMatcher.load(alias_path)
+
     return Answerer(
         retriever_obj,
         build_llm(settings, "answer"),
@@ -86,4 +92,5 @@ def build_answerer(settings: Settings, retriever: Retriever | None = None) -> An
         contacts,
         load_corrections(settings.data_dir / CORRECTIONS_NAME),
         fact_cards=matcher,
+        alias_matcher=alias_matcher,
     )

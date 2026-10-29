@@ -46,8 +46,9 @@ def normalize_question(question: str) -> str:
 
 def cache_key(question: str, fingerprint: str = "", voice_mode: bool = False) -> str:
     language = detect_language(question)
-    mode_str = "voice" if voice_mode else "text"
-    return "\x1f".join((fingerprint, mode_str, language, normalize_question(question)))
+    if voice_mode:
+        return "\x1f".join((fingerprint, "voice", language, normalize_question(question)))
+    return "\x1f".join((fingerprint, language, normalize_question(question)))
 
 
 def _digest_files(paths: list[Path], root: Path) -> str:
@@ -117,13 +118,19 @@ class CachedAnswerer:
         return getattr(self._service, "retriever", None)
 
     def answer(self, question: str, voice_mode: bool = False) -> Answer:
+        started = self._clock()
         key = cache_key(question, self._fingerprint, voice_mode=voice_mode)
         cached = self._get(key)
         if cached is not None:
             # Replaced question so subtle differences like whitespace match the caller
-            return replace(cached, question=question)
+            elapsed = (self._clock() - started) * 1000
+            timings = {"cache": elapsed, "total": elapsed}
+            return replace(cached, question=question, timings_ms=timings)
 
-        answer = self._service.answer(question, voice_mode=voice_mode)
+        try:
+            answer = self._service.answer(question, voice_mode=voice_mode)
+        except TypeError:
+            answer = self._service.answer(question)
         if answer.refusal_reason not in _PASSING_FAILURES:
             self._put(key, answer)
         return answer

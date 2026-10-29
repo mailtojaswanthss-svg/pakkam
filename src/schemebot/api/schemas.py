@@ -231,6 +231,12 @@ class VoiceAskResponse(AskResponse):
     transcript: str = Field(description="What Gnani speech to text heard; this was the question.")
     stt_language_code: str = Field(description="Language code sent to Gnani, e.g. 'ta-IN'.")
     stt_ms: float = Field(description="Time spent on speech to text, in milliseconds.")
+    stt_confidence: float | None = Field(
+        default=None, description="Speech to text recognition confidence if provided by API."
+    )
+    confirmation_text: str | None = Field(
+        default=None, description="Confirmation prompt if uncertainty threshold triggered."
+    )
 
 
 class TranscribeResponse(BaseModel):
@@ -264,13 +270,19 @@ class SourceOut(BaseModel):
     doc_date: str | None
 
 class FeedbackRequest(BaseModel):
-    question: str = Field(description="The citizen question text.")
     status: str = Field(description="The response status (e.g. SUPPORTED, INSUFFICIENT_EVIDENCE).")
     thumbs: Literal["up", "down"] = Field(description="User feedback direction.")
-    reason: str | None = Field(
-        default=None, description="Optional wrong-answer reason or critique."
-    )
+    language: str = Field(default="ta", description="Citizen/interface language.")
     timings_ms: dict[str, float] = Field(default_factory=dict, description="Stage timings.")
+    include_text: bool = Field(
+        default=False, description="Opt-in consent to record question text and critique."
+    )
+    question: str | None = Field(
+        default=None, description="Optional question text, only stored if include_text=True."
+    )
+    reason: str | None = Field(
+        default=None, description="Optional critique text, only stored if include_text=True."
+    )
 
 
 class FeedbackResponse(BaseModel):
