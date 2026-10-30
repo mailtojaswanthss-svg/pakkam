@@ -33,7 +33,7 @@
     "pdf_shows": "रु.1000",
     "confirmed_by": null,
     "confirmed_on": null,
-    "note": "Minimum guaranteed pension. Claude's first pass of the PDF suggests p1 prints रु.1000; not yet checked by a person."
+    "note": "Minimum guaranteed pension. Claude rendered p1 of the PDF on 27 Oct 2026: it prints रु.1000 (with रु.2000 ... रु.5000), so the correction holds. Still to be confirmed by a person."
   },
   {
     "doc_id": "tn-swwe-policy-note-2024-ta",
