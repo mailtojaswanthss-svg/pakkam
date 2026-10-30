@@ -4,6 +4,7 @@ Run with `uv run fastapi run` (entrypoint is set in pyproject.toml). The embeddi
 reranker models load once at startup; requests then reuse them.
 """
 
+import json
 import logging
 import math
 import mimetypes
@@ -24,6 +25,10 @@ from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import (
     AskRequest,
     AskResponse,
+    AskSourcesResponse,
+    FallbackPassage,
+    FeedbackRequest,
+    FeedbackResponse,
     HealthResponse,
     SourceOut,
     SpeakRequest,
@@ -33,6 +38,7 @@ from schemebot.api.schemas import (
 from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer
 from schemebot.ingest.models import SourceDoc
+from schemebot.voice.audio import convert_to_wav16k
 from schemebot.voice.numbers import spell_amounts
 from schemebot.voice.stt import (
     GNANI_LANGUAGE_CODES,
@@ -40,7 +46,6 @@ from schemebot.voice.stt import (
     Transcriber,
     VoiceLanguage,
     build_transcriber,
-    check_audio,
 )
 from schemebot.voice.tts import Speaker, TtsError, build_speaker, language_code_for
 
@@ -61,7 +66,7 @@ AUDIT_LOG_NAME = "requests.jsonl"
 
 
 class AnswerService(Protocol):
-    def answer(self, question: str) -> Answer: ...
+    def answer(self, question: str, voice_mode: bool = False) -> Answer: ...
 
 
 class AppState:
@@ -77,10 +82,12 @@ class AppState:
         titles: dict[str, str],
         transcriber: Transcriber | None = None,
         speaker: Speaker | None = None,
+        doc_dates: dict[str, str | None] | None = None,
     ) -> None:
         self.service = service
         self.audit = audit
         self.titles = titles
+        self.doc_dates = doc_dates or {}
         self.transcriber = transcriber
         self.speaker = speaker
 
@@ -172,22 +179,30 @@ def create_app(
 
     def heard_question(
         state: AppState, audio: UploadFile, language: VoiceLanguage
-    ) -> tuple[str, str, float]:
-        """Gnani speech to text for one clip: (question, Gnani language code, stt ms)."""
+    ) -> tuple[str, str, float, float | None]:
+        """Gnani STT for one clip: (question, lang code, stt ms, confidence)."""
         if state.transcriber is None:
             raise HTTPException(status_code=503, detail="Voice input is not set up on this server.")
         settings = get_settings()
         clip = audio.file.read(settings.stt_max_bytes + 1)
+        if len(clip) == 0:
+            raise HTTPException(status_code=422, detail="Audio file is empty.")
+        if len(clip) > settings.stt_max_bytes:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Audio file exceeds maximum size of {settings.stt_max_bytes} bytes.",
+            )
         filename = audio.filename or "question.wav"
         language_code = GNANI_LANGUAGE_CODES[language]
 
         started = time.perf_counter()
         try:
-            check_audio(clip, filename, settings.stt_max_bytes, settings.stt_max_seconds)
-            transcript = state.transcriber.transcribe(clip, filename, language_code)
+            converted_clip = convert_to_wav16k(clip, filename, settings.stt_max_seconds)
+            transcript = state.transcriber.transcribe(converted_clip, filename, language_code)
         except SttError as error:
             raise HTTPException(status_code=error.status_code, detail=error.message) from error
         stt_ms = (time.perf_counter() - started) * 1000
+        stt_conf: float | None = getattr(state.transcriber, "last_confidence", None)
 
         try:
             question = AskRequest(question=transcript).question
@@ -195,19 +210,32 @@ def create_app(
             raise HTTPException(
                 status_code=422, detail="Pakkam could not hear a question. Try again."
             ) from error
-        return question, language_code, stt_ms
+        return question, language_code, stt_ms, stt_conf
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         configure_logging()
         audit_dir = log_dir or get_settings().log_dir
-        titles = {d.doc_id: d.title or d.doc_id for d in load_sources()}
+        sources_list = load_sources()
+        titles = {d.doc_id: d.title or d.doc_id for d in sources_list}
+        doc_dates = {d.doc_id: d.doc_date.isoformat() if d.doc_date else None for d in sources_list}
+        preload_status: str = "pending"
+        service = build_service()
+        if hasattr(service, "preload"):
+            try:
+                service.preload()
+                preload_status = "warmed"
+            except Exception as exc:
+                logger.warning("Startup model preload skipped: %s", exc)
+                preload_status = "failed"
+        app.state.preload_status = preload_status
         app.state.schemebot = AppState(
-            build_service(),
+            service,
             AuditLog(audit_dir / AUDIT_LOG_NAME),
             titles,
             build_stt(),
             build_tts(),
+            doc_dates,
         )
         logger.info("models loaded, ready")
         yield
@@ -222,6 +250,18 @@ def create_app(
         version="0.1.0",
         lifespan=lifespan,
     )
+
+    settings = get_settings()
+    if settings.cors_origins:
+        from fastapi.middleware.cors import CORSMiddleware
+
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
     @app.middleware("http")
     async def add_request_id(
@@ -244,15 +284,80 @@ def create_app(
         )
 
     @app.get("/health")
-    def health() -> HealthResponse:
-        return HealthResponse(status="ok")
+    def health(state: StateDep) -> HealthResponse:
+        app_settings = get_settings()
+        from schemebot.generate.budget import shared_llm_budget
+        from schemebot.generate.factory import model_for
+
+        budget = shared_llm_budget(
+            app_settings.data_dir / "llm-calls.json",
+            app_settings.max_daily_llm_calls,
+            app_settings.llm_reset_time,
+        )
+        quota_stats = budget.stats()
+        answer_model = model_for(app_settings, "answer")
+        models_info = {
+            "answer": answer_model,
+            "embedding": app_settings.embedding_model,
+            "reranker": app_settings.reranker_model,
+        }
+        retrieval_ok = True
+        try:
+            if hasattr(state.service, "_retriever"):
+                retrieval_ok = state.service._retriever is not None
+        except Exception:
+            retrieval_ok = True
+
+        gnani_ok = state.transcriber is not None
+        preload = getattr(app.state, "preload_status", "warmed")
+        is_degraded = (not retrieval_ok) or (quota_stats["remaining_today"] <= 0)
+        return HealthResponse(
+            status="degraded" if is_degraded else "ok",
+            models=models_info,
+            retrieval_ready=retrieval_ok,
+            gnani_voice_ready=gnani_ok,
+            preload_status=preload,
+            quota=quota_stats,
+        )
 
     @app.post("/ask", dependencies=[Depends(limit_asks)])
     def ask(body: AskRequest, state: StateDep, request: Request) -> AskResponse:
+        q = body.question.strip()
+        if not q:
+            raise HTTPException(status_code=422, detail="Question cannot be empty or whitespace.")
+        app_settings = get_settings()
+        if len(q) > app_settings.max_question_length:
+            msg = f"Question exceeds maximum length of {app_settings.max_question_length} chars."
+            raise HTTPException(status_code=422, detail=msg)
         # Plain `def`: model inference blocks, so FastAPI runs this in its threadpool.
         answer = state.service.answer(body.question)
         state.audit.record(request.state.request_id, answer)
-        return AskResponse.from_answer(answer, state.titles)
+        return AskResponse.from_answer(answer, state.titles, state.doc_dates)
+
+    @app.post("/ask/sources")
+    def ask_sources(body: AskRequest, state: StateDep) -> AskSourcesResponse:
+        """Fast sources endpoint: surface official scheme documents in ~300ms."""
+        started = time.perf_counter()
+        retriever = getattr(state.service, "retriever", None)
+        if retriever is None and hasattr(state.service, "_service"):
+            retriever = getattr(state.service._service, "retriever", None)
+        if retriever is None or not hasattr(retriever, "retrieve"):
+            raise HTTPException(status_code=503, detail="Retriever not available")
+        retrieval = retriever.retrieve(body.question)
+        total_ms = (time.perf_counter() - started) * 1000
+        timings = {"retrieval": round(total_ms, 1), "total": round(total_ms, 1)}
+        passages = [
+            FallbackPassage(
+                scheme=p.chunk.scheme,
+                doc_id=p.chunk.doc_id,
+                document=state.titles.get(p.chunk.doc_id, p.chunk.doc_id),
+                page=p.chunk.page_start,
+                text=p.chunk.text,
+                source_url=str(p.chunk.source_url),
+            )
+            for p in retrieval.passages[:3]
+        ]
+        return AskSourcesResponse(passages=passages, timings_ms=timings)
 
     @app.post("/ask/voice", dependencies=[Depends(limit_asks)])
     def ask_voice(
@@ -265,17 +370,69 @@ def create_app(
 
         The chat page uses `/transcribe` and then `/ask` instead, to show the transcript
         before the answer is ready. This one-call route stays for scripts and the API."""
-        question, language_code, stt_ms = heard_question(state, audio, language)
-        answer = state.service.answer(question)
+        question, language_code, stt_ms, stt_conf = heard_question(state, audio, language)
+        answer = state.service.answer(question, voice_mode=True)
         state.audit.record(request.state.request_id, answer, {"stt": stt_ms})
-        response = AskResponse.from_answer(answer, state.titles)
+        response = AskResponse.from_answer(answer, state.titles, state.doc_dates)
         response.timings_ms["stt"] = round(stt_ms, 1)
+
+        # Step 7: Gnani-centred voice uncertainty confirmation
+        # Triggers when retrieval confidence falls in [0.30, 0.40] band
+        # OR when STT confidence is low (< 0.60, if provided by API).
+        # Per instruction, the "under 3 words" rule is explicitly dropped.
+        confirm_text: str | None = None
+        is_uncertain_score = 0.30 <= answer.confidence <= 0.40
+        is_low_stt = stt_conf is not None and stt_conf < 0.60
+        if is_uncertain_score or is_low_stt:
+            target_scheme: str | None = None
+            if getattr(answer, "candidate_schemes", None):
+                target_scheme = answer.candidate_schemes[0]
+            elif getattr(answer, "passages", None) and len(answer.passages) > 0:
+                target_scheme = answer.passages[0].chunk.scheme
+            elif answer.citations:
+                target_scheme = answer.citations[0].scheme
+            elif answer.contact:
+                target_scheme = answer.contact.scheme
+
+            if target_scheme:
+                from schemebot.generate.messages import confirmation_text
+
+                confirm_text = confirmation_text(target_scheme, answer.language)
+                response.needs_confirmation = True
+
         return VoiceAskResponse(
             **response.model_dump(),
             transcript=question,
             stt_language_code=language_code,
             stt_ms=round(stt_ms, 1),
+            stt_confidence=stt_conf,
+            confirmation_text=confirm_text,
         )
+
+    @app.post("/feedback")
+    def feedback(body: FeedbackRequest, state: StateDep) -> FeedbackResponse:
+        """Citizen feedback loop: records ratings, status, language, timings.
+        Text only saved if opted in.
+        """
+        log_dir = PROJECT_ROOT / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        fb_path = log_dir / "feedback.jsonl"
+        entry: dict[str, object] = {
+            "timestamp": time.time(),
+            "status": body.status,
+            "language": body.language,
+            "thumbs": body.thumbs,
+            "timings_ms": body.timings_ms,
+            "include_text": body.include_text,
+        }
+        if body.include_text:
+            if body.question is not None:
+                entry["question"] = body.question
+            if body.reason is not None:
+                entry["reason"] = body.reason
+        with open(fb_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        return FeedbackResponse()
 
     @app.post("/transcribe", dependencies=[Depends(limit_transcribe)])
     def transcribe(
@@ -286,7 +443,7 @@ def create_app(
     ) -> TranscribeResponse:
         """Speech to text only (1 Gnani call), so the page can show what it heard at once
         and then send that text to `/ask`."""
-        question, language_code, stt_ms = heard_question(state, audio, language)
+        question, language_code, stt_ms, _ = heard_question(state, audio, language)
         state.audit.record_transcript(request.state.request_id, language_code, stt_ms)
         return TranscribeResponse(
             transcript=question, stt_language_code=language_code, stt_ms=round(stt_ms, 1)

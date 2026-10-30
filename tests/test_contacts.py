@@ -78,3 +78,20 @@ def test_project_contacts_match_schemes_in_the_source_list() -> None:
 
     assert contacts, "data/contacts.json is empty"
     assert set(contacts) <= schemes
+
+
+def test_helpline_release_check_fails_on_unverified_non_null(tmp_path: Path) -> None:
+    from schemebot.generate.contacts import verify_helplines
+
+    csv_file = tmp_path / "check.csv"
+    csv_file.write_text(
+        "scheme,helpline,source_url,verified_by,verification_date,notes\n"
+        "Scheme A,1800-111-222,https://gov.in,,,unverified\n"
+        "Scheme B,,https://gov.in,,,null is safe\n"
+        "Scheme C,1800-333-444,https://gov.in,Verified Person,2026-10-30,verified\n",
+        encoding="utf-8",
+    )
+    errors = verify_helplines(csv_file)
+    assert len(errors) == 1
+    assert "Scheme A" in errors[0]
+    assert "verified_by" in errors[0]

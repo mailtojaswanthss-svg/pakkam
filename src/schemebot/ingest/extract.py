@@ -17,6 +17,9 @@ from typing import Literal
 import pymupdf
 
 from schemebot.ingest.langid import Language
+from schemebot.text import (
+    normalize_text as normalize_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -79,10 +82,7 @@ OCR_LANGUAGES: dict[Language, str] = {
     "unknown": "tam+hin+eng",
 }
 
-NO_BREAK_SPACE = 0x00A0
 REPLACEMENT_CHAR = 0xFFFD
-ZERO_WIDTH_CHARS = (0x200B, 0x200C, 0x200D)  # space, non-joiner, joiner
-_ZERO_WIDTH = re.compile("[" + "".join(map(chr, ZERO_WIDTH_CHARS)) + "]")
 PRIVATE_USE_RANGE = (0xE000, 0xF8FF)
 BULLET = chr(0x2022)
 _PRIVATE_USE = re.compile(f"[{chr(PRIVATE_USE_RANGE[0])}-{chr(PRIVATE_USE_RANGE[1])}]")
@@ -103,20 +103,6 @@ class PageText:
     """1-based page number, as shown in a PDF viewer and used in citations."""
     text: str
     method: ExtractionMethod
-
-
-def normalize_text(text: str) -> str:
-    """NFC-normalise and tidy whitespace without changing the words."""
-    text = unicodedata.normalize("NFC", text)
-    text = text.replace(chr(NO_BREAK_SPACE), " ")
-    # Zero-width space / non-joiner / joiner: OCR inserts them after Tamil virama, and they
-    # silently break keyword matching while changing nothing a reader can see.
-    text = _ZERO_WIDTH.sub("", text)
-    # Re-join English words hyphenated across a line break.
-    text = re.sub(r"([a-z])-\n([a-z])", r"\1\2", text)
-    lines = [re.sub(r"[ \t]+", " ", line).strip() for line in text.splitlines()]
-    text = "\n".join(lines)
-    return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 
 def _is_bad_char(char: str) -> bool:
@@ -211,6 +197,78 @@ def make_tesseract_ocr(
             return str(pytesseract.image_to_string(image, lang=OCR_LANGUAGES[language]))
         except (pytesseract.TesseractNotFoundError, pytesseract.TesseractError) as error:
             raise OcrUnavailableError(str(error)) from error
+
+    return ocr_page
+
+
+def make_chitrapathak_ocr(language: Language) -> OcrFn:
+    """Build a Chitrapathak-2 OCR function for scanned pages."""
+    try:
+        import torch
+        from PIL import Image
+        from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+    except ImportError as error:
+        raise OcrUnavailableError(
+            f"Chitrapathak-2 requires 'transformers' and 'torch': {error}"
+        ) from error
+
+    model_id = "krutrim-ai-labs/Chitrapathak-2"
+    revision = "e21a8b2983fdf6fbf335c9e5ae6a3e52ba9e5e3b"
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+
+    logger.info("Loading Chitrapathak-2 model (%s, %s)...", device, dtype)
+    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        model_id,
+        revision=revision,
+        torch_dtype=dtype,
+        device_map="auto" if device == "cuda" else None,
+    )
+    if device != "cuda":
+        model = model.to("cpu")
+    processor = AutoProcessor.from_pretrained(
+        model_id,
+        revision=revision,
+        max_pixels=1280 * 28 * 28,
+    )
+
+    def ocr_page(page: pymupdf.Page) -> str:
+        pixmap = page.get_pixmap(dpi=150)
+        image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image", "image": image},
+                    {
+                        "type": "text",
+                        "text": (
+                            "Extract all text from this image exactly as written. "
+                            "Output only the extracted text."
+                        ),
+                    },
+                ],
+            }
+        ]
+        text_prompt = processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+        inputs = processor(
+            text=[text_prompt],
+            images=[image],
+            padding=True,
+            return_tensors="pt",
+        ).to(model.device)
+        generated_ids = model.generate(**inputs, max_new_tokens=2048)
+        generated_ids_trimmed = [
+            out_ids[len(in_ids) :]
+            for in_ids, out_ids in zip(inputs.input_ids, generated_ids, strict=False)
+        ]
+        output_text = processor.batch_decode(
+            generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )[0]
+        return str(output_text).strip()
 
     return ocr_page
 

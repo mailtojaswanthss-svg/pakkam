@@ -12,6 +12,7 @@ from typing import Any
 import httpx
 
 from schemebot.config import Effort
+from schemebot.generate.budget import BudgetExhausted, LlmBudget
 from schemebot.generate.llm import MAX_OUTPUT_TOKENS, LlmDeclinedError, LlmUnavailableError
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ class GeminiJsonLlm:
         effort: Effort,
         timeout_seconds: float = 60.0,
         retries: int = 2,
+        budget: LlmBudget | None = None,
     ) -> None:
         from google import genai
         from google.genai import errors, types
@@ -57,6 +59,7 @@ class GeminiJsonLlm:
         self._errors: Any = errors
         self._model = model
         self._effort = effort
+        self._budget = budget
         options = types.HttpOptions(
             timeout=round(timeout_seconds * 1000),
             retry_options=types.HttpRetryOptions(
@@ -85,6 +88,13 @@ class GeminiJsonLlm:
         if self._client is None:
             raise LlmUnavailableError("no Gemini API key configured")
 
+        if self._budget is not None:
+            try:
+                self._budget.take(model=self._model)
+            except BudgetExhausted as exc:
+                logger.warning("Gemini call blocked by daily budget: %s", exc)
+                raise LlmUnavailableError(str(exc)) from exc
+
         types = self._types
         config = types.GenerateContentConfig(
             system_instruction=system,
@@ -99,6 +109,10 @@ class GeminiJsonLlm:
             )
         except self._errors.APIError as error:
             logger.error("Gemini API error %s %s", error.code, error.status)
+            if (
+                error.code == 429 or "RESOURCE_EXHAUSTED" in str(error.status).upper()
+            ) and self._budget is not None:
+                self._budget.record_429(model=self._model)
             raise LlmUnavailableError(f"Gemini API returned {error.code}") from error
         except httpx.HTTPError as error:  # connection failures and timeouts
             raise LlmUnavailableError("could not reach the Gemini API") from error

@@ -262,6 +262,14 @@
     // Listen sits beside the time; the source lines above replace the old "N sources" button.
     meta.append(listenButton(data));
     if (data.latency_ms && !refused) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
+    if (data.timings_ms && !refused) {
+      const steps = [];
+      if (data.timings_ms.stt) steps.push(`heard ${Math.round(data.timings_ms.stt)}ms`);
+      const searchMs = (data.timings_ms.search || 0) + (data.timings_ms.rerank || 0);
+      if (searchMs > 0) steps.push(`search ${Math.round(searchMs)}ms`);
+      if (data.timings_ms.llm_answer) steps.push(`answer ${Math.round(data.timings_ms.llm_answer)}ms`);
+      if (steps.length > 0) meta.append(el('span', 'a-breakdown', `(${steps.join(' · ')})`));
+    }
     const disclaimer = el('p', 'disclaimer', data.disclaimer);
     setLang(disclaimer, data.language);
     body.append(meta, disclaimer);
@@ -301,51 +309,128 @@
     return card;
   }
 
-  /* ---------- spoken answers (Gnani Timbre on the server; only after a tap) ---------- */
-  let playing = null; // { audio, button, url }
+  /* ---------- spoken answers (Sentence-by-sentence queued playback via Gnani Timbre) ---------- */
+  let playing = null; // { audio, button, abortCtrl, urls: [] }
 
   function stopPlaying() {
     if (!playing) return;
-    playing.audio.pause();
-    URL.revokeObjectURL(playing.url);
+    if (playing.abortCtrl) {
+      playing.abortCtrl.abort();
+    }
+    if (playing.audio) {
+      playing.audio.pause();
+    }
+    if (playing.urls) {
+      playing.urls.forEach((u) => URL.revokeObjectURL(u));
+    }
     playing.button.textContent = TEXT.listen;
     playing.button.setAttribute('aria-pressed', 'false');
     playing = null;
   }
 
-  function spokenText(data) {
-    if (data.refused || data.sentences.length === 0) return data.answer;
-    return data.sentences.map((s) => s.text).join(' ');
+  function getSentencesToSpeak(data) {
+    if (data.refused || !data.sentences || data.sentences.length === 0) {
+      return [data.answer];
+    }
+    return data.sentences.map((s) => s.text.trim()).filter(Boolean);
+  }
+
+  async function fetchSentenceAudio(text, language, signal) {
+    const response = await fetch('/speak', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, language }),
+      signal,
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(typeof body.detail === 'string' ? body.detail : TEXT.listenFailed);
+    }
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
   }
 
   async function listen(data, button) {
-    if (playing && playing.button === button) return stopPlaying();
+    if (playing && playing.button === button) {
+      stopPlaying();
+      return;
+    }
     stopPlaying();
     button.disabled = true;
     button.textContent = TEXT.listenLoading;
+
+    const abortCtrl = new AbortController();
+    const urls = [];
+    const state = { audio: null, button, abortCtrl, urls };
+    playing = state;
+
+    const sentences = getSentencesToSpeak(data);
+    if (sentences.length === 0) {
+      stopPlaying();
+      button.disabled = false;
+      return;
+    }
+
     try {
-      const response = await fetch('/speak', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: spokenText(data), language: data.language }),
-      });
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(typeof body.detail === 'string' ? body.detail : TEXT.listenFailed);
-      }
-      const url = URL.createObjectURL(await response.blob());
-      const audio = new Audio(url);
-      playing = { audio, button, url };
-      audio.addEventListener('ended', stopPlaying);
+      // Pipelining: fetch sentence 1 first to minimize Time-to-First-Audio (TTFA)
+      const firstUrl = await fetchSentenceAudio(sentences[0], data.language, abortCtrl.signal);
+      urls.push(firstUrl);
+
+      if (playing !== state) return; // stopped while downloading
+
+      button.disabled = false;
       button.textContent = TEXT.listenStop;
       button.setAttribute('aria-pressed', 'true');
-      await audio.play();
+
+      // Play queue sequentially
+      let currentIdx = 0;
+      const playNext = async () => {
+        if (playing !== state || currentIdx >= sentences.length) {
+          stopPlaying();
+          return;
+        }
+
+        const url = urls[currentIdx];
+        const audio = new Audio(url);
+        state.audio = audio;
+
+        // Prefetch next sentence while current sentence is playing
+        if (currentIdx + 1 < sentences.length && urls.length <= currentIdx + 1) {
+          fetchSentenceAudio(sentences[currentIdx + 1], data.language, abortCtrl.signal)
+            .then((nextUrl) => {
+              if (playing === state) urls.push(nextUrl);
+            })
+            .catch(() => {});
+        }
+
+        audio.addEventListener('ended', async () => {
+          currentIdx++;
+          if (currentIdx < sentences.length) {
+            // Wait for next sentence if it is still fetching
+            while (urls.length <= currentIdx && playing === state) {
+              await new Promise((r) => setTimeout(r, 100));
+            }
+            playNext();
+          } else {
+            stopPlaying();
+          }
+        });
+
+        await audio.play();
+      };
+
+      await playNext();
     } catch (error) {
+      if (error.name === 'AbortError') {
+        return; // Normal cancellation
+      }
       stopPlaying();
       button.textContent = TEXT.listen;
       showFormMsg(error instanceof TypeError ? TEXT.network : error.message);
     } finally {
-      button.disabled = false;
+      if (playing === state && !state.audio) {
+        button.disabled = false;
+      }
     }
   }
 
@@ -388,9 +473,34 @@
     const questionItem = el('li', 'msg q');
     const bubble = el('p', null, label);
     questionItem.append(bubble);
-    const pending = assistantItem('pending', [el('p', 'wait', TEXT.waiting), el('span', 'wait-bar')]);
+    const waitMsg = el('p', 'wait', TEXT.waiting);
+    const waitBar = el('span', 'wait-bar');
+    const previewBox = el('div', 'source-preview-box');
+    previewBox.hidden = true;
+    const pending = assistantItem('pending', [waitMsg, waitBar, previewBox]);
     log.append(questionItem, pending);
     scrollToEnd();
+
+    const questionText = typeof label === 'string' && label !== TEXT.voiceQuestion ? label : null;
+    if (questionText) {
+      fetch('/ask/sources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: questionText }),
+      }).then(async (res) => {
+        if (!res.ok) return;
+        const sdata = await res.json();
+        if (sdata.passages && sdata.passages.length > 0 && pending.isConnected) {
+          const first = sdata.passages[0];
+          waitMsg.textContent = `Found in ${first.document} (page ${first.page}) · Checking details...`;
+          previewBox.textContent = '';
+          const snippet = el('blockquote', 'source-preview-snippet', first.text.length > 140 ? first.text.slice(0, 137) + '...' : first.text);
+          previewBox.append(snippet);
+          previewBox.hidden = false;
+          scrollToEnd();
+        }
+      }).catch(() => {});
+    }
 
     try {
       let response;

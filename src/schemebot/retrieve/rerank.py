@@ -36,9 +36,14 @@ class BgeReranker:
         self._device = "cuda" if torch.cuda.is_available() else "cpu"
         dtype = torch.float16 if self._device == "cuda" else torch.float32
         self._tokenizer: Any = AutoTokenizer.from_pretrained(model_name)
-        self._model: Any = AutoModelForSequenceClassification.from_pretrained(
-            model_name, dtype=dtype
-        ).to(self._device)
+        try:
+            self._model: Any = AutoModelForSequenceClassification.from_pretrained(
+                model_name, torch_dtype=dtype
+            ).to(self._device)
+        except TypeError:
+            self._model = AutoModelForSequenceClassification.from_pretrained(
+                model_name, dtype=dtype
+            ).to(self._device)
         self._model.eval()
 
     def score(self, query: str, passages: Sequence[str]) -> list[float]:

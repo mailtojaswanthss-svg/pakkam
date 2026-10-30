@@ -42,6 +42,9 @@ ENV PATH="/app/.venv/bin:$PATH" \
     HF_HOME=/app/models
 WORKDIR /app
 
+# ffmpeg converts voice uploads to 16 kHz mono WAV (schemebot/voice/audio.py).
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home --uid 10001 app \
     && mkdir -p /app/data /app/logs /app/models \
     && chown app:app /app/data /app/logs /app/models
