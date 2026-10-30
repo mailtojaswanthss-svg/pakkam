@@ -2,7 +2,7 @@
 
 Gnani AI internship challenge. Final submission closes **10 Nov 2026, 11:59 PM IST**. Target: submit **Fri 6 Nov** (Diwali is Sun 8 Nov; Sat 7 Nov may be Deepavali in Tamil Nadu), post live **Tue 3 Nov** (latest Thu 5 Nov), video done **Mon 2 Nov**.
 Teammate tasks stay flexible until Jaswanth confirms their skills.
-This is the master list, built from Jaswanth's checklist (26 Oct) and [WEAKNESS_PLAN.md](weakness/WEAKNESS_PLAN.md). The plan has the schedule, hours and reasoning.
+This is the master list, built from Jaswanth's checklist (26 Oct) and [WEAKNESS_PLAN.md](archive/weakness/WEAKNESS_PLAN.md). The plan has the schedule, hours and reasoning.
 
 **Who** column:
 - **Claude (docs):** Claude can do it with no code change and no credits. It still waits for Jaswanth's go-ahead.

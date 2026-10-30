@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 The Pakkam authors
+Copyright (c) 2026 The Pakkam Authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+### Third-Party Model & Dataset Card Licenses (Exact Quotations)
+
+1. **BAAI/bge-m3 (Beijing Academy of Artificial Intelligence):**
+   - Model Card YAML: `license: mit`
+
+2. **BAAI/bge-reranker-v2-m3 (Beijing Academy of Artificial Intelligence):**
+   - Model Card YAML: `license: apache-2.0`
+
+3. **krutrim-ai-labs/Chitrapathak-2 (Krutrim AI Labs):**
+   - Model Card YAML: `license: other`
+   - Model Card Metadata: `license_name: krutrim-community-license-agreement-version-1.0`
+   - Model Card Scope Note: *"released only for research purposes"*
+
+4. **ai4bharat/Kathbath (AI4Bharat):**
+   - Dataset Card YAML: `license: cc-by-4.0`
+   - Dataset Packaging Note: *"We license the actual packaging of all this data under the Creative Commons CC0 license ('no rights reserved')."*

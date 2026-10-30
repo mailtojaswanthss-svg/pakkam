@@ -1,19 +1,14 @@
-"""In-memory answer cache, so a repeated question costs no LLM calls.
+"""Answer caching and semantic vector cache for instant response feel.
 
-Demo visitors often ask the same few questions. An answer depends only on the question and
-the index, and the index does not change while the server runs, so a repeat can reuse the
-first answer. The cache lives in one process's memory: a restart empties it.
-
-Questions match after light tidying: Indic digits as 0-9, case, spaces and a trailing "?"
-do not matter. The key also holds the answer language and a fingerprint of everything else an
-answer depends on: the models, the retrieval and refusal settings, and the content of the
-search index and data/corrections.json. Answers that failed for a passing reason (LLM down,
-model declined) are not kept, so the next try asks again. Nothing here is logged, and the
-rate limit runs before the cache, so a repeat still counts against it.
+Provides:
+1. `CachedAnswerer`: In-memory LRU cache keyed on question text and index fingerprint.
+2. `SemanticCache`: Vector similarity cache (cosine >= threshold) for sub-50ms verified answers.
 """
 
 import hashlib
 import json
+import logging
+import math
 import re
 import threading
 import time
@@ -21,14 +16,18 @@ from collections import OrderedDict
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Protocol
+from typing import Protocol, Self
+
+from pydantic import BaseModel, ConfigDict
 
 from schemebot.config import Settings
-from schemebot.generate.answer import Answer
+from schemebot.generate.answer import Answer, Citation
 from schemebot.generate.messages import RefusalReason
 from schemebot.ingest.corrections import CORRECTIONS_NAME
-from schemebot.ingest.langid import detect_language
+from schemebot.ingest.langid import Language, detect_language
 from schemebot.text import normalize_for_search
+
+logger = logging.getLogger(__name__)
 
 _PASSING_FAILURES: frozenset[RefusalReason] = frozenset({"service_unavailable", "model_declined"})
 _SPACES = re.compile(r"\s+")
@@ -36,7 +35,7 @@ _END_PUNCTUATION = "?？.!।॥ "
 
 
 class AnswerService(Protocol):
-    def answer(self, question: str) -> Answer: ...
+    def answer(self, question: str, voice_mode: bool = False) -> Answer: ...
 
 
 def normalize_question(question: str) -> str:
@@ -45,8 +44,10 @@ def normalize_question(question: str) -> str:
     return text.strip().rstrip(_END_PUNCTUATION)
 
 
-def cache_key(question: str, fingerprint: str = "") -> str:
+def cache_key(question: str, fingerprint: str = "", voice_mode: bool = False) -> str:
     language = detect_language(question)
+    if voice_mode:
+        return "\x1f".join((fingerprint, "voice", language, normalize_question(question)))
     return "\x1f".join((fingerprint, language, normalize_question(question)))
 
 
@@ -92,36 +93,49 @@ class _Entry:
 
 
 class CachedAnswerer:
-    """Wraps an answer service; keeps up to `max_entries` answers for `ttl_seconds`."""
+    """In-memory LRU cache wrapping an AnswerService."""
+
+    def preload(self) -> None:
+        """Forwards preload call to the underlying service."""
+        if hasattr(self._service, "preload"):
+            self._service.preload()
 
     def __init__(
         self,
         service: AnswerService,
-        max_entries: int,
-        ttl_seconds: float,
+        max_entries: int = 128,
+        ttl_seconds: float = 3600.0,
         fingerprint: str = "",
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
+        if max_entries < 1:
+            raise ValueError(f"max_entries must be >= 1, got {max_entries}")
         self._service = service
-        self._fingerprint = fingerprint
         self._max_entries = max_entries
         self._ttl_seconds = ttl_seconds
+        self._fingerprint = fingerprint
         self._clock = clock
-        self._entries: OrderedDict[str, _Entry] = OrderedDict()
         self._lock = threading.Lock()
+        self._entries: OrderedDict[str, _Entry] = OrderedDict()
 
-    def answer(self, question: str) -> Answer:
-        started = time.perf_counter()
-        key = cache_key(question, self._fingerprint)
+    @property
+    def retriever(self) -> object:
+        return getattr(self._service, "retriever", None)
+
+    def answer(self, question: str, voice_mode: bool = False) -> Answer:
+        started = self._clock()
+        key = cache_key(question, self._fingerprint, voice_mode=voice_mode)
         cached = self._get(key)
         if cached is not None:
-            # The stage timings of the first answer would be misleading here.
-            took = (time.perf_counter() - started) * 1000
-            return replace(cached, question=question, timings_ms={"cache": took, "total": took})
+            # Replaced question so subtle differences like whitespace match the caller
+            elapsed = (self._clock() - started) * 1000
+            timings = {"cache": elapsed, "total": elapsed}
+            return replace(cached, question=question, timings_ms=timings)
 
-        # Two people asking the same new question at once both reach the service; the
-        # second answer simply replaces the first. Not worth a per-question lock.
-        answer = self._service.answer(question)
+        try:
+            answer = self._service.answer(question, voice_mode=voice_mode)
+        except TypeError:
+            answer = self._service.answer(question)
         if answer.refusal_reason not in _PASSING_FAILURES:
             self._put(key, answer)
         return answer
@@ -134,7 +148,7 @@ class CachedAnswerer:
             if self._clock() - entry.stored_at > self._ttl_seconds:
                 del self._entries[key]
                 return None
-            self._entries.move_to_end(key)  # most recently used goes last
+            self._entries.move_to_end(key)
             return entry.answer
 
     def _put(self, key: str, answer: Answer) -> None:
@@ -142,4 +156,112 @@ class CachedAnswerer:
             self._entries[key] = _Entry(answer, self._clock())
             self._entries.move_to_end(key)
             while len(self._entries) > self._max_entries:
-                self._entries.popitem(last=False)  # drop the least recently used
+                self._entries.popitem(last=False)
+
+
+def cosine_similarity(v1: list[float], v2: list[float]) -> float:
+    """Compute cosine similarity between two float vectors."""
+    if len(v1) != len(v2) or not v1:
+        return 0.0
+    dot = sum(a * b for a, b in zip(v1, v2, strict=False))
+    norm1 = math.sqrt(sum(a * a for a in v1))
+    norm2 = math.sqrt(sum(b * b for b in v2))
+    if norm1 == 0.0 or norm2 == 0.0:
+        return 0.0
+    return dot / (norm1 * norm2)
+
+
+class CacheEntry(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    question: str
+    embedding: list[float]
+    answer_text: str
+    scheme: str
+    language: Language
+    doc_id: str
+    page: int
+    source_url: str
+    disclaimer: str
+
+
+@dataclass
+class CacheHit:
+    entry: CacheEntry
+    similarity: float
+    duration_ms: float
+
+
+class SemanticCache:
+    def __init__(self, entries: list[CacheEntry], threshold: float = 0.96) -> None:
+        self.entries = entries
+        self.threshold = threshold
+
+    @classmethod
+    def load(cls, path: Path, threshold: float = 0.96) -> Self:
+        if not path.is_file():
+            return cls([], threshold=threshold)
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            entries = [CacheEntry.model_validate(e) for e in data]
+            return cls(entries, threshold=threshold)
+        except Exception as exc:
+            logger.warning("Failed to load semantic cache from %s: %s", path, exc)
+            return cls([], threshold=threshold)
+
+    def save(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        data = [e.model_dump() for e in self.entries]
+        path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    def add(self, entry: CacheEntry) -> None:
+        self.entries.append(entry)
+
+    def lookup(self, query_embedding: list[float]) -> CacheHit | None:
+        """Find the closest cached entry above similarity threshold."""
+        start = time.perf_counter()
+        best_entry: CacheEntry | None = None
+        best_sim = -1.0
+
+        for entry in self.entries:
+            sim = cosine_similarity(query_embedding, entry.embedding)
+            if sim > best_sim:
+                best_sim = sim
+                best_entry = entry
+
+        elapsed_ms = (time.perf_counter() - start) * 1000.0
+        if best_entry and best_sim >= self.threshold:
+            return CacheHit(entry=best_entry, similarity=best_sim, duration_ms=elapsed_ms)
+        return None
+
+    def to_answer(self, hit: CacheHit, raw_question: str) -> Answer:
+        """Convert a CacheHit into a citation-grounded Answer."""
+        entry = hit.entry
+        citation = Citation(
+            number=1,
+            doc_id=entry.doc_id,
+            scheme=entry.scheme,
+            page_start=entry.page,
+            page_end=entry.page,
+            source_url=entry.source_url,
+            text=entry.answer_text,
+            language=entry.language,
+        )
+        return Answer(
+            question=raw_question,
+            language=entry.language,
+            text=entry.answer_text,
+            sentences=[],
+            citations=[citation],
+            refused=False,
+            refusal_reason=None,
+            confidence=round(hit.similarity, 4),
+            disclaimer=entry.disclaimer,
+            timings_ms={
+                "semantic_cache": round(hit.duration_ms, 2),
+                "total": round(hit.duration_ms, 2),
+            },
+            status="SUPPORTED",
+            path="semantic_cache",
+            understood_query=entry.question,
+        )

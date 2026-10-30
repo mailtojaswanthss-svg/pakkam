@@ -11,6 +11,7 @@ from typing import Any, Protocol, TypeVar
 from pydantic import BaseModel, ValidationError
 
 from schemebot.config import Effort
+from schemebot.generate.budget import BudgetExhausted, LlmBudget
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,7 @@ class ClaudeJsonLlm:
         effort: Effort,
         timeout_seconds: float = 60.0,
         retries: int = 2,
+        budget: LlmBudget | None = None,
     ) -> None:
         import anthropic
 
@@ -82,6 +84,7 @@ class ClaudeJsonLlm:
         self._anthropic = anthropic
         self._model = model
         self._effort = effort
+        self._budget = budget
         if not has_credentials(self._client):
             logger.warning(
                 "No Claude API credentials found; questions that reach the LLM will be "
@@ -101,6 +104,13 @@ class ClaudeJsonLlm:
         # genuine programming errors).
         if not has_credentials(self._client):
             raise LlmUnavailableError("no Claude API credentials configured")
+
+        if self._budget is not None:
+            try:
+                self._budget.take(model=self._model)
+            except BudgetExhausted as exc:
+                logger.warning("Claude call blocked by daily budget: %s", exc)
+                raise LlmUnavailableError(str(exc)) from exc
 
         anthropic = self._anthropic
         messages: list[BetaMessageParam] = [{"role": "user", "content": user}]
@@ -126,6 +136,8 @@ class ClaudeJsonLlm:
         except anthropic.APIConnectionError as error:
             raise LlmUnavailableError("could not reach the Claude API") from error
         except anthropic.RateLimitError as error:
+            if self._budget is not None:
+                self._budget.record_429(model=self._model)
             raise LlmUnavailableError("Claude API rate limit reached") from error
         except anthropic.APIStatusError as error:
             logger.error("Claude API error %s (request %s)", error.status_code, error.request_id)
@@ -144,3 +156,47 @@ class ClaudeJsonLlm:
         except json.JSONDecodeError as error:
             raise LlmUnavailableError("the response was not valid JSON") from error
         return result
+
+
+class FailoverJsonLlm:
+    """Wraps a primary JsonLlm and falls back to a secondary on outage/rate-limit.
+
+    Failover triggers ONLY when fallback_enabled is True and secondary.configured is True.
+    A model refusal (LlmDeclinedError) is never failed over because it represents a policy decision,
+    not an infrastructure failure.
+    """
+
+    def __init__(
+        self,
+        primary: ConfiguredJsonLlm,
+        secondary: ConfiguredJsonLlm | None = None,
+        *,
+        fallback_enabled: bool = False,
+    ) -> None:
+        self._primary = primary
+        self._secondary = secondary
+        self._fallback_enabled = fallback_enabled
+
+    @property
+    def configured(self) -> bool:
+        return self._primary.configured or (
+            self._fallback_enabled and self._secondary is not None and self._secondary.configured
+        )
+
+    def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
+        try:
+            return self._primary.complete_json(system, user, schema)
+        except LlmUnavailableError as primary_err:
+            if not self._fallback_enabled:
+                raise
+            if self._secondary is None or not self._secondary.configured:
+                logger.warning(
+                    "Primary LLM failed (%s), secondary not configured; cannot fail over.",
+                    primary_err,
+                )
+                raise
+            logger.warning(
+                "Primary LLM unavailable (%s); failing over to secondary provider.",
+                primary_err,
+            )
+            return self._secondary.complete_json(system, user, schema)

@@ -1,0 +1,40 @@
+[
+  {
+    "id": "q_speed_01",
+    "lang": "ta",
+    "question": "புதுமைப்பெண் திட்டத்தின் கீழ் மாணவிகளுக்கு மாதந்தோறும் எவ்வளவு உதவித்தொகை வழங்கப்படுகிறது?",
+    "status": "FAILED",
+    "retrieval_ms": 452.4,
+    "llm_ms": 184103.2,
+    "total_ms": 184555.6,
+    "response": {
+      "error": "Gemini API returned 504"
+    }
+  },
+  {
+    "id": "q_speed_02",
+    "lang": "en",
+    "question": "How much financial assistance is provided per year under PM-KISAN?",
+    "status": "FAILED",
+    "retrieval_ms": 452.4,
+    "llm_ms": 183124.7,
+    "total_ms": 183577.1,
+    "response": {
+      "error": "Gemini API returned 504"
+    }
+  },
+  {
+    "id": "q_speed_03",
+    "lang": "hi",
+    "question": "पीएम किसान सम्मान निधि योजना के तहत किसानों को सालाना कितनी राशि मिलती है?",
+    "status": "OK",
+    "retrieval_ms": 452.4,
+    "llm_ms": 40770.8,
+    "total_ms": 41223.2,
+    "response": {
+      "answer": "पीएम किसान योजना के अंतर्गत पात्र किसानों को प्रति वर्ष 6000 रुपये की वित्तीय सहायता मिलती है।",
+      "scheme": "PM-KISAN",
+      "confidence": 1.0
+    }
+  }
+]

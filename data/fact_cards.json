@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "placeholder_kmut_amount_ta",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "amount",
+    "language": "ta",
+    "question_examples": [
+      "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் எவ்வளவு உதவித்தொகை வழங்கப்படுகிறது?",
+      "KMUT scheme la monthly evlo tharanga?",
+      "மகளிர் உரிமை தொகை எவ்வளவு?"
+    ],
+    "answer_text": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் தகுதியான குடும்பத் தலைவிகளுக்கு மாதந்தோறும் ₹1,000 மகளிர் உரிமைத் தொகையாக வழங்கப்படுகிறது.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 2,
+    "document_date": "2023-07-10",
+    "author": "AI draft",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "placeholder_pmkisan_amount_en",
+    "scheme": "PM-KISAN",
+    "field": "amount",
+    "language": "en",
+    "question_examples": [
+      "How much financial assistance is provided per year under PM-KISAN?",
+      "What is the amount given per year under PM Kisan?",
+      "PM Kisan annual benefit amount"
+    ],
+    "answer_text": "Under PM-KISAN, eligible landholding farmer families receive financial benefit of ₹6,000 per year payable in three equal four-monthly installments of ₹2,000 each.",
+    "source_document": "pmkisan-guidelines-2020-en",
+    "source_page": 4,
+    "document_date": "2020-03-29",
+    "author": "AI draft",
+    "verified_by": null,
+    "verified_on": null
+  }
+]

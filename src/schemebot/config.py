@@ -21,6 +21,9 @@ LlmProvider = Literal["claude", "gemini"]
 TimbreModel = Literal["timbre-v2.5", "timbre-v3.0"]
 """Gnani text-to-speech models. Voice names differ between them."""
 
+OcrEngine = Literal["tesseract", "chitrapathak"]
+"""OCR engine for extracting text from scanned PDF pages."""
+
 SUPPORTED_LANGUAGES = ("en", "ta", "hi", "ta-Latn")
 """English, Tamil, Hindi, and Tamil written in Latin script (Tanglish)."""
 
@@ -40,6 +43,8 @@ class Settings(BaseSettings):
 
     # LLM provider for answers, the verifier and the evaluation judge
     llm_provider: LlmProvider = "claude"
+    llm_fallback_enabled: bool = False
+    """When True, switches to secondary provider on unavailable error (429/timeout)."""
 
     # Claude. With no key set, the SDK falls back to ANTHROPIC_API_KEY or `ant auth login`.
     anthropic_api_key: SecretStr | None = None
@@ -56,6 +61,10 @@ class Settings(BaseSettings):
     # For a long evaluation run on Gemini's free tier, raise the retries (e.g. 7).
     llm_timeout_seconds: float = Field(default=60.0, gt=0)
     llm_retries: int = Field(default=2, ge=0, le=10)
+    max_daily_llm_calls: int = Field(default=20, ge=1)
+    llm_reset_time: str = Field(default="unknown")
+    max_question_length: int = Field(default=500, ge=10, le=5000)
+    cors_origins: list[str] = Field(default_factory=lambda: ["*"])
 
     # Gemini (llm_provider = "gemini"). With no key set, the SDK falls back to GEMINI_API_KEY.
     gemini_api_key: SecretStr | None = None
@@ -86,7 +95,8 @@ class Settings(BaseSettings):
     # Public demo limits on POST /ask (each question can cost two LLM calls)
     ask_limit_per_client_per_minute: int = Field(default=10, ge=1)
     ask_limit_total_per_day: int = Field(default=500, ge=1)
-    answer_cache_size: int = Field(default=256, ge=0)
+    # disabled for demo: wrong-match rate unmeasured
+    answer_cache_size: int = Field(default=0, ge=0)
     """Answers kept in memory so a repeated question costs no LLM call; 0 turns it off."""
     answer_cache_ttl_seconds: float = Field(default=6 * 3600, gt=0)
 
@@ -119,6 +129,7 @@ class Settings(BaseSettings):
     # OCR
     tesseract_cmd: str | None = None
     tessdata_dir: Path | None = None
+    ocr_engine: OcrEngine = "tesseract"
     """Folder holding tam/hin/eng .traineddata, when not the install's own tessdata folder."""
 
     @field_validator(

@@ -126,6 +126,7 @@ class GnaniStt:
             headers={"X-API-Key-ID": api_key}, timeout=timeout_seconds, transport=transport
         )
         self._url = url
+        self.last_confidence: float | None = None
 
     def transcribe(self, audio: bytes, filename: str, language_code: str) -> str:
         try:
@@ -136,10 +137,12 @@ class GnaniStt:
             )
         except httpx.HTTPError as error:
             raise SttError("The speech service could not be reached.") from error
-        return _read_transcript(response)
+        transcript, confidence = _read_transcript(response)
+        self.last_confidence = confidence
+        return transcript
 
 
-def _read_transcript(response: httpx.Response) -> str:
+def _read_transcript(response: httpx.Response) -> tuple[str, float | None]:
     try:
         body = response.json()
     except ValueError:
@@ -154,7 +157,9 @@ def _read_transcript(response: httpx.Response) -> str:
     transcript = body.get("transcript")
     if not isinstance(transcript, str):
         raise SttError("The speech service sent an unexpected reply.")
-    return transcript.strip()
+    conf = body.get("confidence")
+    confidence = float(conf) if isinstance(conf, (int, float)) else None
+    return transcript.strip(), confidence
 
 
 class BudgetedTranscriber:
@@ -163,6 +168,7 @@ class BudgetedTranscriber:
     def __init__(self, inner: Transcriber, budget: CallBudget) -> None:
         self._inner = inner
         self.budget = budget
+        self.last_confidence: float | None = None
 
     def transcribe(self, audio: bytes, filename: str, language_code: str) -> str:
         try:
@@ -171,7 +177,9 @@ class BudgetedTranscriber:
             raise SttError(
                 "Voice input has reached today's limit. You can still type your question.", 503
             ) from error
-        return self._inner.transcribe(audio, filename, language_code)
+        result = self._inner.transcribe(audio, filename, language_code)
+        self.last_confidence = getattr(self._inner, "last_confidence", None)
+        return result
 
 
 def build_budget(settings: Settings) -> CallBudget:

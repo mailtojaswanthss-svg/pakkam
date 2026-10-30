@@ -22,6 +22,9 @@ logs/
 *.log
 .cache/
 qdrant_storage/
+*-calls.json
+*.lock
+!uv.lock
 
 # Search index (rebuilt by python -m schemebot.index)
 data/index/
@@ -34,3 +37,11 @@ tools/
 
 # Voice recordings and their transcripts (python -m schemebot.voice): never committed
 data/voice/
+data/voice/field_clips/
+data/voice/prisma_raw_sample.json
+
+data/audio_cache/
+*.wav
+*.mp3
+
+data/eval/answer_eval_raw/

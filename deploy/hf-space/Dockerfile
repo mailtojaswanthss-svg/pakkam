@@ -16,6 +16,9 @@ ENV UV_COMPILE_BYTECODE=1 \
     HF_HOME=/app/models \
     FORWARDED_ALLOW_IPS="*"
 
+# ffmpeg converts voice uploads to 16 kHz mono WAV (schemebot/voice/audio.py).
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home --uid 1000 user
 WORKDIR /app
 

@@ -6,7 +6,7 @@ import sys
 from functools import partial
 
 from schemebot.config import get_settings
-from schemebot.ingest.extract import make_tesseract_ocr
+from schemebot.ingest.extract import make_chitrapathak_ocr, make_tesseract_ocr
 from schemebot.ingest.pipeline import MANIFEST_NAME, run_ingest
 
 
@@ -24,11 +24,14 @@ def main() -> int:
 
     ocr_factory = None
     if not args.no_ocr:
-        ocr_factory = partial(
-            make_tesseract_ocr,
-            tesseract_cmd=settings.tesseract_cmd,
-            tessdata_dir=settings.tessdata_dir,
-        )
+        if settings.ocr_engine == "chitrapathak":
+            ocr_factory = make_chitrapathak_ocr
+        else:
+            ocr_factory = partial(
+                make_tesseract_ocr,
+                tesseract_cmd=settings.tesseract_cmd,
+                tessdata_dir=settings.tessdata_dir,
+            )
     report = run_ingest(settings, ocr_factory)
     if not report.documents and not report.has_errors:
         print(f"{manifest} lists no documents. See docs/data_sources.md.", file=sys.stderr)

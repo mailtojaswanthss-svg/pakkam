@@ -1,0 +1,31 @@
+clip_id,language,speaker_id,environment,reference_text,target_scheme
+clip_01,ta,spk01,quiet_room,அடல் பென்ஷன் திட்டத்தில் சேர வயது வரம்பு என்ன?,Atal Pension Yojana
+clip_02,ta,spk01,street_ambient,பிஎம் கிசான் திட்டத்தில் ஆண்டுக்கு எவ்வளவு உதவித்தொகை கிடைக்கும்?,PM-KISAN
+clip_03,ta,spk02,quiet_room,மகளிர் உரிமைத் திட்டத்திற்கு யார் விண்ணப்பிக்கலாம்?,Kalaignar Magalir Urimai Thittam
+clip_04,ta,spk02,canteen,உஜ்வாலா திட்டத்தில் இலவச கேஸ் இணைப்பு எப்படி பெறுவது?,Pradhan Mantri Ujjwala Yojana
+clip_05,ta,spk03,quiet_room,முதலமைச்சரின் காலை உணவுத் திட்டம் எந்த வகுப்புகளுக்கு செயல்படுத்தப்படுகிறது?,Chief Minister's Breakfast Scheme
+clip_06,ta,spk03,street_ambient,விவசாயிகளுக்கு ஆண்டுக்கு ஆறாயிரம் ரூபாய் தரும் திட்டம் எது?,PM-KISAN
+clip_07,ta,spk01,canteen,கலைஞர் மகளிர் உரிமைத் தொகை வங்கி கணக்கில் எப்போது வரும்?,Kalaignar Magalir Urimai Thittam
+clip_08,ta,spk02,quiet_room,அறுபது வயதுக்கு மேல் மாதாந்திர பென்ஷன் தரும் திட்ட விவரம் சொல்லுங்கள்.,Atal Pension Yojana
+clip_09,ta-Latn,spk01,quiet_room,Atal Pension Yojana-la seruradhukku enna age limit?,Atal Pension Yojana
+clip_10,ta-Latn,spk01,street_ambient,PM-KISAN thittathula varushathuku evlo kaasu varum?,PM-KISAN
+clip_11,ta-Latn,spk02,quiet_room,Magalir Urimai Thogai eppo bank account-la kedaikkum?,Kalaignar Magalir Urimai Thittam
+clip_12,ta-Latn,spk02,canteen,Ujjwala yojana-la free gas connection epdi apply panradhu?,Pradhan Mantri Ujjwala Yojana
+clip_13,ta-Latn,spk03,quiet_room,Government school pasangalukku breakfast scheme irukka?,Chief Minister's Breakfast Scheme
+clip_14,ta-Latn,spk03,street_ambient,60 age ku mela monthly pension varra scheme sollu.,Atal Pension Yojana
+clip_15,ta-Latn,spk01,quiet_room,Enakku 2 ekar boomi irukku PM kisan apply panna mudiyuma?,PM-KISAN
+clip_16,ta-Latn,spk02,canteen,Ration card irukura ponnukku 1000 rubai kedaikuma?,Kalaignar Magalir Urimai Thittam
+clip_17,hi,spk04,quiet_room,अटल पेंशन योजना में न्यूनतम और अधिकतम आयु सीमा क्या है?,Atal Pension Yojana
+clip_18,hi,spk04,street_ambient,पीएम किसान सम्मान निधि में किसानों को साल में कितने पैसे मिलते हैं?,PM-KISAN
+clip_19,hi,spk04,canteen,प्रधानमंत्री उज्ज्वला योजना में मुफ्त गैस सिलेंडर कैसे प्राप्त करें?,Pradhan Mantri Ujjwala Yojana
+clip_20,hi,spk05,quiet_room,अटल पेंशन योजना में साठ साल के बाद कितनी पेंशन मिलती है?,Atal Pension Yojana
+clip_21,hi,spk05,street_ambient,क्या दो हेक्टेयर से कम भूमि वाले किसान पीएम किसान के पात्र हैं?,PM-KISAN
+clip_22,hi,spk05,canteen,उज्ज्वला योजना के तहत पहला गैस चूल्हा मुफ्त मिलता है क्या?,Pradhan Mantri Ujjwala Yojana
+clip_23,hi,spk04,quiet_room,पेंशन के लिए बैंक खाते में ऑटो डेबिट कैसे चालू करें?,Atal Pension Yojana
+clip_24,en,spk01,quiet_room,What is the entry age limit for Atal Pension Yojana?,Atal Pension Yojana
+clip_25,en,spk02,street_ambient,How much financial assistance is provided annually under PM-KISAN?,PM-KISAN
+clip_26,en,spk03,quiet_room,Who is eligible for the Kalaignar Magalir Urimai scheme in Tamil Nadu?,Kalaignar Magalir Urimai Thittam
+clip_27,en,spk04,canteen,What are the documents required for Pradhan Mantri Ujjwala Yojana?,Pradhan Mantri Ujjwala Yojana
+clip_28,en,spk05,quiet_room,Which classes of students are covered under Chief Minister Breakfast Scheme?,Chief Minister's Breakfast Scheme
+clip_29,en,spk01,street_ambient,Is there a monthly pension guaranteed after 60 years of age in APY?,Atal Pension Yojana
+clip_30,en,spk02,canteen,Can income tax payers apply for Kalaignar Magalir Urimai Thittam?,Kalaignar Magalir Urimai Thittam

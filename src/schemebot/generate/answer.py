@@ -9,6 +9,7 @@ Order of decisions:
 import logging
 import time
 from dataclasses import dataclass, field
+from typing import Any, Literal
 
 from schemebot.generate.contacts import Contact
 from schemebot.generate.guardrails import (
@@ -18,10 +19,18 @@ from schemebot.generate.guardrails import (
     numbers_in,
 )
 from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError, parse_reply
-from schemebot.generate.messages import RefusalReason, contact_text, disclaimer, refusal_text
+from schemebot.generate.messages import (
+    RefusalReason,
+    clarification_text,
+    contact_text,
+    contains_pii,
+    disclaimer,
+    refusal_text,
+)
 from schemebot.generate.prompt import (
     ANSWER_SCHEMA,
     SYSTEM_PROMPT,
+    VOICE_SYSTEM_PROMPT,
     AnswerReply,
     build_user_message,
 )
@@ -29,6 +38,7 @@ from schemebot.ingest.corrections import CORRECTED, OcrCorrection
 from schemebot.ingest.langid import Language, detect_language
 from schemebot.ingest.models import Chunk
 from schemebot.retrieve.retriever import RetrievedPassage, Retriever
+from schemebot.text import clean_query
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +83,23 @@ class Answer:
     generation (= llm_answer + verifier) and total. A stage that did not run is absent."""
     contact: Contact | None = None
     """On a refusal about a scheme we hold documents for: its official contact."""
+    passages: list[RetrievedPassage] = field(default_factory=list)
+    """Retrieved passages, populated on fallback when model is unavailable."""
+    path: Literal["rag", "fact_card", "fallback", "semantic_cache", "guardrail"] = "rag"
+    """The pipeline path that produced this answer."""
+    status: Literal[
+        "SUPPORTED",
+        "INSUFFICIENT_EVIDENCE",
+        "MODEL_UNAVAILABLE",
+        "needs_clarification",
+        "PII_DETECTED",
+        "UNSUPPORTED_LANGUAGE",
+    ] = "SUPPORTED"
+    """Status: SUPPORTED, INSUFFICIENT_EVIDENCE, MODEL_UNAVAILABLE, or needs_clarification."""
+    understood_query: str | None = None
+    """The cleaned, normalized query understood by the system."""
+    candidate_schemes: list[str] = field(default_factory=list)
+    """Candidate schemes when query is near-threshold or ambiguous."""
 
 
 def _citation(number: int, passage: RetrievedPassage) -> Citation:
@@ -110,6 +137,15 @@ def _misread_in(chunk: Chunk, misread: dict[tuple[str, int], set[str]]) -> set[s
 
 
 class Answerer:
+    def preload(self) -> None:
+        """Preloads and warms up retrieval models to eliminate cold-start latency."""
+        if hasattr(self._retriever, "retrieve"):
+            try:
+                self._retriever.retrieve("warmup")
+                logger.info("Retriever models preloaded and warmed up successfully.")
+            except Exception as exc:
+                logger.debug("Preload retrieve skipped or failed: %s", exc)
+
     def __init__(
         self,
         retriever: Retriever,
@@ -118,6 +154,8 @@ class Answerer:
         refusal_threshold: float,
         contacts: dict[str, Contact] | None = None,
         corrections: list[OcrCorrection] | None = None,
+        fact_cards: Any | None = None,
+        alias_matcher: Any | None = None,
     ) -> None:
         self._retriever = retriever
         self._llm = llm
@@ -127,13 +165,106 @@ class Answerer:
         # Confirmed fixes are applied at ingestion, but stay here too: until the index is
         # rebuilt the passage still holds the misreading.
         self._misread = misread_numbers_by_page(corrections or [])
+        self._fact_cards = fact_cards
+        self._alias_matcher = alias_matcher
 
-    def answer(self, question: str) -> Answer:
+    @property
+    def retriever(self) -> Retriever:
+        return self._retriever
+
+    def answer(self, question: str, voice_mode: bool = False) -> Answer:
         timings: dict[str, float] = {}
         started = time.perf_counter()
         language = detect_language(question)
 
-        retrieval = self._retriever.retrieve(question)
+        # Privacy guardrail: intercept Aadhaar or mobile phone numbers before retrieval or LLM
+        if contains_pii(question):
+            timings["total"] = (time.perf_counter() - started) * 1000
+            return Answer(
+                question=question,
+                language=language,
+                text=refusal_text("pii_detected", language),
+                sentences=[],
+                citations=[],
+                refused=True,
+                refusal_reason="pii_detected",
+                confidence=0.0,
+                disclaimer=disclaimer(language),
+                timings_ms=timings,
+                status="PII_DETECTED",
+                path="guardrail",
+                understood_query=clean_query(question),
+            )
+
+        if language == "unknown":
+            has_supported = any(
+                0x0B80 <= ord(c) <= 0x0BFF
+                or 0x0900 <= ord(c) <= 0x097F
+                or ("a" <= c.lower() <= "z")
+                for c in question
+            )
+            if not has_supported:
+                timings["total"] = (time.perf_counter() - started) * 1000
+                return Answer(
+                    question=question,
+                    language="en",
+                    text=refusal_text("unsupported_language", "en"),
+                    sentences=[],
+                    citations=[],
+                    refused=True,
+                    refusal_reason="unsupported_language",
+                    confidence=0.0,
+                    disclaimer=disclaimer("en"),
+                    timings_ms=timings,
+                    status="UNSUPPORTED_LANGUAGE",
+                    path="guardrail",
+                    understood_query=clean_query(question),
+                )
+
+        # Step 4B: Deterministic cleanup & alias expansion
+        cleaned_q = clean_query(question)
+        search_q = cleaned_q
+        if self._alias_matcher is not None:
+            search_q = self._alias_matcher.expand_query(cleaned_q)
+
+        if self._fact_cards is not None:
+            card_started = time.perf_counter()
+            card, card_score = self._fact_cards.match(cleaned_q)
+            card_ms = (time.perf_counter() - card_started) * 1000
+            timings["fact_card_match"] = card_ms
+            if card is not None:
+                timings["total"] = (time.perf_counter() - started) * 1000
+                contact = self._contacts.get(card.scheme)
+                citation = Citation(
+                    number=1,
+                    doc_id=card.source_document,
+                    scheme=card.scheme,
+                    page_start=card.source_page,
+                    page_end=card.source_page,
+                    source_url=str(contact.website) if contact else "https://www.tn.gov.in",
+                    text=card.answer_text,
+                    language=card.language,
+                    ocr_corrected=False,
+                )
+                sentence = AnswerSentence(text=card.answer_text, citations=[1])
+                return Answer(
+                    question=question,
+                    language=language,
+                    text=f"{card.answer_text} [1]",
+                    sentences=[sentence],
+                    citations=[citation],
+                    refused=False,
+                    refusal_reason=None,
+                    confidence=card_score,
+                    disclaimer=disclaimer(language),
+                    timings_ms=timings,
+                    contact=contact,
+                    path="fact_card",
+                    status="SUPPORTED",
+                    understood_query=cleaned_q,
+                )
+
+        retrieval = self._retriever.retrieve(search_q)
         timings["retrieval"] = (time.perf_counter() - started) * 1000
         timings.update(retrieval.timings_ms)  # "search" and "rerank" inside "retrieval"
         confidence = retrieval.confidence
@@ -143,15 +274,31 @@ class Answerer:
             logger.info("refused (%s), confidence %.3f", reason, confidence)
             text = refusal_text(reason, language)
             contact: Contact | None = None
-            # Past the confidence check the question is about a scheme we hold documents
-            # for, so point to that scheme's official contact. Below it we don't know which
-            # scheme (if any) the question is about, so the generic advice stays.
             if reason != "low_confidence" and retrieval.passages:
                 contact = self._contacts.get(retrieval.passages[0].chunk.scheme)
                 if contact:
                     text += " " + contact_text(
                         contact.scheme, contact.helpline, str(contact.website), language
                     )
+            if reason == "service_unavailable":
+                return Answer(
+                    question=question,
+                    language=language,
+                    text=text,
+                    sentences=[],
+                    citations=[],
+                    refused=True,
+                    refusal_reason=reason,
+                    confidence=confidence,
+                    disclaimer=disclaimer(language),
+                    rejected=rejected or [],
+                    timings_ms=timings,
+                    contact=contact,
+                    passages=retrieval.passages[:3],
+                    status="MODEL_UNAVAILABLE",
+                    path="fallback",
+                    understood_query=cleaned_q,
+                )
             return Answer(
                 question=question,
                 language=language,
@@ -165,12 +312,43 @@ class Answerer:
                 rejected=rejected or [],
                 timings_ms=timings,
                 contact=contact,
+                passages=[],
+                status="INSUFFICIENT_EVIDENCE",
+                path="rag",
+                understood_query=cleaned_q,
             )
 
         if confidence < self._refusal_threshold:
+            # Step 4B: Near-threshold clarification band [0.30, 0.35)
+            if confidence >= 0.30 and retrieval.passages:
+                candidates = list(
+                    dict.fromkeys(p.chunk.scheme for p in retrieval.passages if p.chunk.scheme)
+                )[:2]
+                if candidates:
+                    timings["total"] = (time.perf_counter() - started) * 1000
+                    contact = self._contacts.get(candidates[0])
+                    return Answer(
+                        question=question,
+                        language=language,
+                        text=clarification_text(candidates, language),
+                        sentences=[],
+                        citations=[],
+                        refused=False,
+                        refusal_reason=None,
+                        confidence=confidence,
+                        disclaimer=disclaimer(language),
+                        timings_ms=timings,
+                        contact=contact,
+                        passages=retrieval.passages[:2],
+                        path="rag",
+                        status="needs_clarification",
+                        understood_query=cleaned_q,
+                        candidate_schemes=candidates,
+                    )
             return refuse("low_confidence")
 
-        passages = retrieval.passages
+        prompt_to_use = VOICE_SYSTEM_PROMPT if voice_mode else SYSTEM_PROMPT
+        passages = retrieval.passages[:3] if voice_mode else retrieval.passages
         passage_texts = [passage.chunk.text for passage in passages]
         misread = [_misread_in(passage.chunk, self._misread) for passage in passages]
         generation_started = time.perf_counter()
@@ -178,15 +356,20 @@ class Answerer:
             reply = parse_reply(
                 AnswerReply,
                 self._llm.complete_json(
-                    SYSTEM_PROMPT, build_user_message(question, language, passages), ANSWER_SCHEMA
+                    prompt_to_use, build_user_message(question, language, passages), ANSWER_SCHEMA
                 ),
             )
             timings["llm_answer"] = (time.perf_counter() - generation_started) * 1000
             drafts = [DraftSentence(s.text.strip(), s.sources) for s in reply.sentences]
             if not reply.answerable or not drafts:
                 return refuse("not_in_documents")
+
+            # Voice optimization: skip LLM verifier if answer text has no numbers or dates
+            has_numbers = any(bool(numbers_in(s.text)) for s in drafts)
+            verifier_to_use = None if (voice_mode and not has_numbers) else self._verifier
+
             verify_started = time.perf_counter()
-            checked = check_answer(drafts, passage_texts, self._verifier, misread)
+            checked = check_answer(drafts, passage_texts, verifier_to_use, misread)
             # Guardrail checks plus the verifier call (when one is configured).
             timings["verifier"] = (time.perf_counter() - verify_started) * 1000
         except LlmDeclinedError:
@@ -202,8 +385,8 @@ class Answerer:
 
         # Renumber citations so the user sees [1], [2], ... in order of first use.
         cited_order: list[int] = []
-        for sentence in checked.kept:
-            for source in sentence.sources:
+        for kept_s in checked.kept:
+            for source in kept_s.sources:
                 if source not in cited_order:
                     cited_order.append(source)
         renumber = {source: new for new, source in enumerate(cited_order, start=1)}
@@ -226,4 +409,6 @@ class Answerer:
             disclaimer=disclaimer(language),
             rejected=checked.rejected,
             timings_ms=timings,
+            status="SUPPORTED",
+            understood_query=cleaned_q,
         )

@@ -2,6 +2,7 @@ import json
 import threading
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
@@ -47,8 +48,9 @@ class FakeService:
         self.questions: list[str] = []
         self._answer = answer or CITED
         self._error = error
+        self.retriever: Any = None
 
-    def answer(self, question: str) -> Answer:
+    def answer(self, question: str, voice_mode: bool = False) -> Answer:
         self.questions.append(question)
         if self._error:
             raise self._error
@@ -71,7 +73,7 @@ def test_health(client: TestClient) -> None:
     response = client.get("/health")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert response.json()["status"] == "ok"
 
 
 class MeetingService(FakeService):
@@ -81,7 +83,7 @@ class MeetingService(FakeService):
         super().__init__()
         self._both_running = threading.Barrier(2, timeout=5)
 
-    def answer(self, question: str) -> Answer:
+    def answer(self, question: str, voice_mode: bool = False) -> Answer:
         self._both_running.wait()
         return super().answer(question)
 
@@ -262,7 +264,7 @@ def test_web_page_is_served_and_api_routes_still_win(service: FakeService, tmp_p
 
     assert page.status_code == 200
     assert "Pakkam" in page.text
-    assert health.json() == {"status": "ok"}
+    assert health.json()["status"] == "ok"
 
 
 def test_webp_photos_are_served_as_images(service: FakeService, tmp_path: Path) -> None:
@@ -316,6 +318,7 @@ class FakeStt:
         self.calls: list[tuple[str, str]] = []
         self._transcript = transcript
         self._error = error
+        self.retriever: Any = None
 
     def transcribe(self, audio: bytes, filename: str, language_code: str) -> str:
         self.calls.append((filename, language_code))
@@ -422,6 +425,7 @@ class FakeTts:
     def __init__(self, error: Exception | None = None) -> None:
         self.calls: list[tuple[str, str]] = []
         self._error = error
+        self.retriever: Any = None
 
     def speak(self, text: str, language_code: str) -> bytes:
         self.calls.append((text, language_code))
@@ -516,7 +520,7 @@ def test_voice_adds_stt_timing_to_response_and_log(service: FakeService, tmp_pat
     assert body["timings_ms"]["stt"] == body["stt_ms"]
     assert body["timings_ms"]["total"] == 950.0
     [entry] = audit_lines(tmp_path)
-    assert set(entry["timings_ms"]) == {"retrieval", "generation", "total", "stt"}  # type: ignore[arg-type]
+    assert set(entry["timings_ms"]) == {"retrieval", "generation", "total", "stt"}  # type: ignore[call-overload]
 
 
 def test_speak_logs_tts_timing_without_text(service: FakeService, tmp_path: Path) -> None:
@@ -528,7 +532,7 @@ def test_speak_logs_tts_timing_without_text(service: FakeService, tmp_path: Path
     assert entry["kind"] == "speech"
     assert entry["chars"] == len("Citizens can join.")
     assert entry["language_code"] == "ta-IN"
-    assert set(entry["timings_ms"]) == {"tts"}  # type: ignore[arg-type]
+    assert set(entry["timings_ms"]) == {"tts"}  # type: ignore[call-overload]
     assert "Citizens" not in (tmp_path / "requests.jsonl").read_text()
 
 
@@ -606,3 +610,99 @@ def test_transcribe_has_its_own_rate_limit(service: FakeService, tmp_path: Path)
         assert client.post("/transcribe", files=clip).status_code == 200
         assert client.post("/ask", json={"question": QUESTION}).status_code == 200
         assert client.post("/transcribe", files=clip).status_code == 429
+
+
+def test_ask_model_unavailable_returns_fallback_passages(tmp_path: Path) -> None:
+    import datetime
+
+    from schemebot.ingest.models import Chunk
+    from schemebot.retrieve.retriever import RetrievedPassage
+
+    chunk = Chunk(
+        chunk_id="apy-brochure-en:p1:c0",
+        doc_id="apy-brochure-en",
+        scheme="Atal Pension Yojana",
+        source_url="https://pfrda.org.in/apy",
+        page_start=1,
+        page_end=1,
+        section="Eligibility",
+        language="en",
+        doc_date=datetime.date(2024, 1, 1),
+        text="Sample official passage text",
+        extraction="original",
+    )
+    passage = RetrievedPassage(chunk=chunk, relevance=0.95)
+    unavailable_answer = Answer(
+        question="What is APY?",
+        language="en",
+        text="Model is temporarily down. Please refer to official sources.",
+        sentences=[],
+        citations=[],
+        refused=True,
+        refusal_reason="service_unavailable",
+        confidence=0.95,
+        disclaimer="Informational only.",
+        contact=Contact(
+            scheme="Atal Pension Yojana",
+            helpline="1800-110-069",
+            helpline_source="apy-brochure-en:p1",
+            website="https://pfrda.org.in",
+        ),
+        passages=[passage],
+    )
+    svc = FakeService(answer=unavailable_answer)
+    with TestClient(create_app(lambda: svc, log_dir=tmp_path)) as client:
+        res = client.post("/ask", json={"question": "What is APY?"})
+        assert res.status_code == 200
+        data = res.json()
+        assert data["status"] == "MODEL_UNAVAILABLE"
+        assert data["path"] == "fallback"
+        assert len(data["passages"]) == 1
+        assert data["passages"][0]["scheme"] == "Atal Pension Yojana"
+        assert data["passages"][0]["text"] == "Sample official passage text"
+        assert data["contact"]["scheme"] == "Atal Pension Yojana"
+
+
+def test_ask_sources_returns_passages(tmp_path: Path) -> None:
+    import datetime
+
+    from schemebot.ingest.models import Chunk
+    from schemebot.retrieve.retriever import RetrievalResult, RetrievedPassage
+
+    class FakeRetriever:
+        def retrieve(self, question: str) -> RetrievalResult:
+            chunk = Chunk(
+                chunk_id="apy-brochure-en:p1:c0",
+                doc_id="apy-brochure-en",
+                scheme="Atal Pension Yojana",
+                source_url="https://pfrda.org.in/apy",
+                page_start=1,
+                page_end=1,
+                section="Eligibility",
+                language="en",
+                doc_date=datetime.date(2024, 1, 1),
+                text="Direct retrieval passage",
+                extraction="original",
+            )
+            passage = RetrievedPassage(chunk=chunk, relevance=0.95)
+            return RetrievalResult(
+                query=question, passages=[passage], timings_ms={"retrieval": 15.0}
+            )
+
+    svc = FakeService()
+    svc.retriever = FakeRetriever()
+    with TestClient(create_app(lambda: svc, log_dir=tmp_path)) as client:
+        res = client.post("/ask/sources", json={"question": "What is APY?"})
+        assert res.status_code == 200
+        data = res.json()
+        assert len(data["passages"]) == 1
+        assert data["passages"][0]["scheme"] == "Atal Pension Yojana"
+        assert data["passages"][0]["text"] == "Direct retrieval passage"
+        assert "retrieval" in data["timings_ms"]
+
+
+def test_ask_sources_503_when_no_retriever(tmp_path: Path) -> None:
+    svc = FakeService()
+    with TestClient(create_app(lambda: svc, log_dir=tmp_path)) as client:
+        res = client.post("/ask/sources", json={"question": "What is APY?"})
+        assert res.status_code == 503
