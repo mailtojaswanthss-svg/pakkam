@@ -23,6 +23,10 @@ jobs:
       - name: Install Python
         run: uv python install 3.12
 
+      # The voice endpoints convert uploads to 16 kHz mono WAV with ffmpeg.
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
       # Everything except PyTorch and the embedding library: the fast tests use fake models.
       - name: Install dependencies
         run: >-
