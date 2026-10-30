@@ -24,6 +24,7 @@ logs/
 qdrant_storage/
 *-calls.json
 *.lock
+!uv.lock
 
 # Search index (rebuilt by python -m schemebot.index)
 data/index/

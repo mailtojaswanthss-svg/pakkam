@@ -7,9 +7,9 @@ CRITICAL TIMELINE & DEADLINES (Revised & Aligned):
 - Own Engineering Target: Fri 6 Nov 2026
 - Hard Submission Deadline: 10 Nov 2026, 11:59 PM IST
 
-REMOTE REPOSITORY STATUS:
-- Branch `feat/prompt-pack-execution` exists on GitHub remote origin as a private backup (repo visibility: PRIVATE).
-- Push policy: STRICTLY NO PUSHES without explicit authorization (`PUSH_BRANCH_NOW: no`). All commits are strictly local.
+REPOSITORY STATUS (30 Oct):
+- `feat/prompt-pack-execution` is pushed to GitHub and is being merged into `main` through a cleanup pull request (lint fixes, archived superseded reports, rewritten README).
+- Superseded reports and old plans now live in `docs/archive/`.
 
 ---
 
@@ -17,7 +17,7 @@ REMOTE REPOSITORY STATUS:
 
 - **Test Suite Status**: **521 passed, 10 deselected** (100% pass rate).
 - **Mypy Strict Status**: Strict clean across all 65 source files (`src/schemebot`, `scripts/`, `tests/`).
-- **Ruff Lint Status**: All checks passed across codebase.
+- **Ruff Lint Status**: `ruff check .` and `ruff format --check .` pass across the repo (fixed 30 Oct; 384 errors and 59 unformatted files before).
 - **Git Secrets Audit**: **0 secrets found** in full git history and working tree (`scripts/scan_git_secrets.py`).
 - **Clean Clone Audit**: Verified in pristine temp clone: `uv sync` installs all dependencies cleanly; 521/521 tests pass; 0 secrets.
 - **LLM Budget Guard**: Daily cap enforced at 20 calls/day; minimum reserve of 5 spare calls maintained. Today: 3 calls used on pinned `gemini-3.8-flash` (17 spare calls available).
@@ -86,5 +86,5 @@ REMOTE REPOSITORY STATUS:
 | **BLK-04** | Helpline Human Verification | User | Complete phone verification calls for 9 helplines in `docs/review/helpline_check.csv`. | Blocked on telephone calls |
 | **BLK-05** | Answer-Level Human Grading | User | Complete manual scoring in `docs/review/grading_sheet.csv`. | Blocked on human evaluator |
 | **BLK-06** | OCR Page Disagreement Review | User | Review 68 scanned Tamil PDF pages with numerical amount disagreements. | Blocked on human review |
-| **BLK-07** | Remote Push / PR Creation | User | Explicit `PUSH_BRANCH_NOW: yes` decision to push feature branch to origin. | Gated on user decision |
+| **BLK-07** | Remote Push / PR Creation | User | Push the feature branch and open a PR to main. | Done (30 Oct) |
 | **BLK-08** | Cloud Hosting / Phone Test | User | Real phone network deployment (SIP / Twilio / Exotel). | Deferred post-submission |
