@@ -51,6 +51,13 @@ REMOTE REPOSITORY STATUS:
 - Executed voice-loop timing benchmark ($n=10$, perceived start latency 8,417.9 ms).
 - Automated blocker gating for missing datasets (`BLK-01`, `BLK-02`, `BLK-03`).
 
+### Hosting and source checks (26-27 Oct, merged from main)
+- Website live on Vercel at https://pakkam-alpha.vercel.app (`web/`). The backend runs on Jaswanth's laptop and is reached through a Cloudflare quick tunnel; `web/vercel.json` forwards `/ask`, `/sources`, `/transcribe` and `/speak`. The tunnel link changes on every restart, so vercel.json needs the new host each time. Plan: Cloud Run (CPU, trial credit) near the deadline.
+- Vercel cannot run the backend (PyTorch + 4.5 GB models over its ~500 MB limit, no index). Hugging Face Docker Spaces now need PRO ($9/month), so that route was dropped.
+- First live timings via the site: search + rerank 0.7-0.9 s on the RTX 4060, tunnel ~0.5 s, full answers 40 s to over 120 s on free Gemini (two calls per answer, 429 retries). Suggested `.env`: flash-lite models, 30 s timeout, 1 retry.
+- OCR corrections: `apy-brochure-hi` p1 checked by rendering the PDF: it prints रु.1000, so the correction holds. The six Tamil Nadu entries could not be checked from the cloud (cms.tn.gov.in resets connections); Jaswanth checks them on the laptop.
+- Ujjwala (#10): the PMUY SoP lists Aadhaar of the applicant and all adults, and bank account number with IFSC, so the reference answer matches the source.
+
 ### Step 5: Prisma Real Request Capture (`c032949`)
 - Dispatched 1 pre-approved live Gnani STT request (`scripts/capture_prisma_raw.py`) on public Kathbath clip (`kathbath_ta_01.wav`).
 - Captured raw JSON to gitignored `data/voice/prisma_raw_sample.json`.
