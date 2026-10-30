@@ -108,7 +108,9 @@ BENCHMARK_TARGETS = [
 ]
 
 
-def find_amount_crops(image: Image.Image, lang: str, target_tokens: list[str]) -> list[tuple[int, int, int, int]]:
+def find_amount_crops(
+    image: Image.Image, lang: str, target_tokens: list[str]
+) -> list[tuple[int, int, int, int]]:
     """Locate bounding boxes for amounts using Tesseract word positions."""
     data = pytesseract.image_to_data(image, lang=lang, output_type=pytesseract.Output.DICT)
     boxes = []
@@ -144,10 +146,10 @@ def find_amount_crops(image: Image.Image, lang: str, target_tokens: list[str]) -
     img_w, img_h = image.size
 
     merged = []
-    for (l, t, w, h, _) in chosen_boxes:
-        x0 = max(0, l - margin_x)
+    for left, t, w, h, _ in chosen_boxes:
+        x0 = max(0, left - margin_x)
         y0 = max(0, t - margin_y)
-        x1 = min(img_w, l + w + margin_x)
+        x1 = min(img_w, left + w + margin_x)
         y1 = min(img_h, t + h + margin_y)
         merged.append([x0, y0, x1, y1])
 
@@ -161,7 +163,12 @@ def find_amount_crops(image: Image.Image, lang: str, target_tokens: list[str]) -
             remaining = []
             for other in merged:
                 # Check horizontal/vertical intersection
-                if not (curr[2] < other[0] or curr[0] > other[2] or curr[3] < other[1] or curr[1] > other[3]):
+                if not (
+                    curr[2] < other[0]
+                    or curr[0] > other[2]
+                    or curr[3] < other[1]
+                    or curr[1] > other[3]
+                ):
                     curr[0] = min(curr[0], other[0])
                     curr[1] = min(curr[1], other[1])
                     curr[2] = max(curr[2], other[2])
@@ -203,12 +210,12 @@ def main():
             full_image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
 
         # 1. Locate crops via Tesseract
-        t_crop_start = time.perf_counter()
         crops = find_amount_crops(full_image, target["lang"], target["target_tokens"])
-        t_crop_find = time.perf_counter() - t_crop_start
 
         if not crops:
-            logger.warning("  No amount crops found on page %d; falling back to center crop", page_num)
+            logger.warning(
+                "  No amount crops found on page %d; falling back to center crop", page_num
+            )
             w, h = full_image.size
             crops = [(w // 4, h // 4, w // 2, h // 4)]
 
@@ -225,21 +232,34 @@ def main():
                     "role": "user",
                     "content": [
                         {"type": "image", "image": crop_img},
-                        {"type": "text", "text": "Extract all text from this image exactly as written. Output only the extracted text."},
+                        {
+                            "type": "text",
+                            "text": "Extract all text from this image exactly as written. Output only the extracted text.",
+                        },
                     ],
                 }
             ]
-            text_prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            inputs = processor(text=[text_prompt], images=[crop_img], padding=True, return_tensors="pt").to(model.device)
+            text_prompt = processor.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+            inputs = processor(
+                text=[text_prompt], images=[crop_img], padding=True, return_tensors="pt"
+            ).to(model.device)
 
             generated_ids = model.generate(**inputs, max_new_tokens=256)
-            trimmed_ids = [out[len(inp):] for inp, out in zip(inputs.input_ids, generated_ids)]
-            crop_out = processor.batch_decode(trimmed_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0].strip()
+            trimmed_ids = [
+                out[len(inp) :] for inp, out in zip(inputs.input_ids, generated_ids, strict=False)
+            ]
+            crop_out = processor.batch_decode(
+                trimmed_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False
+            )[0].strip()
 
             dur = time.perf_counter() - t_infer_start
             crop_latencies.append(dur)
             crop_texts.append(crop_out)
-            logger.info("  Crop %d (%dx%d px): %.2fs -> %s", crop_idx, w, h, dur, repr(crop_out[:60]))
+            logger.info(
+                "  Crop %d (%dx%d px): %.2fs -> %s", crop_idx, w, h, dur, repr(crop_out[:60])
+            )
 
         combined_crop_text = " | ".join(crop_texts)
         total_crop_time = sum(crop_latencies)
@@ -247,22 +267,28 @@ def main():
 
         # Check correctness against ground truth
         clean_gt = target["ground_truth"].replace(",", "").replace("/", "").replace("-", "").strip()
-        clean_extracted = combined_crop_text.replace(",", "").replace("/", "").replace("-", "").strip()
-        is_correct = clean_gt in clean_extracted or any(tok in combined_crop_text for tok in target["target_tokens"][:2])
+        clean_extracted = (
+            combined_crop_text.replace(",", "").replace("/", "").replace("-", "").strip()
+        )
+        is_correct = clean_gt in clean_extracted or any(
+            tok in combined_crop_text for tok in target["target_tokens"][:2]
+        )
 
-        results.append({
-            "doc_id": target["doc_id"],
-            "page": page_num,
-            "scheme": target["scheme"],
-            "ground_truth": target["ground_truth"],
-            "crops_count": len(crops),
-            "avg_time_per_crop_s": round(avg_crop_time, 2),
-            "total_crop_time_s": round(total_crop_time, 2),
-            "full_page_baseline_s": 78.8,
-            "speedup": round(78.8 / max(0.1, total_crop_time), 1),
-            "extracted_text": combined_crop_text,
-            "is_correct": is_correct,
-        })
+        results.append(
+            {
+                "doc_id": target["doc_id"],
+                "page": page_num,
+                "scheme": target["scheme"],
+                "ground_truth": target["ground_truth"],
+                "crops_count": len(crops),
+                "avg_time_per_crop_s": round(avg_crop_time, 2),
+                "total_crop_time_s": round(total_crop_time, 2),
+                "full_page_baseline_s": 78.8,
+                "speedup": round(78.8 / max(0.1, total_crop_time), 1),
+                "extracted_text": combined_crop_text,
+                "is_correct": is_correct,
+            }
+        )
 
     # Save results to review
     out_json = Path("docs/review/ocr_crop_mode_results.json")
@@ -271,17 +297,25 @@ def main():
     print("\n" + "=" * 90)
     print(" CROP MODE OCR BENCHMARK RESULTS (7 KNOWN-PROBLEM PAGES)")
     print("=" * 90)
-    print(f"{'Document':<24} {'Page':<5} {'Ground Truth':<12} {'Crop Time':<10} {'Speedup':<9} {'Accuracy'}")
+    print(
+        f"{'Document':<24} {'Page':<5} {'Ground Truth':<12} {'Crop Time':<10} {'Speedup':<9} {'Accuracy'}"
+    )
     print("-" * 90)
     for r in results:
         status = "CORRECT ✅" if r["is_correct"] else "MISSED ❌"
-        print(f"{r['doc_id']:<24} {r['page']:<5} {r['ground_truth']:<12} {r['total_crop_time_s']:>6.2f}s    {r['speedup']:>4.1f}x     {status}")
+        print(
+            f"{r['doc_id']:<24} {r['page']:<5} {r['ground_truth']:<12} {r['total_crop_time_s']:>6.2f}s    {r['speedup']:>4.1f}x     {status}"
+        )
     print("=" * 90)
 
     correct_count = sum(1 for r in results if r["is_correct"])
     mean_crop_time = sum(r["total_crop_time_s"] for r in results) / len(results)
-    print(f"\nTarget Accuracy:   {correct_count} / {len(results)} ({correct_count / len(results) * 100:.1f}%)")
-    print(f"Mean Time / Page:  {mean_crop_time:.2f}s (vs 78.8s full-page -> {78.8 / mean_crop_time:.1f}x faster)")
+    print(
+        f"\nTarget Accuracy:   {correct_count} / {len(results)} ({correct_count / len(results) * 100:.1f}%)"
+    )
+    print(
+        f"Mean Time / Page:  {mean_crop_time:.2f}s (vs 78.8s full-page -> {78.8 / mean_crop_time:.1f}x faster)"
+    )
     print(f"Results saved to:  {out_json.as_posix()}\n")
     return 0
 

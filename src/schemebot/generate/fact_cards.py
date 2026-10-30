@@ -23,24 +23,24 @@ CardField = Literal["amount", "who_qualifies", "documents", "how_to_apply"]
 
 SCHEME_ALIASES: dict[str, list[str]] = {
     "Kalaignar Magalir Urimai Thittam": [
-        "kmut", "magalir urimai", "மகளிர் உரிமை", "urimai thogai",
-        "உரிமைத் தொகை", "kalaignar", "கலைஞர் மகளிர்"
+        "kmut",
+        "magalir urimai",
+        "மகளிர் உரிமை",
+        "urimai thogai",
+        "உரிமைத் தொகை",
+        "kalaignar",
+        "கலைஞர் மகளிர்",
     ],
-    "PM-KISAN": [
-        "pm kisan", "pmkisan", "pm-kisan", "kisan samman", "किसान सम्मान", "விவசாயி"
-    ],
-    "Pradhan Mantri Ujjwala Yojana": [
-        "pmuy", "ujjwala", "உஜ்வாலா", "उज्ज्वला", "gas connection", "lpg"
-    ],
-    "Atal Pension Yojana": [
-        "atal pension", "apy", "அடல் பென்ஷன்", "अटल पेंशन"
-    ],
+    "PM-KISAN": ["pm kisan", "pmkisan", "pm-kisan", "kisan samman", "किसान सम्मान", "விவசாயி"],
+    "Pradhan Mantri Ujjwala Yojana": ["pmuy", "ujjwala", "உஜ்வாலா", "उज्ज्वला", "gas connection", "lpg"],
+    "Atal Pension Yojana": ["atal pension", "apy", "அடல் பென்ஷன்", "अटल पेंशन"],
     "Chief Minister's Comprehensive Health Insurance Scheme": [
-        "cmchis", "மருத்துவக் காப்பீடு", "maruthuva", "காப்பீட்டு"
+        "cmchis",
+        "மருத்துவக் காப்பீடு",
+        "maruthuva",
+        "காப்பீட்டு",
     ],
-    "Pudhumai Penn": [
-        "pudhumai penn", "புதுமைப்பெண்", "pudhumai pen", "moovalur ramamirtham"
-    ],
+    "Pudhumai Penn": ["pudhumai penn", "புதுமைப்பெண்", "pudhumai pen", "moovalur ramamirtham"],
 }
 
 

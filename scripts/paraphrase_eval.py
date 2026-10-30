@@ -138,18 +138,20 @@ def main() -> None:
             if is_refused:
                 refusals += 1
 
-            results.append({
-                "scheme": scheme,
-                "variant_type": var_type,
-                "raw_query": messy_q,
-                "cleaned_query": cleaned,
-                "expanded_query": search_q,
-                "confidence": res.confidence,
-                "top1_hit": top1_hit,
-                "top5_hit": top5_hit,
-                "refused": is_refused,
-                "latency_ms": lat_ms,
-            })
+            results.append(
+                {
+                    "scheme": scheme,
+                    "variant_type": var_type,
+                    "raw_query": messy_q,
+                    "cleaned_query": cleaned,
+                    "expanded_query": search_q,
+                    "confidence": res.confidence,
+                    "top1_hit": top1_hit,
+                    "top5_hit": top5_hit,
+                    "refused": is_refused,
+                    "latency_ms": lat_ms,
+                }
+            )
 
     top5_recall = (top5_hits / total_variants) * 100.0
     refusal_rate = (refusals / total_variants) * 100.0
@@ -158,8 +160,7 @@ def main() -> None:
     print(f"Total Messy Variants Evaluated: {total_variants}")
     print(f"Top-5 Retrieval Recall: {top5_hits}/{total_variants} ({top5_recall:.1f}%)")
     print(
-        f"False Refusal Rate (confidence < 0.35): "
-        f"{refusals}/{total_variants} ({refusal_rate:.1f}%)"
+        f"False Refusal Rate (confidence < 0.35): {refusals}/{total_variants} ({refusal_rate:.1f}%)"
     )
     print(f"Average Search Latency: {avg_latency:.1f} ms")
     print("=================================================================\n")
@@ -216,7 +217,7 @@ def main() -> None:
     )
     lines.append(
         "3. **Near-Threshold Band Integration:** Queries falling in $[0.30, 0.40)$ trigger "
-        "`status=\"needs_clarification\"` with candidate suggestions rather than a cold refusal."
+        '`status="needs_clarification"` with candidate suggestions rather than a cold refusal.'
     )
 
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")

@@ -52,8 +52,8 @@ def compute_wer(reference: str, hypothesis: str) -> float:
                 d[i][j] = d[i - 1][j - 1]
             else:
                 d[i][j] = min(
-                    d[i - 1][j] + 1,      # deletion
-                    d[i][j - 1] + 1,      # insertion
+                    d[i - 1][j] + 1,  # deletion
+                    d[i][j - 1] + 1,  # insertion
                     d[i - 1][j - 1] + 1,  # substitution
                 )
     return d[len(ref_words)][len(hyp_words)] / len(ref_words)
@@ -129,15 +129,17 @@ def main() -> None:
         if retrieval_hit:
             lang_stats[lang]["retrieval_hits"] += 1
 
-        results.append({
-            "clip_id": r["clip_id"],
-            "language": lang,
-            "reference": ref_text,
-            "transcript": transcript,
-            "wer": round(wer, 4),
-            "stt_ms": round(stt_ms, 1),
-            "retrieval_hit_top3": retrieval_hit,
-        })
+        results.append(
+            {
+                "clip_id": r["clip_id"],
+                "language": lang,
+                "reference": ref_text,
+                "transcript": transcript,
+                "wer": round(wer, 4),
+                "stt_ms": round(stt_ms, 1),
+                "retrieval_hit_top3": retrieval_hit,
+            }
+        )
 
     # Save results
     out_file = PROJECT_ROOT / "data" / "voice" / "field_clips_results.json"
@@ -159,7 +161,7 @@ def main() -> None:
         hit_rate = (s["retrieval_hits"] / s["total"] * 100) if s["total"] else 0.0
         avg_lat = sum(s["stt_latencies"]) / len(s["stt_latencies"]) if s["stt_latencies"] else 0.0
         row_str = (
-            f"{lang:<10} | {s['total']:<5} | {mean_wer*100:>7.1f}% | "
+            f"{lang:<10} | {s['total']:<5} | {mean_wer * 100:>7.1f}% | "
             f"{hit_rate:>9.1f}% | {avg_lat:>8.1f} ms"
         )
         print(row_str)

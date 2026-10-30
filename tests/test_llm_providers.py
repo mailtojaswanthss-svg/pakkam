@@ -99,9 +99,7 @@ def test_claude_timeout_and_connection_error() -> None:
     [
         SimpleNamespace(content=[], stop_reason="end_turn"),
         SimpleNamespace(content=[SimpleNamespace(type="image")], stop_reason="end_turn"),
-        SimpleNamespace(
-            content=[SimpleNamespace(type="text", text="")], stop_reason="end_turn"
-        ),
+        SimpleNamespace(content=[SimpleNamespace(type="text", text="")], stop_reason="end_turn"),
         SimpleNamespace(
             content=[SimpleNamespace(type="text", text="not a json string")],
             stop_reason="end_turn",
@@ -212,9 +210,7 @@ class FakeStubLlm:
     def configured(self) -> bool:
         return self._is_configured
 
-    def complete_json(
-        self, system: str, user: str, schema: dict[str, object]
-    ) -> dict[str, Any]:
+    def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
         self.call_count += 1
         if isinstance(self._result, Exception):
             raise self._result

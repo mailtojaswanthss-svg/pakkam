@@ -61,15 +61,17 @@ def main() -> None:
         doc_id = top_passage.chunk.doc_id if top_passage else "none"
         page = top_passage.chunk.page_start if top_passage else 0
 
-        measurements.append({
-            "id": qid,
-            "question": q_text[:50] + "..." if len(q_text) > 50 else q_text,
-            "search_ms": retrieval.timings_ms.get("search", 0.0),
-            "rerank_ms": retrieval.timings_ms.get("rerank", 0.0),
-            "total_sources_ms": total_sources_ms,
-            "top_doc": doc_id,
-            "top_page": page,
-        })
+        measurements.append(
+            {
+                "id": qid,
+                "question": q_text[:50] + "..." if len(q_text) > 50 else q_text,
+                "search_ms": retrieval.timings_ms.get("search", 0.0),
+                "rerank_ms": retrieval.timings_ms.get("rerank", 0.0),
+                "total_sources_ms": total_sources_ms,
+                "top_doc": doc_id,
+                "top_page": page,
+            }
+        )
         logger.info(
             "%s: total=%.1f ms (search=%.1f ms, rerank=%.1f ms) -> doc=%s, p.%d",
             qid,
@@ -148,18 +150,20 @@ def main() -> None:
             f"`{m['top_doc']}` | p. {m['top_page']} |"
         )
 
-    lines.extend([
-        "",
-        "---",
-        "",
-        "## 4. Key Takeaways",
-        "1. **Zero LLM Overhead:** The `/ask/sources` endpoint executes completely locally "
-        "in under 400 ms on consumer hardware, instantly giving the user proof that their query "
-        "was understood and matched to official scheme rules.",
-        "2. **Eliminates Dead Time:** By streaming the top document name, page, and excerpt "
-        "into the pending state, perceived responsiveness shifts from 8–14 seconds down to "
-        "sub-second interaction.",
-    ])
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## 4. Key Takeaways",
+            "1. **Zero LLM Overhead:** The `/ask/sources` endpoint executes completely locally "
+            "in under 400 ms on consumer hardware, instantly giving the user proof that their query "
+            "was understood and matched to official scheme rules.",
+            "2. **Eliminates Dead Time:** By streaming the top document name, page, and excerpt "
+            "into the pending state, perceived responsiveness shifts from 8–14 seconds down to "
+            "sub-second interaction.",
+        ]
+    )
 
     report_md = "\n".join(lines)
     OUT_REPORT.write_text(report_md, encoding="utf-8")

@@ -15,6 +15,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+import contextlib
+
 from schemebot.config import get_settings
 from schemebot.voice.numbers import spell_amounts
 from schemebot.voice.tts import build_speaker, language_code_for
@@ -46,13 +48,13 @@ def main():
     calls_file = settings.log_dir / "gnani-calls.json"
     current_calls = 0
     if calls_file.is_file():
-        try:
+        with contextlib.suppress(Exception):
             current_calls = json.loads(calls_file.read_text(encoding="utf-8")).get("calls", 0)
-        except Exception:
-            pass
 
     calls_needed = len(SAMPLE_SENTENCES)
-    logger.info("Current Gnani calls today: %d / %d", current_calls, settings.gnani_max_calls_per_day)
+    logger.info(
+        "Current Gnani calls today: %d / %d", current_calls, settings.gnani_max_calls_per_day
+    )
     logger.info("Sentence TTS calls required: %d calls", calls_needed)
 
     if current_calls + calls_needed > settings.gnani_max_calls_per_day:
@@ -74,7 +76,7 @@ def main():
         lang = item["lang"]
         spoken_text = spell_amounts(raw_text, lang)
         lang_code = language_code_for(lang)
-        
+
         st = time.perf_counter()
         audio = speaker.speak(spoken_text, lang_code)
         elapsed_ms = (time.perf_counter() - st) * 1000
@@ -91,7 +93,7 @@ def main():
     # Output report
     report_md = f"""# Sentence-by-Sentence Speech Report (Timbre v3.0)
 
-Generated: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Generated: {__import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 Script: `scripts/test_sentence_speech.py`
 Model: `{settings.tts_model}` (`Shivani` voice)
 
@@ -114,7 +116,7 @@ Model: `{settings.tts_model}` (`Shivani` voice)
 | **Sentence 3** | **{timings[2]:.1f} ms** | Fetched while Sentence 2 is playing |
 | **Total Cumulative Latency** | **{total_time_ms:.1f} ms** | Total time to synthesize entire answer block |
 
-**Key UX Win**: By synthesizing sentence-by-sentence, perceived audio start latency drops from **{total_time_ms/1000:.2f}s** down to **{ttfa_ms/1000:.2f}s** (a ~3x improvement in responsiveness).
+**Key UX Win**: By synthesizing sentence-by-sentence, perceived audio start latency drops from **{total_time_ms / 1000:.2f}s** down to **{ttfa_ms / 1000:.2f}s** (a ~3x improvement in responsiveness).
 
 ---
 

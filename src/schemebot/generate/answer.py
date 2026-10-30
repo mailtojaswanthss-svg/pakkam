@@ -322,9 +322,7 @@ class Answerer:
             # Step 4B: Near-threshold clarification band [0.30, 0.35)
             if confidence >= 0.30 and retrieval.passages:
                 candidates = list(
-                    dict.fromkeys(
-                        p.chunk.scheme for p in retrieval.passages if p.chunk.scheme
-                    )
+                    dict.fromkeys(p.chunk.scheme for p in retrieval.passages if p.chunk.scheme)
                 )[:2]
                 if candidates:
                     timings["total"] = (time.perf_counter() - started) * 1000

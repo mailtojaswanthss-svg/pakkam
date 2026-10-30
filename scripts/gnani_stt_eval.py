@@ -8,10 +8,8 @@ Outputs:
 """
 
 import csv
-import io
 import json
 import re
-import statistics
 import sys
 import time
 import wave
@@ -99,7 +97,9 @@ def main():
     print("=" * 80)
     print(" GNANI STT EVALUATION: KATHBATH & SYNTHETIC BENCHMARK")
     print("=" * 80)
-    print(f"Our Daily Cap Guard: {budget.max_per_day} | Used today before run: {credits_before} | Run cap: {MAX_CALLS_THIS_RUN}")
+    print(
+        f"Our Daily Cap Guard: {budget.max_per_day} | Used today before run: {credits_before} | Run cap: {MAX_CALLS_THIS_RUN}"
+    )
 
     # Load Kathbath CSV
     kathbath_csv = Path("data/voice/kathbath_clips.csv")
@@ -119,13 +119,15 @@ def main():
     # Add synthetic smoke clip as baseline synthetic test
     synth_path = Path("data/voice/synthetic_smoke_ta.wav")
     if synth_path.exists():
-        clips.append({
-            "filename": synth_path.name,
-            "language": "ta",
-            "reference_text": "வணக்கம், இது ஒரு சோதனை ஒலி.",
-            "source": "Synthetic-Plumbing",
-            "synthetic_or_real": "synthetic",
-        })
+        clips.append(
+            {
+                "filename": synth_path.name,
+                "language": "ta",
+                "reference_text": "வணக்கம், இது ஒரு சோதனை ஒலி.",
+                "source": "Synthetic-Plumbing",
+                "synthetic_or_real": "synthetic",
+            }
+        )
 
     if not clips:
         print("No clips found to evaluate.", file=sys.stderr)
@@ -169,54 +171,69 @@ def main():
             norm_wer = calculate_wer(ref_text, transcript, normalize=True)
             raw_wer = calculate_wer(ref_text, transcript, normalize=False)
 
-            results.append({
-                "filename": fname,
-                "language": lang,
-                "source": source,
-                "kind": kind,
-                "reference": ref_text,
-                "transcript": transcript,
-                "clip_duration_s": round(clip_duration, 2),
-                "latency_s": round(dur, 2),
-                "wer_normalized": round(norm_wer, 4),
-                "wer_raw": round(raw_wer, 4),
-                "success": True,
-            })
-            print(f"[{idx:02d}/{len(clips)}] {source:<12} ({lang}): Latency={dur:.2f}s | Norm WER={norm_wer*100:.1f}% | Raw WER={raw_wer*100:.1f}%")
+            results.append(
+                {
+                    "filename": fname,
+                    "language": lang,
+                    "source": source,
+                    "kind": kind,
+                    "reference": ref_text,
+                    "transcript": transcript,
+                    "clip_duration_s": round(clip_duration, 2),
+                    "latency_s": round(dur, 2),
+                    "wer_normalized": round(norm_wer, 4),
+                    "wer_raw": round(raw_wer, 4),
+                    "success": True,
+                }
+            )
+            print(
+                f"[{idx:02d}/{len(clips)}] {source:<12} ({lang}): Latency={dur:.2f}s | Norm WER={norm_wer * 100:.1f}% | Raw WER={raw_wer * 100:.1f}%"
+            )
         except BudgetExhausted as e:
             print(f"\n[Budget Exceeded]: {e}")
             break
         except Exception as e:
-            results.append({
-                "filename": fname,
-                "language": lang,
-                "source": source,
-                "kind": kind,
-                "reference": ref_text,
-                "clip_duration_s": round(clip_duration, 2),
-                "error": str(e),
-                "success": False,
-            })
+            results.append(
+                {
+                    "filename": fname,
+                    "language": lang,
+                    "source": source,
+                    "kind": kind,
+                    "reference": ref_text,
+                    "clip_duration_s": round(clip_duration, 2),
+                    "error": str(e),
+                    "success": False,
+                }
+            )
             print(f"[{idx:02d}/{len(clips)}] {source:<12} ({lang}): FAILED - {e}")
 
     credits_after = budget.used_today()
 
     # Save detailed JSON output
     out_json = Path("data/voice/stt_eval_results.json")
-    out_json.write_text(json.dumps({
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S IST"),
-        "credits_before": credits_before,
-        "credits_after": credits_after,
-        "calls_made": calls_made,
-        "credits_cost_per_call": "unknown (undocumented by Gnani API)",
-        "daily_cap_note": f"The {budget.max_per_day} calls/day limit is our own application-level safety guard",
-        "results": results,
-    }, indent=2, ensure_ascii=False), encoding="utf-8")
+    out_json.write_text(
+        json.dumps(
+            {
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S IST"),
+                "credits_before": credits_before,
+                "credits_after": credits_after,
+                "calls_made": calls_made,
+                "credits_cost_per_call": "unknown (undocumented by Gnani API)",
+                "daily_cap_note": f"The {budget.max_per_day} calls/day limit is our own application-level safety guard",
+                "results": results,
+            },
+            indent=2,
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
 
     print("\n" + "=" * 80)
     print(" STT EVALUATION SUMMARY REPORT")
     print("=" * 80)
-    print(f"Calls Made This Run: {calls_made} | Today's Guard: {credits_after} / {budget.max_per_day} calls used")
+    print(
+        f"Calls Made This Run: {calls_made} | Today's Guard: {credits_after} / {budget.max_per_day} calls used"
+    )
     print(f"Results saved to {out_json.as_posix()}")
     return 0
 

@@ -93,6 +93,7 @@ def build_answerer(settings: Settings, retriever: Retriever | None = None) -> An
     alias_matcher = None
     if alias_path.is_file():
         from schemebot.retrieve.aliases import AliasMatcher
+
         alias_matcher = AliasMatcher.load(alias_path)
 
     return Answerer(

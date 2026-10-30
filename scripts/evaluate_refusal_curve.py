@@ -10,7 +10,6 @@ Outputs: docs/review/REFUSAL_THRESHOLD_CURVE.md
 
 import logging
 import os
-import statistics
 import subprocess
 import sys
 from datetime import datetime
@@ -37,8 +36,12 @@ THRESHOLDS = [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
 
 def get_git_info() -> tuple[str, bool]:
     try:
-        commit = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=PROJECT_ROOT, text=True).strip()
-        status = subprocess.check_output(["git", "status", "--porcelain"], cwd=PROJECT_ROOT, text=True).strip()
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"], cwd=PROJECT_ROOT, text=True
+        ).strip()
+        status = subprocess.check_output(
+            ["git", "status", "--porcelain"], cwd=PROJECT_ROOT, text=True
+        ).strip()
         return commit, (len(status) == 0)
     except Exception:
         return "unknown", False
@@ -101,20 +104,27 @@ def main():
         false_refusal_rate = (fn / total_ans * 100) if total_ans else 0.0
         accuracy = ((tp + tn) / total * 100) if total else 0.0
 
-        is_default = (thresh == settings.refusal_threshold)
+        is_default = thresh == settings.refusal_threshold
 
-        sweep_data.append({
-            "threshold": thresh,
-            "is_default": is_default,
-            "correct_refusals": f"{tn}/{total_unans} ({correct_refusal_rate:.1f}%)",
-            "false_refusals": f"{fn}/{total_ans} ({false_refusal_rate:.1f}%)",
-            "accuracy": f"{accuracy:.1f}%",
-            "tp": tp,
-            "fp": fp,
-            "tn": tn,
-            "fn": fn,
-        })
-        logger.info("Threshold %.2f -> Accuracy: %.1f%% | False Refusals: %.1f%%", thresh, accuracy, false_refusal_rate)
+        sweep_data.append(
+            {
+                "threshold": thresh,
+                "is_default": is_default,
+                "correct_refusals": f"{tn}/{total_unans} ({correct_refusal_rate:.1f}%)",
+                "false_refusals": f"{fn}/{total_ans} ({false_refusal_rate:.1f}%)",
+                "accuracy": f"{accuracy:.1f}%",
+                "tp": tp,
+                "fp": fp,
+                "tn": tn,
+                "fn": fn,
+            }
+        )
+        logger.info(
+            "Threshold %.2f -> Accuracy: %.1f%% | False Refusals: %.1f%%",
+            thresh,
+            accuracy,
+            false_refusal_rate,
+        )
 
     commit, is_clean = get_git_info()
     clean_flag = "clean ✅" if is_clean else "uncommitted changes ⚠️"
@@ -139,26 +149,36 @@ def main():
 
     for s in sweep_data:
         marker = " **[ACTIVE DEFAULT]**" if s["is_default"] else ""
-        role = "Aggressive refusal" if s["threshold"] > 0.35 else ("Permissive (risk of hallucination)" if s["threshold"] < 0.35 else "Balanced Safety Default")
+        role = (
+            "Aggressive refusal"
+            if s["threshold"] > 0.35
+            else (
+                "Permissive (risk of hallucination)"
+                if s["threshold"] < 0.35
+                else "Balanced Safety Default"
+            )
+        )
         report_lines.append(
             f"| `{s['threshold']:.2f}`{marker} | {role} | {s['correct_refusals']} | {s['false_refusals']} | **{s['accuracy']}** |"
         )
 
-    report_lines.extend([
-        "",
-        "---",
-        "",
-        "## 2. Analysis & Recommendations",
-        "",
-        f"1. **Safety Grounding:** The active threshold of **`{settings.refusal_threshold}`** sits at the inflection point between minimizing false refusals and intercepting queries about ungrounded schemes.",
-        "2. **Zero Modification Policy:** Per system instructions, the default threshold remains strictly at `0.35` pending human stakeholder review.",
-        "",
-        "---",
-        "",
-        "## 3. Not Claimed",
-        "",
-        "- Unanswerable test queries represent out-of-domain scheme inquiries, not adversarial jailbreak attempts.",
-    ])
+    report_lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## 2. Analysis & Recommendations",
+            "",
+            f"1. **Safety Grounding:** The active threshold of **`{settings.refusal_threshold}`** sits at the inflection point between minimizing false refusals and intercepting queries about ungrounded schemes.",
+            "2. **Zero Modification Policy:** Per system instructions, the default threshold remains strictly at `0.35` pending human stakeholder review.",
+            "",
+            "---",
+            "",
+            "## 3. Not Claimed",
+            "",
+            "- Unanswerable test queries represent out-of-domain scheme inquiries, not adversarial jailbreak attempts.",
+        ]
+    )
 
     OUT_REPORT.write_text("\n".join(report_lines), encoding="utf-8")
     logger.info("SUCCESS: Wrote refusal curve report to %s", OUT_REPORT)

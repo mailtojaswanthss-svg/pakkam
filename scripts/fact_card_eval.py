@@ -31,7 +31,11 @@ def main():
     logger.info("Loaded %d verified cards", len(cards))
 
     questions_path = PROJECT_ROOT / "data" / "eval" / "questions.jsonl"
-    all_questions = [json.loads(line) for line in questions_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    all_questions = [
+        json.loads(line)
+        for line in questions_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
     logger.info("Loaded %d total evaluation questions", len(all_questions))
 
     # Split into dev (70%) and held-out (30%) deterministically
@@ -61,7 +65,7 @@ def main():
         correct = 0
         wrong_on_unanswerable = 0
         unanswerable_total = sum(1 for q in dataset if not q.get("answerable", True))
-        
+
         for q in dataset:
             text = q["question"]
             matched_card, score = matcher.match(text)
@@ -78,13 +82,18 @@ def main():
                     # Look at gold documents or fact
                     gold_schemes = [g.get("doc_id", "") for g in q.get("gold", [])]
                     # If scheme matches card scheme or doc_id matches
-                    if any(matched_card.source_document in g_doc for g_doc in gold_schemes) or matched_card.scheme.lower() in text.lower():
+                    if (
+                        any(matched_card.source_document in g_doc for g_doc in gold_schemes)
+                        or matched_card.scheme.lower() in text.lower()
+                    ):
                         correct += 1
 
         share_served = (served / total) * 100 if total > 0 else 0.0
         correct_rate = (correct / served) * 100 if served > 0 else 0.0
-        wrong_unans_rate = (wrong_on_unanswerable / unanswerable_total) * 100 if unanswerable_total > 0 else 0.0
-        
+        wrong_unans_rate = (
+            (wrong_on_unanswerable / unanswerable_total) * 100 if unanswerable_total > 0 else 0.0
+        )
+
         return {
             "total": total,
             "served": served,
@@ -104,9 +113,16 @@ def main():
         dev_results[t] = evaluate_set(dev_set, t)
         logger.info(
             "Threshold %.2f -> Served: %d/%d (%.1f%%), Correct: %d/%d (%.1f%%), Wrong on unanswerable: %d/%d (%.1f%%)",
-            t, dev_results[t]["served"], dev_results[t]["total"], dev_results[t]["share_served"],
-            dev_results[t]["correct"], dev_results[t]["served"] or 1, dev_results[t]["correct_rate"],
-            dev_results[t]["wrong_on_unanswerable"], dev_results[t]["unanswerable_total"], dev_results[t]["wrong_unans_rate"]
+            t,
+            dev_results[t]["served"],
+            dev_results[t]["total"],
+            dev_results[t]["share_served"],
+            dev_results[t]["correct"],
+            dev_results[t]["served"] or 1,
+            dev_results[t]["correct_rate"],
+            dev_results[t]["wrong_on_unanswerable"],
+            dev_results[t]["unanswerable_total"],
+            dev_results[t]["wrong_unans_rate"],
         )
 
     # Choose optimal threshold (0.85 has high precision and zero unanswerable false matches)
@@ -114,15 +130,22 @@ def main():
     held_out_res = evaluate_set(held_out_set, chosen_t)
     logger.info(
         "Held-out Set (Threshold %.2f) -> Served: %d/%d (%.1f%%), Correct: %d/%d (%.1f%%), Wrong on unanswerable: %d/%d (%.1f%%)",
-        chosen_t, held_out_res["served"], held_out_res["total"], held_out_res["share_served"],
-        held_out_res["correct"], held_out_res["served"] or 1, held_out_res["correct_rate"],
-        held_out_res["wrong_on_unanswerable"], held_out_res["unanswerable_total"], held_out_res["wrong_unans_rate"]
+        chosen_t,
+        held_out_res["served"],
+        held_out_res["total"],
+        held_out_res["share_served"],
+        held_out_res["correct"],
+        held_out_res["served"] or 1,
+        held_out_res["correct_rate"],
+        held_out_res["wrong_on_unanswerable"],
+        held_out_res["unanswerable_total"],
+        held_out_res["wrong_unans_rate"],
     )
 
     # Write report
     report_md = f"""# Verified Fact Card Evaluation Report
 
-Generated: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Generated: {__import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 Script: `scripts/fact_card_eval.py`
 Verified Cards: {len(cards)} placeholder cards (KMUT amount, PM-KISAN amount)
 
@@ -140,10 +163,10 @@ Verified Cards: {len(cards)} placeholder cards (KMUT amount, PM-KISAN amount)
 
 | Metric | Held-Out Value |
 | :--- | :--- |
-| Total Held-Out Questions | {held_out_res['total']} |
-| Questions Served by Card | {held_out_res['served']} ({held_out_res['share_served']:.1f}%) |
-| Correct-Card Rate | {held_out_res['correct_rate']:.1f}% ({held_out_res['correct']}/{held_out_res['served'] if held_out_res['served'] > 0 else 1}) |
-| Wrong-Match Rate on Unanswerable | {held_out_res['wrong_unans_rate']:.1f}% ({held_out_res['wrong_on_unanswerable']}/{held_out_res['unanswerable_total']}) |
+| Total Held-Out Questions | {held_out_res["total"]} |
+| Questions Served by Card | {held_out_res["served"]} ({held_out_res["share_served"]:.1f}%) |
+| Correct-Card Rate | {held_out_res["correct_rate"]:.1f}% ({held_out_res["correct"]}/{held_out_res["served"] if held_out_res["served"] > 0 else 1}) |
+| Wrong-Match Rate on Unanswerable | {held_out_res["wrong_unans_rate"]:.1f}% ({held_out_res["wrong_on_unanswerable"]}/{held_out_res["unanswerable_total"]}) |
 
 ## Observations & Findings
 

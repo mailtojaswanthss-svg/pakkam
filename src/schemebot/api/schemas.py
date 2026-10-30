@@ -177,10 +177,9 @@ class AskResponse(BaseModel):
                 )
                 for p in getattr(answer, "passages", [])
             ]
-        elif (
-            answer.refusal_reason in ("pii_detected", "unsupported_language")
-            or getattr(answer, "status", None) in ("PII_DETECTED", "UNSUPPORTED_LANGUAGE")
-        ):
+        elif answer.refusal_reason in ("pii_detected", "unsupported_language") or getattr(
+            answer, "status", None
+        ) in ("PII_DETECTED", "UNSUPPORTED_LANGUAGE"):
             is_unsupported = (
                 answer.refusal_reason == "unsupported_language"
                 or getattr(answer, "status", None) == "UNSUPPORTED_LANGUAGE"
@@ -292,6 +291,7 @@ class SourceOut(BaseModel):
     source_url: str
     doc_date: str | None
 
+
 class FeedbackRequest(BaseModel):
     status: str = Field(description="The response status (e.g. SUPPORTED, INSUFFICIENT_EVIDENCE).")
     thumbs: Literal["up", "down"] = Field(description="User feedback direction.")
@@ -311,4 +311,3 @@ class FeedbackRequest(BaseModel):
 class FeedbackResponse(BaseModel):
     recorded: bool = Field(default=True, description="Whether feedback was persisted.")
     message: str = Field(default="Feedback recorded. Thank you for improving Pakkam.")
-

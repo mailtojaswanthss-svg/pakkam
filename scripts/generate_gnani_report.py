@@ -50,28 +50,32 @@ def main():
         mean_dur = statistics.mean(durs) if durs else 0.0
         med_dur = statistics.median(durs) if durs else 0.0
 
-        audio_desc = "read speech, clean audio" if kind == "real" else "synthetic plumbing, generated audio"
+        audio_desc = (
+            "read speech, clean audio" if kind == "real" else "synthetic plumbing, generated audio"
+        )
 
-        rows.append({
-            "source": src,
-            "kind": kind,
-            "audio_desc": audio_desc,
-            "lang": lang.upper(),
-            "count": len(items),
-            "mean_dur": f"{mean_dur:.2f}s",
-            "med_dur": f"{med_dur:.2f}s",
-            "median_lat": f"{med_lat:.2f}s",
-            "p95_lat": f"{p95_lat:.2f}s",
-            "mean_norm_wer": f"{mean_norm_wer * 100:.1f}%",
-            "mean_raw_wer": f"{mean_raw_wer * 100:.1f}%",
-        })
+        rows.append(
+            {
+                "source": src,
+                "kind": kind,
+                "audio_desc": audio_desc,
+                "lang": lang.upper(),
+                "count": len(items),
+                "mean_dur": f"{mean_dur:.2f}s",
+                "med_dur": f"{med_dur:.2f}s",
+                "median_lat": f"{med_lat:.2f}s",
+                "p95_lat": f"{p95_lat:.2f}s",
+                "mean_norm_wer": f"{mean_norm_wer * 100:.1f}%",
+                "mean_raw_wer": f"{mean_raw_wer * 100:.1f}%",
+            }
+        )
 
     total_calls_today = eval_data.get("credits_after", 0)
 
     report_content = f"""# Gnani Voice Integration & Benchmark Report
 
 **Project:** indic-scheme-rag (Pakkam)  
-**Date:** {eval_data.get('timestamp', time.strftime('%Y-%m-%d %H:%M:%S IST'))}  
+**Date:** {eval_data.get("timestamp", time.strftime("%Y-%m-%d %H:%M:%S IST"))}  
 **Git Commit:** `{commit_hash}` ({clean_tree})  
 **STT Engine:** Gnani Prisma v2.5 (`POST /stt/v3`)  
 **TTS Engine:** Gnani Timbre v3.0 (`Shivani` voice)  

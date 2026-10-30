@@ -261,7 +261,7 @@ def create_app(
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
-    )
+        )
 
     @app.middleware("http")
     async def add_request_id(
@@ -320,8 +320,6 @@ def create_app(
             quota=quota_stats,
         )
 
-
-
     @app.post("/ask", dependencies=[Depends(limit_asks)])
     def ask(body: AskRequest, state: StateDep, request: Request) -> AskResponse:
         q = body.question.strip()
@@ -360,7 +358,6 @@ def create_app(
             for p in retrieval.passages[:3]
         ]
         return AskSourcesResponse(passages=passages, timings_ms=timings)
-
 
     @app.post("/ask/voice", dependencies=[Depends(limit_asks)])
     def ask_voice(
@@ -411,7 +408,6 @@ def create_app(
             stt_confidence=stt_conf,
             confirmation_text=confirm_text,
         )
-
 
     @app.post("/feedback")
     def feedback(body: FeedbackRequest, state: StateDep) -> FeedbackResponse:

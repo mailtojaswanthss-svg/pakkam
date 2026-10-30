@@ -1,9 +1,7 @@
 from pathlib import Path
-from pydantic import HttpUrl
+
 import pytest
 
-from schemebot.generate.answer import Answerer
-from schemebot.generate.contacts import Contact
 from schemebot.generate.fact_cards import FactCard, FactCardMatcher, load_verified_cards
 
 
@@ -62,14 +60,16 @@ def sample_cards() -> list[FactCard]:
     ]
 
 
-def test_load_verified_cards_filters_unverified(tmp_path: Path, sample_cards: list[FactCard]) -> None:
+def test_load_verified_cards_filters_unverified(
+    tmp_path: Path, sample_cards: list[FactCard]
+) -> None:
     p = tmp_path / "cards.json"
     p.write_text(
         f"""[
             {sample_cards[0].model_dump_json()},
             {sample_cards[1].model_dump_json()}
         ]""",
-        encoding="utf-8"
+        encoding="utf-8",
     )
     loaded = load_verified_cards(p)
     assert len(loaded) == 1
@@ -87,7 +87,9 @@ def test_fact_card_matcher_matches_high_similarity(sample_cards: list[FactCard])
     assert score >= 0.85
 
 
-def test_fact_card_matcher_rejects_unrelated_or_unmatched_scheme(sample_cards: list[FactCard]) -> None:
+def test_fact_card_matcher_rejects_unrelated_or_unmatched_scheme(
+    sample_cards: list[FactCard],
+) -> None:
     verified_cards = [sample_cards[0]]
     matcher = FactCardMatcher(verified_cards, encoder=MockEncoder(), threshold=0.85)
 

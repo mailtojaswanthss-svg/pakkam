@@ -16,18 +16,30 @@ Usage:
 import argparse
 import csv
 import hashlib
-from pathlib import Path
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+import json
+
 from schemebot.config import get_settings
 from schemebot.ingest.extract import OCR_DPI, OCR_LANGUAGES
-import json
 
 # Regex to capture purely digits and numeric expressions (handling Indian grouping)
 NUM_PATTERN = re.compile(r"\b[\d\u0BE6-\u0BEF]+(?:[,\.][\d\u0BE6-\u0BEF]+)*\b")
-TAMIL_DIGITS = {"௦": "0", "௧": "1", "௨": "2", "௩": "3", "௪": "4", "௫": "5", "௬": "6", "௭": "7", "௮": "8", "௯": "9"}
+TAMIL_DIGITS = {
+    "௦": "0",
+    "௧": "1",
+    "௨": "2",
+    "௩": "3",
+    "௪": "4",
+    "௫": "5",
+    "௬": "6",
+    "௭": "7",
+    "௮": "8",
+    "௯": "9",
+}
 
 
 def normalize_number(raw: str) -> str:
@@ -48,7 +60,9 @@ def extract_numbers(text: str) -> set[str]:
     return found
 
 
-def get_tesseract_cached_text(cache_root: Path, pdf_path: Path, language: str, page_num: int) -> str:
+def get_tesseract_cached_text(
+    cache_root: Path, pdf_path: Path, language: str, page_num: int
+) -> str:
     # Compute hash key matching schemebot.ingest.ocr_cache
     digest = hashlib.sha256()
     with pdf_path.open("rb") as f:
@@ -65,10 +79,18 @@ def get_tesseract_cached_text(cache_root: Path, pdf_path: Path, language: str, p
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Side-by-side comparison of Tesseract vs Chitrapathak-2")
+    parser = argparse.ArgumentParser(
+        description="Side-by-side comparison of Tesseract vs Chitrapathak-2"
+    )
     parser.add_argument("--csv", default="docs/review/ocr_gate_pages.csv", help="Input gate CSV")
-    parser.add_argument("--out-csv", default="docs/review/ocr_compare_results.csv", help="Output comparison CSV")
-    parser.add_argument("--chitra-dir", default="data/processed/chitrapathak_text", help="Directory of Chitrapathak texts")
+    parser.add_argument(
+        "--out-csv", default="docs/review/ocr_compare_results.csv", help="Output comparison CSV"
+    )
+    parser.add_argument(
+        "--chitra-dir",
+        default="data/processed/chitrapathak_text",
+        help="Directory of Chitrapathak texts",
+    )
     args = parser.parse_args()
 
     settings = get_settings()
@@ -121,29 +143,41 @@ def main():
         tess_has_known = (norm_known in tess_nums) if norm_known else "N/A"
         chitra_has_known = (norm_known in chitra_nums) if norm_known else "N/A"
 
-        results.append({
-            "document": doc_id,
-            "page": page_num,
-            "known_number": known_num,
-            "tess_has_known": tess_has_known,
-            "chitra_has_known": chitra_has_known,
-            "tess_chars": len(tess_text),
-            "chitra_chars": len(chitra_text),
-            "tess_num_count": len(tess_nums),
-            "chitra_num_count": len(chitra_nums),
-            "both_nums_count": len(both_nums),
-            "tess_only_sample": "; ".join(sorted(list(tess_only))[:5]),
-            "chitra_only_sample": "; ".join(sorted(list(chitra_only))[:5]),
-            "notes": notes,
-        })
+        results.append(
+            {
+                "document": doc_id,
+                "page": page_num,
+                "known_number": known_num,
+                "tess_has_known": tess_has_known,
+                "chitra_has_known": chitra_has_known,
+                "tess_chars": len(tess_text),
+                "chitra_chars": len(chitra_text),
+                "tess_num_count": len(tess_nums),
+                "chitra_num_count": len(chitra_nums),
+                "both_nums_count": len(both_nums),
+                "tess_only_sample": "; ".join(sorted(list(tess_only))[:5]),
+                "chitra_only_sample": "; ".join(sorted(list(chitra_only))[:5]),
+                "notes": notes,
+            }
+        )
 
     # Save to CSV
     out_csv_path = Path(args.out_csv)
     out_csv_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = [
-        "document", "page", "known_number", "tess_has_known", "chitra_has_known",
-        "tess_chars", "chitra_chars", "tess_num_count", "chitra_num_count",
-        "both_nums_count", "tess_only_sample", "chitra_only_sample", "notes"
+        "document",
+        "page",
+        "known_number",
+        "tess_has_known",
+        "chitra_has_known",
+        "tess_chars",
+        "chitra_chars",
+        "tess_num_count",
+        "chitra_num_count",
+        "both_nums_count",
+        "tess_only_sample",
+        "chitra_only_sample",
+        "notes",
     ]
     with out_csv_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -153,11 +187,17 @@ def main():
     print(f"Saved comparison results to {out_csv_path}\n")
 
     # Print summary table
-    print(f"{'Document':<28} {'Pg':<4} {'Tess Chars':<11} {'Chitra Chars':<13} {'Tess #':<8} {'Chitra #':<9} {'Known Match (T/C)'}")
+    print(
+        f"{'Document':<28} {'Pg':<4} {'Tess Chars':<11} {'Chitra Chars':<13} {'Tess #':<8} {'Chitra #':<9} {'Known Match (T/C)'}"
+    )
     print("-" * 88)
     for r in results:
-        known_display = f"{r['tess_has_known']}/{r['chitra_has_known']}" if r['known_number'] else "-"
-        print(f"{r['document'][:27]:<28} {r['page']:<4} {r['tess_chars']:<11} {r['chitra_chars']:<13} {r['tess_num_count']:<8} {r['chitra_num_count']:<9} {known_display}")
+        known_display = (
+            f"{r['tess_has_known']}/{r['chitra_has_known']}" if r["known_number"] else "-"
+        )
+        print(
+            f"{r['document'][:27]:<28} {r['page']:<4} {r['tess_chars']:<11} {r['chitra_chars']:<13} {r['tess_num_count']:<8} {r['chitra_num_count']:<9} {known_display}"
+        )
 
 
 if __name__ == "__main__":

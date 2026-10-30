@@ -33,7 +33,7 @@ def extract_numbers(text: str) -> set[str]:
 def main():
     settings = get_settings()
     results_path = PROJECT_ROOT / "data" / "voice" / "stt_eval_results.json"
-    
+
     if not results_path.is_file():
         logger.error("Results file %s not found", results_path)
         return
@@ -78,30 +78,34 @@ def main():
         top_trans_doc = res_trans.passages[0].chunk.doc_id if res_trans.passages else "none"
         top_trans_page = res_trans.passages[0].chunk.page_start if res_trans.passages else 0
 
-        same_doc = (top_ref_doc == top_trans_doc)
-        same_page = (same_doc and top_ref_page == top_trans_page)
+        same_doc = top_ref_doc == top_trans_doc
+        same_page = same_doc and top_ref_page == top_trans_page
 
         if same_doc:
             same_doc_count += 1
         if same_page:
             same_page_count += 1
 
-        rows.append({
-            "filename": fname,
-            "language": lang,
-            "wer": wer,
-            "reference": ref[:50] + "..." if len(ref) > 50 else ref,
-            "transcript": trans[:50] + "..." if len(trans) > 50 else trans,
-            "same_doc": same_doc,
-            "same_page": same_page,
-            "ref_doc_page": f"{top_ref_doc}:p{top_ref_page}",
-            "trans_doc_page": f"{top_trans_doc}:p{top_trans_page}",
-        })
+        rows.append(
+            {
+                "filename": fname,
+                "language": lang,
+                "wer": wer,
+                "reference": ref[:50] + "..." if len(ref) > 50 else ref,
+                "transcript": trans[:50] + "..." if len(trans) > 50 else trans,
+                "same_doc": same_doc,
+                "same_page": same_page,
+                "ref_doc_page": f"{top_ref_doc}:p{top_ref_page}",
+                "trans_doc_page": f"{top_trans_doc}:p{top_trans_page}",
+            }
+        )
 
     n = len(rows)
     doc_match_rate = (same_doc_count / n) * 100 if n > 0 else 0.0
     page_match_rate = (same_page_count / n) * 100 if n > 0 else 0.0
-    num_survival_rate = (num_survived_count / clips_with_nums * 100) if clips_with_nums > 0 else 100.0
+    num_survival_rate = (
+        (num_survived_count / clips_with_nums * 100) if clips_with_nums > 0 else 100.0
+    )
 
     logger.info("Total clips evaluated: %d", n)
     logger.info("Same top document: %d/%d (%.1f%%)", same_doc_count, n, doc_match_rate)
@@ -110,7 +114,7 @@ def main():
     # Generate Markdown Table
     md = f"""# Speech Error & Language Table (BhashaShield)
 
-Generated: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Generated: {__import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 Script: `scripts/speech_error_test.py`
 Evaluation Set: Kathbath Read Speech Sample (Tamil n=15, Hindi n=15, Total n={n})
 

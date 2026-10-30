@@ -8,8 +8,8 @@ Usage:
 
 import hashlib
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -49,7 +49,9 @@ def main():
     cache_root = settings.processed_dir / "ocr_cache"
     chitra_dir = settings.processed_dir / "chitrapathak_text"
 
-    print(f"\nEvaluating {len(corrections)} entries in {corrections_file.name} against Old (Tesseract) vs New (Chitrapathak-2):\n")
+    print(
+        f"\nEvaluating {len(corrections)} entries in {corrections_file.name} against Old (Tesseract) vs New (Chitrapathak-2):\n"
+    )
     print("=" * 100)
 
     for idx, c in enumerate(corrections, 1):
@@ -70,19 +72,31 @@ def main():
         old_has_wrong = ocr_reads in old_text
         old_has_right = pdf_shows in old_text
         new_has_wrong = ocr_reads in new_text
-        new_has_right = pdf_shows in new_text or (pdf_shows.replace(',', '') in new_text.replace(',', ''))
+        new_has_right = pdf_shows in new_text or (
+            pdf_shows.replace(",", "") in new_text.replace(",", "")
+        )
 
         print(f"[{idx}] {doc_id} (Page {page})")
-        print(f"    Expected Fix:   '{ocr_reads}' (old misreading) -> '{pdf_shows}' (true PDF text)")
-        print(f"    Old (Tesseract): Contains Wrong: {old_has_wrong:<5} | Contains Right: {old_has_right}")
-        print(f"    New (Chitra-2):  Contains Wrong: {new_has_wrong:<5} | Contains Right: {new_has_right}")
+        print(
+            f"    Expected Fix:   '{ocr_reads}' (old misreading) -> '{pdf_shows}' (true PDF text)"
+        )
+        print(
+            f"    Old (Tesseract): Contains Wrong: {old_has_wrong:<5} | Contains Right: {old_has_right}"
+        )
+        print(
+            f"    New (Chitra-2):  Contains Wrong: {new_has_wrong:<5} | Contains Right: {new_has_right}"
+        )
 
         if new_has_right and not new_has_wrong:
-            print("    -> STATUS: [RESOLVED] Chitrapathak-2 matches true PDF text; manual correction unneeded.")
+            print(
+                "    -> STATUS: [RESOLVED] Chitrapathak-2 matches true PDF text; manual correction unneeded."
+            )
         elif new_has_right and new_has_wrong:
             print("    -> STATUS: [PARTIAL] Both tokens found in Chitrapathak-2 text.")
         elif not new_has_right and not new_has_wrong:
-            print("    -> STATUS: [INSPECT] Neither token matched verbatim; check surrounding formatting.")
+            print(
+                "    -> STATUS: [INSPECT] Neither token matched verbatim; check surrounding formatting."
+            )
         else:
             print("    -> STATUS: [UNRESOLVED] Still matches old misreading.")
         print(f"    Note: {note}")

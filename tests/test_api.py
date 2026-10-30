@@ -629,7 +629,7 @@ def test_ask_model_unavailable_returns_fallback_passages(tmp_path: Path) -> None
         language="en",
         doc_date=datetime.date(2024, 1, 1),
         text="Sample official passage text",
-        extraction='original',
+        extraction="original",
     )
     passage = RetrievedPassage(chunk=chunk, relevance=0.95)
     unavailable_answer = Answer(
@@ -682,7 +682,7 @@ def test_ask_sources_returns_passages(tmp_path: Path) -> None:
                 language="en",
                 doc_date=datetime.date(2024, 1, 1),
                 text="Direct retrieval passage",
-                extraction='original',
+                extraction="original",
             )
             passage = RetrievedPassage(chunk=chunk, relevance=0.95)
             return RetrievalResult(

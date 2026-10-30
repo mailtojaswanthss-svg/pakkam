@@ -20,7 +20,12 @@ PATTERNS = [
     ("OpenAI API Key", re.compile(r"sk-[a-zA-Z0-9]{20,}")),
     ("HuggingFace Token", re.compile(r"hf_[a-zA-Z0-9]{30,}")),
     ("Private Key", re.compile(r"-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----")),
-    ("Generic Secret Assignment", re.compile(r"""(?i)(?:api_key|apikey|secret|password|token)\s*[:=]\s*['"][a-zA-Z0-9\-_]{16,}['"]""")),
+    (
+        "Generic Secret Assignment",
+        re.compile(
+            r"""(?i)(?:api_key|apikey|secret|password|token)\s*[:=]\s*['"][a-zA-Z0-9\-_]{16,}['"]"""
+        ),
+    ),
 ]
 
 # Whitelist safe false positives (hashes, public IDs, sample commit hashes)
@@ -34,10 +39,7 @@ WHITELIST = [
 
 
 def is_whitelisted(match_str: str) -> bool:
-    for w in WHITELIST:
-        if w in match_str:
-            return True
-    return False
+    return any(w in match_str for w in WHITELIST)
 
 
 def main():
@@ -52,7 +54,9 @@ def main():
     findings = []
 
     for commit in commits:
-        diff = subprocess.check_output(["git", "show", "--format=%H %an %ad", commit], text=True, errors="replace")
+        diff = subprocess.check_output(
+            ["git", "show", "--format=%H %an %ad", commit], text=True, errors="replace"
+        )
         lines = diff.splitlines()
         header = lines[0] if lines else commit
 
@@ -64,7 +68,9 @@ def main():
                 for m in matches:
                     if is_whitelisted(m if isinstance(m, str) else line):
                         continue
-                    findings.append((commit[:8], header, name, m if isinstance(m, str) else line[:80]))
+                    findings.append(
+                        (commit[:8], header, name, m if isinstance(m, str) else line[:80])
+                    )
 
     # 2. Check tracked files in working directory
     tracked = subprocess.check_output(["git", "ls-files"], text=True).splitlines()

@@ -89,6 +89,7 @@ def test_near_threshold_clarification() -> None:
     from schemebot.generate.contacts import Contact
     from schemebot.ingest.models import Chunk
     from schemebot.retrieve.retriever import RetrievalResult, RetrievedPassage, Retriever
+
     chunk1 = Chunk(
         chunk_id="c1",
         doc_id="doc1",
@@ -123,10 +124,7 @@ def test_near_threshold_clarification() -> None:
         def retrieve(self, query: str) -> RetrievalResult:
             p1 = RetrievedPassage(chunk=chunk1, relevance=self.score)
             p2 = RetrievedPassage(chunk=chunk2, relevance=self.score * 0.95)
-            return RetrievalResult(
-                query=query, passages=[p1, p2], timings_ms={"retrieval": 10.0}
-            )
-
+            return RetrievalResult(query=query, passages=[p1, p2], timings_ms={"retrieval": 10.0})
 
     class MockLlm:
         def complete_json(self, *args: object, **kwargs: object) -> object:

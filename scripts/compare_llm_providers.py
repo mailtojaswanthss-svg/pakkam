@@ -64,9 +64,7 @@ class RunMeasurement:
     answer_text: str
 
 
-def load_selected_questions(
-    questions_file: Path, target_ids: list[str]
-) -> list[dict[str, Any]]:
+def load_selected_questions(questions_file: Path, target_ids: list[str]) -> list[dict[str, Any]]:
     selected: dict[str, dict[str, Any]] = {}
     with questions_file.open("r", encoding="utf-8") as f:
         for line in f:
@@ -145,9 +143,7 @@ def run_single_comparison(
     check_result = check_answer(drafts, passage_texts)
     claims_passed = len(check_result.rejected) == 0
 
-    model_name = (
-        settings.gemini_model if provider == "gemini" else settings.llm_model
-    )
+    model_name = settings.gemini_model if provider == "gemini" else settings.llm_model
 
     return RunMeasurement(
         question_id=qid,
@@ -197,13 +193,15 @@ def format_markdown_report(runs: list[RunMeasurement], n_questions: int) -> str:
             f"{avg_llm:.1f} | {avg_total:.1f} | {avg_chars:.0f} | {pass_rate:.1f}% |"
         )
 
-    lines.extend([
-        "",
-        "## Per-Question Details",
-        "",
-        "| QID | Provider | Mode | Thinking | Retrieve | LLM (ms) | Total | Claims | Excerpt |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Per-Question Details",
+            "",
+            "| QID | Provider | Mode | Thinking | Retrieve | LLM (ms) | Total | Claims | Excerpt |",
+            "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
+        ]
+    )
 
     for r in runs:
         safe_text = r.answer_text.replace("|", "/")
@@ -215,12 +213,14 @@ def format_markdown_report(runs: list[RunMeasurement], n_questions: int) -> str:
             f"{r.retrieval_ms} | {r.llm_ms} | {r.total_ms} | {pass_str} | {safe_text} |"
         )
 
-    lines.extend([
-        "",
-        "## Recommendation",
-        "",
-        "- Default recommendation is determined strictly by measured latency and claim accuracy.",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Recommendation",
+            "",
+            "- Default recommendation is determined strictly by measured latency and claim accuracy.",
+        ]
+    )
 
     return "\n".join(lines)
 

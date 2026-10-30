@@ -67,10 +67,14 @@ def convert_to_wav16k(
     cmd = [
         ffmpeg_bin,
         "-y",
-        "-i", in_path,
-        "-ac", str(TARGET_CHANNELS),
-        "-ar", str(TARGET_SAMPLE_RATE),
-        "-f", "wav",
+        "-i",
+        in_path,
+        "-ac",
+        str(TARGET_CHANNELS),
+        "-ar",
+        str(TARGET_SAMPLE_RATE),
+        "-f",
+        "wav",
         out_path,
     ]
 

@@ -103,6 +103,7 @@ def test_api_contract_markdown_sample_payloads() -> None:
 def test_real_server_output_conforms_to_api_contract(tmp_path: Path) -> None:
     """Verifies that live responses returned by the FastAPI server match the API contract."""
     from tests.conftest import make_chunk
+
     chunk = make_chunk("apy-2020-001", "Citizens aged 18 to 40 can join the scheme.")
 
     class RealTestRetriever:

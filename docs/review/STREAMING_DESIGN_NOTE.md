@@ -61,9 +61,7 @@ Both Claude (`anthropic`) and Gemini (`google-genai`) SDKs support token-level s
 Interface definition:
 ```python
 class StreamingJsonLlm(Protocol):
-    def stream_tokens(
-        self, system: str, user: str, schema: dict[str, object]
-    ) -> Iterator[str]:
+    def stream_tokens(self, system: str, user: str, schema: dict[str, object]) -> Iterator[str]:
         """Yields raw JSON tokens incrementally as received from provider."""
         ...
 ```
