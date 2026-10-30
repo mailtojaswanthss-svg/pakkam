@@ -119,7 +119,8 @@ person**.
 
 ## Quickstart
 
-Needs [uv](https://docs.astral.sh/uv/) and Python 3.11-3.12. Tesseract (with `tam` and
+Needs [uv](https://docs.astral.sh/uv/), Python 3.11-3.12 and [ffmpeg](https://ffmpeg.org/) on
+the PATH (voice uploads are converted with it). Tesseract (with `tam` and
 `hin`) is needed only to rebuild the index. A GPU makes the models much faster.
 
 ```bash
