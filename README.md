@@ -1,10 +1,25 @@
-# Pakkam
+<div align="center">
 
-**Ask about an Indian government scheme in Tamil, Hindi, English or Tanglish, by text or
-voice, and see the exact page of the official document behind every sentence.** If the
-documents don't cover the question, Pakkam says so and points to the official contact.
+# Pakkam · பக்கம்
 
-*Pakkam* (பக்கம்) is Tamil for *page*: the page number is the product.
+**Ask about an Indian government scheme in your own language.<br>
+See the exact page of the official document behind every sentence.**
+
+Tamil · Hindi · English · Tanglish &nbsp;|&nbsp; text or voice &nbsp;|&nbsp; cited, or honestly "I don't know"
+
+[![CI](https://github.com/mailtojaswanthss-svg/pakkam/actions/workflows/ci.yml/badge.svg)](https://github.com/mailtojaswanthss-svg/pakkam/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB)
+![Tests](https://img.shields.io/badge/tests-521%20passing-2E7D32)
+![License](https://img.shields.io/badge/code-MIT-5A36A3)
+![Status](https://img.shields.io/badge/status-research%20prototype-E3A33B)
+
+[**Live site**](https://pakkam-alpha.vercel.app) · [**Chat**](https://pakkam-alpha.vercel.app/chat/) · [How it works](#how-it-works) · [Results](#results) · [Quickstart](#quickstart) · [Status](STATUS.md)
+
+</div>
+
+<p align="center">
+  <img src="docs/img/home-desktop.png" alt="Pakkam home page: Somewhere in a government order, there is a line about you." width="100%">
+</p>
 
 > **Disclaimer.** An independent student research prototype. It is **not** an official
 > service and is **not affiliated with any government body**. Answers are informational
@@ -12,10 +27,59 @@ documents don't cover the question, Pakkam says so and points to the official co
 > (listed in [docs/sources.csv](docs/sources.csv)) and stores no personal data
 > ([docs/PRIVACY.md](docs/PRIVACY.md)).
 
-- **Live site:** https://pakkam-alpha.vercel.app (chat at `/chat/`). The chat answers only
-  while the backend is running; see [Hosting](#hosting).
-- **Status:** research prototype; evaluated on draft questions and clean read speech. See
-  [STATUS.md](STATUS.md) and [Limitations](#limitations).
+---
+
+## Why Pakkam
+
+A forwarded message says *"₹1,000 every month for women. Apply fast!"* Is it real? Is it
+meant for you? The answer is written down, in a 43-page government order in formal Tamil
+and official English that few people have time to read. So people guess, pay a middleman,
+or never apply.
+
+Pakkam reads those pages for you. Ask the way you would ask at home, and it answers from
+**18 official documents** only, shows **the page each sentence comes from**, and when the
+documents don't say, **tells you so and gives the official helpline** instead of guessing.
+
+*Pakkam* (பக்கம்) is Tamil for *page*: the page number is the product.
+
+## Highlights
+
+| | |
+|---|---|
+| **Every sentence is cited** | Each answer sentence links to the document and page it came from, with the passage and the official PDF one tap away. |
+| **Four ways to ask** | Tamil, Hindi, English and Tanglish (Tamil in English letters), typed or spoken. Answers come back in the question's language. |
+| **Numbers are checked, not trusted** | Every amount, date and period in an answer must appear in the cited text (`claims.py`); a second model checks support. Unsupported sentences are dropped. |
+| **Honest refusals** | Low confidence means no LLM call: a calm card says the documents don't cover it and links the official contact. |
+| **Sources in under half a second** | `/ask/sources` shows the cited pages in about 0.3-0.4 s while the answer is still being written. |
+| **Voice with Gnani** | Prisma speech to text ("Pakkam heard: ..."), Timbre speech out sentence by sentence, amounts spoken as words. |
+| **Verified fact cards** | Ready answers for common questions with no LLM call and cached audio. A card is served only after a person signs it off (`verified_by`); the 2 drafted cards are not signed off yet. |
+| **Private by design** | The audit log stores a hash of the question, never its text. No accounts, no personal data. |
+| **Built for cheap phones** | Plain HTML/CSS/JS, no framework, light and dark themes, reduced-motion support, 44 px touch targets. |
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="70%"><img src="docs/img/chat-dark.png" alt="Pakkam chat in dark theme with suggestion cards in four languages"></td>
+    <td width="30%"><img src="docs/img/home-phone.png" alt="Pakkam home page on a phone"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Chat app (dark theme): suggestions in four scripts, mic and language picker</sub></td>
+    <td align="center"><sub>Home page on a phone</sub></td>
+  </tr>
+</table>
+
+## Tech stack
+
+| Layer | What |
+|---|---|
+| Documents | 18 official PDFs (Tamil Nadu and central schemes), Tesseract OCR + Krutrim Chitrapathak-2 crop OCR for hard numerals |
+| Search | BAAI `bge-m3` dense + learned sparse vectors in Qdrant, `bge-reranker-v2-m3` |
+| Answers | Gemini (default, free tier) or Claude, structured JSON with per-sentence citations, failover and a daily call budget |
+| Voice | Gnani Prisma v2.5 (speech to text), Gnani Timbre (text to speech), ffmpeg |
+| API | FastAPI, rate limits, privacy-preserving audit log |
+| Web | Plain HTML, CSS and JavaScript; Baloo 2 / Hind fonts; Vercel |
+| Quality | pytest (521 tests), ruff, mypy, GitHub Actions |
 
 ---
 
