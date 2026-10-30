@@ -25,6 +25,7 @@ def normalize_text(text: str) -> str:
     text = "\n".join(lines)
     return re.sub(r"\n{3,}", "\n\n", text).strip()
 
+
 TAMIL_DIGIT_ZERO = 0x0BE6
 DEVANAGARI_DIGIT_ZERO = 0x0966
 

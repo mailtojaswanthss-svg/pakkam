@@ -1,7 +1,8 @@
 import datetime
+
 import pytest
 
-from schemebot.generate.claims import Claim, verify_claim, verify_all_claims
+from schemebot.generate.claims import Claim, verify_all_claims, verify_claim
 from schemebot.ingest.models import Chunk
 
 

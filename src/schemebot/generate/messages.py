@@ -44,12 +44,30 @@ NOT_FOUND: dict[MessageLanguage, str] = {
     ),
 }
 
-INDIC_TO_ASCII = str.maketrans({
-    "०": "0", "१": "1", "२": "2", "३": "3", "४": "4",
-    "५": "5", "६": "6", "७": "7", "८": "8", "९": "9",
-    "௦": "0", "௧": "1", "௨": "2", "௩": "3", "௪": "4",
-    "௫": "5", "௬": "6", "௭": "7", "௮": "8", "௯": "9",
-})
+INDIC_TO_ASCII = str.maketrans(
+    {
+        "०": "0",
+        "१": "1",
+        "२": "2",
+        "३": "3",
+        "४": "4",
+        "५": "5",
+        "६": "6",
+        "७": "7",
+        "८": "8",
+        "९": "9",
+        "௦": "0",
+        "௧": "1",
+        "௨": "2",
+        "௩": "3",
+        "௪": "4",
+        "௫": "5",
+        "௬": "6",
+        "௭": "7",
+        "௮": "8",
+        "௯": "9",
+    }
+)
 
 AADHAAR_PATTERN = re.compile(r"\b[2-9]\d{3}[ -]?\d{4}[ -]?\d{4}\b")
 PHONE_PATTERN = re.compile(
@@ -186,8 +204,7 @@ def clarification_text(candidates: list[str], language: Language) -> str:
             "ta": f"நீங்கள் {c1} பற்றிக் கேட்கிறீர்களா? அதிகாரப்பூர்வ ஆவணத்தில் உள்ள தகவல் இதோ:",
             "hi": f"क्या आपका मतलब {c1} से था? आधिकारिक दस्तावेज़ में यह जानकारी दी गई है:",
             "ta-Latn": (
-                f"Neenga {c1} pathi kekkareengala? "
-                "Official document-la irukkura thagaval idho:"
+                f"Neenga {c1} pathi kekkareengala? Official document-la irukkura thagaval idho:"
             ),
         }
         return templates[lang]

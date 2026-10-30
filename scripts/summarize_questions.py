@@ -32,7 +32,7 @@ def main():
         print(f"Error: {CSV_PATH} not found.")
         return 1
 
-    with open(CSV_PATH, "r", encoding="utf-8") as f:
+    with open(CSV_PATH, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         rows = list(reader)
 
@@ -42,9 +42,10 @@ def main():
 
     total_count = len(rows)
     lang_counter = Counter(r.get("group", "unknown").strip() for r in rows)
-    status_counter = Counter(r.get("status", "draft").strip() for r in rows)
     verified_counter = Counter(
-        "verified" if r.get("verified", "").strip().lower() in ("yes", "true", "1") else "unverified (draft)"
+        "verified"
+        if r.get("verified", "").strip().lower() in ("yes", "true", "1")
+        else "unverified (draft)"
         for r in rows
     )
 
@@ -66,8 +67,8 @@ def main():
 ## 1. Executive Summary
 
 - **Total Corpus Questions:** **{total_count}**
-- **Human-Verified Questions:** **{verified_counter.get('verified', 0)}** (0.0%)
-- **Unverified (Draft) Questions:** **{verified_counter.get('unverified (draft)', 0)}** (100.0%)
+- **Human-Verified Questions:** **{verified_counter.get("verified", 0)}** (0.0%)
+- **Unverified (Draft) Questions:** **{verified_counter.get("unverified (draft)", 0)}** (100.0%)
 
 > [!IMPORTANT]
 > **Honest Evidence Disclosure:** All {total_count} benchmark questions are currently marked as **draft / unverified** by external native speakers. While questions are grounded in official scheme documents (kmut, pmkisan, apy, cmchis, pmuy), they have not yet received formal double-blind human verification. All downstream retrieval and refusal metrics report against this draft set.
@@ -114,4 +115,5 @@ Every draft question maps to one or more primary government welfare documents:
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

@@ -24,7 +24,7 @@ def main() -> int:
 
     ocr_factory = None
     if not args.no_ocr:
-        if settings.ocr_engine == 'chitrapathak':
+        if settings.ocr_engine == "chitrapathak":
             ocr_factory = make_chitrapathak_ocr
         else:
             ocr_factory = partial(

@@ -57,7 +57,8 @@ def load_input_questions(path: Path) -> list[dict]:
             reader = csv.DictReader(f)
             # Only use verified=yes if the column exists
             return [
-                row for row in reader
+                row
+                for row in reader
                 if row.get("verified", "yes").strip().lower() in ("yes", "y", "true", "1")
             ]
 
@@ -91,8 +92,12 @@ def get_already_processed_ids(csv_path: Path) -> set[str]:
 
 def main():
     parser = argparse.ArgumentParser(description="Pakkam answer-level evaluation harness.")
-    parser.add_argument("--limit", type=int, default=3, help="Maximum questions to run in this batch.")
-    parser.add_argument("--input", type=Path, default=PROJECT_ROOT / "data" / "eval" / "questions.jsonl")
+    parser.add_argument(
+        "--limit", type=int, default=3, help="Maximum questions to run in this batch."
+    )
+    parser.add_argument(
+        "--input", type=Path, default=PROJECT_ROOT / "data" / "eval" / "questions.jsonl"
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_CSV)
     args = parser.parse_args()
 
@@ -105,7 +110,7 @@ def main():
     pending = [q for q in questions if q.get("id") not in processed_ids]
     logger.info("%d questions pending evaluation", len(pending))
 
-    to_run = pending[:args.limit]
+    to_run = pending[: args.limit]
     if not to_run:
         logger.info("No questions to run. Exiting.")
         return
@@ -136,7 +141,7 @@ def main():
         logger.info("Evaluating [%s]: %s", qid, q_text)
 
         raw_file = RAW_CACHE_DIR / f"{qid}.json"
-        
+
         answer_data = None
         if raw_file.is_file():
             try:
@@ -167,7 +172,9 @@ def main():
                     ],
                     "passages": [p.chunk.text for p in getattr(ans, "passages", [])],
                 }
-                raw_file.write_text(json.dumps(answer_data, indent=2, ensure_ascii=False), encoding="utf-8")
+                raw_file.write_text(
+                    json.dumps(answer_data, indent=2, ensure_ascii=False), encoding="utf-8"
+                )
             except LlmUnavailableError as err:
                 logger.warning("Rate limit / quota exhausted while processing [%s]: %s", qid, err)
                 rate_limited = True
@@ -177,10 +184,16 @@ def main():
                 continue
 
         # Format row
-        status_val = "MODEL_UNAVAILABLE" if answer_data.get("refusal_reason") == "service_unavailable" else ("INSUFFICIENT_EVIDENCE" if answer_data.get("refused") else "SUPPORTED")
-        cites_summary = "; ".join(f"[{c['number']}] {c['doc_id']}:p{c['page']}" for c in answer_data.get("citations", []))
+        status_val = (
+            "MODEL_UNAVAILABLE"
+            if answer_data.get("refusal_reason") == "service_unavailable"
+            else ("INSUFFICIENT_EVIDENCE" if answer_data.get("refused") else "SUPPORTED")
+        )
+        cites_summary = "; ".join(
+            f"[{c['number']}] {c['doc_id']}:p{c['page']}" for c in answer_data.get("citations", [])
+        )
         cites_text = " --- ".join(c.get("text", "") for c in answer_data.get("citations", []))
-        
+
         row = {
             "id": qid,
             "question": q_text,
@@ -201,7 +214,9 @@ def main():
     out_file.close()
     logger.info("Batch finished: %d questions written to %s", completed, args.output)
     if rate_limited:
-        logger.info("Paused cleanly due to quota limits. Re-run --limit N when quota resets to continue.")
+        logger.info(
+            "Paused cleanly due to quota limits. Re-run --limit N when quota resets to continue."
+        )
 
 
 if __name__ == "__main__":

@@ -16,9 +16,9 @@ if hasattr(sys.stdout, "reconfigure"):
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from schemebot.config import get_settings
-from schemebot.voice.budget import BudgetExhausted, shared_budget
+from schemebot.voice.budget import BudgetExhausted
 from schemebot.voice.stt import GnaniStt, build_budget
-from schemebot.voice.tts import DEFAULT_VOICES, GnaniTts, language_code_for
+from schemebot.voice.tts import DEFAULT_VOICES, GnaniTts
 
 
 def main() -> int:
@@ -50,7 +50,9 @@ def main() -> int:
     )
 
     test_phrase = "வணக்கம், இது ஒரு சோதனை ஒலி."
-    print(f"\n[1/2] Testing TTS (Timbre Model: {model}, Voice: {voices.get('ta-IN', 'default')}, Lang: ta-IN)...")
+    print(
+        f"\n[1/2] Testing TTS (Timbre Model: {model}, Voice: {voices.get('ta-IN', 'default')}, Lang: ta-IN)..."
+    )
     tts_start = time.perf_counter()
 
     try:
@@ -73,7 +75,7 @@ def main() -> int:
         url=settings.gnani_stt_url,
     )
 
-    print(f"\n[2/2] Testing STT (Prisma v2.5, Lang: ta-IN)...")
+    print("\n[2/2] Testing STT (Prisma v2.5, Lang: ta-IN)...")
     stt_start = time.perf_counter()
 
     try:

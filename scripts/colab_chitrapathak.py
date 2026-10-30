@@ -10,10 +10,10 @@ Usage:
 
 import argparse
 import csv
-from io import BytesIO
 import os
-from pathlib import Path
 import sys
+from io import BytesIO
+from pathlib import Path
 
 # Default cache dir to F: drive if available to avoid C: drive out-of-space
 if Path("F:/").exists():
@@ -21,8 +21,8 @@ if Path("F:/").exists():
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 import pymupdf
-from PIL import Image
 import torch
+from PIL import Image
 from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 
 MODEL_ID = "krutrim-ai-labs/Chitrapathak-2"
@@ -32,13 +32,12 @@ MAX_PIXELS = 1280 * 28 * 28  # Cap vision tokens to avoid CUDA OOM on 8GB VRAM
 
 
 def get_model_and_processor(device: str = "auto", cache_dir: str | None = None):
-    if device == "auto":
-        device_str = "cuda" if torch.cuda.is_available() else "cpu"
-    else:
-        device_str = device
+    device_str = ("cuda" if torch.cuda.is_available() else "cpu") if device == "auto" else device
 
     effective_cache = cache_dir or os.environ.get("HF_HOME")
-    print(f"Loading {MODEL_ID} (rev {MODEL_REVISION[:7]}) on {device_str} (cache: {effective_cache})...")
+    print(
+        f"Loading {MODEL_ID} (rev {MODEL_REVISION[:7]}) on {device_str} (cache: {effective_cache})..."
+    )
 
     processor = AutoProcessor.from_pretrained(
         MODEL_ID,
@@ -67,9 +66,15 @@ def render_page_image(pdf_path: Path, page_num_1based: int) -> Image.Image:
 
 def main():
     parser = argparse.ArgumentParser(description="Run Chitrapathak-2 OCR on specific PDF pages")
-    parser.add_argument("--csv", default="docs/review/ocr_gate_pages.csv", help="CSV with document, page columns")
+    parser.add_argument(
+        "--csv", default="docs/review/ocr_gate_pages.csv", help="CSV with document, page columns"
+    )
     parser.add_argument("--pdf-dir", default="data/raw", help="Directory containing PDF files")
-    parser.add_argument("--out-dir", default="data/processed/chitrapathak_text", help="Directory to save extracted texts")
+    parser.add_argument(
+        "--out-dir",
+        default="data/processed/chitrapathak_text",
+        help="Directory to save extracted texts",
+    )
     parser.add_argument("--cache-dir", default=None, help="Custom HuggingFace cache directory")
     parser.add_argument("--device", default="auto", help="'cuda', 'cpu', or 'auto'")
     parser.add_argument("--limit", type=int, default=0, help="Optional limit for test runs")
@@ -91,7 +96,7 @@ def main():
         rows = list(reader)
 
     if args.limit > 0:
-        rows = rows[:args.limit]
+        rows = rows[: args.limit]
 
     print(f"Processing {len(rows)} pages from {csv_path}...")
 
@@ -129,7 +134,9 @@ def main():
         ]
 
         try:
-            text_prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            text_prompt = processor.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
             inputs = processor(
                 text=[text_prompt],
                 images=[img],
@@ -141,10 +148,13 @@ def main():
             with torch.no_grad():
                 generated_ids = model.generate(**inputs, max_new_tokens=2048)
                 generated_ids_trimmed = [
-                    out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs["input_ids"], generated_ids)
+                    out_ids[len(in_ids) :]
+                    for in_ids, out_ids in zip(inputs["input_ids"], generated_ids, strict=False)
                 ]
                 extracted_text = processor.batch_decode(
-                    generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+                    generated_ids_trimmed,
+                    skip_special_tokens=True,
+                    clean_up_tokenization_spaces=False,
                 )[0]
 
             out_file.write_text(extracted_text, encoding="utf-8")

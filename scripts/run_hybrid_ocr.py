@@ -35,6 +35,8 @@ TESSERACT_EXE = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 if Path(TESSERACT_EXE).is_file():
     pytesseract.pytesseract.tesseract_cmd = TESSERACT_EXE
 
+import contextlib
+
 from schemebot.config import get_settings
 from schemebot.index.embed import BgeM3Encoder, model_source
 from schemebot.index.store import build_index, open_client
@@ -53,6 +55,7 @@ MAX_PIXELS = 1280 * 28 * 28
 
 NUM_PATTERN = re.compile(r"\b[\d\u0BE6-\u0BEF]+(?:[,\.][\d\u0BE6-\u0BEF]+)*\b")
 TAMIL_DIGITS = str.maketrans("௦௧௨௩௪௫௬௭௮௯", "0123456789")
+
 
 def get_page_priority(doc_id: str, page_num: int) -> int:
     """Demo priority order:
@@ -126,10 +129,10 @@ def find_amount_crops(image: Image.Image, lang: str) -> list[tuple[int, int, int
     img_w, img_h = image.size
 
     merged = []
-    for (l, t, w, h) in boxes:
-        x0 = max(0, l - margin_x)
+    for left, t, w, h in boxes:
+        x0 = max(0, left - margin_x)
         y0 = max(0, t - margin_y)
-        x1 = min(img_w, l + w + margin_x)
+        x1 = min(img_w, left + w + margin_x)
         y1 = min(img_h, t + h + margin_y)
         merged.append([x0, y0, x1, y1])
 
@@ -142,7 +145,12 @@ def find_amount_crops(image: Image.Image, lang: str) -> list[tuple[int, int, int
             overlapping = False
             remaining = []
             for other in merged:
-                if not (curr[2] < other[0] or curr[0] > other[2] or curr[3] < other[1] or curr[1] > other[3]):
+                if not (
+                    curr[2] < other[0]
+                    or curr[0] > other[2]
+                    or curr[3] < other[1]
+                    or curr[1] > other[3]
+                ):
                     curr[0] = min(curr[0], other[0])
                     curr[1] = min(curr[1], other[1])
                     curr[2] = max(curr[2], other[2])
@@ -199,12 +207,14 @@ def main():
         page_num = int(r["page"])
         if "currency:" in r["reason"]:
             prio = get_page_priority(doc_id, page_num)
-            target_tasks.append({
-                "document": doc_id,
-                "page": page_num,
-                "reason": r["reason"],
-                "priority": prio,
-            })
+            target_tasks.append(
+                {
+                    "document": doc_id,
+                    "page": page_num,
+                    "reason": r["reason"],
+                    "priority": prio,
+                }
+            )
 
     target_tasks.sort(key=lambda t: (t["priority"], t["document"], t["page"]))
     logger.info("Found %d target pages for Option C processing", len(target_tasks))
@@ -215,12 +225,14 @@ def main():
 
     # Completed tasks vs pending tasks
     completed_tasks = [
-        t for t in target_tasks
+        t
+        for t in target_tasks
         if (out_dir / f"{t['document']}_p{t['page']}.txt").is_file()
         and (out_dir / f"{t['document']}_p{t['page']}.txt").stat().st_size >= 20
     ]
     pending_tasks = [
-        t for t in target_tasks
+        t
+        for t in target_tasks
         if not (out_dir / f"{t['document']}_p{t['page']}.txt").is_file()
         or (out_dir / f"{t['document']}_p{t['page']}.txt").stat().st_size < 20
     ]
@@ -248,11 +260,16 @@ def main():
     print(f" Pages Completed (Chitrapathak):      {done_count} ({pct:.1f}%)")
     print(f" Pages Remaining:                     {left_count}")
     print(f" Average Time per Page:               {avg_s:.1f}s")
-    print(f" Estimated Time Remaining:            {est_hours_left:.2f} hours ({int(est_sec_left)}s)")
+    print(
+        f" Estimated Time Remaining:            {est_hours_left:.2f} hours ({int(est_sec_left)}s)"
+    )
     print("=" * 78 + "\n")
 
     if args.finalize:
-        logger.info("--finalize flag passed: Skipping GPU extraction and building outputs directly from %d completed pages.", done_count)
+        logger.info(
+            "--finalize flag passed: Skipping GPU extraction and building outputs directly from %d completed pages.",
+            done_count,
+        )
 
     # Initialize model if tasks pending and not finalizing
     if not args.finalize and pending_tasks:
@@ -283,16 +300,22 @@ def main():
             pdf_path = settings.raw_dir / source["file"]
 
             t0 = time.perf_counter()
-            logger.info("[%d/%d] Extracting %s (Page %d)...", idx, len(pending_tasks), doc_id, page_num)
+            logger.info(
+                "[%d/%d] Extracting %s (Page %d)...", idx, len(pending_tasks), doc_id, page_num
+            )
 
             try:
                 with pymupdf.open(pdf_path) as doc:
                     page = doc[page_num - 1]
                     pixmap = page.get_pixmap(dpi=DPI)
-                    full_image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
+                    full_image = Image.frombytes(
+                        "RGB", (pixmap.width, pixmap.height), pixmap.samples
+                    )
 
                 if args.mode == "crop":
-                    tess_text = load_tesseract_page(cache_root, pdf_path, source["language"], page_num)
+                    tess_text = load_tesseract_page(
+                        cache_root, pdf_path, source["language"], page_num
+                    )
                     if not tess_text:
                         tess_text = page.get_text("text").strip()
 
@@ -302,32 +325,59 @@ def main():
                     if not crops:
                         target_txt.write_text(tess_text, encoding="utf-8")
                         elapsed = time.perf_counter() - t0
-                        logger.info("  -> [Crop Mode] Saved %s (Tesseract baseline) in %.1fs", target_txt.name, elapsed)
+                        logger.info(
+                            "  -> [Crop Mode] Saved %s (Tesseract baseline) in %.1fs",
+                            target_txt.name,
+                            elapsed,
+                        )
                     else:
                         crop_results = []
-                        for crop_idx, (x, y, w, h) in enumerate(crops, 1):
+                        for _crop_idx, (x, y, w, h) in enumerate(crops, 1):
                             crop_img = full_image.crop((x, y, x + w, y + h))
                             messages = [
                                 {
                                     "role": "user",
                                     "content": [
                                         {"type": "image", "image": crop_img},
-                                        {"type": "text", "text": "Extract all text from this image exactly as written. Output only the extracted text."},
+                                        {
+                                            "type": "text",
+                                            "text": "Extract all text from this image exactly as written. Output only the extracted text.",
+                                        },
                                     ],
                                 }
                             ]
-                            text_prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-                            inputs = processor(text=[text_prompt], images=[crop_img], padding=True, return_tensors="pt").to(model.device)
+                            text_prompt = processor.apply_chat_template(
+                                messages, tokenize=False, add_generation_prompt=True
+                            )
+                            inputs = processor(
+                                text=[text_prompt],
+                                images=[crop_img],
+                                padding=True,
+                                return_tensors="pt",
+                            ).to(model.device)
                             generated_ids = model.generate(**inputs, max_new_tokens=256)
-                            trimmed_ids = [out[len(inp):] for inp, out in zip(inputs.input_ids, generated_ids)]
-                            crop_out = processor.batch_decode(trimmed_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0].strip()
+                            trimmed_ids = [
+                                out[len(inp) :]
+                                for inp, out in zip(inputs.input_ids, generated_ids, strict=False)
+                            ]
+                            crop_out = processor.batch_decode(
+                                trimmed_ids,
+                                skip_special_tokens=True,
+                                clean_up_tokenization_spaces=False,
+                            )[0].strip()
                             crop_results.append(crop_out)
 
                         verified_block = "\n\n[Verified Amounts]: " + " | ".join(crop_results)
                         hybrid_text = tess_text + verified_block
                         target_txt.write_text(hybrid_text, encoding="utf-8")
                         elapsed = time.perf_counter() - t0
-                        logger.info("  -> [Crop Mode] Saved %s (%d crops) in %.1fs -> %s", target_txt.name, len(crops), elapsed, repr(" | ".join(crop_results)[:50]))
+                        logger.info(
+                            "  -> [Crop Mode] Saved %s (%d crops) in %.1fs -> %s",
+                            target_txt.name,
+                            len(crops),
+                            elapsed,
+                            repr(" | ".join(crop_results)[:50]),
+                        )
 
                 else:  # Full-page mode
                     messages = [
@@ -335,7 +385,10 @@ def main():
                             "role": "user",
                             "content": [
                                 {"type": "image", "image": full_image},
-                                {"type": "text", "text": "Extract all text from this image exactly as written. Output only the extracted text."},
+                                {
+                                    "type": "text",
+                                    "text": "Extract all text from this image exactly as written. Output only the extracted text.",
+                                },
                             ],
                         }
                     ]
@@ -351,24 +404,32 @@ def main():
 
                     generated_ids = model.generate(**inputs, max_new_tokens=2048)
                     generated_ids_trimmed = [
-                        out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+                        out_ids[len(in_ids) :]
+                        for in_ids, out_ids in zip(inputs.input_ids, generated_ids, strict=False)
                     ]
                     output_text = processor.batch_decode(
-                        generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+                        generated_ids_trimmed,
+                        skip_special_tokens=True,
+                        clean_up_tokenization_spaces=False,
                     )[0].strip()
 
                     target_txt.write_text(output_text, encoding="utf-8")
                     elapsed = time.perf_counter() - t0
-                    logger.info("  -> [Full-Page] Saved %s (%d chars) in %.1fs", target_txt.name, len(output_text), elapsed)
+                    logger.info(
+                        "  -> [Full-Page] Saved %s (%d chars) in %.1fs",
+                        target_txt.name,
+                        len(output_text),
+                        elapsed,
+                    )
 
                 timings[f"{doc_id}_p{page_num}"] = round(elapsed, 1)
-                try:
+                with contextlib.suppress(Exception):
                     timing_file.write_text(json.dumps(timings, indent=2), encoding="utf-8")
-                except Exception:
-                    pass
 
             except torch.cuda.OutOfMemoryError:
-                logger.error("CUDA OOM on %s page %d! Clearing cache and pausing 5s...", doc_id, page_num)
+                logger.error(
+                    "CUDA OOM on %s page %d! Clearing cache and pausing 5s...", doc_id, page_num
+                )
                 torch.cuda.empty_cache()
                 time.sleep(5)
                 continue
@@ -402,17 +463,28 @@ def main():
         chitra_only = sorted(chitra_nums - tess_nums)
 
         if tess_only or chitra_only:
-            disagreements.append({
-                "document": doc_id,
-                "page": page_num,
-                "tesseract_only_numbers": "; ".join(tess_only[:8]),
-                "chitrapathak_only_numbers": "; ".join(chitra_only[:8]),
-                "notes": task["reason"],
-            })
+            disagreements.append(
+                {
+                    "document": doc_id,
+                    "page": page_num,
+                    "tesseract_only_numbers": "; ".join(tess_only[:8]),
+                    "chitrapathak_only_numbers": "; ".join(chitra_only[:8]),
+                    "notes": task["reason"],
+                }
+            )
 
     disagree_csv = Path("docs/review/ocr_disagreements.csv")
     with disagree_csv.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["document", "page", "tesseract_only_numbers", "chitrapathak_only_numbers", "notes"])
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "document",
+                "page",
+                "tesseract_only_numbers",
+                "chitrapathak_only_numbers",
+                "notes",
+            ],
+        )
         writer.writeheader()
         writer.writerows(disagreements)
     logger.info("Wrote %d number disagreements to %s", len(disagreements), disagree_csv.as_posix())
@@ -447,7 +519,9 @@ def main():
         chunks = chunk_document(source_doc, doc_pages)
         all_chunks.extend(chunks)
 
-    logger.info("Total hybrid chunks generated: %d. Indexing into 'pakkam_chitra'...", len(all_chunks))
+    logger.info(
+        "Total hybrid chunks generated: %d. Indexing into 'pakkam_chitra'...", len(all_chunks)
+    )
     encoder = BgeM3Encoder(
         model_source(settings.embedding_model, settings.embedding_revision),
         settings.embed_batch_size,

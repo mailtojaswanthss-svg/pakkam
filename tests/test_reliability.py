@@ -92,6 +92,7 @@ def test_llm_budget_limits_and_records(tmp_path: Path) -> None:
     assert budget.remaining() == 0
 
     import pytest
+
     with pytest.raises(BudgetExhausted):
         budget.take(model="gemini-3.8-flash")
 
@@ -114,6 +115,7 @@ def test_llm_budget_authoritative_429(tmp_path: Path) -> None:
     assert budget.is_rate_limited("gemini-3.8-flash")
 
     import pytest
+
     with pytest.raises(BudgetExhausted, match="authoritative 429"):
         budget.take(model="gemini-3.8-flash")
 

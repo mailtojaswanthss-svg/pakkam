@@ -12,6 +12,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+import contextlib
+
 from schemebot.config import get_settings
 from schemebot.generate.fact_cards import load_verified_cards
 from schemebot.voice.numbers import spell_amounts
@@ -27,28 +29,30 @@ def main():
     settings = get_settings()
     cards_path = PROJECT_ROOT / "data" / "fact_cards.json"
     cards = load_verified_cards(cards_path)
-    
+
     if not cards:
         logger.warning("No verified fact cards found in %s", cards_path)
         return
 
     # Sort so Tamil cards come first
     sorted_cards = sorted(cards, key=lambda c: (0 if c.language == "ta" else 1, c.card_id))
-    
+
     AUDIO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     # Read current budget status
     calls_file = settings.log_dir / "gnani-calls.json"
     current_calls = 0
     if calls_file.is_file():
-        try:
+        with contextlib.suppress(Exception):
             current_calls = json.loads(calls_file.read_text(encoding="utf-8")).get("calls", 0)
-        except Exception:
-            pass
 
     calls_needed = len(sorted_cards)
-    logger.info("Current Gnani calls today: %d / %d", current_calls, settings.gnani_max_calls_per_day)
-    logger.info("TTS calls required for %d verified cards: %d calls", len(sorted_cards), calls_needed)
+    logger.info(
+        "Current Gnani calls today: %d / %d", current_calls, settings.gnani_max_calls_per_day
+    )
+    logger.info(
+        "TTS calls required for %d verified cards: %d calls", len(sorted_cards), calls_needed
+    )
 
     if current_calls + calls_needed > settings.gnani_max_calls_per_day:
         logger.error("Generating audio would exceed daily Gnani cap! Aborting.")
@@ -68,10 +72,12 @@ def main():
             continue
 
         # Spoken text: numbers spelled out for natural pronunciation
-        spoken_text = spell_amounts(card.answer_text, card.language) # type: ignore
+        spoken_text = spell_amounts(card.answer_text, card.language)  # type: ignore
         lang_code = language_code_for(card.language)
 
-        logger.info("Calling Timbre TTS for card %s (%s, %s)...", card.card_id, card.language, lang_code)
+        logger.info(
+            "Calling Timbre TTS for card %s (%s, %s)...", card.card_id, card.language, lang_code
+        )
         try:
             audio_bytes = speaker.speak(spoken_text, lang_code)
             out_file.write_bytes(audio_bytes)

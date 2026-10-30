@@ -64,9 +64,7 @@ class SentenceSpeaker:
         self.speaker = speaker
         self.spell_numbers = spell_numbers
 
-    def synthesize_sentence(
-        self, sentence: str, language: str
-    ) -> tuple[str, bytes, float]:
+    def synthesize_sentence(self, sentence: str, language: str) -> tuple[str, bytes, float]:
         """Synthesize a single sentence into audio bytes with timing.
 
         Returns: (spelled_sentence_text, wav_bytes, duration_ms)

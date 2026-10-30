@@ -44,23 +44,27 @@ def make_sheet(source_json: Path | None = None, output_csv: Path = DEFAULT_OUT) 
                 if not line.strip():
                     continue
                 q = json.loads(line)
-                items.append({
-                    "question_id": q.get("id", f"q_{idx:03d}"),
-                    "language": q.get("language", "en"),
-                    "question": q.get("question", ""),
-                    "answer_text": "PENDING_RUN",
-                    "cited_passages": "PENDING_RUN",
-                })
+                items.append(
+                    {
+                        "question_id": q.get("id", f"q_{idx:03d}"),
+                        "language": q.get("language", "en"),
+                        "question": q.get("question", ""),
+                        "answer_text": "PENDING_RUN",
+                        "cited_passages": "PENDING_RUN",
+                    }
+                )
         elif q_file_json.is_file():
             questions = json.loads(q_file_json.read_text(encoding="utf-8"))
             for idx, q in enumerate(questions):
-                items.append({
-                    "question_id": q.get("id", f"q_{idx:03d}"),
-                    "language": q.get("language", "en"),
-                    "question": q.get("question", ""),
-                    "answer_text": "PENDING_RUN",
-                    "cited_passages": "PENDING_RUN",
-                })
+                items.append(
+                    {
+                        "question_id": q.get("id", f"q_{idx:03d}"),
+                        "language": q.get("language", "en"),
+                        "question": q.get("question", ""),
+                        "answer_text": "PENDING_RUN",
+                        "cited_passages": "PENDING_RUN",
+                    }
+                )
 
     fieldnames = [
         "question_id",
@@ -78,17 +82,19 @@ def make_sheet(source_json: Path | None = None, output_csv: Path = DEFAULT_OUT) 
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for it in items:
-            writer.writerow({
-                "question_id": it.get("question_id", it.get("id", "")),
-                "language": it.get("language", ""),
-                "question": it.get("question", ""),
-                "answer_text": it.get("answer_text", it.get("text", "")),
-                "cited_passages": it.get("cited_passages", ""),
-                "number_correct": it.get("number_correct", ""),
-                "citation_supports": it.get("citation_supports", ""),
-                "unsupported_claim": it.get("unsupported_claim", ""),
-                "notes": it.get("notes", ""),
-            })
+            writer.writerow(
+                {
+                    "question_id": it.get("question_id", it.get("id", "")),
+                    "language": it.get("language", ""),
+                    "question": it.get("question", ""),
+                    "answer_text": it.get("answer_text", it.get("text", "")),
+                    "cited_passages": it.get("cited_passages", ""),
+                    "number_correct": it.get("number_correct", ""),
+                    "citation_supports": it.get("citation_supports", ""),
+                    "unsupported_claim": it.get("unsupported_claim", ""),
+                    "notes": it.get("notes", ""),
+                }
+            )
 
     print(f"Generated human grading sheet at {output_csv} with {len(items)} items.")
     return len(items)

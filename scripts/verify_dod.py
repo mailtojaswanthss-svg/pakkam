@@ -9,10 +9,7 @@ Tests the 7 Definition of Done requirements:
 6. Git safety audit: No API keys, credentials, audio files, or personal data committed.
 """
 
-import json
 import logging
-import os
-import re
 import subprocess
 import sys
 import time
@@ -119,6 +116,7 @@ def check_reports():
 
 def run_dod_verification():
     from fastapi.testclient import TestClient
+
     from schemebot.api.main import create_app
     from schemebot.config import get_settings
     from schemebot.generate.factory import build_answerer
@@ -154,7 +152,6 @@ def run_dod_verification():
             assert res.status_code == 200, f"Failed /ask: {res.status_code}"
             data = res.json()
             ans_text = data.get("answer", "")
-            status = data.get("status")
             has_amount = any(exp in ans_text for exp in item["expected_amounts"])
             if has_amount:
                 logger.info("PASS: %s -> Found amount in answer: %s", item["scheme"], ans_text[:80])
@@ -167,10 +164,16 @@ def run_dod_verification():
 
         # Check 3: Out-of-Domain Refusal
         logger.info("--- Check 3: Out-of-Domain Refusal on /ask ---")
-        res_ood = client.post("/ask", json={"question": "How do I claim a grant for kangaroo farming in Antarctica?"})
+        res_ood = client.post(
+            "/ask", json={"question": "How do I claim a grant for kangaroo farming in Antarctica?"}
+        )
         data_ood = res_ood.json()
-        assert data_ood.get("status") == "INSUFFICIENT_EVIDENCE", f"Expected INSUFFICIENT_EVIDENCE, got {data_ood.get('status')}"
-        assert data_ood.get("refused") is True, f"Expected refused=True, got {data_ood.get('refused')}"
+        assert data_ood.get("status") == "INSUFFICIENT_EVIDENCE", (
+            f"Expected INSUFFICIENT_EVIDENCE, got {data_ood.get('status')}"
+        )
+        assert data_ood.get("refused") is True, (
+            f"Expected refused=True, got {data_ood.get('refused')}"
+        )
         logger.info("PASS: Out-of-domain correctly refused with INSUFFICIENT_EVIDENCE ✅")
 
         # Check 4: Voice Endpoint
@@ -187,7 +190,9 @@ def run_dod_verification():
                 vdata = res_voice.json()
                 logger.info("PASS: /ask/voice succeeded! Timings: %s", vdata.get("timings_ms"))
             else:
-                logger.warning("/ask/voice status: %d (%s)", res_voice.status_code, res_voice.text[:100])
+                logger.warning(
+                    "/ask/voice status: %d (%s)", res_voice.status_code, res_voice.text[:100]
+                )
         else:
             logger.warning("No test clip at %s", clip_path)
 

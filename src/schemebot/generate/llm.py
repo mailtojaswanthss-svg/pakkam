@@ -183,9 +183,7 @@ class FailoverJsonLlm:
             self._fallback_enabled and self._secondary is not None and self._secondary.configured
         )
 
-    def complete_json(
-        self, system: str, user: str, schema: dict[str, object]
-    ) -> dict[str, Any]:
+    def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
         try:
             return self._primary.complete_json(system, user, schema)
         except LlmUnavailableError as primary_err:

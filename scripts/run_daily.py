@@ -124,9 +124,7 @@ def run_speed_retest(llm_budget: LlmBudget, dry_run: bool = False) -> dict[str, 
     stats = llm_budget.stats()
     remaining = stats["remaining_today"]
     if remaining <= MAX_SPARE_RESERVE:
-        msg = (
-            f"Blocked by budget guard: remaining {remaining} calls <= {MAX_SPARE_RESERVE} spare."
-        )
+        msg = f"Blocked by budget guard: remaining {remaining} calls <= {MAX_SPARE_RESERVE} spare."
         logger.warning(msg)
         return {"status": "SKIPPED", "reason": msg}
 
@@ -211,16 +209,18 @@ def run_speed_retest(llm_budget: LlmBudget, dry_run: bool = False) -> dict[str, 
             logger.error("Error generating answer for %s: %s", q_id, exc)
 
         t_total = t_ret + t_llm
-        results.append({
-            "id": q_id,
-            "lang": item["lang"],
-            "question": q_text,
-            "status": status,
-            "retrieval_ms": round(t_ret, 1),
-            "llm_ms": round(t_llm, 1),
-            "total_ms": round(t_total, 1),
-            "response": resp,
-        })
+        results.append(
+            {
+                "id": q_id,
+                "lang": item["lang"],
+                "question": q_text,
+                "status": status,
+                "retrieval_ms": round(t_ret, 1),
+                "llm_ms": round(t_llm, 1),
+                "total_ms": round(t_total, 1),
+                "response": resp,
+            }
+        )
 
     SPEED_RESULTS_PATH.write_text(
         json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8"

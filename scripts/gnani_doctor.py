@@ -67,7 +67,9 @@ def main() -> int:
         print("[PASS] HF_TOKEN is configured (masked)")
     else:
         print("[FAIL] HF_TOKEN is missing or empty in .env.")
-        print("       Fix: Generate a token at huggingface.co/settings/tokens and add HF_TOKEN=... to .env")
+        print(
+            "       Fix: Generate a token at huggingface.co/settings/tokens and add HF_TOKEN=... to .env"
+        )
         failures += 1
 
     # 5. Check ffmpeg
@@ -81,9 +83,10 @@ def main() -> int:
 
     # 6. Check Python environment & libraries
     try:
-        import httpx
-        import pydantic
-        import pymupdf
+        import httpx  # noqa: F401  (availability check)
+        import pydantic  # noqa: F401
+        import pymupdf  # noqa: F401
+
         print("[PASS] Python environment has required packages (httpx, pydantic, pymupdf)")
     except ImportError as e:
         print(f"[FAIL] Missing Python dependencies: {e}")
@@ -98,7 +101,9 @@ def main() -> int:
 
     # 8. Check Credit Guard
     if settings.gnani_max_calls_per_day > 0:
-        print(f"[PASS] Credit Guard is active (limit: {settings.gnani_max_calls_per_day} calls/day)")
+        print(
+            f"[PASS] Credit Guard is active (limit: {settings.gnani_max_calls_per_day} calls/day)"
+        )
     else:
         print("[WARN] Credit Guard is disabled (SCHEMEBOT_GNANI_MAX_CALLS_PER_DAY=0).")
 

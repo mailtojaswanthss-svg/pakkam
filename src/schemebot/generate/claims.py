@@ -25,16 +25,43 @@ ClaimType = Literal["amount", "date", "condition", "description"]
 ClaimPeriod = Literal["monthly", "yearly", "one_time", "unknown"]
 
 MONTHLY_KEYWORDS = (
-    "month", "monthly", "மாதம்", "மாதாந்திர", "மாதந்தோறும்", "மாதம் தோறும்",
-    "प्रति माह", "मासिक", "महीना", "माह"
+    "month",
+    "monthly",
+    "மாதம்",
+    "மாதாந்திர",
+    "மாதந்தோறும்",
+    "மாதம் தோறும்",
+    "प्रति माह",
+    "मासिक",
+    "महीना",
+    "माह",
 )
 YEARLY_KEYWORDS = (
-    "year", "yearly", "annual", "annum", "ஆண்டு", "ஆண்டுக்கு", "ஆண்டிற்கு",
-    "வருடம்", "வருடாந்திர", "வருடத்திற்கு", "प्रति वर्ष", "वार्षिक", "साल", "वर्ष"
+    "year",
+    "yearly",
+    "annual",
+    "annum",
+    "ஆண்டு",
+    "ஆண்டுக்கு",
+    "ஆண்டிற்கு",
+    "வருடம்",
+    "வருடாந்திர",
+    "வருடத்திற்கு",
+    "प्रति वर्ष",
+    "वार्षिक",
+    "साल",
+    "वर्ष",
 )
 ONE_TIME_KEYWORDS = (
-    "one-time", "one time", "lump sum", "single installment",
-    "ஒரே முறை", "ஒரு முறை", "ஒற்றை", "एकमुश्त", "एक बार"
+    "one-time",
+    "one time",
+    "lump sum",
+    "single installment",
+    "ஒரே முறை",
+    "ஒரு முறை",
+    "ஒற்றை",
+    "एकमुश्त",
+    "एक बार",
 )
 
 

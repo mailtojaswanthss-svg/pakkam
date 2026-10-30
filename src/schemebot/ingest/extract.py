@@ -105,7 +105,6 @@ class PageText:
     method: ExtractionMethod
 
 
-
 def _is_bad_char(char: str) -> bool:
     return ord(char) == REPLACEMENT_CHAR or 0xE000 <= ord(char) <= 0xF8FF
 
@@ -263,7 +262,7 @@ def make_chitrapathak_ocr(language: Language) -> OcrFn:
         ).to(model.device)
         generated_ids = model.generate(**inputs, max_new_tokens=2048)
         generated_ids_trimmed = [
-            out_ids[len(in_ids):]
+            out_ids[len(in_ids) :]
             for in_ids, out_ids in zip(inputs.input_ids, generated_ids, strict=False)
         ]
         output_text = processor.batch_decode(

@@ -5,10 +5,10 @@ Evaluates retrieval survivability on 10 realistic colloquial Tanglish citizen qu
 representing common welfare inquiries across phone audio and spoken transcription.
 """
 
-from dataclasses import dataclass
-from pathlib import Path
 import sys
 import time
+from dataclasses import dataclass
+from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
@@ -125,16 +125,18 @@ def run_tanglish_eval() -> None:
         if top5_hit:
             top5_matches += 1
 
-        results.append({
-            "id": item.id,
-            "query": item.query_text,
-            "target": item.target_scheme,
-            "top1": top1_scheme,
-            "score": round(retrieval.confidence, 4),
-            "top1_hit": top1_hit,
-            "top5_hit": top5_hit,
-            "latency_ms": round(latency, 1),
-        })
+        results.append(
+            {
+                "id": item.id,
+                "query": item.query_text,
+                "target": item.target_scheme,
+                "top1": top1_scheme,
+                "score": round(retrieval.confidence, 4),
+                "top1_hit": top1_hit,
+                "top5_hit": top5_hit,
+                "latency_ms": round(latency, 1),
+            }
+        )
 
     top1_acc = top1_matches / len(TANGLISH_TEST_SET) * 100.0
     top5_acc = top5_matches / len(TANGLISH_TEST_SET) * 100.0
@@ -176,20 +178,22 @@ def run_tanglish_eval() -> None:
         top1_icon = "YES" if r["top1_hit"] else "NO"
         top5_icon = "YES" if r["top5_hit"] else "NO"
         lines.append(
-            f"| `{r['id']}` | \"{r['query']}\" | {r['target'][:32]} | {r['top1'][:32]} | {r['score']} | {top1_icon} | {top5_icon} | {r['latency_ms']} ms |"
+            f'| `{r["id"]}` | "{r["query"]}" | {r["target"][:32]} | {r["top1"][:32]} | {r["score"]} | {top1_icon} | {top5_icon} | {r["latency_ms"]} ms |'
         )
 
-    lines.extend([
-        "",
-        "---",
-        "",
-        "## 3. Engineering Analysis",
-        "",
-        "1. **Tanglish Normalization Impact:** Colloquial terms like `ponnungalukku` and `vivasayigalukku` successfully map to semantic representations without keyword drop.",
-        "2. **Alias Expansion Efficacy:** Common acronyms (`pm kisan`, `cmchis`, `atal pension`) immediately trigger canonical scheme expansion, ensuring multi-vector BGE-M3 dense and sparse representations align with official policy documents.",
-        "3. **Zero Hallucination Risk:** All queries cleared the 0.35 confidence threshold, allowing the assistant to ground answers strictly on official scheme documents and policy texts.",
-        ""
-    ])
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## 3. Engineering Analysis",
+            "",
+            "1. **Tanglish Normalization Impact:** Colloquial terms like `ponnungalukku` and `vivasayigalukku` successfully map to semantic representations without keyword drop.",
+            "2. **Alias Expansion Efficacy:** Common acronyms (`pm kisan`, `cmchis`, `atal pension`) immediately trigger canonical scheme expansion, ensuring multi-vector BGE-M3 dense and sparse representations align with official policy documents.",
+            "3. **Zero Hallucination Risk:** All queries cleared the 0.35 confidence threshold, allowing the assistant to ground answers strictly on official scheme documents and policy texts.",
+            "",
+        ]
+    )
 
     out_file = PROJECT_ROOT / "docs" / "review" / "TANGLISH_EVAL_REPORT.md"
     out_file.write_text("\n".join(lines), encoding="utf-8")

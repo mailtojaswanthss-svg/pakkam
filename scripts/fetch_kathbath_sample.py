@@ -9,7 +9,6 @@ Outputs:
 """
 
 import csv
-import io
 import os
 import shutil
 import sys
@@ -43,7 +42,7 @@ LANG_CONFIGS = [
 def check_disk_space(target_path: Path, min_gb: float = 5.0) -> None:
     anchor = target_path.resolve().anchor
     usage = shutil.disk_usage(anchor)
-    free_gb = usage.free / (1024 ** 3)
+    free_gb = usage.free / (1024**3)
     if free_gb < min_gb:
         raise RuntimeError(
             f"Insufficient disk space on {anchor}: {free_gb:.1f} GB free, required >= {min_gb} GB"
@@ -55,7 +54,7 @@ def get_hf_token() -> str:
     settings = get_settings()
     token = os.environ.get("HF_TOKEN")
     if not token and settings.model_config.get("env_file"):
-        with open(settings.model_config["env_file"], "r", encoding="utf-8") as f:
+        with open(settings.model_config["env_file"], encoding="utf-8") as f:
             for line in f:
                 if line.startswith("HF_TOKEN="):
                     token = line.strip().split("=", 1)[1]
@@ -105,7 +104,11 @@ def main():
                 # Find relevant columns
                 text_col = "text" if "text" in col_names else "transcription"
                 dur_col = "duration" if "duration" in col_names else None
-                bytes_col = "audio_filepath" if "audio_filepath" in col_names else ("bytes" if "bytes" in col_names else "audio")
+                bytes_col = (
+                    "audio_filepath"
+                    if "audio_filepath" in col_names
+                    else ("bytes" if "bytes" in col_names else "audio")
+                )
 
                 for row_idx in range(table.num_rows):
                     if saved_count >= TARGET_CLIPS_PER_LANG:
@@ -119,18 +122,17 @@ def main():
 
                     # Extract raw audio bytes
                     raw_val = table[bytes_col][row_idx].as_py()
-                    if isinstance(raw_val, dict):
-                        raw_bytes = raw_val.get("bytes")
-                    else:
-                        raw_bytes = raw_val
+                    raw_bytes = raw_val.get("bytes") if isinstance(raw_val, dict) else raw_val
 
                     if not raw_bytes:
                         continue
 
                     # Convert to standard 16 kHz mono WAV via ffmpeg
                     try:
-                        wav_16k = convert_to_wav16k(raw_bytes, f"raw_{name}.wav", max_seconds=MAX_DURATION)
-                    except Exception as e:
+                        wav_16k = convert_to_wav16k(
+                            raw_bytes, f"raw_{name}.wav", max_seconds=MAX_DURATION
+                        )
+                    except Exception:
                         continue
 
                     saved_count += 1
@@ -138,18 +140,24 @@ def main():
                     clip_path = out_dir / clip_filename
                     clip_path.write_bytes(wav_16k)
 
-                    csv_rows.append({
-                        "filename": clip_filename,
-                        "language": lang,
-                        "reference_text": ref_text,
-                        "source": "Kathbath",
-                        "synthetic_or_real": "real",
-                    })
-                    print(f"  [{name.upper()} {saved_count:02d}/{TARGET_CLIPS_PER_LANG}] Saved {clip_filename} ({len(wav_16k)} bytes, {duration:.1f}s)")
+                    csv_rows.append(
+                        {
+                            "filename": clip_filename,
+                            "language": lang,
+                            "reference_text": ref_text,
+                            "source": "Kathbath",
+                            "synthetic_or_real": "real",
+                        }
+                    )
+                    print(
+                        f"  [{name.upper()} {saved_count:02d}/{TARGET_CLIPS_PER_LANG}] Saved {clip_filename} ({len(wav_16k)} bytes, {duration:.1f}s)"
+                    )
 
     # Write catalog CSV
     with csv_path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["filename", "language", "reference_text", "source", "synthetic_or_real"])
+        writer = csv.DictWriter(
+            f, fieldnames=["filename", "language", "reference_text", "source", "synthetic_or_real"]
+        )
         writer.writeheader()
         writer.writerows(csv_rows)
 

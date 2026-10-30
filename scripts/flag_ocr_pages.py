@@ -1,8 +1,8 @@
 import csv
 import json
 import re
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Ensure UTF-8 output
 if hasattr(sys.stdout, "reconfigure"):
@@ -116,13 +116,15 @@ def main():
 
             if reasons:
                 doc_flagged += 1
-                flagged_rows.append({
-                    "document": doc_id,
-                    "page": page_num,
-                    "reason": "; ".join(reasons),
-                    "has_currency": bool(curr_matches),
-                    "category": get_scheme_category(doc_id),
-                })
+                flagged_rows.append(
+                    {
+                        "document": doc_id,
+                        "page": page_num,
+                        "reason": "; ".join(reasons),
+                        "has_currency": bool(curr_matches),
+                        "category": get_scheme_category(doc_id),
+                    }
+                )
 
         stats_per_doc[doc_id] = {
             "total_ocr": doc_total,
@@ -143,11 +145,13 @@ def main():
     SEC_PER_PAGE = 95.0
 
     print("=" * 85)
-    print(f"HYBRID OCR FLAGGING REPORT (Total OCR Pages: 1,353)")
-    print(f"Flagging Rule: Contains currency marker (ரூ, Rs, Rs., ₹, रु) OR 3+ digits")
+    print("HYBRID OCR FLAGGING REPORT (Total OCR Pages: 1,353)")
+    print("Flagging Rule: Contains currency marker (ரூ, Rs, Rs., ₹, रु) OR 3+ digits")
     print(f"Wrote flagged pages to: {out_csv.as_posix()}")
     print("=" * 85)
-    print(f"{'Scheme / Category':<32} {'Document ID':<28} {'Flagged':<9} {'(Currency)':<11} {'Est. Time'}")
+    print(
+        f"{'Scheme / Category':<32} {'Document ID':<28} {'Flagged':<9} {'(Currency)':<11} {'Est. Time'}"
+    )
     print("-" * 85)
 
     current_cat = None
@@ -156,13 +160,19 @@ def main():
             current_cat = st["category"]
             print(f"\n[{current_cat}]")
         est_gpu_hours = (st["flagged"] * SEC_PER_PAGE) / 3600.0
-        print(f"  {doc_id:<36} {st['flagged']:>4}/{st['total_ocr']:<4} ({st['currency_flagged']:>4} curr)   {est_gpu_hours:>6.1f} hrs")
+        print(
+            f"  {doc_id:<36} {st['flagged']:>4}/{st['total_ocr']:<4} ({st['currency_flagged']:>4} curr)   {est_gpu_hours:>6.1f} hrs"
+        )
 
     print("=" * 85)
     all_gpu_hours = (total_flagged * SEC_PER_PAGE) / 3600.0
     curr_gpu_hours = (total_currency * SEC_PER_PAGE) / 3600.0
-    print(f"TOTAL FLAGGED (Currency OR 3+ Digits): {total_flagged} pages  (~{all_gpu_hours:.1f} GPU hours)")
-    print(f"TOTAL WITH CURRENCY MARKERS ONLY:       {total_currency} pages  (~{curr_gpu_hours:.1f} GPU hours)")
+    print(
+        f"TOTAL FLAGGED (Currency OR 3+ Digits): {total_flagged} pages  (~{all_gpu_hours:.1f} GPU hours)"
+    )
+    print(
+        f"TOTAL WITH CURRENCY MARKERS ONLY:       {total_currency} pages  (~{curr_gpu_hours:.1f} GPU hours)"
+    )
     print("=" * 85)
 
 

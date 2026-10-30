@@ -1,10 +1,11 @@
 """Unit tests for citizen feedback loop (POST /feedback)."""
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
-from fastapi.testclient import TestClient
+
 import pytest
+from fastapi.testclient import TestClient
 
 from schemebot.api.main import create_app
 from schemebot.generate.answer import Answer

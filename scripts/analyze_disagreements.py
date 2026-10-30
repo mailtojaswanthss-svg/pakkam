@@ -25,7 +25,7 @@ def analyze() -> None:
 
     total_pages = len(rows)
     doc_counter = Counter(r["document"] for r in rows)
-    
+
     # Categorize disagreements
     single_digit_diffs = 0
     phone_or_date_diffs = 0
@@ -36,12 +36,15 @@ def analyze() -> None:
         tess = r.get("tesseract_only_numbers", "").strip()
         chitra = r.get("chitrapathak_only_numbers", "").strip()
         notes = r.get("notes", "").strip()
-        
+
         # Check for year/date format (e.g. 2023, 2024, 1989)
         combined = f"{tess} {chitra} {notes}"
         has_year = any(yr in combined for yr in ("202", "201", "199", "198"))
         has_phone = any(len(tok) in (10, 11) and tok.isdigit() for tok in combined.split())
-        has_amount = any(tok in combined for tok in ("1,000", "5,000", "10,000", "1000", "5000", "10000", "ரூ", "Rs"))
+        has_amount = any(
+            tok in combined
+            for tok in ("1,000", "5,000", "10,000", "1000", "5000", "10000", "ரூ", "Rs")
+        )
 
         if has_phone or has_year:
             phone_or_date_diffs += 1
@@ -67,10 +70,10 @@ def analyze() -> None:
         "",
         "| Disagreement Category | Page Count | % of Disagreements | Description & Risk Assessment |",
         "| :--- | :---: | :---: | :--- |",
-        f"| **Date & Order References** | {phone_or_date_diffs} | {phone_or_date_diffs/total_pages*100:.1f}% | Gazette notification dates, G.O. Ms. numbers, and calendar years (e.g., 2022-2023 vs 2022-23). **Zero financial benefit risk.** |",
-        f"| **Dense Tabular Numerals** | {table_multi_num_diffs} | {table_multi_num_diffs/total_pages*100:.1f}% | Multi-column budget tables where Tesseract merged adjacent columns. Chitrapathak correctly segmented cells. **High fidelity gain from VLM.** |",
-        f"| **Isolated Single Digits** | {single_digit_diffs} | {single_digit_diffs/total_pages*100:.1f}% | Page numbers, bullet point numbers (1., 2.), and punctuation artifacts. **Zero eligibility impact.** |",
-        f"| **Financial & Rupee Amounts** | {currency_or_amount_diffs} | {currency_or_amount_diffs/total_pages*100:.1f}% | Direct benefit amounts (e.g. Rs. 1,000 vs Rs. 4,000 misread). Ground truth resolved by Chitrapathak Crop Mode (100% on failure crops). |",
+        f"| **Date & Order References** | {phone_or_date_diffs} | {phone_or_date_diffs / total_pages * 100:.1f}% | Gazette notification dates, G.O. Ms. numbers, and calendar years (e.g., 2022-2023 vs 2022-23). **Zero financial benefit risk.** |",
+        f"| **Dense Tabular Numerals** | {table_multi_num_diffs} | {table_multi_num_diffs / total_pages * 100:.1f}% | Multi-column budget tables where Tesseract merged adjacent columns. Chitrapathak correctly segmented cells. **High fidelity gain from VLM.** |",
+        f"| **Isolated Single Digits** | {single_digit_diffs} | {single_digit_diffs / total_pages * 100:.1f}% | Page numbers, bullet point numbers (1., 2.), and punctuation artifacts. **Zero eligibility impact.** |",
+        f"| **Financial & Rupee Amounts** | {currency_or_amount_diffs} | {currency_or_amount_diffs / total_pages * 100:.1f}% | Direct benefit amounts (e.g. Rs. 1,000 vs Rs. 4,000 misread). Ground truth resolved by Chitrapathak Crop Mode (100% on failure crops). |",
         f"| **Total Disagreements** | **{total_pages}** | **100.0%** | Full corpus coverage across all 18 documents. |",
         "",
         "---",
@@ -85,23 +88,28 @@ def analyze() -> None:
 
     for doc_name, count in doc_counter.most_common():
         pct = count / total_pages * 100
-        md_lines.append(f"| `{doc_name}` | {count} ({pct:.1f}%) | Multi-column tabular budget summaries and department statistics. |")
+        md_lines.append(
+            f"| `{doc_name}` | {count} ({pct:.1f}%) | Multi-column tabular budget summaries and department statistics. |"
+        )
 
-    md_lines.extend([
-        "",
-        "---",
-        "",
-        "## 3. Engineering Conclusion & Safeguards",
-        "",
-        "1. **No Silent Numeral Corruption:** 0 rows contained raw isolated currency symbols or unmapped glyphs.",
-        "2. **Chitrapathak Superiority on Tabular Crops:** In known problem crops, Chitrapathak achieved 7/7 (100.0%) numeral accuracy while Tesseract achieved 0/7 (0.0%).",
-        "3. **Claim-Lite Deterministic Guard:** Any amount cited in an answer must strictly match the chunk quote in `src/schemebot/generate/claims.py`, preventing out-of-context misreads from reaching citizens.",
-        ""
-    ])
+    md_lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## 3. Engineering Conclusion & Safeguards",
+            "",
+            "1. **No Silent Numeral Corruption:** 0 rows contained raw isolated currency symbols or unmapped glyphs.",
+            "2. **Chitrapathak Superiority on Tabular Crops:** In known problem crops, Chitrapathak achieved 7/7 (100.0%) numeral accuracy while Tesseract achieved 0/7 (0.0%).",
+            "3. **Claim-Lite Deterministic Guard:** Any amount cited in an answer must strictly match the chunk quote in `src/schemebot/generate/claims.py`, preventing out-of-context misreads from reaching citizens.",
+            "",
+        ]
+    )
 
     out_path = Path("docs/review/OCR_DISAGREEMENTS_ANALYSIS.md")
     out_path.write_text("\n".join(md_lines), encoding="utf-8")
     print(f"Successfully generated {out_path} ({total_pages} pages categorized).")
+
 
 if __name__ == "__main__":
     analyze()

@@ -8,7 +8,6 @@ Verifies:
 All tests use mock speakers with 0 real Gnani or network calls.
 """
 
-
 from schemebot.voice.sentence_speaker import SentenceSpeaker, split_sentences
 
 FAKE_WAV = b"RIFF....WAVEfmt "
@@ -52,9 +51,7 @@ def test_sentence_speaker_spells_indic_numbers() -> None:
     sentence_speaker = SentenceSpeaker(speaker, spell_numbers=True)
 
     # Tamil amount spelling
-    spoken, audio, ms = sentence_speaker.synthesize_sentence(
-        "மாதம் ரூ. 1,000 வழங்கப்படுகிறது.", "ta"
-    )
+    spoken, audio, ms = sentence_speaker.synthesize_sentence("மாதம் ரூ. 1,000 வழங்கப்படுகிறது.", "ta")
     assert audio == FAKE_WAV
     assert ms >= 0.0
     assert len(speaker.calls) == 1

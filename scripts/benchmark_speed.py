@@ -10,7 +10,6 @@ Measures median and p95 latency for each stage:
 Outputs: docs/review/SPEED_REPORT.md
 """
 
-import json
 import logging
 import statistics
 import subprocess
@@ -31,15 +30,47 @@ logger = logging.getLogger("speed_benchmark")
 
 # 10 Representative questions covering all 4 languages and key schemes
 BENCHMARK_QUESTIONS = [
-    {"id": "q001", "lang": "ta", "q": "புதுமைப்பெண் திட்டத்தின் கீழ் மாணவிகளுக்கு மாதந்தோறும் எவ்வளவு உதவித்தொகை வழங்கப்படுகிறது?"},
-    {"id": "q002", "lang": "ta", "q": "முதலமைச்சரின் விரிவான மருத்துவக் காப்பீட்டுத் திட்டத்தில் பயன்பெற குடும்ப ஆண்டு வருமான வரம்பு என்ன?"},
-    {"id": "q003", "lang": "en", "q": "How much financial assistance is provided per year under PM-KISAN?"},
-    {"id": "q004", "lang": "en", "q": "What is the minimum pension guaranteed under Atal Pension Yojana?"},
-    {"id": "q005", "lang": "hi", "q": "पीएम किसान सम्मान निधि योजना के तहत किसानों को सालाना कितनी राशि मिलती है?"},
-    {"id": "q006", "lang": "hi", "q": "अटल पेंशन योजना में शामिल होने के लिए न्यूनतम और अधिकतम आयु सीमा क्या है?"},
+    {
+        "id": "q001",
+        "lang": "ta",
+        "q": "புதுமைப்பெண் திட்டத்தின் கீழ் மாணவிகளுக்கு மாதந்தோறும் எவ்வளவு உதவித்தொகை வழங்கப்படுகிறது?",
+    },
+    {
+        "id": "q002",
+        "lang": "ta",
+        "q": "முதலமைச்சரின் விரிவான மருத்துவக் காப்பீட்டுத் திட்டத்தில் பயன்பெற குடும்ப ஆண்டு வருமான வரம்பு என்ன?",
+    },
+    {
+        "id": "q003",
+        "lang": "en",
+        "q": "How much financial assistance is provided per year under PM-KISAN?",
+    },
+    {
+        "id": "q004",
+        "lang": "en",
+        "q": "What is the minimum pension guaranteed under Atal Pension Yojana?",
+    },
+    {
+        "id": "q005",
+        "lang": "hi",
+        "q": "पीएम किसान सम्मान निधि योजना के तहत किसानों को सालाना कितनी राशि मिलती है?",
+    },
+    {
+        "id": "q006",
+        "lang": "hi",
+        "q": "अटल पेंशन योजना में शामिल होने के लिए न्यूनतम और अधिकतम आयु सीमा क्या है?",
+    },
     {"id": "q007", "lang": "ta-Latn", "q": "Pudhumai penn scheme ku evlo monthly amount tharanga?"},
-    {"id": "q008", "lang": "ta-Latn", "q": "CMCHIS scheme la apply panna annual family income limit evlo?"},
-    {"id": "q009", "lang": "en", "q": "What is the security deposit for new LPG connection under PMUY?"},
+    {
+        "id": "q008",
+        "lang": "ta-Latn",
+        "q": "CMCHIS scheme la apply panna annual family income limit evlo?",
+    },
+    {
+        "id": "q009",
+        "lang": "en",
+        "q": "What is the security deposit for new LPG connection under PMUY?",
+    },
     {"id": "q010", "lang": "ta", "q": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் பயன்பெற தகுதிகள் என்ன?"},
 ]
 
@@ -48,8 +79,12 @@ OUT_REPORT = PROJECT_ROOT / "docs" / "review" / "SPEED_REPORT.md"
 
 def get_git_info() -> tuple[str, bool]:
     try:
-        commit = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=PROJECT_ROOT, text=True).strip()
-        status = subprocess.check_output(["git", "status", "--porcelain"], cwd=PROJECT_ROOT, text=True).strip()
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"], cwd=PROJECT_ROOT, text=True
+        ).strip()
+        status = subprocess.check_output(
+            ["git", "status", "--porcelain"], cwd=PROJECT_ROOT, text=True
+        ).strip()
         return commit, (len(status) == 0)
     except Exception:
         return "unknown", False
@@ -84,7 +119,9 @@ def main():
         q = item["q"]
         qid = item["id"]
         lang = item["lang"]
-        logger.info("[%d/%d] Running %s (%s): %s...", idx, len(BENCHMARK_QUESTIONS), qid, lang, q[:40])
+        logger.info(
+            "[%d/%d] Running %s (%s): %s...", idx, len(BENCHMARK_QUESTIONS), qid, lang, q[:40]
+        )
 
         t0 = time.perf_counter()
         ans = answerer.answer(q)
@@ -98,14 +135,16 @@ def main():
             if val > 0:
                 stage_timings[k].append(val)
 
-        results.append({
-            "id": qid,
-            "lang": lang,
-            "question": q,
-            "refused": ans.refused,
-            "confidence": round(ans.confidence, 4),
-            "timings_ms": {k: round(v, 1) for k, v in t_data.items()},
-        })
+        results.append(
+            {
+                "id": qid,
+                "lang": lang,
+                "question": q,
+                "refused": ans.refused,
+                "confidence": round(ans.confidence, 4),
+                "timings_ms": {k: round(v, 1) for k, v in t_data.items()},
+            }
+        )
 
     commit, is_clean = get_git_info()
     clean_flag = "clean ✅" if is_clean else "uncommitted changes ⚠️"
@@ -118,7 +157,7 @@ def main():
         f"**Git Commit:** `{commit}` ({clean_flag})  ",
         f"**Qdrant Collection:** `{settings.qdrant_collection}`  ",
         f"**LLM Provider:** `{settings.llm_provider}` (`{settings.llm_model}`)  ",
-        f"**Sample Count (n):** 10 prepared representative citizen questions  ",
+        "**Sample Count (n):** 10 prepared representative citizen questions  ",
         "",
         "---",
         "",
@@ -143,17 +182,21 @@ def main():
             p_95 = p95(vals)
             min_v = min(vals)
             max_v = max(vals)
-            report_lines.append(f"| {label} | {len(vals)} | {med:.1f} ms | {p_95:.1f} ms | {min_v:.1f} ms | {max_v:.1f} ms |")
+            report_lines.append(
+                f"| {label} | {len(vals)} | {med:.1f} ms | {p_95:.1f} ms | {min_v:.1f} ms | {max_v:.1f} ms |"
+            )
 
-    report_lines.extend([
-        "",
-        "---",
-        "",
-        "## 2. Per-Question Detailed Breakdown",
-        "",
-        "| ID | Lang | Question Excerpt | Refused? | Search (ms) | Rerank (ms) | LLM (ms) | Verifier (ms) | Total (ms) |",
-        "| :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: |",
-    ])
+    report_lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## 2. Per-Question Detailed Breakdown",
+            "",
+            "| ID | Lang | Question Excerpt | Refused? | Search (ms) | Rerank (ms) | LLM (ms) | Verifier (ms) | Total (ms) |",
+            "| :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: |",
+        ]
+    )
 
     for r in results:
         t = r["timings_ms"]
@@ -164,15 +207,17 @@ def main():
             f"{t.get('llm_answer', 0.0):.1f} | {t.get('verifier', 0.0):.1f} | {t.get('total', 0.0):.1f} |"
         )
 
-    report_lines.extend([
-        "",
-        "---",
-        "",
-        "## 3. Not Claimed",
-        "",
-        "- Latencies measured on single local workstation under warm GPU cache.",
-        "- Network variability from LLM APIs (Claude/Gemini) can cause outliers during peak server hours.",
-    ])
+    report_lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## 3. Not Claimed",
+            "",
+            "- Latencies measured on single local workstation under warm GPU cache.",
+            "- Network variability from LLM APIs (Claude/Gemini) can cause outliers during peak server hours.",
+        ]
+    )
 
     OUT_REPORT.write_text("\n".join(report_lines), encoding="utf-8")
     logger.info("SUCCESS: Wrote speed report to %s", OUT_REPORT)
