@@ -30,6 +30,9 @@ from schemebot.api.schemas import (
     FallbackPassage,
     FeedbackRequest,
     FeedbackResponse,
+    ForwardClaimOut,
+    ForwardRequest,
+    ForwardResponse,
     HealthResponse,
     SourceOut,
     SpeakRequest,
@@ -181,6 +184,13 @@ def _default_service() -> AnswerService:
     )
 
 
+def _default_forward_llm() -> Any:
+    """The small fast model (the verifier's) that splits forwards and judges each claim."""
+    from schemebot.generate.factory import build_llm
+
+    return build_llm(get_settings(), "verifier")
+
+
 def _default_transcriber() -> Transcriber | None:
     return build_transcriber(get_settings())
 
@@ -200,6 +210,7 @@ def create_app(
     sources_limiter: AskLimiter | None = None,
     speak_limiter: AskLimiter | None = None,
     feedback_limiter: AskLimiter | None = None,
+    build_forward_llm: Callable[[], Any] = _default_forward_llm,
 ) -> FastAPI:
     ask_limiter = limiter or _default_limiter()
     # Its own counter, so a voice question (/transcribe, then /ask) counts once on each.
@@ -297,6 +308,7 @@ def create_app(
             build_tts(),
             doc_dates,
         )
+        app.state.forward_llm = build_forward_llm()
         logger.info("models loaded, ready")
         yield
 
@@ -467,6 +479,37 @@ def create_app(
             stt_ms=round(stt_ms, 1),
             stt_confidence=stt_conf,
             confirmation_text=confirm_text,
+        )
+
+    @app.post("/check-forward", dependencies=[Depends(limit_asks)])
+    def check_forward(body: ForwardRequest, state: StateDep, request: Request) -> ForwardResponse:
+        """'Is this forward real?': each claim in a forwarded message, checked against the
+        official documents with a cited answer. Like /ask, the message text is not logged."""
+        from schemebot.generate.forward import ForwardChecker
+        from schemebot.generate.llm import LlmUnavailableError
+
+        try:
+            result = ForwardChecker(state.service, request.app.state.forward_llm).check(
+                body.message
+            )
+        except LlmUnavailableError as error:
+            raise HTTPException(
+                status_code=503, detail="Pakkam is busy right now. Try again in a minute."
+            ) from error
+        for claim in result.claims:
+            state.audit.record(request.state.request_id, claim.answer)
+        return ForwardResponse(
+            overall=result.overall,
+            claims=[
+                ForwardClaimOut(
+                    claim=c.claim,
+                    question=c.question,
+                    verdict=c.verdict,
+                    explanation=c.explanation,
+                    answer=AskResponse.from_answer(c.answer, state.titles, state.doc_dates),
+                )
+                for c in result.claims
+            ],
         )
 
     @app.post("/feedback", dependencies=[Depends(limit_feedback)])
