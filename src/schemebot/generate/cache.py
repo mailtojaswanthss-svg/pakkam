@@ -29,7 +29,10 @@ from schemebot.text import normalize_for_search
 
 logger = logging.getLogger(__name__)
 
-_PASSING_FAILURES: frozenset[RefusalReason] = frozenset({"service_unavailable", "model_declined"})
+# Not cached: an outage passes, and a draft the checks rejected may pass on the next try.
+_PASSING_FAILURES: frozenset[RefusalReason] = frozenset(
+    {"service_unavailable", "model_declined", "unsupported"}
+)
 _SPACES = re.compile(r"\s+")
 _END_PUNCTUATION = "?？.!।॥ "
 

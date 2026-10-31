@@ -159,3 +159,45 @@ def test_source_without_a_period_is_left_to_the_verifier() -> None:
         [DraftSentence("The deposit is Rs.1,600 a year.", [1])], ["Security deposit Rs.1,600."]
     )
     assert len(result.kept) == 1
+
+
+@pytest.mark.parametrize(
+    ("text", "period"),
+    [
+        ("Varudathukku Rs.6,000 kidaikum.", {"yearly"}),
+        ("Varshathukku Rs.6,000.", {"yearly"}),
+        ("Oru varusham Rs.6,000.", {"yearly"}),
+        ("Masathukku Rs.1,000 kidaikum.", {"monthly"}),
+        ("Maasam Rs.1,000.", {"monthly"}),
+        ("Moonu thavanaiyaa Rs.6,000 kidaikum.", set()),
+    ],
+)
+def test_tanglish_period_words(text: str, period: set[str]) -> None:
+    from schemebot.generate.guardrails import periods_in
+
+    assert periods_in(text) == period
+
+
+def test_refusal_response_says_which_check_rejected_the_draft() -> None:
+    from dataclasses import replace
+
+    from schemebot.api.schemas import AskResponse
+    from schemebot.generate.answer import Answer
+    from schemebot.generate.guardrails import RejectedSentence
+
+    draft = DraftSentence("Farmers get Rs.6,000 a month.", [1])
+    answer = Answer(
+        question="PM Kisan evlo?",
+        language="en",
+        text="",
+        sentences=[],
+        citations=[],
+        refused=True,
+        refusal_reason="unsupported",
+        confidence=0.5,
+        disclaimer="",
+        timings_ms={},
+    )
+    answer = replace(answer, rejected=[RejectedSentence(draft, "period_not_in_source")])
+
+    assert AskResponse.from_answer(answer).rejected_reasons == ["period_not_in_source"]

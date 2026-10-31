@@ -32,7 +32,7 @@ def model_for(settings: Settings, role: LlmRole) -> str:
 
 
 def _build_provider_llm(
-    settings: Settings, role: LlmRole, provider: LlmProvider
+    settings: Settings, role: LlmRole, provider: LlmProvider, model: str | None = None
 ) -> ConfiguredJsonLlm:
     from schemebot.generate.budget import shared_llm_budget
 
@@ -42,7 +42,7 @@ def _build_provider_llm(
         settings.llm_reset_time,
     )
     effort: Effort = {"answer": settings.llm_effort, "verifier": "low", "judge": "medium"}[role]
-    model = model_for_provider(settings, role, provider)
+    model = model or model_for_provider(settings, role, provider)
     limits = (settings.llm_timeout_seconds, settings.llm_retries)
     if provider == "gemini":
         from schemebot.generate.gemini import GeminiJsonLlm
@@ -61,14 +61,25 @@ def _build_provider_llm(
 
 
 def build_llm(settings: Settings, role: LlmRole) -> ConfiguredJsonLlm:
+    from schemebot.generate.llm import FailoverJsonLlm
+
     primary = _build_provider_llm(settings, role, settings.llm_provider)
+    backup_model = settings.gemini_backup_model
+    if (
+        role == "answer"
+        and settings.llm_provider == "gemini"
+        and backup_model
+        and backup_model != model_for(settings, role)
+    ):
+        # The free Gemini plan allows a few requests a minute per model; a second model
+        # has its own allowance, so a burst of questions still gets answers.
+        backup = _build_provider_llm(settings, role, "gemini", backup_model)
+        primary = FailoverJsonLlm(primary, backup, fallback_enabled=True)
     if not settings.llm_fallback_enabled:
         return primary
 
     secondary_provider: LlmProvider = "claude" if settings.llm_provider == "gemini" else "gemini"
     secondary = _build_provider_llm(settings, role, secondary_provider)
-    from schemebot.generate.llm import FailoverJsonLlm
-
     return FailoverJsonLlm(primary, secondary, fallback_enabled=True)
 
 

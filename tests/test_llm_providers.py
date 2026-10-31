@@ -273,6 +273,7 @@ def test_build_llm_respects_fallback_setting() -> None:
     no_fallback = Settings(
         llm_provider="gemini",
         llm_fallback_enabled=False,
+        gemini_backup_model=None,
         gemini_api_key="gkey",  # type: ignore[arg-type]
         anthropic_api_key="ckey",  # type: ignore[arg-type]
     )
