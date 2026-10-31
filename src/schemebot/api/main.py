@@ -11,10 +11,11 @@ import mimetypes
 import re
 import time
 import uuid
+from collections import OrderedDict
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Annotated, Protocol
+from typing import Annotated, Any, Protocol
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import JSONResponse
@@ -36,7 +37,7 @@ from schemebot.api.schemas import (
     VoiceAskResponse,
 )
 from schemebot.config import PROJECT_ROOT, get_settings
-from schemebot.generate.answer import Answer
+from schemebot.generate.answer import Answer, FollowUp
 from schemebot.ingest.models import SourceDoc
 from schemebot.voice.audio import convert_to_wav16k
 from schemebot.voice.numbers import spell_amounts
@@ -67,6 +68,46 @@ AUDIT_LOG_NAME = "requests.jsonl"
 
 class AnswerService(Protocol):
     def answer(self, question: str, voice_mode: bool = False) -> Answer: ...
+
+
+SPOKEN_CACHE_SIZE = 64
+"""Spoken sentences kept in memory, so replaying an answer costs no new Gnani call."""
+CONFIRM_BAND = (0.30, 0.40)
+"""Voice: a retrieval match in this band is uncertain, so Pakkam asks "I heard X, right?"."""
+
+
+def _voice_confirmation(answer: Answer, stt_confidence: float | None = None) -> str | None:
+    """'I heard <scheme>. Is that right?' when a spoken question was matched uncertainly."""
+    uncertain = CONFIRM_BAND[0] <= answer.confidence <= CONFIRM_BAND[1]
+    low_stt = stt_confidence is not None and stt_confidence < 0.60
+    if not (uncertain or low_stt):
+        return None
+    scheme: str | None = None
+    if answer.candidate_schemes:
+        scheme = answer.candidate_schemes[0]
+    elif answer.passages:
+        scheme = answer.passages[0].chunk.scheme
+    elif answer.citations:
+        scheme = answer.citations[0].scheme
+    elif answer.contact:
+        scheme = answer.contact.scheme
+    if not scheme:
+        return None
+    from schemebot.generate.messages import confirmation_text
+
+    return confirmation_text(scheme, answer.language)
+
+
+def _ask_service(
+    service: "AnswerService", question: str, voice_mode: bool, follow_up: FollowUp | None
+) -> Answer:
+    """Pass only the options that are set, so services that take just the question work."""
+    options: dict[str, Any] = {}
+    if voice_mode:
+        options["voice_mode"] = True
+    if follow_up is not None:
+        options["follow_up"] = follow_up
+    return service.answer(question, **options)
 
 
 class AppState:
@@ -156,10 +197,20 @@ def create_app(
     web_dir: Path | None = None,
     limiter: AskLimiter | None = None,
     transcribe_limiter: AskLimiter | None = None,
+    sources_limiter: AskLimiter | None = None,
+    speak_limiter: AskLimiter | None = None,
+    feedback_limiter: AskLimiter | None = None,
 ) -> FastAPI:
     ask_limiter = limiter or _default_limiter()
     # Its own counter, so a voice question (/transcribe, then /ask) counts once on each.
     stt_limiter = transcribe_limiter or _default_limiter()
+    # The cheap endpoints get their own, larger counters: showing sources, reading an answer
+    # aloud sentence by sentence and sending feedback must not use up the question limit.
+    source_limiter = sources_limiter or AskLimiter(30, 5000)
+    tts_limiter = speak_limiter or AskLimiter(60, 5000)
+    feedback_limit = feedback_limiter or AskLimiter(20, 5000)
+    spoken: OrderedDict[tuple[str, str], bytes] = OrderedDict()
+    log_dir_for_feedback = log_dir or get_settings().log_dir
 
     def check_limit(limiter: AskLimiter, request: Request) -> None:
         client = request.client.host if request.client else "unknown"
@@ -176,6 +227,15 @@ def create_app(
 
     def limit_transcribe(request: Request) -> None:
         check_limit(stt_limiter, request)
+
+    def limit_sources(request: Request) -> None:
+        check_limit(source_limiter, request)
+
+    def limit_speak(request: Request) -> None:
+        check_limit(tts_limiter, request)
+
+    def limit_feedback(request: Request) -> None:
+        check_limit(feedback_limit, request)
 
     def heard_question(
         state: AppState, audio: UploadFile, language: VoiceLanguage
@@ -329,21 +389,38 @@ def create_app(
         if len(q) > app_settings.max_question_length:
             msg = f"Question exceeds maximum length of {app_settings.max_question_length} chars."
             raise HTTPException(status_code=422, detail=msg)
+        follow_up = (
+            FollowUp(body.follow_up.question, body.follow_up.scheme)
+            if body.follow_up and (body.follow_up.question or body.follow_up.scheme)
+            else None
+        )
         # Plain `def`: model inference blocks, so FastAPI runs this in its threadpool.
-        answer = state.service.answer(body.question)
+        answer = _ask_service(state.service, body.question, body.voice_mode, follow_up)
         state.audit.record(request.state.request_id, answer)
-        return AskResponse.from_answer(answer, state.titles, state.doc_dates)
+        response = AskResponse.from_answer(answer, state.titles, state.doc_dates)
+        if body.voice_mode:
+            response.confirmation_text = _voice_confirmation(answer)
+            response.needs_confirmation = response.confirmation_text is not None
+        return response
 
-    @app.post("/ask/sources")
+    @app.post("/ask/sources", dependencies=[Depends(limit_sources)])
     def ask_sources(body: AskRequest, state: StateDep) -> AskSourcesResponse:
-        """Fast sources endpoint: surface official scheme documents in ~300ms."""
+        """The pages a question matches, in well under a second and with no LLM call, shown
+        while the answer is written. Searches exactly what /ask will search (cleaned query,
+        aliases, follow-up scheme), and /ask then reuses this result instead of searching
+        again."""
         started = time.perf_counter()
-        retriever = getattr(state.service, "retriever", None)
-        if retriever is None and hasattr(state.service, "_service"):
-            retriever = getattr(state.service._service, "retriever", None)
-        if retriever is None or not hasattr(retriever, "retrieve"):
-            raise HTTPException(status_code=503, detail="Retriever not available")
-        retrieval = retriever.retrieve(body.question)
+        follow_up = (
+            FollowUp(body.follow_up.question, body.follow_up.scheme) if body.follow_up else None
+        )
+        sources = getattr(state.service, "sources", None)
+        if sources is not None:
+            retrieval = sources(body.question, follow_up)
+        else:
+            retriever = getattr(state.service, "retriever", None)
+            if retriever is None or not hasattr(retriever, "retrieve"):
+                raise HTTPException(status_code=503, detail="Retriever not available")
+            retrieval = retriever.retrieve(body.question)
         total_ms = (time.perf_counter() - started) * 1000
         timings = {"retrieval": round(total_ms, 1), "total": round(total_ms, 1)}
         passages = [
@@ -376,32 +453,13 @@ def create_app(
         response = AskResponse.from_answer(answer, state.titles, state.doc_dates)
         response.timings_ms["stt"] = round(stt_ms, 1)
 
-        # Step 7: Gnani-centred voice uncertainty confirmation
-        # Triggers when retrieval confidence falls in [0.30, 0.40] band
-        # OR when STT confidence is low (< 0.60, if provided by API).
-        # Per instruction, the "under 3 words" rule is explicitly dropped.
-        confirm_text: str | None = None
-        is_uncertain_score = 0.30 <= answer.confidence <= 0.40
-        is_low_stt = stt_conf is not None and stt_conf < 0.60
-        if is_uncertain_score or is_low_stt:
-            target_scheme: str | None = None
-            if getattr(answer, "candidate_schemes", None):
-                target_scheme = answer.candidate_schemes[0]
-            elif getattr(answer, "passages", None) and len(answer.passages) > 0:
-                target_scheme = answer.passages[0].chunk.scheme
-            elif answer.citations:
-                target_scheme = answer.citations[0].scheme
-            elif answer.contact:
-                target_scheme = answer.contact.scheme
-
-            if target_scheme:
-                from schemebot.generate.messages import confirmation_text
-
-                confirm_text = confirmation_text(target_scheme, answer.language)
-                response.needs_confirmation = True
+        # Uncertain match (retrieval in the confirm band, or low speech-to-text confidence):
+        # ask "I heard X, is that right?" before people act on the answer.
+        confirm_text = _voice_confirmation(answer, stt_conf)
+        response.needs_confirmation = confirm_text is not None
 
         return VoiceAskResponse(
-            **response.model_dump(),
+            **response.model_dump(exclude={"confirmation_text"}),
             transcript=question,
             stt_language_code=language_code,
             stt_ms=round(stt_ms, 1),
@@ -409,12 +467,12 @@ def create_app(
             confirmation_text=confirm_text,
         )
 
-    @app.post("/feedback")
+    @app.post("/feedback", dependencies=[Depends(limit_feedback)])
     def feedback(body: FeedbackRequest, state: StateDep) -> FeedbackResponse:
         """Citizen feedback loop: records ratings, status, language, timings.
         Text only saved if opted in.
         """
-        log_dir = PROJECT_ROOT / "logs"
+        log_dir = log_dir_for_feedback
         log_dir.mkdir(parents=True, exist_ok=True)
         fb_path = log_dir / "feedback.jsonl"
         entry: dict[str, object] = {
@@ -449,7 +507,7 @@ def create_app(
             transcript=question, stt_language_code=language_code, stt_ms=round(stt_ms, 1)
         )
 
-    @app.post("/speak", dependencies=[Depends(limit_asks)])
+    @app.post("/speak", dependencies=[Depends(limit_speak)])
     def speak(body: SpeakRequest, state: StateDep, request: Request) -> Response:
         """An answer read aloud by Gnani Timbre, as WAV. Only numbers are logged, never the
         text or the audio."""
@@ -465,10 +523,18 @@ def create_app(
         if settings.tts_spell_amounts:
             text = spell_amounts(text, language_code)
         started = time.perf_counter()
-        try:
-            audio = state.speaker.speak(text, language_code)
-        except TtsError as error:
-            raise HTTPException(status_code=error.status_code, detail=error.message) from error
+        key = (language_code, text)
+        audio = spoken.get(key)
+        if audio is not None:
+            spoken.move_to_end(key)
+        else:
+            try:
+                audio = state.speaker.speak(text, language_code)
+            except TtsError as error:
+                raise HTTPException(status_code=error.status_code, detail=error.message) from error
+            spoken[key] = audio
+            while len(spoken) > SPOKEN_CACHE_SIZE:
+                spoken.popitem(last=False)
         tts_ms = (time.perf_counter() - started) * 1000
         state.audit.record_speech(request.state.request_id, len(text), language_code, tts_ms)
         # Server-Timing is the standard header for this; browsers show it in dev tools.

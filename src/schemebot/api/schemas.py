@@ -22,8 +22,22 @@ Question = Annotated[
 ]
 
 
+class FollowUpIn(BaseModel):
+    """The previous turn, sent back by the page so a follow-up question can be understood.
+    Nothing is stored on the server."""
+
+    question: Annotated[str, StringConstraints(strip_whitespace=True, max_length=500)] | None = None
+    scheme: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)] | None = None
+
+
 class AskRequest(BaseModel):
     question: Question = Field(examples=["PM Kisan ku evlo panam kidaikum?"])
+    voice_mode: bool = Field(
+        default=False, description="Asked by voice: a short answer, easy to read aloud."
+    )
+    follow_up: FollowUpIn | None = Field(
+        default=None, description="The previous question and scheme, for follow-up questions."
+    )
 
 
 def rounded_timings(timings: Mapping[str, float]) -> dict[str, float]:
@@ -119,6 +133,10 @@ class AskResponse(BaseModel):
     )
     contact: ContactOut | None = Field(
         default=None, description="On a refusal about a known scheme: its official contact."
+    )
+    confirmation_text: str | None = Field(
+        default=None,
+        description="Voice only: a short 'I heard X, is that right?' when the match is uncertain.",
     )
 
     @classmethod
@@ -293,18 +311,26 @@ class SourceOut(BaseModel):
 
 
 class FeedbackRequest(BaseModel):
-    status: str = Field(description="The response status (e.g. SUPPORTED, INSUFFICIENT_EVIDENCE).")
+    status: str = Field(
+        max_length=40, description="The response status (e.g. SUPPORTED, INSUFFICIENT_EVIDENCE)."
+    )
     thumbs: Literal["up", "down"] = Field(description="User feedback direction.")
-    language: str = Field(default="ta", description="Citizen/interface language.")
-    timings_ms: dict[str, float] = Field(default_factory=dict, description="Stage timings.")
+    language: str = Field(default="ta", max_length=10, description="Citizen/interface language.")
+    timings_ms: dict[str, float] = Field(
+        default_factory=dict, max_length=20, description="Stage timings."
+    )
     include_text: bool = Field(
         default=False, description="Opt-in consent to record question text and critique."
     )
     question: str | None = Field(
-        default=None, description="Optional question text, only stored if include_text=True."
+        default=None,
+        max_length=500,
+        description="Optional question text, only stored if include_text=True.",
     )
     reason: str | None = Field(
-        default=None, description="Optional critique text, only stored if include_text=True."
+        default=None,
+        max_length=1000,
+        description="Optional critique text, only stored if include_text=True.",
     )
 
 

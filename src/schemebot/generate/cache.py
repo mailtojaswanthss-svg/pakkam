@@ -16,12 +16,12 @@ from collections import OrderedDict
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Protocol, Self
+from typing import Any, Protocol, Self
 
 from pydantic import BaseModel, ConfigDict
 
 from schemebot.config import Settings
-from schemebot.generate.answer import Answer, Citation
+from schemebot.generate.answer import Answer, Citation, FollowUp
 from schemebot.generate.messages import RefusalReason
 from schemebot.ingest.corrections import CORRECTIONS_NAME
 from schemebot.ingest.langid import Language, detect_language
@@ -38,17 +38,36 @@ class AnswerService(Protocol):
     def answer(self, question: str, voice_mode: bool = False) -> Answer: ...
 
 
+def _call_answer(
+    service: AnswerService, question: str, voice_mode: bool, follow_up: FollowUp | None
+) -> Answer:
+    """Pass only the options the caller set, so simple services (and test fakes) that take
+    just the question keep working. Never retries on a TypeError raised inside the service:
+    that would run the whole pipeline, LLM calls included, a second time."""
+    options: dict[str, Any] = {}
+    if voice_mode:
+        options["voice_mode"] = True
+    if follow_up is not None:
+        options["follow_up"] = follow_up
+    return service.answer(question, **options)
+
+
 def normalize_question(question: str) -> str:
     """'PM Kisan  amount?' and 'pm kisan amount' give the same text."""
     text = _SPACES.sub(" ", normalize_for_search(question)).casefold()
     return text.strip().rstrip(_END_PUNCTUATION)
 
 
-def cache_key(question: str, fingerprint: str = "", voice_mode: bool = False) -> str:
+def cache_key(
+    question: str, fingerprint: str = "", voice_mode: bool = False, context: str = ""
+) -> str:
+    """`context`: the previous turn's scheme for a follow-up, since "how do I apply?" means
+    something different after each scheme."""
     language = detect_language(question)
-    if voice_mode:
-        return "\x1f".join((fingerprint, "voice", language, normalize_question(question)))
-    return "\x1f".join((fingerprint, language, normalize_question(question)))
+    parts = [fingerprint, "voice"] if voice_mode else [fingerprint]
+    if context:
+        parts.append("after:" + normalize_question(context))
+    return "\x1f".join((*parts, language, normalize_question(question)))
 
 
 def _digest_files(paths: list[Path], root: Path) -> str:
@@ -122,9 +141,18 @@ class CachedAnswerer:
     def retriever(self) -> object:
         return getattr(self._service, "retriever", None)
 
-    def answer(self, question: str, voice_mode: bool = False) -> Answer:
+    def sources(self, question: str, follow_up: FollowUp | None = None) -> object:
+        sources = getattr(self._service, "sources", None)
+        if sources is None:
+            raise AttributeError("the wrapped service has no sources()")
+        return sources(question, follow_up)
+
+    def answer(
+        self, question: str, voice_mode: bool = False, follow_up: FollowUp | None = None
+    ) -> Answer:
         started = self._clock()
-        key = cache_key(question, self._fingerprint, voice_mode=voice_mode)
+        context = (follow_up.scheme or "") if follow_up else ""
+        key = cache_key(question, self._fingerprint, voice_mode=voice_mode, context=context)
         cached = self._get(key)
         if cached is not None:
             # Replaced question so subtle differences like whitespace match the caller
@@ -132,10 +160,7 @@ class CachedAnswerer:
             timings = {"cache": elapsed, "total": elapsed}
             return replace(cached, question=question, timings_ms=timings)
 
-        try:
-            answer = self._service.answer(question, voice_mode=voice_mode)
-        except TypeError:
-            answer = self._service.answer(question)
+        answer = _call_answer(self._service, question, voice_mode, follow_up)
         if answer.refusal_reason not in _PASSING_FAILURES:
             self._put(key, answer)
         return answer

@@ -37,7 +37,7 @@ def test_post_feedback_default_stores_no_text(client: TestClient, tmp_path: Path
     data = response.json()
     assert data["recorded"] is True
 
-    fb_path = Path("logs/feedback.jsonl")
+    fb_path = tmp_path / "feedback.jsonl"
     assert fb_path.is_file()
     lines = fb_path.read_text(encoding="utf-8").strip().split("\n")
     last_entry = json.loads(lines[-1])
@@ -50,7 +50,7 @@ def test_post_feedback_default_stores_no_text(client: TestClient, tmp_path: Path
     assert last_entry["language"] == "ta"
 
 
-def test_post_feedback_opt_in_stores_text(client: TestClient) -> None:
+def test_post_feedback_opt_in_stores_text(client: TestClient, tmp_path: Path) -> None:
     payload = {
         "question": "CMCHIS annual income limit?",
         "status": "INSUFFICIENT_EVIDENCE",
@@ -64,7 +64,7 @@ def test_post_feedback_opt_in_stores_text(client: TestClient) -> None:
     assert response.status_code == 200
     assert response.json()["recorded"] is True
 
-    fb_path = Path("logs/feedback.jsonl")
+    fb_path = tmp_path / "feedback.jsonl"
     lines = fb_path.read_text(encoding="utf-8").strip().split("\n")
     last_entry = json.loads(lines[-1])
     assert last_entry["include_text"] is True
