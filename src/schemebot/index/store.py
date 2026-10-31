@@ -22,6 +22,14 @@ SPARSE_VECTOR = "sparse"
 UPSERT_BATCH = 64
 
 
+def embedding_text(chunk: Chunk) -> str:
+    """What is embedded for a passage: its scheme's name, then its text. Many passages never
+    name their scheme ("Rs.1,000 a month to women heads of families..."), so a question that
+    names it would otherwise miss them. Only the vectors change; the stored text, what the
+    reranker reads and what users see stay the passage itself."""
+    return normalize_for_search(f"{chunk.scheme}. {chunk.text}")
+
+
 def point_id(chunk_id: str) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, chunk_id))
 
@@ -57,7 +65,7 @@ def build_index(
 
     for start in range(0, len(chunks), UPSERT_BATCH):
         batch = chunks[start : start + UPSERT_BATCH]
-        embeddings = encoder.encode([normalize_for_search(c.text) for c in batch], is_query=False)
+        embeddings = encoder.encode([embedding_text(c) for c in batch], is_query=False)
         client.upsert(
             collection,
             points=[

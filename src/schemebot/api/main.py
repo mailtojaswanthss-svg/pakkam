@@ -30,6 +30,9 @@ from schemebot.api.schemas import (
     FallbackPassage,
     FeedbackRequest,
     FeedbackResponse,
+    ForwardClaimOut,
+    ForwardRequest,
+    ForwardResponse,
     HealthResponse,
     SourceOut,
     SpeakRequest,
@@ -39,7 +42,7 @@ from schemebot.api.schemas import (
 from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer, FollowUp
 from schemebot.ingest.models import SourceDoc
-from schemebot.voice.audio import convert_to_wav16k
+from schemebot.voice.audio import convert_to_wav16k, wav_to_opus
 from schemebot.voice.numbers import phone_numbers_as_digits, spell_amounts
 from schemebot.voice.stt import (
     GNANI_LANGUAGE_CODES,
@@ -181,6 +184,13 @@ def _default_service() -> AnswerService:
     )
 
 
+def _default_forward_llm() -> Any:
+    """The small fast model (the verifier's) that splits forwards and judges each claim."""
+    from schemebot.generate.factory import build_llm
+
+    return build_llm(get_settings(), "verifier")
+
+
 def _default_transcriber() -> Transcriber | None:
     return build_transcriber(get_settings())
 
@@ -200,6 +210,7 @@ def create_app(
     sources_limiter: AskLimiter | None = None,
     speak_limiter: AskLimiter | None = None,
     feedback_limiter: AskLimiter | None = None,
+    build_forward_llm: Callable[[], Any] = _default_forward_llm,
 ) -> FastAPI:
     ask_limiter = limiter or _default_limiter()
     # Its own counter, so a voice question (/transcribe, then /ask) counts once on each.
@@ -297,6 +308,7 @@ def create_app(
             build_tts(),
             doc_dates,
         )
+        app.state.forward_llm = build_forward_llm()
         logger.info("models loaded, ready")
         yield
 
@@ -348,6 +360,7 @@ def create_app(
         app_settings = get_settings()
         from schemebot.generate.budget import shared_llm_budget
         from schemebot.generate.factory import model_for
+        from schemebot.generate.llm import LAST_ERRORS
 
         budget = shared_llm_budget(
             app_settings.data_dir / "llm-calls.json",
@@ -378,6 +391,7 @@ def create_app(
             gnani_voice_ready=gnani_ok,
             preload_status=preload,
             quota=quota_stats,
+            llm_errors=dict(LAST_ERRORS),
         )
 
     @app.post("/ask", dependencies=[Depends(limit_asks)])
@@ -467,6 +481,37 @@ def create_app(
             confirmation_text=confirm_text,
         )
 
+    @app.post("/check-forward", dependencies=[Depends(limit_asks)])
+    def check_forward(body: ForwardRequest, state: StateDep, request: Request) -> ForwardResponse:
+        """'Is this forward real?': each claim in a forwarded message, checked against the
+        official documents with a cited answer. Like /ask, the message text is not logged."""
+        from schemebot.generate.forward import ForwardChecker
+        from schemebot.generate.llm import LlmUnavailableError
+
+        try:
+            result = ForwardChecker(state.service, request.app.state.forward_llm).check(
+                body.message
+            )
+        except LlmUnavailableError as error:
+            raise HTTPException(
+                status_code=503, detail="Pakkam is busy right now. Try again in a minute."
+            ) from error
+        for claim in result.claims:
+            state.audit.record(request.state.request_id, claim.answer)
+        return ForwardResponse(
+            overall=result.overall,
+            claims=[
+                ForwardClaimOut(
+                    claim=c.claim,
+                    question=c.question,
+                    verdict=c.verdict,
+                    explanation=c.explanation,
+                    answer=AskResponse.from_answer(c.answer, state.titles, state.doc_dates),
+                )
+                for c in result.claims
+            ],
+        )
+
     @app.post("/feedback", dependencies=[Depends(limit_feedback)])
     def feedback(body: FeedbackRequest, state: StateDep) -> FeedbackResponse:
         """Citizen feedback loop: records ratings, status, language, timings.
@@ -540,6 +585,11 @@ def create_app(
         state.audit.record_speech(request.state.request_id, len(text), language_code, tts_ms)
         # Server-Timing is the standard header for this; browsers show it in dev tools.
         headers = {"Cache-Control": "no-store", "Server-Timing": f"tts;dur={tts_ms:.1f}"}
+        # Pages that can play Ogg/Opus ask for it: about 10x smaller than WAV on a slow phone.
+        if "audio/ogg" in request.headers.get("accept", ""):
+            opus = wav_to_opus(audio)
+            if opus is not None:
+                return Response(content=opus, media_type="audio/ogg", headers=headers)
         return Response(content=audio, media_type="audio/wav", headers=headers)
 
     @app.get("/sources")

@@ -299,6 +299,10 @@ class HealthResponse(BaseModel):
     gnani_voice_ready: bool = False
     preload_status: Literal["warmed", "pending", "failed"] = "warmed"
     quota: dict[str, Any] | None = None
+    llm_errors: dict[str, dict[str, str]] = Field(
+        default_factory=dict,
+        description="Last failure per LLM model (time and the API's message; never a key).",
+    )
 
 
 class SourceOut(BaseModel):
@@ -337,3 +341,22 @@ class FeedbackRequest(BaseModel):
 class FeedbackResponse(BaseModel):
     recorded: bool = Field(default=True, description="Whether feedback was persisted.")
     message: str = Field(default="Feedback recorded. Thank you for improving Pakkam.")
+
+
+class ForwardRequest(BaseModel):
+    message: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=10, max_length=1500)
+    ] = Field(description="The forwarded message to check, as received.")
+
+
+class ForwardClaimOut(BaseModel):
+    claim: str = Field(description="One checkable claim from the forward.")
+    question: str = Field(description="The claim asked as a question of the documents.")
+    verdict: Literal["supported", "contradicted", "not_in_documents"]
+    explanation: str = Field(description="One sentence quoting the official rule or amount.")
+    answer: AskResponse = Field(description="The cited official answer the verdict rests on.")
+
+
+class ForwardResponse(BaseModel):
+    overall: Literal["looks_right", "partly_wrong", "wrong", "not_in_documents", "no_claims"]
+    claims: list[ForwardClaimOut]
