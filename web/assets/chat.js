@@ -726,7 +726,8 @@
         // host is there but the answer server behind it is not reachable.
         // 429: the server says whether to wait a minute or come back tomorrow.
         if (error.status === 429) message = error.detail || TEXT.tooMany;
-        else if ([404, 405, 502, 504].includes(error.status) && !error.detail) message = TEXT.offline;
+        // 520-530: Cloudflare's tunnel is up on their side but the laptop behind it is not.
+        else if (([404, 405, 502, 504].includes(error.status) || (error.status >= 520 && error.status <= 530)) && !error.detail) message = TEXT.offline;
         else if (error.detail && VOICE_ERRORS.has(error.status)) message = error.detail;
         else message = TEXT.server;
       }
