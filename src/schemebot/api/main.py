@@ -39,7 +39,7 @@ from schemebot.api.schemas import (
 from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer, FollowUp
 from schemebot.ingest.models import SourceDoc
-from schemebot.voice.audio import convert_to_wav16k
+from schemebot.voice.audio import convert_to_wav16k, wav_to_opus
 from schemebot.voice.numbers import phone_numbers_as_digits, spell_amounts
 from schemebot.voice.stt import (
     GNANI_LANGUAGE_CODES,
@@ -542,6 +542,11 @@ def create_app(
         state.audit.record_speech(request.state.request_id, len(text), language_code, tts_ms)
         # Server-Timing is the standard header for this; browsers show it in dev tools.
         headers = {"Cache-Control": "no-store", "Server-Timing": f"tts;dur={tts_ms:.1f}"}
+        # Pages that can play Ogg/Opus ask for it: about 10x smaller than WAV on a slow phone.
+        if "audio/ogg" in request.headers.get("accept", ""):
+            opus = wav_to_opus(audio)
+            if opus is not None:
+                return Response(content=opus, media_type="audio/ogg", headers=headers)
         return Response(content=audio, media_type="audio/wav", headers=headers)
 
     @app.get("/sources")

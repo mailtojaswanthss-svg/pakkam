@@ -106,3 +106,39 @@ def convert_to_wav16k(
         raise SttError(msg, 400)
 
     return converted_wav
+
+
+OPUS_BITRATE = "24k"
+"""Speech at 24 kb/s Opus: about a tenth of the 24 kHz WAV Timbre returns."""
+
+
+def wav_to_opus(wav_bytes: bytes) -> bytes | None:
+    """The same speech as Ogg/Opus, much smaller for slow phone connections. None when
+    ffmpeg is missing or fails, so the caller can send the WAV instead."""
+    ffmpeg_bin = shutil.which("ffmpeg")
+    if not ffmpeg_bin or not wav_bytes:
+        return None
+    proc = subprocess.run(
+        [
+            ffmpeg_bin,
+            "-loglevel",
+            "error",
+            "-f",
+            "wav",
+            "-i",
+            "pipe:0",
+            "-c:a",
+            "libopus",
+            "-b:a",
+            OPUS_BITRATE,
+            "-application",
+            "voip",
+            "-f",
+            "ogg",
+            "pipe:1",
+        ],
+        input=wav_bytes,
+        capture_output=True,
+        check=False,
+    )
+    return proc.stdout if proc.returncode == 0 and proc.stdout else None
