@@ -18,6 +18,12 @@ git checkout main
 git pull origin main
 
 Write-Host "2/4 Starting the backend (loading models takes about a minute)..." -ForegroundColor Cyan
+# An old backend still holds the search index (Qdrant allows one process), and an old
+# tunnel points at it; stop both so the new ones start cleanly.
+$old = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
+foreach ($c in $old) { Stop-Process -Id $c.OwningProcess -Force -ErrorAction SilentlyContinue }
+Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force
+if ($old) { Start-Sleep -Seconds 3 }
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "uv run --extra ingest --extra index --extra generate --extra gemini --extra api fastapi run"
 $ready = $false
 for ($i = 0; $i -lt 60; $i++) {
