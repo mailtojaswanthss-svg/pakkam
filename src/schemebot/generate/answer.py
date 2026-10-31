@@ -20,6 +20,7 @@ from schemebot.generate.guardrails import (
     RejectedSentence,
     check_answer,
     numbers_in,
+    written_in_script_of,
 )
 from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError, parse_reply
 from schemebot.generate.messages import (
@@ -31,6 +32,7 @@ from schemebot.generate.messages import (
     refusal_text,
 )
 from schemebot.generate.prompt import (
+    ANSWER_LANGUAGE,
     ANSWER_SCHEMA,
     SYSTEM_PROMPT,
     VOICE_SYSTEM_PROMPT,
@@ -44,6 +46,15 @@ from schemebot.retrieve.retriever import RetrievalResult, RetrievedPassage, Retr
 from schemebot.text import clean_query
 
 logger = logging.getLogger(__name__)
+
+WRONG_SCRIPT_NOTE = (
+    "Your last answer was not in the language asked for. Write every sentence in {}, "
+    "translating the facts from the passages."
+)
+
+
+def _in_asked_script(language: Language, reply: AnswerReply) -> bool:
+    return written_in_script_of(language, " ".join(s.text for s in reply.sentences))
 
 
 @dataclass(frozen=True)
@@ -468,19 +479,21 @@ class Answerer:
         misread = [_misread_in(passage.chunk, self._misread) for passage in passages]
         generation_started = time.perf_counter()
         try:
-            reply = parse_reply(
-                AnswerReply,
-                self._llm.complete_json(
-                    prompt_to_use,
-                    build_user_message(
-                        question,
-                        language,
-                        passages,
-                        follow_up.question if follow_up else None,
-                    ),
-                    ANSWER_SCHEMA,
-                ),
+            user_message = build_user_message(
+                question, language, passages, follow_up.question if follow_up else None
             )
+            reply = parse_reply(
+                AnswerReply, self._llm.complete_json(prompt_to_use, user_message, ANSWER_SCHEMA)
+            )
+            if reply.answerable and not _in_asked_script(language, reply):
+                # Light models sometimes copy a passage in another language; ask once more.
+                logger.info("answer came back in the wrong script for %s; retrying", language)
+                retry = f"{user_message}\n\n{WRONG_SCRIPT_NOTE.format(ANSWER_LANGUAGE[language])}"
+                reply = parse_reply(
+                    AnswerReply, self._llm.complete_json(prompt_to_use, retry, ANSWER_SCHEMA)
+                )
+                if reply.answerable and not _in_asked_script(language, reply):
+                    return refuse("unsupported")
             timings["llm_answer"] = (time.perf_counter() - generation_started) * 1000
             drafts = [DraftSentence(s.text.strip(), s.sources) for s in reply.sentences]
             if not reply.answerable or not drafts:
