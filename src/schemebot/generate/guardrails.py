@@ -57,6 +57,28 @@ _PERIODS = {
 }
 
 
+def _script_counts(text: str) -> tuple[int, int, int]:
+    """Letters in Tamil script, Devanagari and Latin."""
+    tamil = sum(1 for ch in text if "\u0b80" <= ch <= "\u0bff")
+    devanagari = sum(1 for ch in text if "\u0900" <= ch <= "\u097f")
+    latin = sum(1 for ch in text if ch.isascii() and ch.isalpha())
+    return tamil, devanagari, latin
+
+
+def written_in_script_of(language: str, text: str) -> bool:
+    """False when the answer is plainly in another script than the asked language, e.g. a
+    Hindi passage copied as the answer to a Tamil question. Scheme names in English letters
+    are fine inside a Tamil or Hindi answer."""
+    tamil, devanagari, latin = _script_counts(text)
+    if language == "ta":
+        return tamil > devanagari and tamil > 0
+    if language == "hi":
+        return devanagari > tamil and devanagari > 0
+    if language in ("en", "ta-Latn"):
+        return latin > tamil + devanagari
+    return True
+
+
 def periods_in(text: str) -> set[str]:
     return {name for name, pattern in _PERIODS.items() if pattern.search(text)}
 
