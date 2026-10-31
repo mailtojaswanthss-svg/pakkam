@@ -1,37 +1,325 @@
 [
   {
-    "card_id": "placeholder_kmut_amount_ta",
-    "scheme": "Kalaignar Magalir Urimai Thittam",
-    "field": "amount",
-    "language": "ta",
-    "question_examples": [
-      "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் எவ்வளவு உதவித்தொகை வழங்கப்படுகிறது?",
-      "KMUT scheme la monthly evlo tharanga?",
-      "மகளிர் உரிமை தொகை எவ்வளவு?"
-    ],
-    "answer_text": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் தகுதியான குடும்பத் தலைவிகளுக்கு மாதந்தோறும் ₹1,000 மகளிர் உரிமைத் தொகையாக வழங்கப்படுகிறது.",
-    "source_document": "kmut-go15-2023-ta",
-    "source_page": 2,
-    "document_date": "2023-07-10",
-    "author": "AI draft",
-    "verified_by": null,
-    "verified_on": null
-  },
-  {
-    "card_id": "placeholder_pmkisan_amount_en",
+    "card_id": "pmkisan_amount_en",
     "scheme": "PM-KISAN",
     "field": "amount",
     "language": "en",
     "question_examples": [
-      "How much financial assistance is provided per year under PM-KISAN?",
-      "What is the amount given per year under PM Kisan?",
-      "PM Kisan annual benefit amount"
+      "How much money does PM-KISAN give per year?",
+      "PM Kisan amount per year",
+      "How many instalments in PM-KISAN?"
     ],
-    "answer_text": "Under PM-KISAN, eligible landholding farmer families receive financial benefit of ₹6,000 per year payable in three equal four-monthly installments of ₹2,000 each.",
-    "source_document": "pmkisan-guidelines-2020-en",
-    "source_page": 4,
-    "document_date": "2020-03-29",
-    "author": "AI draft",
+    "answer_text": "Under PM-KISAN, eligible farmer families get Rs.6,000 a year, paid in three equal instalments of Rs.2,000 into their Aadhaar-seeded bank account.",
+    "source_document": "pmkisan-ekyc-note-2023-en",
+    "source_page": 1,
+    "document_date": "2023",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "pmkisan_amount_ta",
+    "scheme": "PM-KISAN",
+    "field": "amount",
+    "language": "ta",
+    "question_examples": [
+      "பிஎம் கிசான் திட்டத்தில் ஆண்டுக்கு எவ்வளவு பணம் கிடைக்கும்?",
+      "PM kisan la varushathuku evlo panam kidaikum",
+      "pm kisan evlo panam"
+    ],
+    "answer_text": "பிஎம் கிசான் திட்டத்தில் தகுதியான விவசாயக் குடும்பங்களுக்கு ஆண்டுக்கு ரூ.6,000, மூன்று சம தவணைகளாக ரூ.2,000 வீதம், ஆதார் இணைக்கப்பட்ட வங்கிக் கணக்கில் வழங்கப்படுகிறது.",
+    "source_document": "pmkisan-ekyc-note-2023-en",
+    "source_page": 1,
+    "document_date": "2023",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "pmkisan_ekyc_en",
+    "scheme": "PM-KISAN",
+    "field": "how_to_apply",
+    "language": "en",
+    "question_examples": [
+      "How do I do e-KYC for PM-KISAN?",
+      "PM-KISAN eKYC modes",
+      "ways to complete PM Kisan eKYC"
+    ],
+    "answer_text": "PM-KISAN e-KYC can be done in three ways: OTP on the Aadhaar-linked mobile, biometric at a Common Service Centre, or face authentication.",
+    "source_document": "pmkisan-ekyc-note-2023-en",
+    "source_page": 1,
+    "document_date": "2023",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "pmkisan_ekyc_ta",
+    "scheme": "PM-KISAN",
+    "field": "how_to_apply",
+    "language": "ta",
+    "question_examples": [
+      "பிஎம் கிசான் இ-கேஒய்சி எப்படி செய்வது?",
+      "pm kisan ekyc eppadi pannuradhu",
+      "PM Kisan e-KYC vazhigal"
+    ],
+    "answer_text": "பிஎம் கிசான் இ-கேஒய்சியை மூன்று வழிகளில் செய்யலாம்: ஆதாருடன் இணைந்த கைபேசிக்கு வரும் OTP, பொது சேவை மையத்தில் கைரேகை, அல்லது முக அங்கீகாரம்.",
+    "source_document": "pmkisan-ekyc-note-2023-en",
+    "source_page": 1,
+    "document_date": "2023",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "apy_pension_en",
+    "scheme": "Atal Pension Yojana",
+    "field": "amount",
+    "language": "en",
+    "question_examples": [
+      "How much pension does Atal Pension Yojana give?",
+      "APY pension amount after 60",
+      "Atal pension monthly pension"
+    ],
+    "answer_text": "Atal Pension Yojana gives a guaranteed minimum pension of Rs.1,000, 2,000, 3,000, 4,000 or 5,000 a month after the age of 60, depending on your contribution.",
+    "source_document": "apy-brochure-en",
+    "source_page": 1,
+    "document_date": "unknown",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "apy_pension_ta",
+    "scheme": "Atal Pension Yojana",
+    "field": "amount",
+    "language": "ta",
+    "question_examples": [
+      "அடல் பென்ஷன் யோஜனாவில் எவ்வளவு ஓய்வூதியம் கிடைக்கும்?",
+      "atal pension la evlo pension kidaikum",
+      "APY pension evlo"
+    ],
+    "answer_text": "அடல் பென்ஷன் யோஜனாவில் 60 வயதுக்குப் பிறகு, நீங்கள் செலுத்தும் தொகையைப் பொறுத்து, மாதம் ரூ.1,000, 2,000, 3,000, 4,000 அல்லது 5,000 உத்தரவாத ஓய்வூதியம் கிடைக்கும்.",
+    "source_document": "apy-brochure-en",
+    "source_page": 1,
+    "document_date": "unknown",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "apy_age_en",
+    "scheme": "Atal Pension Yojana",
+    "field": "who_qualifies",
+    "language": "en",
+    "question_examples": [
+      "What is the age limit for Atal Pension Yojana?",
+      "Who can join APY?",
+      "Atal pension age"
+    ],
+    "answer_text": "You can join Atal Pension Yojana if you are between 18 and 40 years old. From 1 October 2022, income tax payers cannot join.",
+    "source_document": "apy-brochure-en",
+    "source_page": 1,
+    "document_date": "unknown",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "apy_age_ta",
+    "scheme": "Atal Pension Yojana",
+    "field": "who_qualifies",
+    "language": "ta",
+    "question_examples": [
+      "அடல் பென்ஷன் யோஜனாவில் சேர வயது வரம்பு என்ன?",
+      "atal pension la join panna age enna",
+      "APY age limit enna"
+    ],
+    "answer_text": "18 முதல் 40 வயது வரை உள்ளவர்கள் அடல் பென்ஷன் யோஜனாவில் சேரலாம். 1 அக்டோபர் 2022 முதல் வருமான வரி செலுத்துபவர்கள் சேர முடியாது.",
+    "source_document": "apy-brochure-en",
+    "source_page": 1,
+    "document_date": "unknown",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "kmut_amount_en",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "amount",
+    "language": "en",
+    "question_examples": [
+      "How much money does Magalir Urimai Thogai give?",
+      "Kalaignar Magalir Urimai Thittam amount",
+      "KMUT monthly amount"
+    ],
+    "answer_text": "Under Kalaignar Magalir Urimai Thittam, eligible women heads of families get Rs.1,000 a month.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 9,
+    "document_date": "2023-07-10",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "kmut_amount_ta",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "amount",
+    "language": "ta",
+    "question_examples": [
+      "மகளிர் உரிமைத் தொகை எவ்வளவு?",
+      "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் எவ்வளவு உதவித்தொகை வழங்கப்படுகிறது?",
+      "magalir urimai thogai evlo"
+    ],
+    "answer_text": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் தகுதியான குடும்பத் தலைவிகளுக்கு மாதம் ரூ.1,000 வழங்கப்படுகிறது.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 9,
+    "document_date": "2023-07-10",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "kmut_income_en",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "who_qualifies",
+    "language": "en",
+    "question_examples": [
+      "What is the income limit for Magalir Urimai Thogai?",
+      "KMUT income limit",
+      "Magalir urimai annual income"
+    ],
+    "answer_text": "To get Kalaignar Magalir Urimai Thittam, the family's annual income must be below Rs.2.5 lakh.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 10,
+    "document_date": "2023-07-10",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "kmut_income_ta",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "who_qualifies",
+    "language": "ta",
+    "question_examples": [
+      "மகளிர் உரிமைத் தொகைக்கு வருமான வரம்பு என்ன?",
+      "மகளிர் உரிமைத் திட்டம் ஆண்டு வருமானம் எவ்வளவு இருக்க வேண்டும்?",
+      "magalir urimai income limit evlo"
+    ],
+    "answer_text": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன்பெற குடும்பத்தின் ஆண்டு வருமானம் ரூ.2.5 இலட்சத்திற்குக் கீழ் இருக்க வேண்டும்.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 10,
+    "document_date": "2023-07-10",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "pudhumai_amount_en",
+    "scheme": "Pudhumai Penn Scheme",
+    "field": "amount",
+    "language": "en",
+    "question_examples": [
+      "How much does Pudhumai Penn scheme give?",
+      "Pudhumai Penn monthly amount",
+      "girl students 1000 scheme"
+    ],
+    "answer_text": "Under the Pudhumai Penn scheme, girl students who studied in government schools from class 6 to 12 get Rs.1,000 a month when they join higher education.",
+    "source_document": "tn-swwe-policy-note-2024-en",
+    "source_page": 18,
+    "document_date": "2024",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "pudhumai_amount_ta",
+    "scheme": "Pudhumai Penn Scheme",
+    "field": "amount",
+    "language": "ta",
+    "question_examples": [
+      "புதுமைப் பெண் திட்டத்தில் மாதம் எவ்வளவு உதவித்தொகை?",
+      "pudhumai penn scheme evlo tharanga",
+      "college ponnungalukku 1000 scheme"
+    ],
+    "answer_text": "புதுமைப் பெண் திட்டத்தில், 6 முதல் 12 ஆம் வகுப்பு வரை அரசுப் பள்ளியில் படித்து உயர்கல்வியில் சேரும் மாணவிகளுக்கு மாதம் ரூ.1,000 வழங்கப்படுகிறது.",
+    "source_document": "tn-swwe-policy-note-2024-en",
+    "source_page": 18,
+    "document_date": "2024",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "ujjwala_docs_en",
+    "scheme": "Pradhan Mantri Ujjwala Yojana",
+    "field": "documents",
+    "language": "en",
+    "question_examples": [
+      "Which documents are needed for an Ujjwala gas connection?",
+      "Ujjwala documents required",
+      "PMUY documents"
+    ],
+    "answer_text": "For an Ujjwala connection you need the KYC form, a ration card or state government document showing your family (migrants can give a self-declaration), Aadhaar of the applicant and of all adults in the family, and a bank account number with IFSC.",
+    "source_document": "pmuy-sop-2023-en",
+    "source_page": 1,
+    "document_date": "2023-10-10",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "ujjwala_docs_ta",
+    "scheme": "Pradhan Mantri Ujjwala Yojana",
+    "field": "documents",
+    "language": "ta",
+    "question_examples": [
+      "உஜ்வலா எரிவாயு இணைப்புக்கு என்ன ஆவணங்கள் தேவை?",
+      "ujjwala gas connection ku enna documents venum",
+      "ujjwala documents enna"
+    ],
+    "answer_text": "உஜ்வலா இணைப்புக்கு KYC படிவம், குடும்ப உறுப்பினர்களைக் காட்டும் குடும்ப அட்டை அல்லது மாநில அரசு ஆவணம் (இடம்பெயர்ந்தவர்கள் சுய அறிவிப்பு தரலாம்), விண்ணப்பதாரர் மற்றும் குடும்பத்தின் அனைத்து வயது வந்தோரின் ஆதார், வங்கிக் கணக்கு எண் மற்றும் IFSC தேவை.",
+    "source_document": "pmuy-sop-2023-en",
+    "source_page": 1,
+    "document_date": "2023-10-10",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "breakfast_classes_en",
+    "scheme": "Chief Minister's Breakfast Scheme",
+    "field": "who_qualifies",
+    "language": "en",
+    "question_examples": [
+      "Which classes get the Chief Minister's Breakfast Scheme?",
+      "breakfast scheme which students",
+      "CM breakfast scheme classes"
+    ],
+    "answer_text": "The Chief Minister's Breakfast Scheme gives breakfast to students of classes 1 to 5 in government primary schools.",
+    "source_document": "cmbfs-go43-2022-ta",
+    "source_page": 14,
+    "document_date": "2022-07-27",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "breakfast_classes_ta",
+    "scheme": "Chief Minister's Breakfast Scheme",
+    "field": "who_qualifies",
+    "language": "ta",
+    "question_examples": [
+      "முதலமைச்சரின் காலை உணவுத் திட்டம் எந்த வகுப்பு மாணவர்களுக்கு?",
+      "breakfast scheme endha class pasangalukku",
+      "kaalai unavu thittam endha class"
+    ],
+    "answer_text": "முதலமைச்சரின் காலை உணவுத் திட்டத்தில் அரசு தொடக்கப் பள்ளிகளில் 1 முதல் 5 ஆம் வகுப்பு வரை படிக்கும் மாணவர்களுக்கு காலை உணவு வழங்கப்படுகிறது.",
+    "source_document": "cmbfs-go43-2022-ta",
+    "source_page": 14,
+    "document_date": "2022-07-27",
+    "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
     "verified_by": null,
     "verified_on": null
   }
