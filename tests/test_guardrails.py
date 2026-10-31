@@ -131,3 +131,10 @@ def test_sentences_the_verifier_skips_count_as_unsupported(missing: set[int]) ->
     result = check_answer(sentences, PASSAGES, FakeVerifier(supported=missing))
 
     assert result.kept == []
+
+
+def test_tamil_ilatcham_spelling_counts_as_lakh() -> None:
+    from schemebot.generate.guardrails import numbers_in
+
+    assert "250000" in numbers_in("ஆண்டு வருமானம் ரூ.2.5 இலட்சத்திற்குக் கீழ்")
+    assert "250000" in numbers_in("Rs.2,50,000")

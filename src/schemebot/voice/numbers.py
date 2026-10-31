@@ -270,6 +270,7 @@ def spell_amounts(text: str, language_code: str) -> str:
 
 
 _PHONE = re.compile(r"(?<![\d.,₹/])(\d[\d -]{3,}\d)(?![\d,.]?\d)")
+_YEAR_SPAN = re.compile(r"(19|20)\d{2}[ -]+\d{2,4}")
 _MONEY_BEFORE = re.compile(r"(rs\.?|₹|ரூ\.?|रु\.?|inr)\s*$", re.IGNORECASE)
 
 
@@ -282,6 +283,8 @@ def phone_numbers_as_digits(text: str) -> str:
         number = match.group(1)
         digits = re.sub(r"\D", "", number)
         if len(digits) < 5 or _MONEY_BEFORE.search(text[: match.start()]):
+            return number
+        if _YEAR_SPAN.fullmatch(number.strip()):  # "2024-25", "2023 2024": a year, not a phone
             return number
         groups = [g for g in re.split(r"[ -]+", number.strip()) if g]
         return ", ".join(" ".join(group) for group in groups)

@@ -61,5 +61,23 @@
     "confirmed_by": null,
     "confirmed_on": null,
     "note": "Hostel food subsidy for school students; '7-' is OCR for '/-'. pdf_shows is taken from the English note (Rs.1,400); printed page not checked yet."
+  },
+  {
+    "doc_id": "kmut-go15-2023-ta",
+    "page": 10,
+    "ocr_reads": "ரூ.25 இலட்சத்திற்குக் கீழ்",
+    "pdf_shows": "ரூ.2.5 இலட்சத்திற்குக் கீழ்",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Annual family income limit for eligibility. OCR dropped the decimal point; the scheme limit is Rs.2.5 lakh. Found in a live answer on 31 Oct 2026 that said Rs.25 lakh. Printed page not checked by a person yet."
+  },
+  {
+    "doc_id": "kmut-go15-2023-ta",
+    "page": 11,
+    "ocr_reads": "ரூபாய் 25 இலட்சத்திற்குமேல்",
+    "pdf_shows": "ரூபாய் 2.5 இலட்சத்திற்குமேல்",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Income above which families are not eligible (same misread as page 10). Printed page not checked by a person yet."
   }
 ]
