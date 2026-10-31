@@ -36,3 +36,25 @@ def test_passages_are_encoded_as_passages_not_queries(corpus: list[Chunk]) -> No
 def test_point_ids_are_stable_and_unique() -> None:
     assert point_id("kmut-go15-2023-ta-p9-027") == point_id("kmut-go15-2023-ta-p9-027")
     assert point_id("a-p1-000") != point_id("a-p1-001")
+
+
+def test_passages_are_embedded_with_their_scheme_name() -> None:
+    from datetime import date
+
+    from schemebot.index.store import embedding_text
+    from schemebot.ingest.models import Chunk
+
+    chunk = Chunk(
+        chunk_id="c1",
+        doc_id="d",
+        scheme="Kalaignar Magalir Urimai Thittam",
+        source_url="https://example.org/x.pdf",
+        page_start=9,
+        page_end=9,
+        section=None,
+        language="ta",
+        doc_date=date(2023, 7, 10),
+        text="மாதம் ரூ.1,000",
+        extraction="ocr",
+    )
+    assert embedding_text(chunk).startswith("Kalaignar Magalir Urimai Thittam.")
