@@ -6,6 +6,7 @@ model provider can be swapped without touching it.
 
 import json
 import logging
+import time
 from typing import Any, Protocol, TypeVar
 
 from pydantic import BaseModel, ValidationError
@@ -24,6 +25,24 @@ FALLBACK_BETA = "server-side-fallback-2026-07-01"
 FALLBACK_MODELS = frozenset(
     {"claude-fable-5-1", "claude-opus-5-5", "claude-opus-5", "claude-sonnet-5-5"}
 )
+
+
+LAST_ERRORS: dict[str, dict[str, str]] = {}
+"""The most recent failure per model, shown by GET /health so a failing provider can be
+diagnosed without the server's console. Holds the API's error message, never the key."""
+
+PRIMARY_RETRY_AFTER_S = 120.0
+"""After the primary provider fails, go straight to the secondary for this long."""
+
+
+def record_error(model: str, error: Exception) -> None:
+    cause = error.__cause__
+    detail = getattr(cause, "message", None) or (str(cause) if cause else "")
+    message = f"{error}: {detail}" if detail and str(detail) not in str(error) else str(error)
+    LAST_ERRORS[model] = {
+        "time": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "error": message[:300],
+    }
 
 
 class LlmDeclinedError(RuntimeError):
@@ -97,6 +116,13 @@ class ClaudeJsonLlm:
         return has_credentials(self._client)
 
     def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
+        try:
+            return self._complete_json(system, user, schema)
+        except LlmUnavailableError as error:
+            record_error(self._model, error)
+            raise
+
+    def _complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
         from anthropic.types.beta import BetaMessageParam, BetaOutputConfigParam
 
         # Without credentials the SDK raises a bare TypeError at request time; report it as
@@ -140,7 +166,12 @@ class ClaudeJsonLlm:
                 self._budget.record_429(model=self._model)
             raise LlmUnavailableError("Claude API rate limit reached") from error
         except anthropic.APIStatusError as error:
-            logger.error("Claude API error %s (request %s)", error.status_code, error.request_id)
+            logger.error(
+                "Claude API error %s (request %s): %s",
+                error.status_code,
+                error.request_id,
+                getattr(error, "message", ""),
+            )
             raise LlmUnavailableError(f"Claude API returned {error.status_code}") from error
 
         if response.stop_reason == "refusal":
@@ -176,6 +207,7 @@ class FailoverJsonLlm:
         self._primary = primary
         self._secondary = secondary
         self._fallback_enabled = fallback_enabled
+        self._primary_down_until = 0.0
 
     @property
     def configured(self) -> bool:
@@ -184,11 +216,19 @@ class FailoverJsonLlm:
         )
 
     def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
+        secondary_ready = (
+            self._fallback_enabled and self._secondary is not None and self._secondary.configured
+        )
+        # The primary failed a moment ago: don't make every visitor wait for it to fail again.
+        if secondary_ready and time.monotonic() < self._primary_down_until:
+            assert self._secondary is not None
+            return self._secondary.complete_json(system, user, schema)
         try:
             return self._primary.complete_json(system, user, schema)
         except LlmUnavailableError as primary_err:
             if not self._fallback_enabled:
                 raise
+            self._primary_down_until = time.monotonic() + PRIMARY_RETRY_AFTER_S
             if self._secondary is None or not self._secondary.configured:
                 logger.warning(
                     "Primary LLM failed (%s), secondary not configured; cannot fail over.",
