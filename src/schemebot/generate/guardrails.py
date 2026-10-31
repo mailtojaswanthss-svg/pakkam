@@ -88,6 +88,7 @@ class DraftSentence:
     text: str
     sources: list[int]
     """1-based passage numbers, as the model returned them."""
+    section: str = "other"
 
 
 @dataclass(frozen=True)
@@ -211,7 +212,7 @@ def check_answer(
         if any(sentence_numbers & misread[n - 1] for n in valid):
             rejected.append(RejectedSentence(sentence, "known_ocr_error"))
             continue
-        kept.append(DraftSentence(sentence.text, valid))
+        kept.append(DraftSentence(sentence.text, valid, sentence.section))
 
     if verifier is None or not kept:
         return GuardrailResult(kept, rejected)

@@ -112,7 +112,9 @@ def test_ask_returns_cited_answer(client: TestClient) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["refused"] is False
-    assert body["sentences"] == [{"text": "Citizens aged 18 to 40 can join.", "citations": [1]}]
+    assert body["sentences"] == [
+        {"text": "Citizens aged 18 to 40 can join.", "citations": [1], "section": "other"}
+    ]
     assert body["citations"][0]["doc_id"] == "apy-brochure-en"
     assert body["latency_ms"] == 950.0
     assert response.headers[REQUEST_ID_HEADER]

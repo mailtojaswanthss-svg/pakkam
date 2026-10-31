@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from typing import Any, Literal
 
 from schemebot.generate.contacts import Contact
+from schemebot.generate.discovery import discovery_text, is_discovery, suggest_schemes
 from schemebot.generate.guardrails import (
     DraftSentence,
     RejectedSentence,
@@ -34,6 +35,7 @@ from schemebot.generate.messages import (
 from schemebot.generate.prompt import (
     ANSWER_LANGUAGE,
     ANSWER_SCHEMA,
+    SECTIONS,
     SYSTEM_PROMPT,
     VOICE_SYSTEM_PROMPT,
     AnswerReply,
@@ -51,6 +53,18 @@ WRONG_SCRIPT_NOTE = (
     "Your last answer was not in the language asked for. Write every sentence in {}, "
     "translating the facts from the passages."
 )
+
+
+CARD_SECTION = {
+    "amount": "amount",
+    "who_qualifies": "eligibility",
+    "documents": "documents",
+    "how_to_apply": "apply",
+}
+
+
+def _section(value: str) -> str:
+    return value if value in SECTIONS else "other"
 
 
 def _in_asked_script(language: Language, reply: AnswerReply) -> bool:
@@ -78,6 +92,8 @@ class AnswerSentence:
     text: str
     citations: list[int]
     """Numbers into Answer.citations."""
+    section: str = "other"
+    """amount, eligibility, documents, apply or other (prompt.SECTIONS)."""
 
 
 @dataclass(frozen=True)
@@ -135,7 +151,9 @@ class Answer:
     """On a refusal about a scheme we hold documents for: its official contact."""
     passages: list[RetrievedPassage] = field(default_factory=list)
     """Retrieved passages, populated on fallback when model is unavailable."""
-    path: Literal["rag", "fact_card", "fallback", "semantic_cache", "guardrail"] = "rag"
+    path: Literal["rag", "fact_card", "fallback", "semantic_cache", "guardrail", "discovery"] = (
+        "rag"
+    )
     """The pipeline path that produced this answer."""
     status: Literal[
         "SUPPORTED",
@@ -150,6 +168,9 @@ class Answer:
     """The cleaned, normalized query understood by the system."""
     candidate_schemes: list[str] = field(default_factory=list)
     """Candidate schemes when query is near-threshold or ambiguous."""
+    scheme: str | None = None
+    """The one scheme the answer is about, by its own name (not a policy note's title), for
+    follow-up questions. None when unclear."""
 
 
 def _citation(number: int, passage: RetrievedPassage) -> Citation:
@@ -242,6 +263,25 @@ class Answerer:
         if scheme and not names_scheme and scheme.casefold() not in search_q.casefold():
             search_q = f"{search_q} {scheme}"
         return search_q
+
+    def main_scheme(
+        self, question: str, follow_up: FollowUp | None, answer_text: str, cited: list[str]
+    ) -> str | None:
+        """The scheme an answer is about: named in the question, carried from the previous
+        turn, named in the answer, or the cited document's scheme unless that is a policy
+        note covering many schemes."""
+        if self._alias_matcher is not None:
+            named = self._alias_matcher.match(question)
+            if named is not None:
+                return str(named.canonical)
+        if follow_up is not None and follow_up.scheme:
+            return follow_up.scheme
+        if self._alias_matcher is not None:
+            named = self._alias_matcher.match(answer_text)
+            if named is not None:
+                return str(named.canonical)
+        specific = [s for s in cited if s and "policy note" not in s.lower()]
+        return specific[0] if specific else None
 
     def sources(self, question: str, follow_up: FollowUp | None = None) -> RetrievalResult:
         """Search only (no LLM): what /ask/sources shows while the answer is written. The
@@ -336,6 +376,28 @@ class Answerer:
         cleaned_q = clean_query(question)
         search_q = self.search_query(question, follow_up)
 
+        names_a_scheme = follow_up is not None or (
+            self._alias_matcher is not None and self._alias_matcher.match(cleaned_q) is not None
+        )
+        if is_discovery(cleaned_q, names_a_scheme):
+            timings["total"] = (time.perf_counter() - started) * 1000
+            return Answer(
+                question=question,
+                language=language,
+                text=discovery_text(language),
+                sentences=[],
+                citations=[],
+                refused=False,
+                refusal_reason=None,
+                confidence=0.0,
+                disclaimer=disclaimer(language),
+                timings_ms=timings,
+                path="discovery",
+                status="needs_clarification",
+                understood_query=cleaned_q,
+                candidate_schemes=suggest_schemes(cleaned_q),
+            )
+
         if self._fact_cards is not None:
             card_started = time.perf_counter()
             card, card_score = self._fact_cards.match(cleaned_q)
@@ -355,7 +417,11 @@ class Answerer:
                     language=card.language,
                     ocr_corrected=False,
                 )
-                sentence = AnswerSentence(text=card.answer_text, citations=[1])
+                sentence = AnswerSentence(
+                    text=card.answer_text,
+                    citations=[1],
+                    section=CARD_SECTION.get(card.field, "other"),
+                )
                 return Answer(
                     question=question,
                     language=language,
@@ -370,6 +436,7 @@ class Answerer:
                     contact=contact,
                     path="fact_card",
                     status="SUPPORTED",
+                    scheme=card.scheme,
                     understood_query=cleaned_q,
                 )
 
@@ -495,7 +562,10 @@ class Answerer:
                 if reply.answerable and not _in_asked_script(language, reply):
                     return refuse("unsupported")
             timings["llm_answer"] = (time.perf_counter() - generation_started) * 1000
-            drafts = [DraftSentence(s.text.strip(), s.sources) for s in reply.sentences]
+            drafts = [
+                DraftSentence(s.text.strip(), s.sources, _section(s.section))
+                for s in reply.sentences
+            ]
             if not reply.answerable or not drafts:
                 return refuse("not_in_documents")
 
@@ -527,7 +597,7 @@ class Answerer:
         renumber = {source: new for new, source in enumerate(cited_order, start=1)}
         citations = [_citation(renumber[s], passages[s - 1]) for s in cited_order]
         sentences = [
-            AnswerSentence(s.text, sorted(renumber[source] for source in s.sources))
+            AnswerSentence(s.text, sorted(renumber[source] for source in s.sources), s.section)
             for s in checked.kept
         ]
         text = " ".join(f"{s.text} {''.join(f'[{n}]' for n in s.citations)}" for s in sentences)
@@ -546,4 +616,5 @@ class Answerer:
             timings_ms=timings,
             status="SUPPORTED",
             understood_query=cleaned_q,
+            scheme=self.main_scheme(cleaned_q, follow_up, text, [c.scheme for c in citations]),
         )
