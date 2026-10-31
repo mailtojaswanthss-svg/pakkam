@@ -18,7 +18,7 @@ git checkout main
 git pull origin main
 
 Write-Host "2/4 Starting the backend (loading models takes about a minute)..." -ForegroundColor Cyan
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "uv run --extra index --extra generate --extra gemini --extra api fastapi run"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "uv run --extra ingest --extra index --extra generate --extra gemini --extra api fastapi run"
 $ready = $false
 for ($i = 0; $i -lt 60; $i++) {
     Start-Sleep -Seconds 5
