@@ -105,4 +105,5 @@ def build_answerer(settings: Settings, retriever: Retriever | None = None) -> An
         load_corrections(settings.data_dir / CORRECTIONS_NAME),
         fact_cards=matcher,
         alias_matcher=alias_matcher,
+        rewriter=build_llm(settings, "verifier") if settings.rewrite_unclear_questions else None,
     )

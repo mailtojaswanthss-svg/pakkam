@@ -81,6 +81,25 @@ class FollowUp:
 
 _NAMES_A_SCHEME = re.compile(r"\b(scheme|thittam|yojana|yojna)\b|திட்ட|योजना", re.IGNORECASE)
 
+REWRITE_SYSTEM = """\
+You turn a citizen's question about an Indian government welfare scheme into search queries \
+for official documents. The question may be in Tanglish (Tamil written in English letters), \
+Tamil, Hindi or English; it may misspell the scheme or describe it without naming it \
+("monthly 1000 for college girls"). Return the question rewritten in plain English, the same \
+question in Tamil script, and the official scheme name if you can tell which scheme is meant \
+(an empty string if you are not sure). Do not answer the question and do not add facts."""
+
+REWRITE_SCHEMA: dict[str, object] = {
+    "type": "object",
+    "properties": {
+        "english": {"type": "string"},
+        "tamil": {"type": "string"},
+        "scheme": {"type": "string"},
+    },
+    "required": ["english", "tamil", "scheme"],
+    "additionalProperties": False,
+}
+
 RETRIEVAL_REUSE_S = 120.0
 """How long a search result is kept so /ask can reuse the one /ask/sources just ran."""
 RETRIEVAL_REUSE_MAX = 64
@@ -176,6 +195,7 @@ class Answerer:
         corrections: list[OcrCorrection] | None = None,
         fact_cards: Any | None = None,
         alias_matcher: Any | None = None,
+        rewriter: JsonLlm | None = None,
     ) -> None:
         self._retriever = retriever
         self._llm = llm
@@ -187,6 +207,8 @@ class Answerer:
         self._misread = misread_numbers_by_page(corrections or [])
         self._fact_cards = fact_cards
         self._alias_matcher = alias_matcher
+        # A small, fast model that rewrites unclear questions (see _rewrite_and_search).
+        self._rewriter = rewriter
         self._recent: OrderedDict[str, tuple[float, RetrievalResult]] = OrderedDict()
         self._recent_lock = threading.Lock()
 
@@ -214,6 +236,23 @@ class Answerer:
         """Search only (no LLM): what /ask/sources shows while the answer is written. The
         result is kept briefly, so the /ask that follows does not search again."""
         return self._retrieve(self.search_query(question, follow_up))
+
+    def _rewrite_and_search(self, question: str) -> tuple[str, RetrievalResult] | None:
+        """For a question search was unsure about: let a small model restate it in English
+        and Tamil with the scheme's official name, and search again. None on any failure,
+        so the normal path (clarify or refuse) still runs."""
+        if self._rewriter is None:
+            return None
+        try:
+            reply = self._rewriter.complete_json(REWRITE_SYSTEM, question, REWRITE_SCHEMA)
+        except (LlmUnavailableError, LlmDeclinedError) as error:
+            logger.info("question rewrite skipped: %s", error)
+            return None
+        parts = [str(reply.get(key, "")).strip() for key in ("english", "tamil", "scheme")]
+        query = " ".join(part for part in parts if part)
+        if not query:
+            return None
+        return query, self._retrieve(query)
 
     def _retrieve(self, search_q: str) -> RetrievalResult:
         now = time.monotonic()
@@ -327,6 +366,17 @@ class Answerer:
         timings["retrieval"] = (time.perf_counter() - started) * 1000
         timings.update(retrieval.timings_ms)  # "search" and "rerank" inside "retrieval"
         confidence = retrieval.confidence
+
+        # Unsure? Restate the question (Tanglish, misspelt or unnamed schemes) and search
+        # again; keep whichever search is more confident.
+        if confidence < self._refusal_threshold and self._rewriter is not None:
+            rewrite_started = time.perf_counter()
+            rewritten = self._rewrite_and_search(question)
+            timings["rewrite"] = (time.perf_counter() - rewrite_started) * 1000
+            if rewritten is not None and rewritten[1].confidence > confidence:
+                search_q, retrieval = rewritten
+                confidence = retrieval.confidence
+                logger.info("question rewritten, confidence now %.3f", confidence)
 
         def refuse(reason: RefusalReason, rejected: list[RejectedSentence] | None = None) -> Answer:
             timings["total"] = (time.perf_counter() - started) * 1000
