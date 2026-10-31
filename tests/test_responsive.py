@@ -293,3 +293,27 @@ def test_health_shows_the_last_llm_error(
     errors = client.get("/health").json()["llm_errors"]
     assert "credit balance low" in errors["claude-opus-5-5"]["error"]
     LAST_ERRORS.clear()
+
+
+def test_wav_to_opus_is_much_smaller() -> None:
+    import io
+    import math
+    import shutil
+    import struct
+    import wave
+
+    from schemebot.voice.audio import wav_to_opus
+
+    if shutil.which("ffmpeg") is None:
+        pytest.skip("ffmpeg not installed")
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(24000)
+        wav.writeframes(
+            b"".join(struct.pack("<h", int(8000 * math.sin(i / 8))) for i in range(48000))
+        )
+    opus = wav_to_opus(buffer.getvalue())
+    assert opus is not None and opus[:4] == b"OggS"
+    assert len(opus) < len(buffer.getvalue()) / 5
