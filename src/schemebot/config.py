@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     """Thinking depth for the answer. Short cited answers do as well at "low", and it is
     several times faster (docs/review/LLM_PROVIDER_COMPARISON.md)."""
     verify_answers: bool = True
+    rewrite_unclear_questions: bool = True
+    """When search is unsure, the verifier model restates the question (English, Tamil, scheme
+    name) and search runs again. One small extra call, only on uncertain questions."""
     """Run the second-model support check on every answer (one extra, cheap API call)."""
     verifier_model: str = "claude-haiku-5-5"
     judge_model: str = "claude-opus-5-5"
