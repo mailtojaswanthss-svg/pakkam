@@ -119,3 +119,13 @@ def test_every_amount_format_in_the_eval_set_keeps_its_value() -> None:
                 expected = int(value) * (100_000 if "lakh" in amount else 1)
                 number_words = whole.removesuffix(" " + RUPEES[language][1])
                 assert words_to_number(number_words) == expected, (amount, spoken)
+
+
+def test_helplines_are_read_digit_by_digit() -> None:
+    from schemebot.voice.numbers import phone_numbers_as_digits
+
+    assert phone_numbers_as_digits("Call 1800 425 3993 now") == "Call 1 8 0 0, 4 2 5, 3 9 9 3 now"
+    assert phone_numbers_as_digits("PM-KISAN helpline 155261.") == "PM-KISAN helpline 1 5 5 2 6 1."
+    assert phone_numbers_as_digits("Rs. 25000 a year") == "Rs. 25000 a year"
+    assert phone_numbers_as_digits("₹ 1,20,000 limit") == "₹ 1,20,000 limit"
+    assert phone_numbers_as_digits("in 2023 and 181") == "in 2023 and 181"
