@@ -52,14 +52,43 @@
     return new Blob([view], { type: 'audio/wav' });
   }
 
-  async function start() {
+  // Speech detection for hands-free use: loud enough counts as speech; after speech, this
+  // long below the quiet level ends the recording.
+  const SPEECH_RMS = 0.035;
+  const QUIET_RMS = 0.015;
+  const SILENCE_AFTER_SPEECH_MS = 1400;
+
+  // options.onLevel(0..1) for a level meter; options.onSilence(heardSpeech) when the speaker
+  // has stopped (or never started within options.noSpeechMs).
+  async function start(options = {}) {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } });
     const context = new AudioContext();
     const source = context.createMediaStreamSource(stream);
     // ScriptProcessor is old but needs no extra worklet file, and every current browser has it.
     const processor = context.createScriptProcessor(4096, 1, 1);
     const chunks = [];
-    processor.onaudioprocess = (event) => chunks.push(new Float32Array(event.inputBuffer.getChannelData(0)));
+    const startedAt = performance.now();
+    let heardSpeech = false;
+    let quietSince = null;
+    let silenceSent = false;
+    processor.onaudioprocess = (event) => {
+      const data = event.inputBuffer.getChannelData(0);
+      chunks.push(new Float32Array(data));
+      let sum = 0;
+      for (let i = 0; i < data.length; i += 1) sum += data[i] * data[i];
+      const rms = Math.sqrt(sum / data.length);
+      if (options.onLevel) options.onLevel(Math.min(1, rms * 8));
+      if (!options.onSilence || silenceSent) return;
+      const now = performance.now();
+      if (rms >= SPEECH_RMS) { heardSpeech = true; quietSince = null; return; }
+      if (rms < QUIET_RMS && heardSpeech) {
+        quietSince = quietSince ?? now;
+        if (now - quietSince >= SILENCE_AFTER_SPEECH_MS) { silenceSent = true; options.onSilence(true); }
+      } else if (!heardSpeech && options.noSpeechMs && now - startedAt >= options.noSpeechMs) {
+        silenceSent = true;
+        options.onSilence(false);
+      }
+    };
     source.connect(processor);
     processor.connect(context.destination);
 

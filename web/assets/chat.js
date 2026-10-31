@@ -23,6 +23,16 @@
     found: (doc, page) => `Found in ${doc}, page ${page}. Writing the answer`,
     slowAnswer: 'This is taking longer than usual.',
     stop: 'Stop',
+    talk: {
+      idle: 'Tap the mic and ask your question',
+      listening: 'Listening… stop talking when you are done',
+      thinking: 'Finding the answer in the official documents…',
+      speaking: 'Speaking… tap the mic to interrupt',
+    },
+    talkNoSpeech: 'Pakkam did not hear anything. Tap the mic and try again.',
+    talkFailed: 'That did not work. Tap the mic and ask again.',
+    talkLangLabel: 'I will speak in',
+    call: (number) => `Call ${number}`,
     stopped: 'Stopped. Ask again when you are ready.',
     chip: 'Show the source',
     answeredIn: (ms) => `Answered in ${(ms / 1000).toFixed(1)} s`,
@@ -429,6 +439,12 @@
     }
     card.append(el('p', 'refusal-text', data.answer));
     const actions = el('div', 'refusal-actions');
+    const helpline = data.contact && data.contact.helpline;
+    if (helpline) {
+      const call = el('a', 'refusal-link refusal-call', TEXT.call(helpline));
+      call.href = `tel:${helpline.replace(/[^\d+]/g, '')}`;
+      actions.append(call);
+    }
     const url = data.contact ? safeUrl(data.contact.website) : null;
     if (url) {
       const link = el('a', 'refusal-link', words.official);
@@ -468,11 +484,15 @@
   }
 
   function getSentencesToSpeak(data) {
+    const first = data.confirmation_text ? [data.confirmation_text] : [];
     if (data.refused || !data.sentences || data.sentences.length === 0) {
-      return [data.answer];
+      return [...first, data.answer];
     }
-    return data.sentences.map((s) => s.text.trim()).filter(Boolean);
+    return [...first, ...data.sentences.map((s) => s.text.trim()).filter(Boolean)];
   }
+
+  // Called once when an answer has been read out to the end (not when stopped).
+  let onSpokenEnd = null;
 
   async function fetchSentenceAudio(text, language, signal) {
     const response = await fetch('/speak', {
@@ -559,6 +579,9 @@
             playNext();
           } else {
             stopPlaying();
+            const next = onSpokenEnd;
+            onSpokenEnd = null;
+            if (next) next();
           }
         });
 
@@ -708,7 +731,7 @@
         bubble.append(el('span', 'heard', TEXT.heard), data.transcript);
       }
       setLang(bubble, data.language);
-      const asked = question || data.transcript || bubble.textContent;
+      const asked = question || hooks.asked || data.transcript || bubble.textContent;
       const item = renderAnswer(data, asked);
       pending.replaceWith(item);
       if (!data.refused && data.citations && data.citations.length) {
@@ -817,6 +840,7 @@
       setVoiceStatus('');
       bubble.textContent = '';
       bubble.append(el('span', 'heard', TEXT.heard), clip.transcript);
+      hooks.asked = clip.transcript;
       const followUp = followUpFor(clip.transcript);
       hooks.preview(clip.transcript, followUp);
       return fetch('/ask', {
@@ -830,13 +854,14 @@
     if (result.error && canRetry(result.error)) {
       setVoiceStatus(TEXT.voiceFailed);
       retryButton.hidden = false;
-      return;
+      return result;
     }
     setVoiceStatus('');
     lastClip = null;
     // Asked by voice, answered by voice: read the answer out. Listen stays as Stop/replay.
     const button = result.item && result.item.querySelector('.listen-btn');
-    if (button && !result.data.refused) listen(result.data, button, true);
+    if (button) listen(result.data, button, true);
+    return { ...result, transcript: clip.transcript };
   }
 
   const newClip = (audio, filename) => ({ audio, filename, language: voiceLanguage(), transcript: null });
@@ -858,6 +883,7 @@
     clearInterval(timer);
     mic.setAttribute('aria-pressed', 'false');
     mic.setAttribute('aria-label', TEXT.micStart);
+    mic.style.setProperty('--level', '0');
     cancelButton.hidden = true;
     return recorder;
   }
@@ -897,7 +923,10 @@
     typeInstead.hidden = true;
     retryButton.hidden = true;
     try {
-      const recorder = await window.PakkamRecorder.start();
+      const recorder = await window.PakkamRecorder.start({
+        onLevel: (level) => mic.style.setProperty('--level', level.toFixed(2)),
+        onSilence: (heard) => { if (heard) stopRecording(); },
+      });
       const startedAt = Date.now();
       let shown = -1;
       const timer = setInterval(() => {
@@ -958,6 +987,155 @@
   });
   document.querySelectorAll('[data-q]').forEach((button) => {
     button.addEventListener('click', () => ask($('.suggest-q', button).textContent));
+  });
+
+  /* ---------- talk mode: a whole conversation by voice ---------- */
+  // Speak, hear the answer, and Pakkam listens again for a follow-up: no reading or typing.
+  // The chat log underneath keeps the written answers and their sources.
+  const talk = $('#talk');
+  const talkMic = $('#talk-mic');
+  const talkState = $('#talk-state');
+  const talkRing = $('#talk-ring');
+  const talkHeard = $('#talk-heard');
+  const talkAnswer = $('#talk-answer');
+  const talkActions = $('#talk-actions');
+  const talkLang = $('#talk-lang');
+  const FOLLOW_UP_LISTEN_MS = 6000;
+  let talkOn = false;
+  let talkPhase = 'idle';
+  let talkRec = null; // { recorder, cap }
+
+  function setTalk(phase, text) {
+    talkPhase = phase;
+    talk.dataset.phase = phase;
+    talkState.textContent = text || TEXT.talk[phase];
+  }
+
+  function openTalk() {
+    if (!window.PakkamRecorder || !window.PakkamRecorder.supported) return showFormMsg(TEXT.micBlocked);
+    talkOn = true;
+    talk.hidden = false;
+    renderTalkLangs();
+    setTalk('idle');
+    talkMic.focus();
+  }
+
+  // The same four choices as under the question box, so the language can change mid-talk.
+  function renderTalkLangs() {
+    talkLang.textContent = '';
+    talkLang.append(el('span', null, TEXT.talkLangLabel));
+    document.querySelectorAll('input[name="voice-lang"]').forEach((radio) => {
+      const button = el('button', 'talk-lang-btn', radio.nextElementSibling.textContent.replace(/\s*\(.*\)$/, ''));
+      button.type = 'button';
+      button.setAttribute('aria-pressed', String(radio.checked));
+      button.addEventListener('click', () => { radio.checked = true; renderTalkLangs(); });
+      talkLang.append(button);
+    });
+  }
+
+  function closeTalk() {
+    talkOn = false;
+    onSpokenEnd = null;
+    stopTalkRecording(true);
+    stopPlaying();
+    talk.hidden = true;
+    mic.focus({ preventScroll: true });
+  }
+
+  function stopTalkRecording(cancel, message) {
+    if (!talkRec) return null;
+    clearTimeout(talkRec.cap);
+    const { recorder } = talkRec;
+    talkRec = null;
+    talkRing.style.setProperty('--level', '0');
+    if (cancel) {
+      recorder.cancel();
+      if (talkOn) setTalk('idle', message);
+      return null;
+    }
+    return recorder;
+  }
+
+  // `followUp`: started by itself after an answer, so give up quietly if nobody speaks.
+  async function talkListen(followUp = false) {
+    if (busy || talkRec || !talkOn) return;
+    onSpokenEnd = null;
+    stopPlaying();
+    try {
+      const recorder = await window.PakkamRecorder.start({
+        onLevel: (level) => talkRing.style.setProperty('--level', level.toFixed(2)),
+        onSilence: (heard) => {
+          if (heard) finishTalkRecording();
+          else stopTalkRecording(true, followUp ? TEXT.talk.idle : TEXT.talkNoSpeech);
+        },
+        noSpeechMs: followUp ? FOLLOW_UP_LISTEN_MS : 10000,
+      });
+      talkRec = { recorder, cap: setTimeout(finishTalkRecording, MAX_VOICE_SECONDS * 1000) };
+      setTalk('listening');
+    } catch {
+      setTalk('idle', TEXT.micBlocked);
+    }
+  }
+
+  function showTalkResult(result, question) {
+    const data = result.data;
+    talkHeard.textContent = question ? `${TEXT.heard} ${question}` : '';
+    const spoken = getSentencesToSpeak(data).join(' ').replace(/\s*\[\d+\]/g, '');
+    talkAnswer.textContent = spoken;
+    setLang(talkAnswer, data.language);
+    talkActions.textContent = '';
+    const scheme = data.citations && data.citations.length ? data.citations[0].scheme : null;
+    if (scheme && !data.refused) {
+      uiText(data.language).followUps.forEach((text) => {
+        const chip = el('button', 'follow-up', text);
+        chip.type = 'button';
+        setLang(chip, data.language);
+        chip.addEventListener('click', () => talkAsk(text, { question: question || text, scheme }));
+        talkActions.append(chip);
+      });
+    }
+    // Read out (askVoice/talkAsk started it); then listen for a follow-up by itself.
+    if (playing) {
+      setTalk('speaking');
+      onSpokenEnd = () => { if (talkOn) talkListen(true); };
+    } else {
+      setTalk('idle');
+    }
+  }
+
+  async function finishTalkRecording() {
+    const recorder = stopTalkRecording(false);
+    if (!recorder) return;
+    setTalk('thinking');
+    talkHeard.textContent = '';
+    talkAnswer.textContent = '';
+    talkActions.textContent = '';
+    const result = await askVoice(newClip(await recorder.stop(), 'question.wav'));
+    if (!talkOn) return;
+    if (!result || !result.data) return setTalk('idle', TEXT.talkFailed);
+    showTalkResult(result, result.transcript);
+  }
+
+  // A follow-up chip in talk mode: ask it, and read the answer out.
+  async function talkAsk(text, followUp) {
+    if (busy) return;
+    stopPlaying();
+    setTalk('thinking');
+    const result = await ask(text, { followUp });
+    if (!talkOn || !result || !result.data) return setTalk('idle', TEXT.talkFailed);
+    const button = result.item && result.item.querySelector('.listen-btn');
+    if (button) listen(result.data, button, true);
+    showTalkResult(result, text);
+  }
+
+  talkMic.addEventListener('click', () => {
+    if (talkPhase === 'listening') finishTalkRecording();
+    else if (talkPhase !== 'thinking') talkListen(); // also interrupts Pakkam while it speaks
+  });
+  $('#talk-close').addEventListener('click', closeTalk);
+  document.querySelectorAll('[data-talk]').forEach((button) => button.addEventListener('click', openTalk));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && talkOn) closeTalk();
   });
 
   /* ---------- new conversation ---------- */

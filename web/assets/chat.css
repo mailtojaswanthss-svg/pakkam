@@ -496,3 +496,86 @@ body { overflow: hidden; background: var(--panel); }
   .source-line { min-height: 44px; }
   .send { width: 46px; height: 46px; }
 }
+
+/* ---------- talk mode ---------- */
+.talk-start {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  width: 100%;
+  margin: var(--s-5) 0 var(--s-2);
+  padding: 14px 18px;
+  color: var(--on-stamp);
+  background: var(--stamp);
+  border: 0;
+  border-radius: var(--r-lg);
+  text-align: start;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+}
+.talk-start:hover { background: var(--stamp-hover); }
+.talk-start svg, .talk-mic svg { flex: none; width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.talk-start strong { display: block; font-size: var(--step-1); }
+.talk-start small { display: block; opacity: .9; font-size: var(--step--1); }
+.talk-open { font-weight: 600; color: var(--stamp); border-color: var(--stamp-line); }
+.talk {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-4);
+  padding: var(--s-7) var(--gutter);
+  background: var(--canvas);
+  text-align: center;
+  overflow-y: auto;
+}
+.talk[hidden] { display: none; }
+.talk-close { position: absolute; top: var(--s-4); right: var(--s-4); }
+.talk-state { max-width: 32ch; font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; }
+.talk-mic {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 128px;
+  height: 128px;
+  color: var(--on-stamp);
+  background: var(--stamp);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.talk-mic svg { width: 48px; height: 48px; position: relative; }
+/* The ring grows with the voice level while listening, and breathes while Pakkam speaks. */
+.talk-ring {
+  --level: 0;
+  position: absolute;
+  inset: -10px;
+  border: 6px solid var(--stamp-line);
+  border-radius: 50%;
+  transform: scale(calc(1 + var(--level) * .45));
+  transition: transform .08s linear;
+}
+.talk[data-phase="listening"] .talk-mic { background: var(--tape); }
+.talk[data-phase="listening"] .talk-ring { border-color: var(--tape-soft); border-color: color-mix(in srgb, var(--tape) 35%, transparent); }
+.talk[data-phase="thinking"] .talk-ring { animation: talk-spin 1.2s linear infinite; border-top-color: var(--stamp); }
+.talk[data-phase="speaking"] .talk-ring { animation: talk-breathe 1.4s var(--ease-in-out) infinite; }
+@keyframes talk-spin { to { transform: rotate(1turn); } }
+@keyframes talk-breathe { 50% { transform: scale(1.12); } }
+.talk-lang { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; color: var(--ink-2); font-size: var(--step--1); }
+.talk-lang-btn { padding: 3px 12px; color: var(--ink); background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-pill); font: inherit; cursor: pointer; }
+.talk-lang-btn[aria-pressed="true"] { color: var(--on-stamp); background: var(--stamp); border-color: var(--stamp); }
+.talk-heard { color: var(--ink-2); max-width: 60ch; }
+.talk-answer { max-width: 60ch; font-size: var(--step-1); line-height: 1.6; }
+.talk-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-2); }
+/* The question-box mic shows how loud it hears you. */
+#mic { --level: 0; }
+#mic[aria-pressed="true"] { box-shadow: 0 0 0 calc(var(--level) * 10px) var(--tape-soft); }
+.refusal-call { color: var(--on-stamp); background: var(--stamp); border-color: var(--stamp); }
+.topbar-talk { color: var(--stamp); }
+@media (max-width: 640px) {
+  .talk-open { display: none; } /* the top bar has the Talk button on phones */
+}
