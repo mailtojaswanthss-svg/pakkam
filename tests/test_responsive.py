@@ -223,3 +223,9 @@ def test_busy_answer_shows_only_matching_passages(corpus: list[Chunk]) -> None:
     assert answer.refusal_reason == "service_unavailable"
     assert answer.passages
     assert all(p.relevance >= 0.3 for p in answer.passages[1:])
+
+
+def test_a_new_scheme_question_does_not_inherit_the_previous_scheme(corpus: list[Chunk]) -> None:
+    answerer, _ = make_answerer(corpus, FakeLlm(sentences(("x", [1]))))
+    query = answerer.search_query("breakfast scheme enna", FollowUp(scheme="PM-KISAN"))
+    assert "PM-KISAN" not in query
