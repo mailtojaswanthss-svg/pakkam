@@ -2,27 +2,27 @@
   "rewrites": [
     {
       "source": "/ask",
-      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/ask"
+      "destination": "https://est-amber-encryption-avenue.trycloudflare.com/ask"
     },
     {
       "source": "/ask/sources",
-      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/ask/sources"
+      "destination": "https://est-amber-encryption-avenue.trycloudflare.com/ask/sources"
     },
     {
       "source": "/sources",
-      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/sources"
+      "destination": "https://est-amber-encryption-avenue.trycloudflare.com/sources"
     },
     {
       "source": "/transcribe",
-      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/transcribe"
+      "destination": "https://est-amber-encryption-avenue.trycloudflare.com/transcribe"
     },
     {
       "source": "/speak",
-      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/speak"
+      "destination": "https://est-amber-encryption-avenue.trycloudflare.com/speak"
     },
     {
       "source": "/feedback",
-      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/feedback"
+      "destination": "https://est-amber-encryption-avenue.trycloudflare.com/feedback"
     }
   ]
 }
