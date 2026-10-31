@@ -138,3 +138,24 @@ def test_tamil_ilatcham_spelling_counts_as_lakh() -> None:
 
     assert "250000" in numbers_in("ஆண்டு வருமானம் ரூ.2.5 இலட்சத்திற்குக் கீழ்")
     assert "250000" in numbers_in("Rs.2,50,000")
+
+
+def test_monthly_claim_from_a_yearly_source_is_rejected() -> None:
+    from schemebot.generate.guardrails import DraftSentence, check_answer
+
+    passages = ["PM-KISAN gives Rs.6,000 per year to farmer families."]
+    wrong = check_answer([DraftSentence("Farmers get Rs.6,000 a month.", [1])], passages)
+    right = check_answer([DraftSentence("Farmers get Rs.6,000 a year.", [1])], passages)
+    tamil = check_answer([DraftSentence("விவசாயிகளுக்கு ஆண்டுக்கு ரூ.6,000 கிடைக்கும்.", [1])], passages)
+    assert [r.reason for r in wrong.rejected] == ["period_not_in_source"]
+    assert len(right.kept) == 1
+    assert len(tamil.kept) == 1
+
+
+def test_source_without_a_period_is_left_to_the_verifier() -> None:
+    from schemebot.generate.guardrails import DraftSentence, check_answer
+
+    result = check_answer(
+        [DraftSentence("The deposit is Rs.1,600 a year.", [1])], ["Security deposit Rs.1,600."]
+    )
+    assert len(result.kept) == 1
