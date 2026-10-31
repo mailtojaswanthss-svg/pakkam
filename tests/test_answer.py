@@ -283,3 +283,45 @@ def test_aadhaar_and_phone_pii_interception(corpus: list[Chunk]) -> None:
     assert ans_phone.refusal_reason == "pii_detected"
     assert ans_phone.status == "PII_DETECTED"
     assert len(llm2.user_messages) == 0
+
+
+HINDI = sentences(("पीएम-किसान प्रति वर्ष 6000 रुपये देता है।", [1]))
+ENGLISH = sentences(("PM-KISAN pays Rs 6000 per year.", [1]))
+
+
+def test_answer_in_the_wrong_script_is_asked_for_again(corpus: list[Chunk]) -> None:
+    llm = FakeLlm(lambda user: ENGLISH if "not in the language asked for" in user else HINDI)
+
+    answer = answer_with(llm, corpus, QUESTION)
+
+    assert not answer.refused
+    assert answer.text.startswith("PM-KISAN pays Rs 6000")
+    assert len(llm.user_messages) == 2
+
+
+def test_answer_still_in_the_wrong_script_is_not_shown(corpus: list[Chunk]) -> None:
+    llm = FakeLlm(HINDI)
+
+    answer = answer_with(llm, corpus, QUESTION)
+
+    assert answer.refused
+    assert answer.refusal_reason == "unsupported"
+    assert len(llm.user_messages) == 2
+
+
+@pytest.mark.parametrize(
+    ("language", "text", "ok"),
+    [
+        ("ta", "பிஎம்-கிசான் (PM-KISAN) திட்டத்தில் ஆண்டுக்கு ரூ.6,000.", True),
+        ("ta", "पीएम-किसान योजना के तहत प्रति वर्ष 6,000 रुपये।", False),
+        ("hi", "पीएम-किसान (PM-KISAN) योजना के तहत 6,000 रुपये।", True),
+        ("hi", "PM-KISAN pays Rs 6,000 a year.", False),
+        ("ta-Latn", "PM-KISAN la varudathukku Rs 6,000 kidaikum.", True),
+        ("ta-Latn", "பிஎம்-கிசான் திட்டத்தில் ஆண்டுக்கு ரூ.6,000 கிடைக்கும்.", False),
+        ("en", "PM-KISAN pays Rs 6,000 a year.", True),
+    ],
+)
+def test_written_in_script_of(language: str, text: str, ok: bool) -> None:
+    from schemebot.generate.guardrails import written_in_script_of
+
+    assert written_in_script_of(language, text) is ok
