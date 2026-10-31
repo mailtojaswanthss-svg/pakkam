@@ -489,7 +489,9 @@
     return URL.createObjectURL(blob);
   }
 
-  async function listen(data, button) {
+  // `quiet`: started automatically after a voice question, so a failure (e.g. spoken answers
+  // not set up on this server) just leaves the Listen button, with no error message.
+  async function listen(data, button, quiet = false) {
     if (playing && playing.button === button) {
       stopPlaying();
       return;
@@ -570,7 +572,7 @@
       }
       stopPlaying();
       button.textContent = TEXT.listen;
-      showFormMsg(error instanceof TypeError ? TEXT.network : error.message);
+      if (!quiet) showFormMsg(error instanceof TypeError ? TEXT.network : error.message);
     } finally {
       if (playing === state && !state.audio) {
         button.disabled = false;
@@ -833,7 +835,7 @@
     lastClip = null;
     // Asked by voice, answered by voice: read the answer out. Listen stays as Stop/replay.
     const button = result.item && result.item.querySelector('.listen-btn');
-    if (button && !result.data.refused) listen(result.data, button);
+    if (button && !result.data.refused) listen(result.data, button, true);
   }
 
   const newClip = (audio, filename) => ({ audio, filename, language: voiceLanguage(), transcript: null });
