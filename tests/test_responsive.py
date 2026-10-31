@@ -229,3 +229,27 @@ def test_a_new_scheme_question_does_not_inherit_the_previous_scheme(corpus: list
     answerer, _ = make_answerer(corpus, FakeLlm(sentences(("x", [1]))))
     query = answerer.search_query("breakfast scheme enna", FollowUp(scheme="PM-KISAN"))
     assert "PM-KISAN" not in query
+
+
+def test_unclear_question_is_rewritten_and_answered(corpus: list[Chunk]) -> None:
+    llm = FakeLlm(sentences(("PM-KISAN pays Rs 6000 per year.", [1])))
+    answerer, retriever = make_answerer(corpus, llm)
+    rewriter = FakeLlm(
+        {"english": "How much does PM-KISAN pay per year?", "tamil": "", "scheme": "PM-KISAN"}
+    )
+    answerer._rewriter = rewriter
+
+    answer = answerer.answer("vivasayi evlo panam varushathuku kidaikum")
+
+    assert not answer.refused
+    assert "rewrite" in answer.timings_ms
+    assert retriever.queries[-1].startswith("How much does PM-KISAN pay per year?")
+
+
+def test_rewrite_failure_falls_back_to_the_normal_refusal(corpus: list[Chunk]) -> None:
+    from schemebot.generate.llm import LlmUnavailableError
+
+    answerer, _ = make_answerer(corpus, FakeLlm(sentences(("x", [1]))))
+    answerer._rewriter = FakeLlm(LlmUnavailableError("down"))
+    answer = answerer.answer("zzzz qqqq xxxx")
+    assert answer.refused
