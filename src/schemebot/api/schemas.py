@@ -69,6 +69,9 @@ class CitationOut(BaseModel):
 class SentenceOut(BaseModel):
     text: str
     citations: list[int] = Field(description="Numbers into `citations`.")
+    section: Literal["amount", "eligibility", "documents", "apply", "other"] = Field(
+        default="other", description="What the sentence is about, for grouping on screen."
+    )
 
 
 class ContactOut(BaseModel):
@@ -101,9 +104,11 @@ class AskResponse(BaseModel):
         default="SUPPORTED",
         description="Response status indicating outcome and validity.",
     )
-    path: Literal["rag", "fact_card", "fallback", "semantic_cache", "guardrail"] = Field(
-        default="rag",
-        description="Path taken to answer: 'rag', 'fact_card', 'fallback', or 'semantic_cache'.",
+    path: Literal["rag", "fact_card", "fallback", "semantic_cache", "guardrail", "discovery"] = (
+        Field(
+            default="rag",
+            description="How it was answered: rag, fact_card, fallback, discovery, ...",
+        )
     )
     understood_query: str | None = Field(
         default=None,
@@ -137,6 +142,10 @@ class AskResponse(BaseModel):
     confirmation_text: str | None = Field(
         default=None,
         description="Voice only: a short 'I heard X, is that right?' when the match is uncertain.",
+    )
+    scheme: str | None = Field(
+        default=None,
+        description="The scheme the answer is about, for follow-up questions (None if unclear).",
     )
     rejected_reasons: list[str] = Field(
         default_factory=list,
@@ -232,7 +241,10 @@ class AskResponse(BaseModel):
             ),
             candidate_schemes=getattr(answer, "candidate_schemes", []),
             refusal_reason=answer.refusal_reason,
-            sentences=[SentenceOut(text=s.text, citations=s.citations) for s in answer.sentences],
+            sentences=[
+                SentenceOut(text=s.text, citations=s.citations, section=s.section)
+                for s in answer.sentences
+            ],
             citations=[
                 CitationOut(
                     number=c.number,
@@ -255,6 +267,7 @@ class AskResponse(BaseModel):
             disclaimer=answer.disclaimer,
             latency_ms=round(answer.timings_ms.get("total", 0.0), 1),
             timings_ms=rounded_timings(answer.timings_ms),
+            scheme=getattr(answer, "scheme", None),
             rejected_reasons=[r.reason for r in getattr(answer, "rejected", [])],
             contact=(
                 ContactOut(
@@ -296,6 +309,11 @@ class SpeakRequest(BaseModel):
 class AskSourcesResponse(BaseModel):
     passages: list[FallbackPassage]
     timings_ms: dict[str, float]
+    answerable: bool = Field(
+        default=True,
+        description="The best passage clears the refusal threshold, so /ask will likely answer "
+        "(the page uses it to offer only follow-up questions the documents cover).",
+    )
 
 
 class HealthResponse(BaseModel):

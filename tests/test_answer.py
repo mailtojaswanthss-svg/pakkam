@@ -325,3 +325,37 @@ def test_written_in_script_of(language: str, text: str, ok: bool) -> None:
     from schemebot.generate.guardrails import written_in_script_of
 
     assert written_in_script_of(language, text) is ok
+
+
+def test_broad_question_gets_scheme_suggestions_not_a_refusal(corpus: list[Chunk]) -> None:
+    llm = FakeLlm(ENGLISH)
+
+    answer = answer_with(llm, corpus, "Which schemes are there for farmers?")
+
+    assert not answer.refused
+    assert answer.path == "discovery"
+    assert answer.candidate_schemes == ["PM-KISAN"]
+    assert llm.user_messages == []  # no LLM call: names only, nothing to get wrong
+
+
+def test_sentences_keep_their_section(corpus: list[Chunk]) -> None:
+    reply = {
+        "answerable": True,
+        "sentences": [
+            {"text": "PM-KISAN pays Rs 6000 per year.", "sources": [1], "section": "amount"}
+        ],
+    }
+
+    answer = answer_with(FakeLlm(reply), corpus, QUESTION)
+
+    assert [s.section for s in answer.sentences] == ["amount"]
+
+
+def test_answer_names_its_scheme_but_never_a_policy_note(corpus: list[Chunk]) -> None:
+    answer = answer_with(FakeLlm(ENGLISH), corpus, QUESTION)
+    assert answer.scheme == answer.citations[0].scheme
+
+    answerer = Answerer.__new__(Answerer)
+    answerer._alias_matcher = None
+    note = "Tamil Nadu Social Welfare schemes (policy note)"
+    assert answerer.main_scheme("who can get it", None, "...", [note]) is None
