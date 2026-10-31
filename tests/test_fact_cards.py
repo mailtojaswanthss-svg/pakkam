@@ -103,3 +103,15 @@ def test_fact_card_matcher_rejects_unrelated_or_unmatched_scheme(
 
     card, score = matcher.match("Random text")  # No scheme keyword
     assert card is None
+
+
+def test_committed_fact_cards_file_is_valid() -> None:
+    """A bad card would stop the backend at startup."""
+    import json
+    from pathlib import Path
+
+    from schemebot.generate.fact_cards import FactCard
+
+    path = Path(__file__).resolve().parents[1] / "data" / "fact_cards.json"
+    for card in json.loads(path.read_text(encoding="utf-8")):
+        FactCard.model_validate(card)
