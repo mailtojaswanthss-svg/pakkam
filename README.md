@@ -51,7 +51,8 @@ documents don't say, **tells you so and gives the official helpline** instead of
 | **Numbers are checked, not trusted** | Every number in an answer (amounts, ages, dates, income limits, 2.5 lakh = 2,50,000) must appear in the cited text (`guardrails.py`); a second model checks the rest. Unsupported sentences are dropped. |
 | **Honest refusals** | Low confidence means no LLM call: a calm card says the documents don't cover it and links the official contact. |
 | **Sources in under half a second** | `/ask/sources` shows the cited pages in about 0.3-0.4 s while the answer is still being written. |
-| **Voice with Gnani** | Prisma speech to text ("Pakkam heard: ..."), Timbre speech out sentence by sentence, amounts spoken as words. |
+| **A conversation, not a form** | The page shows what it found while the answer is written, can be stopped, offers follow-ups ("How do I apply?") that remember the scheme, turns "did you mean A or B?" into buttons, shows the official pages when the model is busy, and asks for 👍/👎. |
+| **Voice with Gnani** | Prisma speech to text ("Pakkam heard: ..."), a short spoken-style answer that is read out automatically, sentence by sentence, with "I heard X, is that right?" when unsure. |
 | **Verified fact cards** | Ready answers for common questions with no LLM call and cached audio. A card is served only after a person signs it off (`verified_by`); the 2 drafted cards are not signed off yet. |
 | **Private by design** | The audit log stores a hash of the question, never its text. No accounts, no personal data. |
 | **Built for cheap phones** | Plain HTML/CSS/JS, no framework, light and dark themes, reduced-motion support, 44 px touch targets. |
@@ -247,7 +248,7 @@ own, larger limits, and a spoken sentence is cached so replaying it costs no new
 | Part | Where | Notes |
 |---|---|---|
 | Website (`web/`) | Vercel, free | Plain HTML/CSS/JS, no build step |
-| Backend (FastAPI + models + index) | Developer's laptop, reached through a Cloudflare quick tunnel | `web/vercel.json` forwards `/ask`, `/sources`, `/transcribe`, `/speak`; the tunnel URL changes on every restart |
+| Backend (FastAPI + models + index) | Developer's laptop, reached through a Cloudflare quick tunnel | `web/vercel.json` forwards `/ask`, `/ask/sources`, `/sources`, `/transcribe`, `/speak`, `/feedback`; the tunnel URL changes on every restart |
 | Planned | Google Cloud Run (CPU) | [deploy/cloudrun/](deploy/cloudrun/README.md); the script asks for a GPU today |
 
 Vercel cannot run the backend (PyTorch and about 4.5 GB of models exceed its function
