@@ -42,16 +42,6 @@
       New conversation
     </button>
 
-    <div class="side-block">
-      <p class="side-h">Ask in any of these</p>
-      <ul class="side-scripts">
-        <li lang="ta">தமிழ்</li>
-        <li lang="hi">हिन्दी</li>
-        <li lang="en">English</li>
-        <li lang="ta-Latn">Tanglish</li>
-      </ul>
-    </div>
-
     <div class="side-block side-schemes">
       <p class="side-h" id="schemes-h" tabindex="-1">Schemes Pakkam can read</p>
       <ul class="scheme-list" id="scheme-list">
@@ -100,6 +90,7 @@
             <span><strong>Talk to Pakkam</strong><small>Ask by voice and hear the answer. No typing or reading needed.</small></span>
           </button>
           <ul class="suggestions">
+            <li><button type="button" class="suggest" data-q><span class="suggest-topic">Not sure which scheme?</span><span class="suggest-q" lang="en">Which schemes can I get?</span></button></li>
             <li><button type="button" class="suggest" data-q><span class="suggest-topic">Women's entitlement</span><span class="suggest-q" lang="ta">மகளிர் உரிமைத் தொகை பெற யார் தகுதியானவர்?</span></button></li>
             <li><button type="button" class="suggest" data-q><span class="suggest-topic">Farmers</span><span class="suggest-q" lang="hi">पीएम किसान में साल में कितना पैसा मिलता है?</span></button></li>
             <li><button type="button" class="suggest" data-q><span class="suggest-topic">Pension</span><span class="suggest-q" lang="en">What is the age limit to join Atal Pension Yojana?</span></button></li>
@@ -130,6 +121,8 @@
       </form>
       <div class="voice-row">
         <button type="button" class="voice-action talk-open" data-talk>Talk mode</button>
+        <details class="voice-lang-pick" id="voice-lang-pick">
+          <summary title="The language you will speak in, for the mic and Talk mode. Typed questions are detected automatically.">Voice: <span id="voice-lang-now" lang="ta">தமிழ்</span></summary>
         <fieldset class="voice-langs" id="voice-lang">
           <legend>I will speak in</legend>
           <label><input type="radio" name="voice-lang" value="ta" checked><span lang="ta">தமிழ்</span></label>
@@ -137,6 +130,7 @@
           <label><input type="radio" name="voice-lang" value="en"><span>English</span></label>
           <label><input type="radio" name="voice-lang" value="ta-Latn"><span>Tanglish <small>(being tested)</small></span></label>
         </fieldset>
+        </details>
         <span class="voice-status" id="voice-status"></span>
         <button type="button" class="voice-action" id="voice-cancel" hidden>✕ Cancel</button>
         <button type="button" class="voice-action" id="voice-retry" hidden>Send again</button>

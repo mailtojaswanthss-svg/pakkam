@@ -31,6 +31,9 @@ Rules for Voice:
 - Copy amounts and numbers exactly from the passages. Do not calculate or convert them.
 - If the passages do not answer the question, set "answerable" to false and return no sentences.
 - Write each sentence without citation markers; the passage numbers go in "sources".
+- Give each sentence a "section": "amount" (money or benefit), "eligibility" (who can \
+get it, age or income limits), "documents" (papers needed), "apply" (how, where or when \
+to apply), or "other".
 """
 
 
@@ -56,7 +59,13 @@ faithfully into the answer language.
 - Keep the answer short and practical: who is eligible, how much, what documents, how to \
 apply - whatever the question asks. Two to five sentences is usually enough.
 - Write each sentence without citation markers; the passage numbers go in "sources".
+- Give each sentence a "section": "amount" (money or benefit), "eligibility" (who can \
+get it, age or income limits), "documents" (papers needed), "apply" (how, where or when \
+to apply), or "other".
 """
+
+SECTIONS = ("amount", "eligibility", "documents", "apply", "other")
+"""How an answer is grouped on screen: how much, who can get it, documents, how to apply."""
 
 ANSWER_SCHEMA: dict[str, object] = {
     "type": "object",
@@ -72,8 +81,13 @@ ANSWER_SCHEMA: dict[str, object] = {
                 "properties": {
                     "text": {"type": "string"},
                     "sources": {"type": "array", "items": {"type": "integer"}},
+                    "section": {
+                        "type": "string",
+                        "enum": list(SECTIONS),
+                        "description": "What the sentence is about, for grouping on screen.",
+                    },
                 },
-                "required": ["text", "sources"],
+                "required": ["text", "sources", "section"],
                 "additionalProperties": False,
             },
         },
@@ -86,6 +100,7 @@ ANSWER_SCHEMA: dict[str, object] = {
 class ReplySentence(BaseModel):
     text: str
     sources: list[int]
+    section: str = "other"
 
 
 class AnswerReply(BaseModel):

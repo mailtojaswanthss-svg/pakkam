@@ -448,7 +448,8 @@ def create_app(
             )
             for p in retrieval.passages[:3]
         ]
-        return AskSourcesResponse(passages=passages, timings_ms=timings)
+        answerable = retrieval.confidence >= get_settings().refusal_threshold
+        return AskSourcesResponse(passages=passages, timings_ms=timings, answerable=answerable)
 
     @app.post("/ask/voice", dependencies=[Depends(limit_asks)])
     def ask_voice(

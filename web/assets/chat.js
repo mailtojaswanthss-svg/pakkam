@@ -70,24 +70,36 @@
       more: 'Ask more about this scheme', useful: 'Was this useful?', yes: 'Useful', no: 'Not useful', thanks: 'Thank you.',
       whichScheme: 'Which scheme do you mean?', busy: 'Pakkam cannot write the answer right now. This is what the official documents say:',
       tryAgain: 'Try again', page: 'page', disclaimer: 'Information only. Check the official source.',
+      sections: { amount: 'How much', eligibility: 'Who can get it', documents: 'Documents needed', apply: 'How to apply' },
+      about: (s) => `What is ${s} and who can get it?`, pickFor: 'Or pick who it is for:',
+      audiences: [['Women', 'schemes for women'], ['Students', 'schemes for students'], ['Farmers', 'schemes for farmers'], ['Elderly', 'pension schemes for elderly'], ['Families', 'schemes for poor families'], ['Health', 'schemes for health treatment']],
     },
     'ta-Latn': {
       followUps: ['Yaarukku kidaikum?', 'Evlo panam kidaikum?', 'Enna documents venum?', 'Eppadi apply panradhu?'],
       more: 'Ask more about this scheme', useful: 'Useful-aa irundhadha?', yes: 'Useful', no: 'Not useful', thanks: 'Nandri.',
       whichScheme: 'Endha scheme pathi kekkureenga?', busy: 'Ippo answer ezhudha mudiyala. Official documents la idhu irukku:',
       tryAgain: 'Marubadi try pannunga', page: 'page', disclaimer: 'Information only. Check the official source.',
+      sections: { amount: 'Evlo kidaikum', eligibility: 'Yaarukku kidaikum', documents: 'Thevaiyana documents', apply: 'Eppadi apply panradhu' },
+      about: (s) => `${s} enna, yaarukku kidaikum?`, pickFor: 'Illa yaarukku-nu choose pannunga:',
+      audiences: [['Pengal', 'pengalukku enna scheme irukku'], ['Students', 'students-ku enna scheme irukku'], ['Vivasayigal', 'vivasayigalukku enna scheme irukku'], ['Periyavanga', 'pension scheme enna irukku'], ['Kudumbam', 'ezhai kudumbathukku enna scheme irukku'], ['Health', 'maruthuva scheme enna irukku']],
     },
     ta: {
       followUps: ['யாருக்கு கிடைக்கும்?', 'எவ்வளவு பணம்?', 'என்ன ஆவணங்கள் தேவை?', 'எப்படி விண்ணப்பிப்பது?'],
       more: 'இந்தத் திட்டம் பற்றி மேலும் கேளுங்கள்', useful: 'இது உதவியதா?', yes: 'உதவியது', no: 'உதவவில்லை', thanks: 'நன்றி.',
       whichScheme: 'எந்தத் திட்டத்தைக் குறிப்பிடுகிறீர்கள்?', busy: 'இப்போது பதில் எழுத முடியவில்லை. அதிகாரப்பூர்வ ஆவணங்களில் உள்ளது:',
       tryAgain: 'மீண்டும் முயற்சிக்கவும்', page: 'பக்கம்', disclaimer: 'தகவலுக்கு மட்டும். அதிகாரப்பூர்வ ஆதாரத்தைச் சரிபார்க்கவும்.',
+      sections: { amount: 'எவ்வளவு கிடைக்கும்', eligibility: 'யாருக்குக் கிடைக்கும்', documents: 'தேவையான ஆவணங்கள்', apply: 'விண்ணப்பிக்கும் முறை' },
+      about: (s) => `${s} என்றால் என்ன, யாருக்குக் கிடைக்கும்?`, pickFor: 'அல்லது யாருக்கு என்று தேர்ந்தெடுங்கள்:',
+      audiences: [['பெண்கள்', 'பெண்களுக்கு என்ன திட்டங்கள் உள்ளன?'], ['மாணவர்கள்', 'மாணவர்களுக்கு என்ன திட்டங்கள் உள்ளன?'], ['விவசாயிகள்', 'விவசாயிகளுக்கு என்ன திட்டங்கள் உள்ளன?'], ['முதியோர்', 'முதியோர் ஓய்வூதியத் திட்டங்கள் என்ன?'], ['குடும்பங்கள்', 'ஏழைக் குடும்பங்களுக்கு என்ன திட்டங்கள் உள்ளன?'], ['மருத்துவம்', 'மருத்துவத் திட்டங்கள் என்ன உள்ளன?']],
     },
     hi: {
       followUps: ['किसे मिलता है?', 'कितना पैसा मिलता है?', 'कौन से दस्तावेज़ चाहिए?', 'आवेदन कैसे करें?'],
       more: 'इस योजना के बारे में और पूछें', useful: 'क्या यह उपयोगी था?', yes: 'उपयोगी', no: 'उपयोगी नहीं', thanks: 'धन्यवाद।',
       whichScheme: 'आप किस योजना के बारे में पूछ रहे हैं?', busy: 'अभी उत्तर नहीं लिखा जा सका। आधिकारिक दस्तावेज़ों में यह लिखा है:',
       tryAgain: 'फिर से कोशिश करें', page: 'पेज', disclaimer: 'केवल जानकारी के लिए। आधिकारिक स्रोत देखें।',
+      sections: { amount: 'कितना मिलता है', eligibility: 'किसे मिलता है', documents: 'ज़रूरी दस्तावेज़', apply: 'आवेदन कैसे करें' },
+      about: (s) => `${s} क्या है और किसे मिलती है?`, pickFor: 'या चुनें कि किसके लिए:',
+      audiences: [['महिलाएँ', 'महिलाओं के लिए कौन सी योजनाएँ हैं?'], ['छात्र', 'छात्रों के लिए कौन सी योजनाएँ हैं?'], ['किसान', 'किसानों के लिए कौन सी योजनाएँ हैं?'], ['बुज़ुर्ग', 'बुज़ुर्गों के लिए पेंशन योजनाएँ कौन सी हैं?'], ['परिवार', 'गरीब परिवारों के लिए कौन सी योजनाएँ हैं?'], ['स्वास्थ्य', 'इलाज के लिए कौन सी योजनाएँ हैं?']],
     },
   };
   const LANG_NAME = { en: 'English', ta: 'தமிழ்', hi: 'हिन्दी', 'ta-Latn': 'Tanglish' };
@@ -249,11 +261,15 @@
   }
 
   const uiText = (lang) => UI[lang] || UI.en;
+  const SECTION_ORDER = ['amount', 'eligibility', 'documents', 'apply', 'other'];
+  const SECTION_ICON = { amount: '₹', eligibility: '👤', documents: '📄', apply: '📝' };
 
   // Buttons that ask the next natural question about the same scheme. They send the scheme
   // along (follow_up), so "How do I apply?" is read as "how do I apply for <scheme>?".
+  // Each chip is first checked against the documents (search only, no LLM) and dropped if
+  // they cannot answer it, so a chip never leads to "not in the documents".
   function followUpChips(data, question) {
-    const scheme = data.citations.length ? data.citations[0].scheme : null;
+    const scheme = data.scheme;
     if (!scheme) return null;
     const words = uiText(data.language);
     const row = el('div', 'follow-ups');
@@ -264,7 +280,17 @@
       chip.type = 'button';
       setLang(chip, data.language);
       chip.addEventListener('click', () => ask(text, { followUp: { question, scheme } }));
+      chip.classList.add('checking');
       row.append(chip);
+      fetch('/ask/sources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: text, follow_up: { question, scheme } }),
+      }).then((res) => (res.ok ? res.json() : null)).then((found) => {
+        if (found && found.answerable === false) chip.remove();
+        else chip.classList.remove('checking');
+        if (!row.children.length) row.remove();
+      }).catch(() => chip.classList.remove('checking'));
     });
     return row;
   }
@@ -296,20 +322,38 @@
   }
 
   // "Did you mean A or B?": each scheme is a button that asks the same question about it.
+  // A broad question ("a scheme for farmers?") gets the matching schemes as buttons; with no
+  // group named, also the groups to narrow by.
   function clarifyCard(data, question) {
     const words = uiText(data.language);
+    const discovery = data.path === 'discovery';
     const card = el('div', 'clarify');
-    const title = el('p', 'clarify-title', words.whichScheme);
+    const title = el('p', 'clarify-title', discovery ? data.answer : words.whichScheme);
     setLang(title, data.language);
     card.append(title);
     const actions = el('div', 'clarify-actions');
     data.candidate_schemes.forEach((scheme) => {
       const button = el('button', 'clarify-btn', scheme);
       button.type = 'button';
-      button.addEventListener('click', () => ask(question, { followUp: { question, scheme }, label: `${question} (${scheme})` }));
+      button.addEventListener('click', () => (discovery
+        ? ask(words.about(scheme), { followUp: { question, scheme } })
+        : ask(question, { followUp: { question, scheme }, label: `${question} (${scheme})` })));
       actions.append(button);
     });
     card.append(actions);
+    if (discovery && data.candidate_schemes.length > 4) {
+      const pick = el('p', 'clarify-title clarify-sub', words.pickFor);
+      setLang(pick, data.language);
+      const groups = el('div', 'follow-ups');
+      words.audiences.forEach(([label, q]) => {
+        const chip = el('button', 'follow-up', label);
+        chip.type = 'button';
+        setLang(chip, data.language);
+        chip.addEventListener('click', () => ask(q));
+        groups.append(chip);
+      });
+      card.append(pick, groups);
+    }
     return card;
   }
 
@@ -367,8 +411,7 @@
       body.append(refusalCard(data));
     } else {
       const byNumber = new Map(data.citations.map((c) => [c.number, c]));
-      const para = el('p', 'sentences');
-      data.sentences.forEach((sentence) => {
+      const addSentence = (para, sentence) => {
         const span = el('span', 'sent', sentence.text);
         span.dataset.cites = sentence.citations.join(' ');
         para.append(span);
@@ -388,8 +431,31 @@
           para.append(chip);
         });
         para.append(' ');
-      });
-      body.append(para);
+      };
+      // Grouped under "How much", "Who can get it", ... when the answer covers those parts.
+      const titled = data.sentences.some((s) => s.section && s.section !== 'other');
+      if (titled) {
+        const groups = el('div', 'a-sections');
+        SECTION_ORDER.forEach((section) => {
+          const inSection = data.sentences.filter((s) => (s.section || 'other') === section);
+          if (!inSection.length) return;
+          const block = el('section', `a-section a-section-${section}`);
+          if (section !== 'other') {
+            const head = el('h3', 'a-section-h', words.sections[section]);
+            head.prepend(el('span', 'a-section-icon', SECTION_ICON[section]));
+            block.append(head);
+          }
+          const para = el('p', 'sentences');
+          inSection.forEach((sentence) => addSentence(para, sentence));
+          block.append(para);
+          groups.append(block);
+        });
+        body.append(groups);
+      } else {
+        const para = el('p', 'sentences');
+        data.sentences.forEach((sentence) => addSentence(para, sentence));
+        body.append(para);
+      }
 
       // The proof, visible without a tap: one line per cited document page.
       const cited = new Set(data.sentences.flatMap((sentence) => sentence.citations));
@@ -734,8 +800,8 @@
       const asked = question || hooks.asked || data.transcript || bubble.textContent;
       const item = renderAnswer(data, asked);
       pending.replaceWith(item);
-      if (!data.refused && data.citations && data.citations.length) {
-        lastTurn = { question: asked, scheme: data.citations[0].scheme };
+      if (!data.refused && data.scheme) {
+        lastTurn = { question: asked, scheme: data.scheme };
       }
       return { data, item };
     } catch (error) {
@@ -807,6 +873,20 @@
   let lastClip = null; // { audio, filename, language }, kept until it is sent without a network error
 
   const voiceLanguage = () => $('input[name="voice-lang"]:checked').value;
+
+  // The voice language sits folded next to the mic: "Voice: தமிழ்". It only tells speech
+  // recognition what to listen for; typed questions are detected by themselves.
+  const voicePick = $('#voice-lang-pick');
+  function showVoiceLang() {
+    const checked = $('input[name="voice-lang"]:checked');
+    const now = $('#voice-lang-now');
+    now.textContent = checked.nextElementSibling.textContent.replace(/\s*\(.*\)$/, '');
+    now.lang = checked.value;
+  }
+  document.querySelectorAll('input[name="voice-lang"]').forEach((radio) => {
+    radio.addEventListener('change', () => { showVoiceLang(); voicePick.open = false; });
+  });
+  showVoiceLang();
 
   function setVoiceStatus(text, spoken = text) {
     voiceStatus.textContent = text;
@@ -1028,7 +1108,7 @@
       const button = el('button', 'talk-lang-btn', radio.nextElementSibling.textContent.replace(/\s*\(.*\)$/, ''));
       button.type = 'button';
       button.setAttribute('aria-pressed', String(radio.checked));
-      button.addEventListener('click', () => { radio.checked = true; renderTalkLangs(); });
+      button.addEventListener('click', () => { radio.checked = true; renderTalkLangs(); showVoiceLang(); });
       talkLang.append(button);
     });
   }
