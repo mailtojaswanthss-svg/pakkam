@@ -46,7 +46,10 @@ if ($NoDeploy) { Write-Host "Send this link to Claude: $url"; exit 0 }
 Write-Host "4/4 Pointing the website at this laptop..." -ForegroundColor Cyan
 $paths = "/ask", "/ask/sources", "/sources", "/transcribe", "/speak", "/feedback"
 $rewrites = $paths | ForEach-Object { [ordered]@{ source = $_; destination = "$url$_" } }
-@{ rewrites = @($rewrites) } | ConvertTo-Json -Depth 4 | Set-Content web\vercel.json -Encoding utf8
+$json = @{ rewrites = @($rewrites) } | ConvertTo-Json -Depth 4
+# UTF-8 without a byte-order mark: Windows PowerShell's "-Encoding utf8" adds one, and Vercel
+# then rejects vercel.json as invalid JSON.
+[System.IO.File]::WriteAllText((Join-Path (Get-Location) "web\vercel.json"), $json, (New-Object System.Text.UTF8Encoding $false))
 try {
     npx vercel deploy --prod --yes
     Write-Host "Done. Open https://pakkam-alpha.vercel.app/chat/" -ForegroundColor Green
