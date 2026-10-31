@@ -104,11 +104,13 @@ def test_llm_budget_limits_and_records(tmp_path: Path) -> None:
     assert stats["by_model"]["gemini-3.5-flash-lite"] == 1
 
 
-def test_llm_budget_authoritative_429(tmp_path: Path) -> None:
+def test_llm_budget_429_pauses_the_model_briefly(tmp_path: Path) -> None:
     from schemebot.generate.budget import BudgetExhausted, LlmBudget
 
-    budget_file = tmp_path / "llm-calls.json"
-    budget = LlmBudget(budget_file, max_per_day=20)
+    now = [1000.0]
+    budget = LlmBudget(
+        tmp_path / "llm-calls.json", max_per_day=20, clock=lambda: now[0], cooldown_s=60
+    )
 
     assert not budget.is_rate_limited("gemini-3.8-flash")
     budget.record_429("gemini-3.8-flash")
@@ -116,8 +118,34 @@ def test_llm_budget_authoritative_429(tmp_path: Path) -> None:
 
     import pytest
 
-    with pytest.raises(BudgetExhausted, match="authoritative 429"):
+    with pytest.raises(BudgetExhausted, match="HTTP 429"):
         budget.take(model="gemini-3.8-flash")
+    budget.take(model="gemini-3.5-flash-lite")  # other models are not paused
+
+    now[0] += 61  # a per-minute limit has passed: the model is tried again
+    assert not budget.is_rate_limited("gemini-3.8-flash")
+    budget.take(model="gemini-3.8-flash")
+
+
+def test_llm_budget_reads_old_true_flag_as_expired(tmp_path: Path) -> None:
+    import json
+
+    from schemebot.generate.budget import LlmBudget, today_in_india
+
+    path = tmp_path / "llm-calls.json"
+    path.write_text(
+        json.dumps(
+            {
+                "date": today_in_india().isoformat(),
+                "calls": 0,
+                "by_model": {},
+                "rate_limited": {"m": True},
+            }
+        )
+    )
+    budget = LlmBudget(path, max_per_day=5)
+    assert not budget.is_rate_limited("m")
+    budget.take(model="m")
 
 
 def test_llm_budget_env_override(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
