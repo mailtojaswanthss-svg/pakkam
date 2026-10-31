@@ -212,3 +212,14 @@ def test_feedback_rejects_huge_text(
     client, _, _ = parts
     body = {"status": "SUPPORTED", "thumbs": "up", "reason": "x" * 5000, "include_text": True}
     assert client.post("/feedback", json=body).status_code == 422
+
+
+def test_busy_answer_shows_only_matching_passages(corpus: list[Chunk]) -> None:
+    from schemebot.generate.llm import LlmUnavailableError
+
+    answerer, _ = make_answerer(corpus, FakeLlm(LlmUnavailableError("down")))
+    answer = answerer.answer("How much does PM-KISAN pay per year?")
+
+    assert answer.refusal_reason == "service_unavailable"
+    assert answer.passages
+    assert all(p.relevance >= 0.3 for p in answer.passages[1:])

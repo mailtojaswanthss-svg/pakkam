@@ -346,7 +346,13 @@ class Answerer:
                     rejected=rejected or [],
                     timings_ms=timings,
                     contact=contact,
-                    passages=retrieval.passages[:3],
+                    # Only passages that match the question well enough to answer it
+                    # (at least the best one), so a garbled or off-topic page is not shown.
+                    passages=[
+                        p
+                        for i, p in enumerate(retrieval.passages[:3])
+                        if i == 0 or p.relevance >= self._refusal_threshold
+                    ],
                     status="MODEL_UNAVAILABLE",
                     path="fallback",
                     understood_query=cleaned_q,
