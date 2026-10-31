@@ -299,6 +299,10 @@ class HealthResponse(BaseModel):
     gnani_voice_ready: bool = False
     preload_status: Literal["warmed", "pending", "failed"] = "warmed"
     quota: dict[str, Any] | None = None
+    llm_errors: dict[str, dict[str, str]] = Field(
+        default_factory=dict,
+        description="Last failure per LLM model (time and the API's message; never a key).",
+    )
 
 
 class SourceOut(BaseModel):

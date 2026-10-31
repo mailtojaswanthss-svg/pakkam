@@ -348,6 +348,7 @@ def create_app(
         app_settings = get_settings()
         from schemebot.generate.budget import shared_llm_budget
         from schemebot.generate.factory import model_for
+        from schemebot.generate.llm import LAST_ERRORS
 
         budget = shared_llm_budget(
             app_settings.data_dir / "llm-calls.json",
@@ -378,6 +379,7 @@ def create_app(
             gnani_voice_ready=gnani_ok,
             preload_status=preload,
             quota=quota_stats,
+            llm_errors=dict(LAST_ERRORS),
         )
 
     @app.post("/ask", dependencies=[Depends(limit_asks)])
