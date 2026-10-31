@@ -44,7 +44,7 @@ Write-Host "    Tunnel: $url" -ForegroundColor Green
 if ($NoDeploy) { Write-Host "Send this link to Claude: $url"; exit 0 }
 
 Write-Host "4/4 Pointing the website at this laptop..." -ForegroundColor Cyan
-$paths = "/ask", "/ask/sources", "/sources", "/transcribe", "/speak", "/feedback"
+$paths = "/ask", "/ask/sources", "/sources", "/transcribe", "/speak", "/feedback", "/check-forward"
 $rewrites = $paths | ForEach-Object { [ordered]@{ source = $_; destination = "$url$_" } }
 $json = @{ rewrites = @($rewrites) } | ConvertTo-Json -Depth 4
 # UTF-8 without a byte-order mark: Windows PowerShell's "-Encoding utf8" adds one, and Vercel

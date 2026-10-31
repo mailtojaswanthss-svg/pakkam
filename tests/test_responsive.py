@@ -253,3 +253,67 @@ def test_rewrite_failure_falls_back_to_the_normal_refusal(corpus: list[Chunk]) -
     answerer._rewriter = FakeLlm(LlmUnavailableError("down"))
     answer = answerer.answer("zzzz qqqq xxxx")
     assert answer.refused
+
+
+def test_failover_skips_a_primary_that_just_failed() -> None:
+    from schemebot.generate.llm import FailoverJsonLlm, LlmUnavailableError
+
+    class Llm:
+        def __init__(self, error: bool) -> None:
+            self.calls = 0
+            self.error = error
+            self.configured = True
+
+        def complete_json(
+            self, system: str, user: str, schema: dict[str, object]
+        ) -> dict[str, Any]:
+            self.calls += 1
+            if self.error:
+                raise LlmUnavailableError("primary down")
+            return {"ok": True}
+
+    primary, secondary = Llm(error=True), Llm(error=False)
+    llm = FailoverJsonLlm(primary, secondary, fallback_enabled=True)
+    assert llm.complete_json("s", "u", {}) == {"ok": True}
+    assert llm.complete_json("s", "u", {}) == {"ok": True}
+    assert primary.calls == 1  # the second question went straight to the secondary
+    assert secondary.calls == 2
+
+
+def test_health_shows_the_last_llm_error(
+    parts: tuple[TestClient, RecordingService, FakeSpeaker],
+) -> None:
+    from schemebot.generate.llm import LAST_ERRORS, LlmUnavailableError, record_error
+
+    try:
+        raise LlmUnavailableError("Claude API returned 400") from ValueError("credit balance low")
+    except LlmUnavailableError as error:
+        record_error("claude-opus-5-5", error)
+    client, _, _ = parts
+    errors = client.get("/health").json()["llm_errors"]
+    assert "credit balance low" in errors["claude-opus-5-5"]["error"]
+    LAST_ERRORS.clear()
+
+
+def test_wav_to_opus_is_much_smaller() -> None:
+    import io
+    import math
+    import shutil
+    import struct
+    import wave
+
+    from schemebot.voice.audio import wav_to_opus
+
+    if shutil.which("ffmpeg") is None:
+        pytest.skip("ffmpeg not installed")
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(24000)
+        wav.writeframes(
+            b"".join(struct.pack("<h", int(8000 * math.sin(i / 8))) for i in range(48000))
+        )
+    opus = wav_to_opus(buffer.getvalue())
+    assert opus is not None and opus[:4] == b"OggS"
+    assert len(opus) < len(buffer.getvalue()) / 5

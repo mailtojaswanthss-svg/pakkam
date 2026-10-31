@@ -13,7 +13,12 @@ import httpx
 
 from schemebot.config import Effort
 from schemebot.generate.budget import BudgetExhausted, LlmBudget
-from schemebot.generate.llm import MAX_OUTPUT_TOKENS, LlmDeclinedError, LlmUnavailableError
+from schemebot.generate.llm import (
+    MAX_OUTPUT_TOKENS,
+    LlmDeclinedError,
+    LlmUnavailableError,
+    record_error,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +90,13 @@ class GeminiJsonLlm:
         return self._client is not None
 
     def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
+        try:
+            return self._complete_json(system, user, schema)
+        except LlmUnavailableError as error:
+            record_error(self._model, error)
+            raise
+
+    def _complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
         if self._client is None:
             raise LlmUnavailableError("no Gemini API key configured")
 
@@ -108,7 +120,12 @@ class GeminiJsonLlm:
                 model=self._model, contents=user, config=config
             )
         except self._errors.APIError as error:
-            logger.error("Gemini API error %s %s", error.code, error.status)
+            logger.error(
+                "Gemini API error %s %s: %s",
+                error.code,
+                error.status,
+                getattr(error, "message", ""),
+            )
             if (
                 error.code == 429 or "RESOURCE_EXHAUSTED" in str(error.status).upper()
             ) and self._budget is not None:
