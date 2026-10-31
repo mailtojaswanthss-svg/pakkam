@@ -267,3 +267,23 @@ def spell_amounts(text: str, language_code: str) -> str:
     """Money amounts in `text` as words in the voice's language (ta-IN, hi-IN, en-IN)."""
     language = {"ta-IN": "ta", "hi-IN": "hi"}.get(language_code, "en")
     return AMOUNT.sub(lambda match: _spell_match(match, language), text)
+
+
+_PHONE = re.compile(r"(?<![\d.,₹/])(\d[\d -]{3,}\d)(?![\d,.]?\d)")
+_MONEY_BEFORE = re.compile(r"(rs\.?|₹|ரூ\.?|रु\.?|inr)\s*$", re.IGNORECASE)
+
+
+def phone_numbers_as_digits(text: str) -> str:
+    """Helplines are read one digit at a time ("1800 425 3993" -> "1 8 0 0, 4 2 5, 3 9 9 3"),
+    as people dial them. Only runs of 5 or more digits that are not money (no Rs/₹ before
+    them) are changed; years and amounts are left alone."""
+
+    def spell(match: re.Match[str]) -> str:
+        number = match.group(1)
+        digits = re.sub(r"\D", "", number)
+        if len(digits) < 5 or _MONEY_BEFORE.search(text[: match.start()]):
+            return number
+        groups = [g for g in re.split(r"[ -]+", number.strip()) if g]
+        return ", ".join(" ".join(group) for group in groups)
+
+    return _PHONE.sub(spell, text)

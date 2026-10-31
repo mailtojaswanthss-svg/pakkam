@@ -76,6 +76,9 @@
         <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="2.5"/><path d="M9 10h11M9 15h11M9 20h7"/><circle cx="24" cy="23" r="6"/></svg>
         Pakkam
       </a>
+      <button type="button" class="icon-btn topbar-talk" data-talk aria-label="Talk mode">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </button>
       <button type="button" class="icon-btn" data-new-chat aria-label="New conversation">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
       </button>
@@ -92,6 +95,10 @@
           </p>
           <h1 id="welcome-h">What would you like to know about a scheme?</h1>
           <p class="welcome-sub">Ask in Tamil, Hindi, English or Tanglish. Every answer shows the page it comes from.</p>
+          <button type="button" class="talk-start" data-talk>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+            <span><strong>Talk to Pakkam</strong><small>Ask by voice and hear the answer. No typing or reading needed.</small></span>
+          </button>
           <ul class="suggestions">
             <li><button type="button" class="suggest" data-q><span class="suggest-topic">Women's entitlement</span><span class="suggest-q" lang="ta">மகளிர் உரிமைத் தொகை பெற யார் தகுதியானவர்?</span></button></li>
             <li><button type="button" class="suggest" data-q><span class="suggest-topic">Farmers</span><span class="suggest-q" lang="hi">पीएम किसान में साल में कितना पैसा मिलता है?</span></button></li>
@@ -122,6 +129,7 @@
         </button>
       </form>
       <div class="voice-row">
+        <button type="button" class="voice-action talk-open" data-talk>Talk mode</button>
         <fieldset class="voice-langs" id="voice-lang">
           <legend>I will speak in</legend>
           <label><input type="radio" name="voice-lang" value="ta" checked><span lang="ta">தமிழ்</span></label>
@@ -139,6 +147,22 @@
       <p class="composer-hint">Information only, not official advice. Check the official source.</p>
     </div>
   </main>
+
+  <!-- Talk mode: a whole conversation by voice -->
+  <div class="talk" id="talk" role="dialog" aria-modal="true" aria-labelledby="talk-state" hidden>
+    <button type="button" class="icon-btn talk-close" id="talk-close" aria-label="Close talk mode">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <p class="talk-state" id="talk-state" aria-live="polite">Tap the mic and ask your question</p>
+    <button type="button" class="talk-mic" id="talk-mic" aria-label="Talk">
+      <span class="talk-ring" id="talk-ring" aria-hidden="true"></span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+    </button>
+    <p class="talk-lang" id="talk-lang"></p>
+    <p class="talk-heard" id="talk-heard"></p>
+    <p class="talk-answer" id="talk-answer"></p>
+    <div class="talk-actions" id="talk-actions"></div>
+  </div>
 
   <!-- Sources panel (a bottom sheet on phones, with a backdrop that closes it) -->
   <div class="sheet-scrim" id="sheet-scrim" hidden></div>
