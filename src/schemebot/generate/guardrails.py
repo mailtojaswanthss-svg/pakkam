@@ -46,11 +46,11 @@ FailureReason = Literal[
 # states a period must find that period in a cited passage (any language, including Tanglish).
 _PERIODS = {
     "monthly": re.compile(
-        r"\bmonth|\bp\.m\.|per mensem|மாத|maas|maasa|masam|maasam|मासिक|माह|महीन|महिन",
+        r"\bmonth|\bp\.m\.|per mensem|மாத|maas|\bmasa|मासिक|माह|महीन|महिन",
         re.IGNORECASE,
     ),
     "yearly": re.compile(
-        r"\byear|\bannual|\bannum|\bp\.a\.|ஆண்டு|ஆண்டி|வருட|varusha|varusam|varudam|"
+        r"\byear|\bannual|\bannum|\bp\.a\.|ஆண்டு|ஆண்டி|வருட|varus|varud|\bvarsh|"
         r"वार्षिक|वर्ष|साल",
         re.IGNORECASE,
     ),

@@ -138,6 +138,11 @@ class AskResponse(BaseModel):
         default=None,
         description="Voice only: a short 'I heard X, is that right?' when the match is uncertain.",
     )
+    rejected_reasons: list[str] = Field(
+        default_factory=list,
+        description="Why drafted sentences were dropped (codes only, e.g. 'number_not_in_source'); "
+        "explains an 'unsupported' refusal.",
+    )
 
     @classmethod
     def from_answer(
@@ -250,6 +255,7 @@ class AskResponse(BaseModel):
             disclaimer=answer.disclaimer,
             latency_ms=round(answer.timings_ms.get("total", 0.0), 1),
             timings_ms=rounded_timings(answer.timings_ms),
+            rejected_reasons=[r.reason for r in getattr(answer, "rejected", [])],
             contact=(
                 ContactOut(
                     scheme=answer.contact.scheme,
