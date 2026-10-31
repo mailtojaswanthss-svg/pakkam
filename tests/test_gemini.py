@@ -12,6 +12,7 @@ from schemebot.generate.factory import build_llm, model_for  # noqa: E402
 from schemebot.generate.gemini import GeminiJsonLlm  # noqa: E402
 from schemebot.generate.llm import (  # noqa: E402
     ClaudeJsonLlm,
+    FailoverJsonLlm,  # noqa: E402
     LlmDeclinedError,
     LlmUnavailableError,
 )
@@ -120,7 +121,7 @@ def test_missing_key_is_unavailable_without_calling_the_api(
 
 
 def test_provider_setting_picks_the_client_and_models() -> None:
-    gemini = Settings(llm_provider="gemini", gemini_api_key="test-key")  # type: ignore[arg-type]
+    gemini = Settings(llm_provider="gemini", gemini_api_key="test-key", gemini_backup_model=None)  # type: ignore[arg-type]
     claude = Settings(llm_provider="claude", anthropic_api_key="test-key")  # type: ignore[arg-type]
 
     assert isinstance(build_llm(gemini, "answer"), GeminiJsonLlm)
@@ -134,7 +135,10 @@ def test_llm_limits_reach_both_clients() -> None:
     # The SDKs' own defaults (10 minutes for Claude; none for Gemini) are far too long for
     # a visitor waiting on an answer.
     limits: dict[str, Any] = {"llm_timeout_seconds": 12, "llm_retries": 1}
-    gemini = build_llm(Settings(llm_provider="gemini", gemini_api_key="k", **limits), "answer")  # type: ignore[arg-type]
+    gemini = build_llm(
+        Settings(llm_provider="gemini", gemini_api_key="k", gemini_backup_model=None, **limits),  # type: ignore[arg-type]
+        "answer",
+    )
     claude = build_llm(Settings(llm_provider="claude", anthropic_api_key="k", **limits), "verifier")  # type: ignore[arg-type]
 
     assert isinstance(gemini, GeminiJsonLlm)
@@ -150,3 +154,20 @@ def test_default_llm_limits_keep_one_call_to_a_few_minutes() -> None:
     settings = Settings()
 
     assert settings.llm_timeout_seconds * (settings.llm_retries + 1) <= 180
+
+
+def test_gemini_answers_fall_back_to_a_second_gemini_model() -> None:
+    # The free plan allows a few requests a minute per model; the backup has its own.
+    settings = Settings(
+        llm_provider="gemini",
+        gemini_api_key="k",  # type: ignore[arg-type]
+        gemini_model="gemini-main",
+        gemini_backup_model="gemini-lite",
+    )
+    llm = build_llm(settings, "answer")
+
+    assert isinstance(llm, FailoverJsonLlm)
+    assert isinstance(llm._primary, GeminiJsonLlm) and llm._primary._model == "gemini-main"
+    assert isinstance(llm._secondary, GeminiJsonLlm) and llm._secondary._model == "gemini-lite"
+    # Only answers get the backup; the verifier already runs on the light model.
+    assert isinstance(build_llm(settings, "verifier"), GeminiJsonLlm)

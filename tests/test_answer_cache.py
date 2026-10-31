@@ -84,7 +84,7 @@ def test_cached_answer_reports_its_own_time_not_the_first_answers_stages() -> No
     assert again.timings_ms["total"] < 100
 
 
-@pytest.mark.parametrize("reason", ["service_unavailable", "model_declined"])
+@pytest.mark.parametrize("reason", ["service_unavailable", "model_declined", "unsupported"])
 def test_passing_failures_are_not_kept(reason: RefusalReason) -> None:
     failed = replace(ANSWER, refused=True, refusal_reason=reason)
     service = CountingService(failed)
@@ -96,7 +96,7 @@ def test_passing_failures_are_not_kept(reason: RefusalReason) -> None:
     assert len(service.calls) == 2
 
 
-@pytest.mark.parametrize("reason", ["low_confidence", "not_in_documents", "unsupported"])
+@pytest.mark.parametrize("reason", ["low_confidence", "not_in_documents"])
 def test_lasting_refusals_are_kept(reason: RefusalReason) -> None:
     refused = replace(ANSWER, refused=True, refusal_reason=reason)
     service = CountingService(refused)
