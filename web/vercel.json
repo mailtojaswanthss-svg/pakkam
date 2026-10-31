@@ -2,27 +2,27 @@
   "rewrites": [
     {
       "source": "/ask",
-      "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/ask"
+      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/ask"
     },
     {
       "source": "/ask/sources",
-      "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/ask/sources"
+      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/ask/sources"
     },
     {
       "source": "/sources",
-      "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/sources"
+      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/sources"
     },
     {
       "source": "/transcribe",
-      "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/transcribe"
+      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/transcribe"
     },
     {
       "source": "/speak",
-      "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/speak"
+      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/speak"
     },
     {
       "source": "/feedback",
-      "destination": "https://cologne-instructions-literature-ratio.trycloudflare.com/feedback"
+      "destination": "https://bestsellers-soonest-organizing-specials.trycloudflare.com/feedback"
     }
   ]
 }
