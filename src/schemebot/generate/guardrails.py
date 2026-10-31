@@ -35,8 +35,30 @@ _UNITS = re.compile(
 _FINANCIAL_YEAR = re.compile(r"\b(?P<start>\d{4})\s*[-–/]\s*(?P<end>\d{2})\b")
 
 FailureReason = Literal[
-    "no_valid_citation", "number_not_in_source", "known_ocr_error", "not_supported"
+    "no_valid_citation",
+    "number_not_in_source",
+    "period_not_in_source",
+    "known_ocr_error",
+    "not_supported",
 ]
+
+# "Rs.6,000 a month" and "Rs.6,000 a year" share a number but not a meaning. A sentence that
+# states a period must find that period in a cited passage (any language, including Tanglish).
+_PERIODS = {
+    "monthly": re.compile(
+        r"\bmonth|\bp\.m\.|per mensem|மாத|maas|maasa|masam|maasam|मासिक|माह|महीन|महिन",
+        re.IGNORECASE,
+    ),
+    "yearly": re.compile(
+        r"\byear|\bannual|\bannum|\bp\.a\.|ஆண்டு|ஆண்டி|வருட|varusha|varusam|varudam|"
+        r"वार्षिक|वर्ष|साल",
+        re.IGNORECASE,
+    ),
+}
+
+
+def periods_in(text: str) -> set[str]:
+    return {name for name, pattern in _PERIODS.items() if pattern.search(text)}
 
 
 @dataclass(frozen=True)
@@ -156,6 +178,13 @@ def check_answer(
         sentence_numbers = numbers_in(sentence.text)
         if not sentence_numbers <= cited_numbers:
             rejected.append(RejectedSentence(sentence, "number_not_in_source"))
+            continue
+        stated = periods_in(sentence.text) if sentence_numbers else set()
+        cited_periods = set().union(*(periods_in(passages[n - 1]) for n in valid))
+        # Only a clash counts: the sentence says "a month" and the source names "a year" but
+        # never a month (or the reverse). A source that names no period is left to the verifier.
+        if len(stated) == 1 and cited_periods and not stated <= cited_periods:
+            rejected.append(RejectedSentence(sentence, "period_not_in_source"))
             continue
         if any(sentence_numbers & misread[n - 1] for n in valid):
             rejected.append(RejectedSentence(sentence, "known_ocr_error"))
