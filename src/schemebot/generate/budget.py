@@ -3,7 +3,8 @@
 Features:
 - Configurable daily limit (default 20, overridable via SCHEMEBOT_DAILY_LLM_CAP_OVERRIDE).
 - Configurable reset time (default "unknown").
-- Real 429 is authoritative: immediately halts further calls for that model.
+- A real 429 pauses that model for a short cooldown (60 s by default), not the whole day:
+  free-tier 429s are usually per-minute limits.
 - Per-model counters and failed attempts counted (fail-closed before dispatch).
 - Low-quota warning when remaining <= 5.
 - Atomic file-locking with stale lock cleanup and IST midnight rollover.
@@ -26,6 +27,8 @@ CALLS_FILE_NAME = "llm-calls.json"
 LOCK_WAIT_S = 5.0
 STALE_LOCK_S = 30.0
 LOW_QUOTA_THRESHOLD = 5
+RATE_LIMIT_COOLDOWN_S = 60.0
+"""How long a model is paused after an HTTP 429 before calls to it are tried again."""
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +48,8 @@ class LlmBudget:
         max_per_day: int = 20,
         reset_time: str = "unknown",
         today: Callable[[], date] = today_in_india,
+        clock: Callable[[], float] = time.time,
+        cooldown_s: float = RATE_LIMIT_COOLDOWN_S,
     ) -> None:
         self._path = path
         # Check environment override
@@ -59,6 +64,8 @@ class LlmBudget:
 
         self.reset_time = os.environ.get("SCHEMEBOT_LLM_RESET_TIME", reset_time)
         self._today = today
+        self._clock = clock
+        self._cooldown_s = cooldown_s
         self._lock = threading.Lock()
 
     @property
@@ -76,17 +83,18 @@ class LlmBudget:
     def is_rate_limited(self, model: str) -> bool:
         with self._lock, self._file_lock():
             data = self._read_data()
-            rate_limited = data.get("rate_limited", {})
-            return bool(rate_limited.get(model, False))
+            return self._paused_for(data, model) > 0
 
     def record_429(self, model: str) -> None:
         """Mark a model as rate-limited (HTTP 429 is authoritative)."""
         with self._lock, self._file_lock():
             data = self._read_data()
             rate_limited = data.setdefault("rate_limited", {})
-            rate_limited[model] = True
+            rate_limited[model] = self._clock() + self._cooldown_s
             self._write_data(data)
-            logger.warning("Model %s received HTTP 429; marked rate-limited until rollover.", model)
+            logger.warning(
+                "Model %s received HTTP 429; paused for %.0f s.", model, self._cooldown_s
+            )
 
     def stats(self) -> dict[str, Any]:
         with self._lock, self._file_lock():
@@ -106,9 +114,11 @@ class LlmBudget:
         """Count one attempt before dispatch. Raises BudgetExhausted if cap reached or model 429."""
         with self._lock, self._file_lock():
             data = self._read_data()
-            rate_limited = data.get("rate_limited", {})
-            if rate_limited.get(model, False):
-                raise BudgetExhausted(f"Model {model} is marked rate-limited (authoritative 429).")
+            paused = self._paused_for(data, model)
+            if paused > 0:
+                raise BudgetExhausted(
+                    f"Model {model} is rate-limited (HTTP 429); retry in {paused:.0f} s."
+                )
 
             used = int(data.get("calls", 0))
             if used >= self.max_per_day:
@@ -129,6 +139,16 @@ class LlmBudget:
             rem = max(self.max_per_day - used, 0)
             if rem <= LOW_QUOTA_THRESHOLD:
                 logger.warning("Low LLM quota warning: only %d calls remaining today!", rem)
+
+    def _paused_for(self, data: dict[str, Any], model: str) -> float:
+        """Seconds left in this model's 429 cooldown; 0 when it may be called.
+
+        Files written by older versions hold `true` instead of a time: treat those as a
+        cooldown that has already ended."""
+        until = data.get("rate_limited", {}).get(model)
+        if not isinstance(until, (int, float)) or isinstance(until, bool):
+            return 0.0
+        return max(float(until) - self._clock(), 0.0)
 
     @contextmanager
     def _file_lock(self) -> Iterator[None]:

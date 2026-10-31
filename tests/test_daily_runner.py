@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from schemebot.generate.budget import LlmBudget
+from schemebot.generate.budget import LlmBudget, today_in_india
 from scripts.run_daily import (
     MAX_SPARE_RESERVE,
     check_field_clips,
@@ -18,7 +18,9 @@ def test_speed_retest_skips_when_remaining_at_or_below_reserve(tmp_path: Path) -
     calls_file = tmp_path / "llm-calls.json"
     budget = LlmBudget(calls_file, max_per_day=20)
     # Simulate 16 calls already used -> 4 remaining (<= 5 reserve)
-    calls_file.write_text(json.dumps({"date": "2026-10-30", "calls": 16}), encoding="utf-8")
+    calls_file.write_text(
+        json.dumps({"date": today_in_india().isoformat(), "calls": 16}), encoding="utf-8"
+    )
 
     res = run_speed_retest(budget, dry_run=False)
     assert res["status"] == "SKIPPED"
@@ -29,7 +31,9 @@ def test_speed_retest_dry_run_respects_reserve(tmp_path: Path) -> None:
     calls_file = tmp_path / "llm-calls.json"
     budget = LlmBudget(calls_file, max_per_day=20)
     # Simulate 10 calls used -> 10 remaining -> 5 usable above reserve
-    calls_file.write_text(json.dumps({"date": "2026-10-30", "calls": 10}), encoding="utf-8")
+    calls_file.write_text(
+        json.dumps({"date": today_in_india().isoformat(), "calls": 10}), encoding="utf-8"
+    )
 
     res = run_speed_retest(budget, dry_run=True)
     assert res["status"] == "DRY_RUN"

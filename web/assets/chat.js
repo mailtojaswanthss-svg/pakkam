@@ -9,6 +9,8 @@
   const ASK_TIMEOUT_MS = 120000;
   // Voice errors whose server message is written for the user (bad file, nothing heard, STT down).
   const VOICE_ERRORS = new Set([400, 413, 415, 422, 502, 503]);
+  // After this long, say so: "This is taking longer than usual."
+  const SLOW_ANSWER_S = 20;
   const TEXT = {
     tooShort: 'Type at least 3 characters.',
     tooLong: 'Keep it under 500 characters.',
@@ -17,7 +19,11 @@
     tooMany: 'Pakkam is getting a lot of questions. Wait a minute, then ask again.',
     timeout: 'Pakkam took too long to answer. Ask again in a moment.',
     offline: 'The live chat is offline right now. The answer server is not connected to this site.',
-    waiting: 'Finding the pages, reading them and checking every sentence',
+    waiting: 'Searching the official documents',
+    found: (doc, page) => `Found in ${doc}, page ${page}. Writing the answer`,
+    slowAnswer: 'This is taking longer than usual.',
+    stop: 'Stop',
+    stopped: 'Stopped. Ask again when you are ready.',
     chip: 'Show the source',
     answeredIn: (ms) => `Answered in ${(ms / 1000).toFixed(1)} s`,
     openPdf: (page) => `Open the official PDF at page ${page}`,
@@ -45,6 +51,34 @@
   const REFUSAL_TEXT = {
     en: { title: 'Not in the documents Pakkam has', official: 'Ask on the official website', schemes: 'What Pakkam can read' },
     ta: { title: 'Pakkam-இடம் உள்ள ஆவணங்களில் இது இல்லை', official: 'அதிகாரப்பூர்வ இணையதளத்தில் கேளுங்கள்', schemes: 'Pakkam படிக்கக்கூடியவை' },
+    hi: { title: 'यह Pakkam के दस्तावेज़ों में नहीं है', official: 'आधिकारिक वेबसाइट पर पूछें', schemes: 'Pakkam क्या पढ़ सकता है' },
+  };
+  // Words around an answer, in its language. Tamil and Hindi need native review.
+  const UI = {
+    en: {
+      followUps: ['Who can get it?', 'How much money?', 'What documents are needed?', 'How do I apply?'],
+      more: 'Ask more about this scheme', useful: 'Was this useful?', yes: 'Useful', no: 'Not useful', thanks: 'Thank you.',
+      whichScheme: 'Which scheme do you mean?', busy: 'Pakkam cannot write the answer right now. This is what the official documents say:',
+      tryAgain: 'Try again', page: 'page', disclaimer: 'Information only. Check the official source.',
+    },
+    'ta-Latn': {
+      followUps: ['Yaarukku kidaikum?', 'Evlo panam kidaikum?', 'Enna documents venum?', 'Eppadi apply panradhu?'],
+      more: 'Ask more about this scheme', useful: 'Useful-aa irundhadha?', yes: 'Useful', no: 'Not useful', thanks: 'Nandri.',
+      whichScheme: 'Endha scheme pathi kekkureenga?', busy: 'Ippo answer ezhudha mudiyala. Official documents la idhu irukku:',
+      tryAgain: 'Marubadi try pannunga', page: 'page', disclaimer: 'Information only. Check the official source.',
+    },
+    ta: {
+      followUps: ['யாருக்கு கிடைக்கும்?', 'எவ்வளவு பணம்?', 'என்ன ஆவணங்கள் தேவை?', 'எப்படி விண்ணப்பிப்பது?'],
+      more: 'இந்தத் திட்டம் பற்றி மேலும் கேளுங்கள்', useful: 'இது உதவியதா?', yes: 'உதவியது', no: 'உதவவில்லை', thanks: 'நன்றி.',
+      whichScheme: 'எந்தத் திட்டத்தைக் குறிப்பிடுகிறீர்கள்?', busy: 'இப்போது பதில் எழுத முடியவில்லை. அதிகாரப்பூர்வ ஆவணங்களில் உள்ளது:',
+      tryAgain: 'மீண்டும் முயற்சிக்கவும்', page: 'பக்கம்', disclaimer: 'தகவலுக்கு மட்டும். அதிகாரப்பூர்வ ஆதாரத்தைச் சரிபார்க்கவும்.',
+    },
+    hi: {
+      followUps: ['किसे मिलता है?', 'कितना पैसा मिलता है?', 'कौन से दस्तावेज़ चाहिए?', 'आवेदन कैसे करें?'],
+      more: 'इस योजना के बारे में और पूछें', useful: 'क्या यह उपयोगी था?', yes: 'उपयोगी', no: 'उपयोगी नहीं', thanks: 'धन्यवाद।',
+      whichScheme: 'आप किस योजना के बारे में पूछ रहे हैं?', busy: 'अभी उत्तर नहीं लिखा जा सका। आधिकारिक दस्तावेज़ों में यह लिखा है:',
+      tryAgain: 'फिर से कोशिश करें', page: 'पेज', disclaimer: 'केवल जानकारी के लिए। आधिकारिक स्रोत देखें।',
+    },
   };
   const LANG_NAME = { en: 'English', ta: 'தமிழ்', hi: 'हिन्दी', 'ta-Latn': 'Tanglish' };
   const LANG_ATTR = new Set(['en', 'ta', 'hi', 'ta-Latn']);
@@ -204,13 +238,122 @@
     return span;
   }
 
-  function renderAnswer(data) {
+  const uiText = (lang) => UI[lang] || UI.en;
+
+  // Buttons that ask the next natural question about the same scheme. They send the scheme
+  // along (follow_up), so "How do I apply?" is read as "how do I apply for <scheme>?".
+  function followUpChips(data, question) {
+    const scheme = data.citations.length ? data.citations[0].scheme : null;
+    if (!scheme) return null;
+    const words = uiText(data.language);
+    const row = el('div', 'follow-ups');
+    row.setAttribute('role', 'group');
+    row.setAttribute('aria-label', words.more);
+    words.followUps.forEach((text) => {
+      const chip = el('button', 'follow-up', text);
+      chip.type = 'button';
+      setLang(chip, data.language);
+      chip.addEventListener('click', () => ask(text, { followUp: { question, scheme } }));
+      row.append(chip);
+    });
+    return row;
+  }
+
+  // Was this answer useful? Only the status, language and timings are sent, never the text.
+  function feedbackRow(data) {
+    const words = uiText(data.language);
+    const row = el('div', 'feedback');
+    const label = el('span', 'feedback-label', words.useful);
+    setLang(label, data.language);
+    row.append(label);
+    [['up', '👍', words.yes], ['down', '👎', words.no]].forEach(([thumbs, icon, name]) => {
+      const button = el('button', 'feedback-btn', icon);
+      button.type = 'button';
+      button.setAttribute('aria-label', name);
+      button.addEventListener('click', () => {
+        row.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+        button.classList.add('chosen');
+        fetch('/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: data.status || 'SUPPORTED', thumbs, language: data.language, timings_ms: data.timings_ms || {} }),
+        }).catch(() => {});
+        label.textContent = words.thanks;
+      });
+      row.append(button);
+    });
+    return row;
+  }
+
+  // "Did you mean A or B?": each scheme is a button that asks the same question about it.
+  function clarifyCard(data, question) {
+    const words = uiText(data.language);
+    const card = el('div', 'clarify');
+    const title = el('p', 'clarify-title', words.whichScheme);
+    setLang(title, data.language);
+    card.append(title);
+    const actions = el('div', 'clarify-actions');
+    data.candidate_schemes.forEach((scheme) => {
+      const button = el('button', 'clarify-btn', scheme);
+      button.type = 'button';
+      button.addEventListener('click', () => ask(question, { followUp: { question, scheme }, label: `${question} (${scheme})` }));
+      actions.append(button);
+    });
+    card.append(actions);
+    return card;
+  }
+
+  // The answer writer is busy or down: show what the documents say instead of a bare error.
+  function busyCard(data, question) {
+    const words = uiText(data.language);
+    const card = el('div', 'busy');
+    const title = el('p', 'busy-title', words.busy);
+    setLang(title, data.language);
+    card.append(title);
+    const list = el('ul', 'busy-passages');
+    data.passages.forEach((p) => {
+      const li = el('li');
+      const head = el('p', 'busy-doc', `${p.document} · ${words.page} ${p.page}`);
+      const text = el('blockquote', 'busy-text', p.text.length > 280 ? `${p.text.slice(0, 277)}…` : p.text);
+      li.append(head, text);
+      const url = safeUrl(p.source_url);
+      if (url) {
+        const link = el('a', 'source-link', TEXT.openPdf(p.page));
+        link.href = `${url}#page=${p.page}`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        li.append(link);
+      }
+      list.append(li);
+    });
+    card.append(list);
+    const again = el('button', 'refusal-schemes', words.tryAgain);
+    again.type = 'button';
+    again.addEventListener('click', () => ask(question));
+    card.append(again);
+    return card;
+  }
+
+  function renderAnswer(data, question) {
     const item = el('li', 'msg a');
     const body = el('div', 'a-body');
     setLang(body, data.language);
+    const words = uiText(data.language);
 
-    const refused = data.refused || data.sentences.length === 0;
-    if (refused) {
+    if (data.confirmation_text) {
+      const confirm = el('p', 'confirm', data.confirmation_text);
+      setLang(confirm, data.language);
+      body.append(confirm);
+    }
+
+    const clarify = data.status === 'needs_clarification' && data.candidate_schemes && data.candidate_schemes.length;
+    const busy = data.refused && data.passages && data.passages.length;
+    const refused = !clarify && (data.refused || data.sentences.length === 0);
+    if (clarify) {
+      body.append(clarifyCard(data, question));
+    } else if (busy) {
+      body.append(busyCard(data, question));
+    } else if (refused) {
       body.append(refusalCard(data));
     } else {
       const byNumber = new Map(data.citations.map((c) => [c.number, c]));
@@ -259,27 +402,23 @@
     }
 
     const meta = el('div', 'a-meta');
-    // Listen sits beside the time; the source lines above replace the old "N sources" button.
-    meta.append(listenButton(data));
-    if (data.latency_ms && !refused) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
-    if (data.timings_ms && !refused) {
-      const steps = [];
-      if (data.timings_ms.stt) steps.push(`heard ${Math.round(data.timings_ms.stt)}ms`);
-      const searchMs = (data.timings_ms.search || 0) + (data.timings_ms.rerank || 0);
-      if (searchMs > 0) steps.push(`search ${Math.round(searchMs)}ms`);
-      if (data.timings_ms.llm_answer) steps.push(`answer ${Math.round(data.timings_ms.llm_answer)}ms`);
-      if (steps.length > 0) meta.append(el('span', 'a-breakdown', `(${steps.join(' · ')})`));
+    if (!clarify && !busy) meta.append(listenButton(data));
+    if (data.latency_ms && !refused && !clarify) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
+    if (!refused && !clarify) meta.append(feedbackRow(data));
+    body.append(meta);
+
+    if (!refused && !clarify) {
+      const more = followUpChips(data, question);
+      if (more) body.append(more);
     }
-    const disclaimer = el('p', 'disclaimer', data.disclaimer);
+    const disclaimer = el('p', 'disclaimer', data.disclaimer || words.disclaimer);
     setLang(disclaimer, data.language);
-    body.append(meta, disclaimer);
+    body.append(disclaimer);
 
     item.append(avatar(), body);
     return item;
   }
 
-  // "I don't know": the refusal text, the scheme's official website when known, and the list
-  // of schemes Pakkam can read. Calm on purpose: a refusal is a correct answer, not an error.
   function refusalCard(data) {
     const words = REFUSAL_TEXT[data.language] || REFUSAL_TEXT.en;
     const card = el('div', 'refusal');
@@ -350,7 +489,9 @@
     return URL.createObjectURL(blob);
   }
 
-  async function listen(data, button) {
+  // `quiet`: started automatically after a voice question, so a failure (e.g. spoken answers
+  // not set up on this server) just leaves the Listen button, with no error message.
+  async function listen(data, button, quiet = false) {
     if (playing && playing.button === button) {
       stopPlaying();
       return;
@@ -361,7 +502,7 @@
 
     const abortCtrl = new AbortController();
     const urls = [];
-    const state = { audio: null, button, abortCtrl, urls };
+    const state = { audio: null, button, abortCtrl, urls, failed: false };
     playing = state;
 
     const sentences = getSentencesToSpeak(data);
@@ -400,15 +541,20 @@
             .then((nextUrl) => {
               if (playing === state) urls.push(nextUrl);
             })
-            .catch(() => {});
+            .catch(() => { state.failed = true; });
         }
 
         audio.addEventListener('ended', async () => {
           currentIdx++;
           if (currentIdx < sentences.length) {
             // Wait for next sentence if it is still fetching
-            while (urls.length <= currentIdx && playing === state) {
+            // Wait for the next sentence, unless its audio could not be fetched.
+            while (urls.length <= currentIdx && playing === state && !state.failed) {
               await new Promise((r) => setTimeout(r, 100));
+            }
+            if (urls.length <= currentIdx) {
+              stopPlaying();
+              return;
             }
             playNext();
           } else {
@@ -426,7 +572,7 @@
       }
       stopPlaying();
       button.textContent = TEXT.listen;
-      showFormMsg(error instanceof TypeError ? TEXT.network : error.message);
+      if (!quiet) showFormMsg(error instanceof TypeError ? TEXT.network : error.message);
     } finally {
       if (playing === state && !state.audio) {
         button.disabled = false;
@@ -452,6 +598,10 @@
 
   /* ---------- asking ---------- */
   let busy = false;
+  let current = null; // { controller } for the turn in progress, so it can be stopped
+  // The last answered scheme. A short follow-up ("how do I apply?") is sent with it so the
+  // server reads it as a question about that scheme. Kept only in this page, never stored.
+  let lastTurn = null; // { question, scheme }
   const showFormMsg = (text) => { formMsg.textContent = text; };
 
   function autosize() {
@@ -459,54 +609,93 @@
     input.style.height = `${input.scrollHeight}px`;
   }
 
-  // One question and answer turn. `request(bubble)` returns the fetch promise; `label` shows
-  // in the question bubble until it is replaced (for voice, by what Pakkam heard).
-  async function runTurn(label, request) {
-    if (busy) return;
+  // Short questions that only make sense after the previous answer, in the four languages.
+  const FOLLOW_UP_CUE = /\b(apply|eligib|documents?|how much|amount|when|where|who|evlo|evvalavu|eppadi|eppo|yaar|enna|venum|kaise|kitna|kab|kaun)\b|விண்ணப்ப|ஆவண|எவ்வளவு|யார்|எப்படி|எப்போது|आवेदन|दस्तावेज़|कितना|कौन|कैसे|कब/i;
+  function followUpFor(question) {
+    if (!lastTurn) return null;
+    const words = question.trim().split(/\s+/).length;
+    return words <= 6 && FOLLOW_UP_CUE.test(question) ? lastTurn : null;
+  }
+
+  // Show the pages a question matched while its answer is still being written.
+  function previewSources(question, followUp, view, signal) {
+    fetch('/ask/sources', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, follow_up: followUp }),
+      signal,
+    }).then(async (res) => {
+      if (!res.ok) return;
+      const found = await res.json();
+      if (!found.passages || !found.passages.length || !view.pending.isConnected) return;
+      const first = found.passages[0];
+      view.stage = TEXT.found(first.document, first.page);
+      view.update();
+      view.preview.textContent = '';
+      view.preview.append(el('blockquote', 'source-preview-snippet', first.text.length > 160 ? `${first.text.slice(0, 157)}…` : first.text));
+      view.preview.hidden = false;
+      scrollToEnd();
+    }).catch(() => {});
+  }
+
+  function stopCurrent() {
+    if (current) current.controller.abort();
+  }
+
+  // One question and answer turn. `request(bubble, hooks)` returns the fetch promise; `label`
+  // shows in the question bubble until it is replaced (for voice, by what Pakkam heard).
+  // Resolves to { data, item } on an answer, { error } on a failure, {} when stopped.
+  async function runTurn(label, request, question = null, followUp = null) {
+    if (busy) return {};
     showFormMsg('');
     busy = true;
     send.disabled = true;
     form.setAttribute('aria-busy', 'true');
     welcome.hidden = true;
     closeSources(false);
+    const controller = new AbortController();
+    current = { controller };
 
     const questionItem = el('li', 'msg q');
     const bubble = el('p', null, label);
     questionItem.append(bubble);
-    const waitMsg = el('p', 'wait', TEXT.waiting);
+    const waitMsg = el('p', 'wait');
     const waitBar = el('span', 'wait-bar');
-    const previewBox = el('div', 'source-preview-box');
-    previewBox.hidden = true;
-    const pending = assistantItem('pending', [waitMsg, waitBar, previewBox]);
+    const preview = el('div', 'source-preview-box');
+    preview.hidden = true;
+    const stop = el('button', 'stop-btn', TEXT.stop);
+    stop.type = 'button';
+    stop.addEventListener('click', stopCurrent);
+    const pending = assistantItem('pending', [waitMsg, waitBar, preview, stop]);
     log.append(questionItem, pending);
     scrollToEnd();
 
-    const questionText = typeof label === 'string' && label !== TEXT.voiceQuestion ? label : null;
-    if (questionText) {
-      fetch('/ask/sources', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: questionText }),
-      }).then(async (res) => {
-        if (!res.ok) return;
-        const sdata = await res.json();
-        if (sdata.passages && sdata.passages.length > 0 && pending.isConnected) {
-          const first = sdata.passages[0];
-          waitMsg.textContent = `Found in ${first.document} (page ${first.page}) · Checking details...`;
-          previewBox.textContent = '';
-          const snippet = el('blockquote', 'source-preview-snippet', first.text.length > 140 ? first.text.slice(0, 137) + '...' : first.text);
-          previewBox.append(snippet);
-          previewBox.hidden = false;
-          scrollToEnd();
-        }
-      }).catch(() => {});
-    }
+    // Real progress only: what was found, and how long it has taken. No pretend steps.
+    const started = Date.now();
+    const view = {
+      pending,
+      preview,
+      stage: TEXT.waiting,
+      update() {
+        const seconds = Math.floor((Date.now() - started) / 1000);
+        const slow = seconds >= SLOW_ANSWER_S ? ` ${TEXT.slowAnswer}` : '';
+        waitMsg.textContent = seconds >= 2 ? `${this.stage} · ${seconds} s${slow}` : this.stage;
+      },
+    };
+    view.update();
+    const ticker = setInterval(() => view.update(), 1000);
+    const hooks = {
+      signal: controller.signal,
+      preview: (text, fu) => previewSources(text, fu, view, controller.signal),
+    };
+    if (question) hooks.preview(question, followUp);
 
     try {
       let response;
       try {
-        response = await withTimeout(request(bubble), ASK_TIMEOUT_MS);
+        response = await withTimeout(request(bubble, hooks), ASK_TIMEOUT_MS);
       } catch (error) {
+        if (error.name === 'AbortError') throw error;
         throw new Error(error.message === 'timeout' ? 'timeout' : 'network');
       }
       if (!response.ok) {
@@ -519,20 +708,33 @@
         bubble.append(el('span', 'heard', TEXT.heard), data.transcript);
       }
       setLang(bubble, data.language);
-      pending.replaceWith(renderAnswer(data));
+      const asked = question || data.transcript || bubble.textContent;
+      const item = renderAnswer(data, asked);
+      pending.replaceWith(item);
+      if (!data.refused && data.citations && data.citations.length) {
+        lastTurn = { question: asked, scheme: data.citations[0].scheme };
+      }
+      return { data, item };
     } catch (error) {
+      if (error.name === 'AbortError') {
+        pending.replaceWith(assistantItem('', [el('p', 'wait', TEXT.stopped)]));
+        return {};
+      }
       let message = error.message === 'timeout' ? TEXT.timeout : TEXT.network;
       if (error instanceof ServerError) {
-        // 404/405: a static host (e.g. Vercel) with no answer server behind it.
+        // 404/405: a static host (e.g. Vercel) with no answer server behind it; 502/504: the
+        // host is there but the answer server behind it is not reachable.
         // 429: the server says whether to wait a minute or come back tomorrow.
         if (error.status === 429) message = error.detail || TEXT.tooMany;
-        else if (error.status === 404 || error.status === 405) message = TEXT.offline;
+        else if ([404, 405, 502, 504].includes(error.status) && !error.detail) message = TEXT.offline;
         else if (error.detail && VOICE_ERRORS.has(error.status)) message = error.detail;
         else message = TEXT.server;
       }
       pending.replaceWith(assistantItem('', [el('p', 'error-msg', message)]));
-      return error;
+      return { error };
     } finally {
+      clearInterval(ticker);
+      current = null;
       busy = false;
       send.disabled = false;
       form.removeAttribute('aria-busy');
@@ -541,18 +743,29 @@
     }
   }
 
-  function ask(raw) {
+  const askBody = (question, followUp, voiceMode = false) => JSON.stringify({
+    question,
+    ...(voiceMode ? { voice_mode: true } : {}),
+    ...(followUp ? { follow_up: followUp } : {}),
+  });
+
+  // `options.followUp` comes from a follow-up chip or a "did you mean" button; a typed short
+  // follow-up gets the previous scheme automatically (followUpFor).
+  function ask(raw, options = {}) {
     const question = raw.trim();
     if (question.length < MIN_CHARS) return showFormMsg(TEXT.tooShort);
     if (question.length > MAX_CHARS) return showFormMsg(TEXT.tooLong);
     if (busy) return;
     input.value = '';
     autosize();
-    return runTurn(question, () => fetch('/ask', {
+    stopPlaying();
+    const followUp = options.followUp || followUpFor(question);
+    return runTurn(options.label || question, (bubble, hooks) => fetch('/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question }),
-    }));
+      body: askBody(question, followUp),
+      signal: hooks.signal,
+    }), question, followUp);
   }
 
   /* ---------- asking by voice (Gnani speech to text on the server) ---------- */
@@ -580,26 +793,22 @@
   // Not for 4xx answers like "could not hear", where speaking again is the fix.
   const canRetry = (error) => !(error instanceof ServerError) || error.status >= 500;
 
-  const askText = (question) => fetch('/ask', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
-  });
-
   // Two steps, so "Pakkam heard: ..." shows as soon as speech to text is done, while the
-  // answer is still being written: /transcribe (1 Gnani call), then /ask with that text.
+  // answer is still being written: /transcribe (1 Gnani call), then /ask with that text, in
+  // voice mode (a short answer that reads well aloud), and the answer is then spoken.
   // Once the transcript is known, Send again resends only the text, with no new Gnani call.
   async function askVoice(clip) {
     retryButton.hidden = true;
     lastClip = clip;
+    stopPlaying();
     setVoiceStatus(TEXT.sendingVoice);
     const slow = setTimeout(() => setVoiceStatus(TEXT.slowUpload), SLOW_UPLOAD_MS);
-    const error = await runTurn(TEXT.voiceQuestion, async (bubble) => {
+    const result = await runTurn(TEXT.voiceQuestion, async (bubble, hooks) => {
       if (!clip.transcript) {
         const body = new FormData();
         body.append('audio', clip.audio, clip.filename);
         body.append('language', clip.language);
-        const heard = await fetch('/transcribe', { method: 'POST', body });
+        const heard = await fetch('/transcribe', { method: 'POST', body, signal: hooks.signal });
         if (!heard.ok) return heard; // runTurn shows the server's message
         clip.transcript = (await heard.json()).transcript;
       }
@@ -607,16 +816,26 @@
       setVoiceStatus('');
       bubble.textContent = '';
       bubble.append(el('span', 'heard', TEXT.heard), clip.transcript);
-      return askText(clip.transcript);
+      const followUp = followUpFor(clip.transcript);
+      hooks.preview(clip.transcript, followUp);
+      return fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: askBody(clip.transcript, followUp, true),
+        signal: hooks.signal,
+      });
     });
     clearTimeout(slow);
-    if (error && canRetry(error)) {
+    if (result.error && canRetry(result.error)) {
       setVoiceStatus(TEXT.voiceFailed);
       retryButton.hidden = false;
-    } else {
-      setVoiceStatus('');
-      lastClip = null;
+      return;
     }
+    setVoiceStatus('');
+    lastClip = null;
+    // Asked by voice, answered by voice: read the answer out. Listen stays as Stop/replay.
+    const button = result.item && result.item.querySelector('.listen-btn');
+    if (button && !result.data.refused) listen(result.data, button, true);
   }
 
   const newClip = (audio, filename) => ({ audio, filename, language: voiceLanguage(), transcript: null });
@@ -743,7 +962,8 @@
   /* ---------- new conversation ---------- */
   document.querySelectorAll('[data-new-chat]').forEach((button) => {
     button.addEventListener('click', () => {
-      if (busy) return;
+      stopCurrent();
+      lastTurn = null;
       stopPlaying();
       cancelRecording();
       lastClip = null;
@@ -775,8 +995,15 @@
       });
       list.textContent = '';
       schemes.forEach((langs, scheme) => {
-        const li = el('li', null, scheme);
-        li.append(el('span', 'scheme-docs', Array.from(langs).join(', ')));
+        const li = el('li');
+        const button = el('button', 'scheme-ask', scheme);
+        button.type = 'button';
+        button.title = `Ask about ${scheme}`;
+        button.addEventListener('click', () => {
+          if (app.classList.contains('menu-open')) setMenu(false);
+          ask(`What is ${scheme} and who can get it?`);
+        });
+        li.append(button, el('span', 'scheme-docs', Array.from(langs).join(', ')));
         list.append(li);
       });
     } catch {

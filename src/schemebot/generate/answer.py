@@ -7,7 +7,9 @@ Order of decisions:
 """
 
 import logging
+import threading
 import time
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -37,7 +39,7 @@ from schemebot.generate.prompt import (
 from schemebot.ingest.corrections import CORRECTED, OcrCorrection
 from schemebot.ingest.langid import Language, detect_language
 from schemebot.ingest.models import Chunk
-from schemebot.retrieve.retriever import RetrievedPassage, Retriever
+from schemebot.retrieve.retriever import RetrievalResult, RetrievedPassage, Retriever
 from schemebot.text import clean_query
 
 logger = logging.getLogger(__name__)
@@ -64,6 +66,21 @@ class AnswerSentence:
     text: str
     citations: list[int]
     """Numbers into Answer.citations."""
+
+
+@dataclass(frozen=True)
+class FollowUp:
+    """What the page remembers from the previous turn, so "and how do I apply?" works.
+
+    Nothing here is stored on the server; the page sends it with the next question."""
+
+    question: str | None = None
+    scheme: str | None = None
+
+
+RETRIEVAL_REUSE_S = 120.0
+"""How long a search result is kept so /ask can reuse the one /ask/sources just ran."""
+RETRIEVAL_REUSE_MAX = 64
 
 
 @dataclass(frozen=True)
@@ -167,12 +184,48 @@ class Answerer:
         self._misread = misread_numbers_by_page(corrections or [])
         self._fact_cards = fact_cards
         self._alias_matcher = alias_matcher
+        self._recent: OrderedDict[str, tuple[float, RetrievalResult]] = OrderedDict()
+        self._recent_lock = threading.Lock()
 
     @property
     def retriever(self) -> Retriever:
         return self._retriever
 
-    def answer(self, question: str, voice_mode: bool = False) -> Answer:
+    def search_query(self, question: str, follow_up: FollowUp | None = None) -> str:
+        """The text actually searched: cleaned, with a known scheme alias spelled out, and,
+        for a follow-up that names no scheme, the scheme of the previous answer."""
+        search_q = clean_query(question)
+        if self._alias_matcher is not None:
+            search_q = self._alias_matcher.expand_query(search_q)
+        scheme = follow_up.scheme if follow_up else None
+        names_scheme = self._alias_matcher is not None and self._alias_matcher.match(search_q)
+        if scheme and not names_scheme and scheme.casefold() not in search_q.casefold():
+            search_q = f"{search_q} {scheme}"
+        return search_q
+
+    def sources(self, question: str, follow_up: FollowUp | None = None) -> RetrievalResult:
+        """Search only (no LLM): what /ask/sources shows while the answer is written. The
+        result is kept briefly, so the /ask that follows does not search again."""
+        return self._retrieve(self.search_query(question, follow_up))
+
+    def _retrieve(self, search_q: str) -> RetrievalResult:
+        now = time.monotonic()
+        with self._recent_lock:
+            hit = self._recent.get(search_q)
+            if hit is not None and now - hit[0] <= RETRIEVAL_REUSE_S:
+                self._recent.move_to_end(search_q)
+                return RetrievalResult(hit[1].query, hit[1].passages, {"reused": 0.0})
+        result = self._retriever.retrieve(search_q)
+        with self._recent_lock:
+            self._recent[search_q] = (now, result)
+            self._recent.move_to_end(search_q)
+            while len(self._recent) > RETRIEVAL_REUSE_MAX:
+                self._recent.popitem(last=False)
+        return result
+
+    def answer(
+        self, question: str, voice_mode: bool = False, follow_up: FollowUp | None = None
+    ) -> Answer:
         timings: dict[str, float] = {}
         started = time.perf_counter()
         language = detect_language(question)
@@ -221,11 +274,10 @@ class Answerer:
                     understood_query=clean_query(question),
                 )
 
-        # Step 4B: Deterministic cleanup & alias expansion
+        # Step 4B: Deterministic cleanup & alias expansion (plus the previous scheme for a
+        # follow-up that names none)
         cleaned_q = clean_query(question)
-        search_q = cleaned_q
-        if self._alias_matcher is not None:
-            search_q = self._alias_matcher.expand_query(cleaned_q)
+        search_q = self.search_query(question, follow_up)
 
         if self._fact_cards is not None:
             card_started = time.perf_counter()
@@ -264,7 +316,7 @@ class Answerer:
                     understood_query=cleaned_q,
                 )
 
-        retrieval = self._retriever.retrieve(search_q)
+        retrieval = self._retrieve(search_q)
         timings["retrieval"] = (time.perf_counter() - started) * 1000
         timings.update(retrieval.timings_ms)  # "search" and "rerank" inside "retrieval"
         confidence = retrieval.confidence
@@ -356,7 +408,14 @@ class Answerer:
             reply = parse_reply(
                 AnswerReply,
                 self._llm.complete_json(
-                    prompt_to_use, build_user_message(question, language, passages), ANSWER_SCHEMA
+                    prompt_to_use,
+                    build_user_message(
+                        question,
+                        language,
+                        passages,
+                        follow_up.question if follow_up else None,
+                    ),
+                    ANSWER_SCHEMA,
                 ),
             )
             timings["llm_answer"] = (time.perf_counter() - generation_started) * 1000

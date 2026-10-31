@@ -171,8 +171,8 @@ body { overflow: hidden; background: var(--panel); }
 }
 .source-line:hover, .source-line[aria-expanded="true"] { border-color: var(--stamp); color: var(--stamp); }
 .a-time { color: var(--ink-2); font-size: var(--step--1); }
-.a-breakdown { color: var(--ink-3); font-size: var(--step--1); }
-.source-preview-box { margin-top: var(--s-2); font-size: var(--step--1); color: var(--ink-2); border-left: 2px solid var(--accent); padding-left: var(--s-2); }
+.source-preview-box { font-size: var(--step--1); color: var(--ink-2); border-left: 2px solid var(--stamp-line); padding-left: var(--s-2); }
+.source-preview-box[hidden] { display: none; }
 .disclaimer { margin-top: var(--s-2); color: var(--ink-2); font-size: var(--step--1); }
 
 .refusal {
@@ -203,6 +203,52 @@ body { overflow: hidden; background: var(--panel); }
 .refusal-link:hover, .refusal-schemes:hover { border-color: var(--stamp); }
 .refusal-host { color: var(--ink-2); font-weight: 400; overflow-wrap: anywhere; }
 #schemes-h:focus { outline: none; }
+.confirm { margin-bottom: var(--s-2); padding: 8px 12px; color: var(--ink); background: var(--marigold-soft); border-radius: var(--r-sm); font-weight: 600; }
+
+/* after an answer: follow-up questions and feedback */
+.follow-ups { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }
+.follow-up {
+  min-height: 36px;
+  padding: 6px 14px;
+  background: var(--panel);
+  color: var(--stamp);
+  border: 1px solid var(--stamp-line);
+  border-radius: var(--r-pill);
+  font-size: var(--step--1);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .16s var(--ease-out), color .16s var(--ease-out);
+}
+.follow-up:hover { background: var(--stamp); color: var(--on-stamp); }
+.feedback { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; color: var(--ink-2); font-size: var(--step--1); }
+.feedback-btn { width: 32px; height: 32px; padding: 0; background: transparent; border: 1px solid transparent; border-radius: 50%; font-size: 1rem; cursor: pointer; }
+.feedback-btn:hover:not(:disabled) { border-color: var(--border); }
+.feedback-btn:disabled { cursor: default; opacity: .45; }
+.feedback-btn.chosen { opacity: 1; border-color: var(--stamp-line); background: var(--stamp-soft); }
+
+/* "Did you mean...?" and "the answer writer is busy" */
+.clarify, .busy { padding: 14px 16px; background: var(--canvas); border: 1px solid var(--stamp-line); border-radius: var(--r-md); }
+.clarify-title, .busy-title { margin-bottom: var(--s-2); font-weight: 600; }
+.clarify-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.clarify-btn {
+  min-height: 44px;
+  padding: 6px 16px;
+  background: var(--stamp);
+  color: var(--on-stamp);
+  border: 0;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  cursor: pointer;
+}
+.clarify-btn:hover { background: var(--stamp-hover); }
+.busy-passages { display: grid; gap: var(--s-3); margin: 0 0 var(--s-3); padding: 0; list-style: none; }
+.busy-doc { font-size: var(--step--1); font-weight: 600; }
+.busy-text { margin: 4px 0; padding-left: var(--s-2); border-left: 2px solid var(--stamp-line); color: var(--ink); font-size: .9375rem; overflow-wrap: anywhere; }
+.stop-btn { justify-self: start; padding: 4px 14px; color: var(--ink); background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-pill); font-size: var(--step--1); cursor: pointer; }
+.stop-btn:hover { border-color: var(--tape); color: var(--tape); }
+.scheme-ask { padding: 0; color: inherit; background: none; border: 0; font: inherit; text-align: start; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.scheme-ask:hover { color: var(--stamp); text-decoration-color: var(--stamp); }
+
 .error-msg { padding: 12px 14px; color: var(--tape); background: var(--tape-soft); border-radius: var(--r-md); }
 
 .pending .a-body { display: grid; gap: var(--s-2); }
@@ -426,11 +472,23 @@ body { overflow: hidden; background: var(--panel); }
     background: var(--border);
     border-radius: 2px;
   }
-  .composer-hint { margin-top: 6px; font-size: .8125rem; }
-  /* On phones the mic is the main control. */
-  #mic { width: 52px; height: 52px; color: var(--on-stamp); background: var(--stamp); border-radius: 50%; }
-  #mic svg { width: 24px; height: 24px; }
-  #mic[aria-pressed="true"] { color: var(--on-stamp); background: var(--tape); }
+  /* Phones: give the question box the width, and keep the bottom area short. */
+  .composer-wrap { padding: 6px 0 var(--s-2); }
+  .composer { gap: 4px; padding: 6px 6px 6px 14px; }
+  #upload-label { display: none; }
+  /* Kept on phones (the English answers rely on it for the disclaimer), but on one short line. */
+  .composer-hint { margin-top: 2px; font-size: .75rem; line-height: 1.3; }
+  .voice-row { gap: 4px; margin-top: 4px; }
+  .voice-langs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .voice-langs::-webkit-scrollbar { display: none; }
+  .voice-langs legend { display: none; }
+  .voice-langs span { padding: 2px 9px; white-space: nowrap; }
+  .voice-langs small { display: none; }
+  /* The mic is outlined, the send button solid, so the two never look the same. */
+  #mic { width: 44px; height: 44px; color: var(--stamp); background: var(--panel); border: 2px solid var(--stamp); border-radius: 50%; }
+  #mic svg { width: 22px; height: 22px; }
+  #mic[aria-pressed="true"] { color: var(--on-stamp); background: var(--tape); border-color: var(--tape); }
+  .feedback { margin-left: 0; }
 }
 @media (pointer: coarse) {
   .icon-btn { width: 44px; height: 44px; }

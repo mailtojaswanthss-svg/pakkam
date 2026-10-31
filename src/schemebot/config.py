@@ -49,7 +49,9 @@ class Settings(BaseSettings):
     # Claude. With no key set, the SDK falls back to ANTHROPIC_API_KEY or `ant auth login`.
     anthropic_api_key: SecretStr | None = None
     llm_model: str = "claude-opus-5-5"
-    llm_effort: Effort = "medium"
+    llm_effort: Effort = "low"
+    """Thinking depth for the answer. Short cited answers do as well at "low", and it is
+    several times faster (docs/review/LLM_PROVIDER_COMPARISON.md)."""
     verify_answers: bool = True
     """Run the second-model support check on every answer (one extra, cheap API call)."""
     verifier_model: str = "claude-haiku-5-5"
@@ -59,9 +61,13 @@ class Settings(BaseSettings):
     # Limits for every LLM call (Claude and Gemini), so one stuck call cannot hold a visitor
     # for many minutes. Retries cover rate limits (429), server errors (5xx) and timeouts.
     # For a long evaluation run on Gemini's free tier, raise the retries (e.g. 7).
-    llm_timeout_seconds: float = Field(default=60.0, gt=0)
-    llm_retries: int = Field(default=2, ge=0, le=10)
-    max_daily_llm_calls: int = Field(default=20, ge=1)
+    # The defaults keep the worst case (timeout x (retries + 1)) well under the 2-minute limit
+    # of the chat page and of the Vercel proxy.
+    llm_timeout_seconds: float = Field(default=30.0, gt=0)
+    llm_retries: int = Field(default=1, ge=0, le=10)
+    max_daily_llm_calls: int = Field(default=200, ge=1)
+    """Answer and verifier calls together (about 100 answered questions a day). A cost guard:
+    on Gemini's free tier set it near the free quota."""
     llm_reset_time: str = Field(default="unknown")
     max_question_length: int = Field(default=500, ge=10, le=5000)
     cors_origins: list[str] = Field(default_factory=lambda: ["*"])
@@ -95,8 +101,9 @@ class Settings(BaseSettings):
     # Public demo limits on POST /ask (each question can cost two LLM calls)
     ask_limit_per_client_per_minute: int = Field(default=10, ge=1)
     ask_limit_total_per_day: int = Field(default=500, ge=1)
-    # disabled for demo: wrong-match rate unmeasured
-    answer_cache_size: int = Field(default=0, ge=0)
+    # Exact-match only: the same words (ignoring case, spaces and a final "?") in the same
+    # language, with the same models, settings, index and corrections.
+    answer_cache_size: int = Field(default=256, ge=0)
     """Answers kept in memory so a repeated question costs no LLM call; 0 turns it off."""
     answer_cache_ttl_seconds: float = Field(default=6 * 3600, gt=0)
 
