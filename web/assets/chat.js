@@ -1012,4 +1012,11 @@
     }
   }
   loadSchemes();
+
+  // chat/?q=... (from the home page) asks that question straight away.
+  const fromLink = new URLSearchParams(location.search).get('q');
+  if (fromLink) {
+    history.replaceState(null, '', location.pathname);
+    ask(fromLink);
+  }
 })();
