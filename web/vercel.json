@@ -23,6 +23,10 @@
     {
       "source": "/feedback",
       "destination": "https://est-amber-encryption-avenue.trycloudflare.com/feedback"
+    },
+    {
+      "source": "/check-forward",
+      "destination": "https://est-amber-encryption-avenue.trycloudflare.com/check-forward"
     }
   ]
 }
