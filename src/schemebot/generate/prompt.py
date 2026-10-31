@@ -104,9 +104,24 @@ def format_passages(passages: list[RetrievedPassage]) -> str:
     return "\n\n".join(blocks)
 
 
-def build_user_message(question: str, language: Language, passages: list[RetrievedPassage]) -> str:
+def build_user_message(
+    question: str,
+    language: Language,
+    passages: list[RetrievedPassage],
+    earlier_question: str | None = None,
+) -> str:
+    """`earlier_question`: the user's previous question, when this one follows up on it
+    ("and how do I apply?"). It only helps read the new question; facts still come from the
+    passages."""
+    earlier = (
+        f"<earlier_question>\n{earlier_question}\n</earlier_question>\n"
+        "The question below may follow up on this earlier question; read it in that light.\n\n"
+        if earlier_question
+        else ""
+    )
     return (
         f"<passages>\n{format_passages(passages)}\n</passages>\n\n"
+        f"{earlier}"
         f"<question>\n{question}\n</question>\n\n"
         f"Answer in {ANSWER_LANGUAGE[language]}."
     )

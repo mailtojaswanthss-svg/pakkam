@@ -9,7 +9,7 @@ Tamil · Hindi · English · Tanglish &nbsp;|&nbsp; text or voice &nbsp;|&nbsp; 
 
 [![CI](https://github.com/mailtojaswanthss-svg/pakkam/actions/workflows/ci.yml/badge.svg)](https://github.com/mailtojaswanthss-svg/pakkam/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB)
-![Tests](https://img.shields.io/badge/tests-521%20passing-2E7D32)
+![Tests](https://img.shields.io/badge/tests-532%20passing-2E7D32)
 ![License](https://img.shields.io/badge/code-MIT-5A36A3)
 ![Status](https://img.shields.io/badge/status-research%20prototype-E3A33B)
 
@@ -48,10 +48,11 @@ documents don't say, **tells you so and gives the official helpline** instead of
 |---|---|
 | **Every sentence is cited** | Each answer sentence links to the document and page it came from, with the passage and the official PDF one tap away. |
 | **Four ways to ask** | Tamil, Hindi, English and Tanglish (Tamil in English letters), typed or spoken. Answers come back in the question's language. |
-| **Numbers are checked, not trusted** | Every amount, date and period in an answer must appear in the cited text (`claims.py`); a second model checks support. Unsupported sentences are dropped. |
+| **Numbers are checked, not trusted** | Every number in an answer (amounts, ages, dates, income limits, 2.5 lakh = 2,50,000) must appear in the cited text (`guardrails.py`); a second model checks the rest. Unsupported sentences are dropped. |
 | **Honest refusals** | Low confidence means no LLM call: a calm card says the documents don't cover it and links the official contact. |
 | **Sources in under half a second** | `/ask/sources` shows the cited pages in about 0.3-0.4 s while the answer is still being written. |
-| **Voice with Gnani** | Prisma speech to text ("Pakkam heard: ..."), Timbre speech out sentence by sentence, amounts spoken as words. |
+| **A conversation, not a form** | The page shows what it found while the answer is written, can be stopped, offers follow-ups ("How do I apply?") that remember the scheme, turns "did you mean A or B?" into buttons, shows the official pages when the model is busy, and asks for 👍/👎. |
+| **Voice with Gnani** | Prisma speech to text ("Pakkam heard: ..."), a short spoken-style answer that is read out automatically, sentence by sentence, with "I heard X, is that right?" when unsure. |
 | **Verified fact cards** | Ready answers for common questions with no LLM call and cached audio. A card is served only after a person signs it off (`verified_by`); the 2 drafted cards are not signed off yet. |
 | **Private by design** | The audit log stores a hash of the question, never its text. No accounts, no personal data. |
 | **Built for cheap phones** | Plain HTML/CSS/JS, no framework, light and dark themes, reduced-motion support, 44 px touch targets. |
@@ -75,11 +76,11 @@ documents don't say, **tells you so and gives the official helpline** instead of
 |---|---|
 | Documents | 18 official PDFs (Tamil Nadu and central schemes), Tesseract OCR + Krutrim Chitrapathak-2 crop OCR for hard numerals |
 | Search | BAAI `bge-m3` dense + learned sparse vectors in Qdrant, `bge-reranker-v2-m3` |
-| Answers | Gemini (default, free tier) or Claude, structured JSON with per-sentence citations, failover and a daily call budget |
+| Answers | Claude (`claude-opus-5-5` answers, `claude-haiku-5-5` checks) or Gemini, structured JSON with per-sentence citations, optional failover to the other provider, a daily call budget |
 | Voice | Gnani Prisma v2.5 (speech to text), Gnani Timbre (text to speech), ffmpeg |
 | API | FastAPI, rate limits, privacy-preserving audit log |
 | Web | Plain HTML, CSS and JavaScript; Baloo 2 / Hind fonts; Vercel |
-| Quality | pytest (521 tests), ruff, mypy, GitHub Actions |
+| Quality | pytest (532 tests), ruff, mypy, GitHub Actions |
 
 ---
 
@@ -119,10 +120,10 @@ Rerank with BGE-reranker-v2-m3
    ├─ POST /ask/sources returns the cited pages at once (no LLM call)
    │
 LLM writes the answer in the question's language, one source list per sentence
-(Gemini by default on the free tier, Claude supported; short mode for voice)
+(Claude by default, Gemini supported; a short spoken-style answer for voice)
    │
-Guardrails: citation is valid · quoted text and every number, date and period
-must appear in the cited chunk (claims.py) · a second model checks support
+Guardrails: citation is valid · every number (amount, age, date, income limit)
+must appear in the cited chunk (guardrails.py) · a second model checks support
    │
    ├─ unsupported sentences removed; nothing left ──► refuse
    │
@@ -206,9 +207,14 @@ Open http://localhost:8000/chat/ (API docs at `/docs`). To use the Chitrapathak 
 collection, set `SCHEMEBOT_QDRANT_COLLECTION=pakkam_chitra`. Every setting is listed in
 [.env.example](.env.example).
 
-**Free-tier tips.** Gemini's free tier allows about 20 requests a day per model and each
-answer uses two, so prefer the flash-lite models, `SCHEMEBOT_LLM_TIMEOUT_SECONDS=30` and
-`SCHEMEBOT_LLM_RETRIES=1`. Google may use free-tier prompts to improve its products.
+**Speed and limits.** Answers use thinking effort `low` (several times faster than
+`medium` for short cited answers), each LLM call waits at most 30 s and is retried once,
+repeated questions come from an in-memory cache, and at most 200 LLM calls are made a day
+(`SCHEMEBOT_MAX_DAILY_LLM_CALLS`; each answer uses two). A rate-limit reply (429) pauses that
+model for 60 s, not for the day. With a paid Claude key (`SCHEMEBOT_LLM_PROVIDER=claude`),
+Gemini can serve as the backup: `SCHEMEBOT_LLM_FALLBACK_ENABLED=true` plus a Gemini key. On
+Gemini's free tier, set the daily cap near your free quota; Google may use free-tier prompts
+to improve its products.
 
 Windows step-by-step: [docs/HANDOFF.md](docs/HANDOFF.md) and
 [docs/GNANI_RUNBOOK.md](docs/GNANI_RUNBOOK.md).
@@ -221,7 +227,7 @@ Full schema: [docs/API_CONTRACT.md](docs/API_CONTRACT.md).
 
 | Method | Path | What it does |
 |---|---|---|
-| POST | `/ask` | `{"question": "..."}` (3-500 chars) → answer sentences, citations, status, timings |
+| POST | `/ask` | `{"question": "...", "voice_mode": false, "follow_up": {"question", "scheme"}}` → answer sentences, citations, status, timings; a follow-up like "how do I apply?" is read with the previous scheme |
 | POST | `/ask/sources` | The cited pages only, no LLM call (shown while the answer is written) |
 | POST | `/ask/voice` | Audio upload + language → transcript and answer |
 | POST | `/transcribe` | Speech to text only ("Pakkam heard: ...") |
@@ -231,7 +237,8 @@ Full schema: [docs/API_CONTRACT.md](docs/API_CONTRACT.md).
 | GET | `/health` | Model and budget status (no secrets) |
 
 A refusal is a normal `200` response with its reason. `/ask` is rate limited per visitor
-(10 a minute) and in total (500 a day). Each request is logged to `logs/requests.jsonl`
+(10 a minute) and in total (500 a day); `/ask/sources`, `/speak` and `/feedback` have their
+own, larger limits, and a spoken sentence is cached so replaying it costs no new Gnani call. Each request is logged to `logs/requests.jsonl`
 **without the question text**: only a hash, length, language, citations and timings.
 
 ---
@@ -241,7 +248,7 @@ A refusal is a normal `200` response with its reason. `/ask` is rate limited per
 | Part | Where | Notes |
 |---|---|---|
 | Website (`web/`) | Vercel, free | Plain HTML/CSS/JS, no build step |
-| Backend (FastAPI + models + index) | Developer's laptop, reached through a Cloudflare quick tunnel | `web/vercel.json` forwards `/ask`, `/sources`, `/transcribe`, `/speak`; the tunnel URL changes on every restart |
+| Backend (FastAPI + models + index) | Developer's laptop, reached through a Cloudflare quick tunnel | `web/vercel.json` forwards `/ask`, `/ask/sources`, `/sources`, `/transcribe`, `/speak`, `/feedback`; the tunnel URL changes on every restart |
 | Planned | Google Cloud Run (CPU) | [deploy/cloudrun/](deploy/cloudrun/README.md); the script asks for a GPU today |
 
 Vercel cannot run the backend (PyTorch and about 4.5 GB of models exceed its function
@@ -257,7 +264,8 @@ src/schemebot/
   ingest/       PDF text, Tesseract OCR, Chitrapathak crop OCR, OCR corrections
   index/        BGE-M3 dense + sparse embeddings, Qdrant store
   retrieve/     hybrid search, reranker, Tanglish gloss
-  generate/     answers, fact cards, claim checks (claims.py), LLM providers + failover
+  generate/     answers, guardrails (number + support checks), fact cards, LLM providers,
+                failover, daily budget, answer cache
   voice/        Gnani STT and TTS, amounts as words, daily call cap
   api/          FastAPI app, rate limits, audit log
   evaluation/   question set, metrics, judge, runner
@@ -316,7 +324,7 @@ The package also has its own commands: `python -m schemebot.evaluation`,
 ```bash
 uv run ruff check . && uv run ruff format --check .
 uv run mypy src
-uv run pytest -q              # 521 tests, fake models
+uv run pytest -q              # 532 tests, fake models
 uv run pytest -m models       # slower tests with the real models (~4.5 GB download)
 ```
 
@@ -338,7 +346,8 @@ pull request, without PyTorch, and builds the Docker image on pushes.
   need a person to confirm them.
 - Helpline numbers in `data/contacts.json` must be checked against official pages
   (`docs/review/helpline_check.csv`).
-- On the free Gemini tier, full answers can take 10 s to over a minute.
+- On Gemini's free tier, answers can take 10 s to over a minute and the daily quota runs out
+  quickly; a paid key (Claude or Gemini) is needed for a public demo.
 
 ---
 
