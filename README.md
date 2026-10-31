@@ -311,6 +311,7 @@ before they spend.
 | Voice (Gnani) | `gnani_doctor.py`, `gnani_smoke.py`, `gnani_stt_eval.py`, `capture_prisma_raw.py`, `speech_error_test.py`, `eval_tanglish_clips.py`, `eval_field_clips.py`, `fetch_kathbath_sample.py`, `voice_loop_timing.py`, `test_sentence_speech.py`, `make_card_audio.py` |
 | OCR | `run_hybrid_ocr.py`, `run_crop_ocr.py`, `colab_chitrapathak.py`, `ocr_compare.py`, `flag_ocr_pages.py`, `generate_gate_pages.py`, `analyze_disagreements.py`, `report_ocr_stats.py`, `check_corrections.py` |
 | Reports | `generate_gnani_report.py`, `generate_voice_report.py`, `generate_docx_report.py`, `summarize_questions.py` |
+| Running | `start_pakkam.ps1` (one click: latest code, backend, tunnel, website pointed at it) |
 | Checks | `scan_git_secrets.py`, `check_helplines.py`, `verify_dod.py`, `review_feedback.py` |
 
 The package also has its own commands: `python -m schemebot.evaluation`,
