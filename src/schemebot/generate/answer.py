@@ -7,6 +7,7 @@ Order of decisions:
 """
 
 import logging
+import re
 import threading
 import time
 from collections import OrderedDict
@@ -77,6 +78,8 @@ class FollowUp:
     question: str | None = None
     scheme: str | None = None
 
+
+_NAMES_A_SCHEME = re.compile(r"\b(scheme|thittam|yojana|yojna)\b|திட்ட|योजना", re.IGNORECASE)
 
 RETRIEVAL_REUSE_S = 120.0
 """How long a search result is kept so /ask can reuse the one /ask/sources just ran."""
@@ -198,7 +201,11 @@ class Answerer:
         if self._alias_matcher is not None:
             search_q = self._alias_matcher.expand_query(search_q)
         scheme = follow_up.scheme if follow_up else None
-        names_scheme = self._alias_matcher is not None and self._alias_matcher.match(search_q)
+        # A question that names a scheme of its own ("breakfast scheme enna") is a new
+        # question, not a follow-up, even if that scheme is not in the alias table.
+        names_scheme = bool(_NAMES_A_SCHEME.search(search_q)) or (
+            self._alias_matcher is not None and self._alias_matcher.match(search_q) is not None
+        )
         if scheme and not names_scheme and scheme.casefold() not in search_q.casefold():
             search_q = f"{search_q} {scheme}"
         return search_q

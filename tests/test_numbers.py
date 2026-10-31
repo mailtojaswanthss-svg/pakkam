@@ -129,3 +129,10 @@ def test_helplines_are_read_digit_by_digit() -> None:
     assert phone_numbers_as_digits("Rs. 25000 a year") == "Rs. 25000 a year"
     assert phone_numbers_as_digits("₹ 1,20,000 limit") == "₹ 1,20,000 limit"
     assert phone_numbers_as_digits("in 2023 and 181") == "in 2023 and 181"
+
+
+def test_financial_years_are_not_read_as_phone_numbers() -> None:
+    from schemebot.voice.numbers import phone_numbers_as_digits
+
+    assert phone_numbers_as_digits("for 2024-25 only") == "for 2024-25 only"
+    assert phone_numbers_as_digits("from 2023 2024") == "from 2023 2024"
