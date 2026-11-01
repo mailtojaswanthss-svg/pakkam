@@ -112,6 +112,8 @@ class Settings(BaseSettings):
     answer_cache_size: int = Field(default=256, ge=0)
     """Answers kept in memory so a repeated question costs no LLM call; 0 turns it off."""
     answer_cache_ttl_seconds: float = Field(default=6 * 3600, gt=0)
+    answer_cache_persist: bool = True
+    """Keep cached answers in data/answer-cache.pkl across restarts (no question text)."""
 
     # Gnani voice (Prisma v2.5 speech to text). The key lives only in .env.
     gnani_api_key: SecretStr | None = None

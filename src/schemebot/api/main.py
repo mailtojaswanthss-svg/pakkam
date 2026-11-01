@@ -181,6 +181,7 @@ def _default_service() -> AnswerService:
         settings.answer_cache_size,
         settings.answer_cache_ttl_seconds,
         fingerprint,
+        path=settings.data_dir / "answer-cache.pkl" if settings.answer_cache_persist else None,
     )
 
 
