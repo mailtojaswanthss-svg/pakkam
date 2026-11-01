@@ -40,11 +40,15 @@ _AUDIENCE_PATTERNS = {
     name: re.compile(words, re.IGNORECASE) for name, words in _AUDIENCE_WORDS.items()
 }
 
-# "find / suggest / which / any ... scheme", in the four ways people ask.
+# Asking to browse: "find / suggest / any scheme / which schemes ...". Kept narrow on
+# purpose: "what does <scheme we lack> give?" must stay an honest refusal, not a list.
 _LOOKING = re.compile(
-    r"\b(find|search|suggest|recommend|list|show|which|what|any|all|available|eligible|"
-    r"need|want|looking|enna|endha|edhu|ethu|irukka|irukku)\b|"
-    r"என்ன|எந்த|ஏதாவது|உள்ளன|இருக்கிற|कौन|क्या|कोई|सभी|बताओ|बताइए",
+    r"\b(find|search|suggest|recommend|list|show me|available|looking for|any schemes?|"
+    r"schemes? for|need a scheme|want a scheme|all (the )?schemes|which schemes|what schemes|"
+    r"enna (scheme|thittam)\w* irukk?u|edhavadhu scheme)\b|"
+    r"என்ன திட்டங்கள்|எந்தத் திட்டங்கள்|திட்டங்கள் உள்ளன|ஏதாவது திட்ட|என்ன திட்டம் இருக்கு|"
+    r"कौन सी योजनाएँ|कौन सी योजनाएं|कौन-सी योजनाएँ|कौन कौन सी|कोई योजना|के लिए कौन सी योजना|"
+    r"योजनाएँ हैं|योजनाएं हैं",
     re.IGNORECASE,
 )
 _SCHEME_WORD = re.compile(
@@ -53,8 +57,19 @@ _SCHEME_WORD = re.compile(
     re.IGNORECASE,
 )
 _SPECIFIC = re.compile(
-    r"\b(how much|amount|evlo|evvalavu|apply|documents?|eligib\w*|age limit|income limit)\b|"
-    r"எவ்வளவு|விண்ணப்ப|ஆவண|कितना|आवेदन|दस्तावेज़",
+    r"\b(how much|amount|evlo|evvalavu|apply|documents?|eligib\w*|limit|age|income|who can|"
+    r"instalments?|vayasu|varumanam|thagudhi|yaarukku|kidaikuma|kidaikum)\b|"
+    r"எவ்வளவு|விண்ணப்ப|ஆவண|வரம்பு|வயது|வருமான|தகுதி|தொகை|யாருக்கு|கிடைக்குமா|"
+    r"कितना|कितनी|कितने|आवेदन|दस्तावेज़|सीमा|उम्र|आयु|आय|पात्र|राशि|किस्त|किसे|मिलेगा",
+    re.IGNORECASE,
+)
+# A scheme named in a form the alias list misses (Tamil case endings, Hindi spelling of a
+# Tamil name): such a question is about that scheme, never a request for suggestions.
+_NAMED = re.compile(
+    r"magalir|urimai|மகளிர்|உரிமைத்|मगलिर|महिलिर|उरिमै|atal|அடல்|अटल|ஓய்வூதியத் திட்ட|"
+    r"pudhumai|puthumai|புதுமை|पुदुमै|ujjwala|ujwala|உஜ்வலா|उज्ज्वला|pm[ -]?kisan|"
+    r"பிஎம் கிசான்|பி\.எம்|पीएम[ -]?किसान|breakfast|காலை உணவு|moovalur|மூவலூர்|cmchis|"
+    r"காப்பீட்டுத் திட்ட",
     re.IGNORECASE,
 )
 
@@ -66,11 +81,9 @@ def audiences_in(question: str) -> set[str]:
 def is_discovery(question: str, names_a_scheme: bool) -> bool:
     """True for "which schemes are there for farmers?"-type questions that name no scheme
     and ask nothing specific (amount, documents, how to apply)."""
-    if names_a_scheme or _SPECIFIC.search(question):
+    if names_a_scheme or _NAMED.search(question) or _SPECIFIC.search(question):
         return False
-    return bool(_SCHEME_WORD.search(question)) and (
-        bool(_LOOKING.search(question)) or bool(audiences_in(question))
-    )
+    return bool(_SCHEME_WORD.search(question)) and bool(_LOOKING.search(question))
 
 
 def suggest_schemes(question: str) -> list[str]:
