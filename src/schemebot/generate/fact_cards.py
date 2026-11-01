@@ -17,6 +17,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, TypeAdapter
 
+from schemebot.ingest.langid import detect_language
+
 logger = logging.getLogger(__name__)
 
 CardField = Literal["amount", "who_qualifies", "documents", "how_to_apply"]
@@ -128,9 +130,12 @@ class FactCardMatcher:
         best_card: FactCard | None = None
         best_score = 0.0
 
+        # A card answers in its own words and language: only a card in the question's
+        # language may answer (Hindi and Tanglish questions go to the documents instead).
+        language = detect_language(question)
         for card, example_embs in self._card_embeddings:
             # Scheme must be identified in question text
-            if not scheme_matches(card.scheme, question):
+            if card.language != language or not scheme_matches(card.scheme, question):
                 continue
 
             for emb in example_embs:

@@ -29,7 +29,9 @@ _NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
 _LAKH, _CRORE = Decimal(100_000), Decimal(10_000_000)
 _UNITS = re.compile(
     r"(?P<number>\d+(?:[.,]\d+)*)\s*"
-    r"(?:(?P<lakh>lakhs?\b|lacs?\b|இ?லட்ச|लाख)|(?P<crore>crores?\b|கோடி|करोड))",
+    # Tanglish too: "2.5 laksham", "2.5 latcham", "1 kodi".
+    r"(?:(?P<lakh>lakh\w*|lacs?\b|laks\w*|lach\w*|latch\w*|latsh\w*|இ?லட்ச|लाख)|"
+    r"(?P<crore>crores?\b|kodi\b|கோடி|करोड))",
     re.IGNORECASE,
 )
 _FINANCIAL_YEAR = re.compile(r"\b(?P<start>\d{4})\s*[-–/]\s*(?P<end>\d{2})\b")

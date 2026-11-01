@@ -18,10 +18,12 @@ checked, so signing is a quick confirmation.
 | `kmut_amount_en/ta` | p.9 → **p.3** | p.9 states only "ஆண்டுக்கு 12 ஆயிரம் ரூபாய்" (Rs.12,000 a year); the card said Rs.1,000 a month, a conversion the page does not make. p.3 states both: "one thousand rupees per month" and "Rs.12,000/- per annum" | **Fixed:** page → 3, text now gives both amounts |
 | `breakfast_classes_en/ta` | p.14 → **p.1** | p.14 is only a table of school and beneficiary counts. p.1 states breakfast for "அரசுத் தொடக்கப் பள்ளிகளில் 1 முதல் 5-ஆம் வகுப்பு வரை பயிலும் மாணவ, மாணவியருக்கு" | **Fixed:** page → 1 |
 | `ujjwala_docs_en/ta` | p.1 → **p.2** | p.1 is a blank cover; the list is on p.2. The card **left out** "Proof of Identity (PoI)" and "Proof of Address (PoA)" | **Fixed:** page → 2, both documents added |
+| `kmut_exclusions_en/ta` (new) | KMUT G.O. 15 p.11 | Written from the page: the eight exclusions in section 2.2.1, including "மாநில, ஒன்றிய அரசு ஊழியர்கள்" (State and Union government employees) | New card; added because the live benchmark showed "central government employee" questions being refused |
+| `ujjwala_eligibility_en/ta` (new) | PMUY SoP p.2 | Written from the page: "Adult woman belonging to any of the following categories" and the 10 categories | New card; the Hindi eligibility question was refused |
 | `pmkisan_amount_en/ta`, `pmkisan_ekyc_en/ta` | PM-KISAN e-KYC note p.1 | **Not checked here:** pmkisan.gov.in serves an incomplete certificate chain, so the PDF could not be downloaded safely | Check on the laptop (`data/raw/`) |
 | `pudhumai_amount_en/ta` | Social Welfare policy note 2024-25 p.18 | **Not checked here:** cms.tn.gov.in reset the connection | Check on the laptop (`data/raw/`) |
 
-**Summary:** 12 of 18 cards were checked. 6 of those were already right, and 6 had a wrong
+**Summary:** 12 of the first 18 cards were checked. 6 of those were already right, and 6 had a wrong
 page and/or missing detail, now fixed. The remaining 6 need a look on the laptop.
 
 ## Why this matters
@@ -35,7 +37,7 @@ sent people to the gas agency without two required documents.
 
 ```powershell
 uv run python scripts/sign_fact_cards.py --list
-uv run python scripts/sign_fact_cards.py --by "YourName" apy_pension_en apy_pension_ta apy_age_en apy_age_ta kmut_income_en kmut_income_ta kmut_amount_en kmut_amount_ta breakfast_classes_en breakfast_classes_ta ujjwala_docs_en ujjwala_docs_ta
+uv run python scripts/sign_fact_cards.py --by "YourName" apy_pension_en apy_pension_ta apy_age_en apy_age_ta kmut_income_en kmut_income_ta kmut_amount_en kmut_amount_ta breakfast_classes_en breakfast_classes_ta ujjwala_docs_en ujjwala_docs_ta kmut_exclusions_en kmut_exclusions_ta ujjwala_eligibility_en ujjwala_eligibility_ta
 ```
 
 For the last 6, open the PDFs in `data/raw/` at the cited page, confirm the text, then sign:

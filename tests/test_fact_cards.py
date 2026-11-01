@@ -35,7 +35,7 @@ def sample_cards() -> list[FactCard]:
             card_id="test_kmut",
             scheme="Kalaignar Magalir Urimai Thittam",
             field="amount",
-            language="ta",
+            language="en",
             question_examples=["KMUT amount?"],
             answer_text="Monthly amount is ₹1,000.",
             source_document="kmut-go15-2023-ta",
@@ -115,3 +115,10 @@ def test_committed_fact_cards_file_is_valid() -> None:
     path = Path(__file__).resolve().parents[1] / "data" / "fact_cards.json"
     for card in json.loads(path.read_text(encoding="utf-8")):
         FactCard.model_validate(card)
+
+
+def test_a_card_only_answers_in_its_own_language(sample_cards: list[FactCard]) -> None:
+    matcher = FactCardMatcher([sample_cards[0]], encoder=MockEncoder(), threshold=0.85)
+
+    assert matcher.match("KMUT amount?")[0] is not None
+    assert matcher.match("KMUT amount evlo kidaikum?")[0] is None  # Tanglish: from the documents
