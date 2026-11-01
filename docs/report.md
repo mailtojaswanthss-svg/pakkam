@@ -9,6 +9,23 @@ Tanglish, with a per-language evaluation.
 > the Claude account had no credit and Gemini's free tier allows 20 requests a day per model.
 > Treat the numbers as development results.
 
+> **Scope of this report.** It describes the retrieval-and-answer core as measured on the
+> 26 Oct 2026 run (original OCR collection `schemes`). The system has grown since; each later
+> part is reported elsewhere:
+>
+> | Added later | Where it is described |
+> |---|---|
+> | Signed fact cards (22, checked against their PDF page) | `docs/review/FACT_CARD_CHECK.md` |
+> | OCR corrections (`data/corrections.json`), Chitrapathak-2 crop OCR | `docs/review/OCR_CORRECTIONS_DESIGN.md`, README |
+> | Clarification band, scheme discovery, follow-ups, answer sections | README, `API_CONTRACT.md` |
+> | Voice (Gnani speech to text and Timbre speech), Talk mode | README, `docs/review/VOICE_LOOP_TIMING.md` |
+> | Provider failover, daily LLM budget, answer cache | README |
+> | End-to-end numbers through the live website | `docs/review/LIVE_BENCHMARK.md` |
+>
+> The README's retrieval figures (98.7% recall@5, 92.5% correct refusals, 14.3% false
+> refusals) differ from this report's (98%, 95%, 16%) because they come from the rebuilt
+> `pakkam_chitra` collection (Chitrapathak OCR and corrections) and later scripts.
+
 ## 1. Problem
 
 Eligibility rules, amounts and documents for welfare schemes are written down, in government
@@ -99,8 +116,11 @@ note reads "ரூ.4,000" where the English says Rs.1,000 for Pudhumai Penn, the
 reads "ரூ.4,20,000" for the Rs.1,20,000 insurance income limit, and the Hindi APY brochure
 reads "रु.000". In Tamil the error has a pattern: a leading 1 is read as 4 (Rs.1,000 as 4,000,
 Rs.1,20,000 as 4,20,000, the hostel food charge Rs.1,400 as 4400), and the senior-citizen
-helpline 14567 appears as 14167 in the body text under a correct heading. The guardrail's
-number check cannot catch this, because the wrong number is in the cited passage.
+helpline 14567 appears as 14167 in the body text under a correct heading. The number check
+alone cannot catch this, because the wrong number is in the cited passage. Known misreads
+are listed in `data/corrections.json`: until a person confirms one, answers may not use the
+wrong number; once confirmed, ingestion replaces it with what the page prints. Unknown
+misreads can still get through.
 
 ## 5. Retrieval
 
@@ -192,16 +212,16 @@ same interface: it requests JSON that follows the same schemas, and maps safety 
 decline and API failures to "unavailable", so the pipeline, guardrail and evaluation run
 unchanged. `SCHEMEBOT_LLM_PROVIDER` switches between them. The answer-quality numbers in
 section 8 were measured with Gemini, because the Claude account had no credit during
-development. On the free tier, rate-limited and overloaded calls were retried with backoff
-for about three minutes (now `SCHEMEBOT_LLM_RETRIES=7`; the app default is 2 retries of at
-most 60 s each, so a visitor is not kept waiting), and calls that still fail are counted separately in the results.
+development. Calls that still fail after the client's retries are counted separately in the
+results, not as refusals.
 
 ## 7. Service and interface
 
 `POST /ask` returns cited sentences, citations with page ranges, excerpts and source URLs,
 the refusal reason if any, the confidence and latency. The audit log keeps a hash of the
 question, never its text. For a public demo `/ask` is rate limited per visitor (10 a minute)
-and in total (500 a day), because each question can cost two LLM calls. Errors return a
+and in total (500 a day), because each question can cost several LLM calls (answer and
+verifier, sometimes a question rewrite). Errors return a
 generic message with a request ID.
 
 The web UI, **Pakkam** ("page" in Tamil), has a home page that tells the story of one
@@ -226,7 +246,8 @@ and 10 unanswerable, in three batches:
   free bus travel, hostels, health and higher-education schemes) and 3 out-of-corpus topics,
   written after both Tanglish changes.
 
-Each fact is asked in all four groups. Gold labels are pages, listed in both language versions
+Each fact is asked in all four groups, except two held-out 1 facts that have no Tamil or no
+Hindi question (hence 46 answerable questions in that batch, not 48). Gold labels are pages, listed in both language versions
 where both state the fact. All 194 are drafts; `python -m schemebot.evaluation.review export`
 writes a spreadsheet with each question beside its gold-page text for a native speaker to
 check, and `import` marks the checked ones verified.
@@ -369,24 +390,38 @@ all 194 questions still need a paid key (Claude, or Gemini with billing).
 - **Answer quality on 8 questions only.** The live test passed, but faithfulness and citation
   accuracy over all 194 questions need a paid key (Claude, or Gemini with billing); the
   free-tier test used small Flash-Lite models, and one model both verified and judged.
-- **OCR digits.** Wrong numbers in Tamil and Hindi OCR text pass the number check.
+- **OCR digits.** Known misreads are blocked or corrected through `data/corrections.json`;
+  unknown wrong numbers in Tamil and Hindi OCR text still pass the number check.
 - **Tanglish.** 44% of answerable Tanglish questions are still refused; detection misses 3
   of 49 Tanglish questions, whose answers and refusals would come back in English.
 - **Near misses.** Questions next to a covered topic ("next PM-KISAN instalment date") get
   high retrieval confidence; only the LLM's "not answerable" judgement refuses them.
 - **Scope.** 18 documents from one state plus three central schemes; rules change, and
   answers reflect the documents' dates.
-- **Not an official service.** It does not process applications or personal data.
+- **Not an official service.** It does not process applications, and questions with an
+  Aadhaar or phone number are refused before any model call. Questions do go to a
+  third-party LLM (Gemini's free tier may use prompts to improve its models), and document
+  text reaches the model as passages, so a tampered document could carry prompt injection.
 
 ## 10. Reproducing
 
+Prerequisites: Python 3.11-3.12 and `uv`; Tesseract with the `tam` and `hin` language data
+(on Windows set `SCHEMEBOT_TESSERACT_CMD` to `tesseract.exe`); a CUDA GPU is optional (the
+reranker runs on CPU, slower). The first run downloads several GB of Hugging Face models.
+Put the 18 PDFs in `data/raw/` under the `file` names in `data/sources.json` (each entry has
+its `source_url`). The retrieval-only run needs no API key.
+
 ```bash
-uv sync --extra ingest --extra index --extra generate --extra api --extra eval
-uv run python -m schemebot.ingest         # PDFs listed in data/sources.json
+uv sync --extra ingest --extra index --extra generate --extra gemini --extra api --extra eval
+uv run python -m schemebot.ingest         # PDFs in data/raw/ -> chunks (OCR is cached)
 uv run python -m schemebot.index
-uv run python -m schemebot.evaluation --retrieval-only     # writes docs/results.md
-uv run pytest                              # 190 fast tests (pytest -m models: 10 more)
+uv run python -m schemebot.evaluation --retrieval-only     # overwrites docs/results.md
+uv run pytest                              # fast tests (pytest -m models: model tests)
 ```
+
+Ablation flags (`--no-rerank`, `--mode dense|sparse`, `--no-gloss`) are in
+`docs/evaluation.md`. End-to-end numbers through the deployed site:
+`python scripts/live_benchmark.py --per-group 10`.
 
 ## 11. Next steps
 
@@ -396,5 +431,6 @@ uv run pytest                              # 190 fast tests (pytest -m models: 1
 2. Have Tamil and Hindi speakers verify the 194 drafts with the review sheet.
 3. Tanglish: transliterate to Tamil script before reranking, or fine-tune the reranker on
    Tanglish question-passage pairs, and test on a fresh batch.
-4. Re-OCR number-dense Tamil pages at a higher resolution, or prefer the English version of a
-   paired document when numbers disagree.
+4. Finish reviewing `docs/review/ocr_disagreements.csv` and `docs/review/amount_check.csv`,
+   then confirm the checked entries into `data/corrections.json`
+   (`scripts/confirm_corrections.py`). Tesseract already runs at 300 dpi.

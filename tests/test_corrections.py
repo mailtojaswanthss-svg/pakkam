@@ -57,10 +57,16 @@ def test_project_corrections_file_is_valid_and_names_real_documents() -> None:
     assert {c.doc_id for c in corrections} <= doc_ids
 
 
-def test_no_correction_is_confirmed_until_a_person_checks_the_pdf() -> None:
-    # Flip this test only together with an entry that a person has checked by eye.
+def test_only_checked_corrections_are_confirmed() -> None:
+    # Confirmed by a person against the printed page (scripts/confirm_corrections.py): the
+    # KMUT income limit read as 25 lakh, which the page prints as 2.5.
     corrections = load_corrections(PROJECT_ROOT / "data" / "corrections.json")
-    assert not any(c.confirmed for c in corrections)
+    confirmed = [c for c in corrections if c.confirmed]
+    assert {(c.doc_id, c.page) for c in confirmed} <= {
+        ("kmut-go15-2023-ta", 10),
+        ("kmut-go15-2023-ta", 11),
+    }
+    assert all(c.confirmed_by and c.confirmed_on and c.page for c in confirmed)
 
 
 def test_missing_file_means_no_corrections(tmp_path: Path) -> None:
