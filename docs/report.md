@@ -58,25 +58,32 @@ question ──► digit normalisation ──► hybrid search (top 20, RRF) ─
 
 | Stage | Choice | Why |
 |---|---|---|
-| Extraction | PyMuPDF text layer; Tesseract OCR per page when the text layer is broken | Half the pages are scans or use legacy Tamil fonts |
-| Chunking | Section-aware, at most 1,000 characters, up to 250 characters of overlap | Keeps an eligibility list or table with its heading |
+| Extraction | PyMuPDF text layer; Tesseract OCR per page when the text layer is broken | Half the pages are scans or use legacy Tamil fonts; per page instead of OCR for every page, which would lose the clean English text layers |
+| Chunking | Section-aware, at most 1,000 characters, up to 250 characters of overlap | Keeps an eligibility list or table with its heading, instead of fixed windows that cut it |
 | Embedding | BAAI/bge-m3, dense and sparse | One model for all three scripts; sparse catches scheme names and numbers |
 | Store | Qdrant, local mode | No server to run; 2,785 chunks fit easily |
-| Fusion | Reciprocal rank fusion of dense and sparse | No score calibration needed |
+| Fusion | Reciprocal rank fusion of dense and sparse | No score calibration needed, instead of a weighted sum of scores on different scales |
 | Reranker | BAAI/bge-reranker-v2-m3 (fp16) | Multilingual cross-encoder; its probability doubles as the refusal signal |
-| Answers | Claude Opus 5.5 (default) or Gemini, structured JSON output | Per-sentence citations as data, not parsed prose |
+| Answers | Claude Opus 5.5 (default) or Gemini, structured JSON output | Per-sentence citations as data, instead of parsing [n] markers out of prose. The answer numbers in section 8 were measured with Gemini |
 | Verifier | Claude Haiku 5.5, or Gemini Flash-Lite | Cheap second opinion on each sentence |
 | API | FastAPI, one worker, models loaded once | One GPU; requests are serialised |
 | UI | Plain HTML, CSS and JavaScript (no build step) | Loads fast on a phone; light and dark themes |
 
 ## 3. Data
 
-18 public PDFs, 2,688 pages: 3 central schemes (PM-KISAN, Atal Pension Yojana, Ujjwala), 2
+18 public PDFs from 10 sources, 2,688 pages: 3 central schemes (PM-KISAN, Atal Pension Yojana, Ujjwala), 2
 Tamil Nadu government orders (Kalaignar Magalir Urimai Thittam, Chief Minister's Breakfast
 Scheme) and 5 Tamil Nadu departmental policy notes for 2024-25. Seven pairs carry the same
 content in two languages (the 5 policy notes in English and Tamil; the PM-KISAN e-KYC note and
 the APY brochure in English and Hindi), which lets one fact be checked against both versions.
 Sources, dates and licences are in [data_sources.md](data_sources.md).
+
+**Abbreviations.** G.O.: Government Order. KMUT: Kalaignar Magalir Urimai Thittam (the women's
+entitlement scheme, Rs.1,000 a month). APY: Atal Pension Yojana. PMUY: Pradhan Mantri Ujjwala
+Yojana (LPG connections). TAHDCO: Tamil Nadu Adi Dravidar Housing and Development
+Corporation. MRR: mean reciprocal rank. RRF: reciprocal rank fusion. OCR: optical character
+recognition. The project is called Pakkam; its Python package is `schemebot`, so settings are
+`SCHEMEBOT_*` environment variables.
 
 | Document language | Documents | Pages | From the text layer | OCR | Chunks |
 |---|---|---|---|---|---|
@@ -97,26 +104,20 @@ All pages of the Hindi documents and all but 7 pages of the Tamil ones (the KMUT
 English annexure) went through OCR. Their text layers looked fine to PyMuPDF but were
 unusable: legacy Tamil fonts (TAU-Marutham and similar) map Tamil glyphs to
 Latin code points, and broken Devanagari shaping puts the i-sign before its consonant
-(`िृषि`). A page goes to OCR when any of these hold:
-
-- too few characters, or replacement / private-use characters;
-- letters under half of the text and alphanumerics under 80% (tables stay on the text layer);
-- a legacy font name on the page;
-- many words starting with an orphan combining mark;
-- in Hindi, an i-sign share outside the 2-9% band of real Hindi;
-- too many tokens that are not words.
-
-OCR uses the document's own languages (`tam+eng`, `hin+eng`, `eng`), since mixing all three
-made Tesseract confuse scripts, and its result replaces the text layer only when it reads at
-least a quarter as much text. OCR output is cached by file hash, language and resolution, so
-re-running ingestion skips OCR for pages already read.
+(`िृषि`). A page goes to OCR when its text layer fails simple quality checks (too little
+text, legacy font names, orphan combining marks, implausible Devanagari i-sign rates, too
+many non-words); the thresholds are in `ingest/extract.py`. OCR uses the document's own
+languages (`tam+eng`, `hin+eng`, `eng`) and is cached, so re-running ingestion skips pages
+already read.
 
 **Known damage.** OCR misreads digits, and that matters most here: the Tamil higher-education
-note reads "ரூ.4,000" where the English says Rs.1,000 for Pudhumai Penn, the Tamil health note
+note reads "ரூ.4,000" and the Tamil social welfare note "ரூ.7000" where the English says
+Rs.1,000 for Pudhumai Penn, the Tamil health note
 reads "ரூ.4,20,000" for the Rs.1,20,000 insurance income limit, and the Hindi APY brochure
 reads "रु.000". In Tamil the error has a pattern: a leading 1 is read as 4 (Rs.1,000 as 4,000,
 Rs.1,20,000 as 4,20,000, the hostel food charge Rs.1,400 as 4400), and the senior-citizen
-helpline 14567 appears as 14167 in the body text under a correct heading. The number check
+helpline 14567 appears as "14௧67" (a Tamil digit one mixed in) in the body text under a
+correct heading. The number check
 alone cannot catch this, because the wrong number is in the cited passage. Known misreads
 are listed in `data/corrections.json`: until a person confirms one, answers may not use the
 wrong number; once confirmed, ingestion replaces it with what the page prints. Unknown
@@ -153,11 +154,9 @@ questions only):
 | The English gloss only | 11% | **33%** | 33% | 100% |
 | Question + gloss (chosen) | 22% | 100% | 33% | 100% |
 
-Gloss alone let two of three unanswerable development questions through (e.g. "magalir urimai
-thogai indha maasam eppo varum", when will this month's payment come, rose from 0.13 to above
-the threshold), so the question is kept and the gloss appended. That choice was made on the
-development set; on the held-out set both variants cut false refusals from 58% to 33% without
-answering any unanswerable question.
+Gloss alone let two of three unanswerable development questions through, so the question is
+kept and the gloss appended (chosen on the development set; on held-out 1 both variants did
+equally well).
 
 Language detection missed 6 of the 28 Tanglish questions in the first two batches (e.g.
 "tamil pudhalvan scheme la pasangalukku evlo panam" has one lexicon word in seven), so the
@@ -178,10 +177,10 @@ None of the 1,390 English chunks in the corpus trips it. It now finds 12 of 12 d
 | Held-out 2, written after both Tanglish changes (18) | 83% | 61% |
 | **All Tanglish (39)** | **69%** | **44%** |
 
-The other groups are unchanged, and recall@5 is the same with and without the gloss (98%).
-The gloss helps on every batch, but the fresh batch shows it is not enough: most of its
-refused questions have the right page in the top 5 and their scores rise (0.02 to 0.12, say)
-without reaching the threshold. Tanglish is still the largest gap between groups.
+The other groups are unchanged, and overall recall@5 is the same with and without the gloss
+(98%; Tanglish alone 92%). The gloss helps on every batch but is not enough: most refused
+Tanglish questions have the right page in the top 5 with scores that rise but stay under the
+threshold. These two tables are the reference for Tanglish in the rest of the report.
 
 Two development questions show the gloss's risk: q039 and q040 were refused with the right
 page retrieved, and with the gloss they pass the check. q040 turned out to have a page stating
@@ -283,14 +282,15 @@ threshold was chosen on the first 110 questions, so held-out 2 is the only batch
 any tuning.
 
 Retrieval holds up on the fresh batch (recall@5 97%), but its false refusals are higher:
-Tanglish (61%) and several Ujjwala and marriage-assistance questions in Tamil and Hindi score
-just under the threshold with the right page found. The unanswerable questions of the later
+Tanglish (section 5) and several Ujjwala and marriage-assistance questions in Tamil and Hindi
+score just under the threshold with the right page found. The unanswerable questions of the later
 batches are further from the corpus than the development set's near misses, so correct
 refusal there is easier.
 
 **The threshold.** Choosing it on the first 110 questions and testing on held-out 2 shows no
 better operating point: at 0.2, false refusals fall (tuning 9% to 6%, test 25% to 18%) but
-correct refusals fall too (tuning 93% to 79%). The retrieval threshold mainly saves an LLM
+correct refusals fall too (tuning 93% to 79%; on the 12 unanswerable test questions the
+figure was not recorded). The retrieval threshold mainly saves an LLM
 call; the model's own "not answerable" judgement refused every near miss in the live test
 below, so a lower threshold may pay off once answer quality can be measured on all 194
 questions. It stays at 0.35 until then.
@@ -323,14 +323,14 @@ threshold, including all 40 unanswerable ones. Refusal then rests entirely on th
   matching should help with exact scheme names, G.O. numbers and amounts that this question
   set barely exercises; a larger verified set should decide. Latency differences of about
   50 ms between runs are noise on this laptop.
-- **The Tanglish gloss** cuts Tanglish false refusals from 69% to 44% and changes nothing for
-  the other groups.
+- **The Tanglish gloss**: see section 5; it changes nothing for the other groups.
 
 ### Live answers (Gemini, 8 questions)
 
 Gemini's free tier allows 20 requests a day per model. Gemini 3.6 Flash ran out after a few
 questions of the full run, 3.8 Flash was overloaded, and Gemini 4 Argon has no free quota. So
-answers were checked live on 8 chosen questions, with Gemini 3.5 Flash-Lite answering and 3.1
+answers were checked live on 8 questions chosen to cover every group, both near misses
+(q011, q023) and the gloss's risk case (q039), with Gemini 3.5 Flash-Lite answering and 3.1
 Flash-Lite verifying and judging, through the same pipeline and guardrail:
 
 | Question | Group | Outcome |
@@ -344,7 +344,7 @@ Flash-Lite verifying and judging, through the same pipeline and guardrail:
 | q011 Next PM-KISAN instalment date | English | Refused, pointing to the PM-KISAN website: correct |
 | q023 New ration card | Tamil | Refused in Tamil, pointing to the KMUT website: correct |
 
-All 8 sentences were judged faithful. This is model-judged: the same Flash-Lite model ran
+All 8 answer sentences, from the 5 answered questions, were judged faithful. This is model-judged: the same Flash-Lite model ran
 the in-pipeline support check and the judging, so it is not an independent judge, and no
 person checked the verdicts. No call failed, and every refusal came in the
 question's language with the official website. Both near misses that passed the retrieval
@@ -363,9 +363,9 @@ all 194 questions still need a paid key (Claude, or Gemini with billing).
 
 ### Error analysis
 
-1. **Tanglish** remains the weakest group (section 5): 44% false refusal (61% on the fresh
-   batch), mostly with the right page retrieved but scored under the threshold.
-2. **Near misses get through.** The two wrongly passed unanswerable questions are both near
+1. **Tanglish** remains the weakest group (tables in section 5), mostly with the right page
+   retrieved but scored under the threshold.
+2. **Near misses get through.** The two (of 40) wrongly passed unanswerable questions are both near
    a covered topic: "When will the next PM-KISAN instalment be paid?" (0.44; the guidelines
    describe instalment periods but give no dates) and "How do I apply for a new ration card?"
    in Tamil (0.85; the Magalir Urimai G.O. discusses ration cards at length). The LLM has to
@@ -392,7 +392,7 @@ all 194 questions still need a paid key (Claude, or Gemini with billing).
   free-tier test used small Flash-Lite models, and one model both verified and judged.
 - **OCR digits.** Known misreads are blocked or corrected through `data/corrections.json`;
   unknown wrong numbers in Tamil and Hindi OCR text still pass the number check.
-- **Tanglish.** 44% of answerable Tanglish questions are still refused; detection misses 3
+- **Tanglish.** The largest false-refusal gap (section 5); detection misses 3
   of 49 Tanglish questions, whose answers and refusals would come back in English.
 - **Near misses.** Questions next to a covered topic ("next PM-KISAN instalment date") get
   high retrieval confidence; only the LLM's "not answerable" judgement refuses them.
@@ -419,18 +419,49 @@ uv run python -m schemebot.evaluation --retrieval-only     # overwrites docs/res
 uv run pytest                              # fast tests (pytest -m models: model tests)
 ```
 
-Ablation flags (`--no-rerank`, `--mode dense|sparse`, `--no-gloss`) are in
-`docs/evaluation.md`. End-to-end numbers through the deployed site:
-`python scripts/live_benchmark.py --per-group 10`.
+**Versions.** The reported run is commit `c050d23` (with uncommitted changes, as
+`docs/results.md` records), models `BAAI/bge-m3` and `BAAI/bge-reranker-v2-m3` at the Hub
+revisions current on 26 Oct 2026, collection `schemes`. To pin a model, set
+`SCHEMEBOT_EMBEDDING_REVISION` / `SCHEMEBOT_RERANKER_REVISION` to a 40-character commit hash;
+every evaluation run writes the commit and model revisions into the head of `docs/results.md`.
+
+**What should match.** On the same PDFs and settings:
+
+| Measure | Reported | Expected on a re-run |
+|---|---|---|
+| Recall@5, all groups | 98% | within 1 point (1 question is 0.6 points of 154) |
+| Correct refusal | 95% (38/40) | exact, or within 1 question (2.5 points) |
+| False refusal, all groups | 16% | within 1-2 questions (0.6 points each) |
+| Retrieval p50 / p95 | 533 / 720 ms | depends on the GPU; not comparable across machines |
+
+Small differences come from OCR (Tesseract version) and GPU arithmetic in fp16 reranking.
+
+**Ablations.** Add a flag to the evaluation command and write each run to its own report so
+`docs/results.md` is not overwritten, e.g.
+`uv run python -m schemebot.evaluation --retrieval-only --no-gloss --report docs/ablation_no_gloss.md`
+(flags: `--no-rerank`, `--mode dense|sparse`, `--no-gloss`; details in `docs/evaluation.md`).
+
+**End to end.** Through the deployed site: `python scripts/live_benchmark.py --per-group 10`
+(writes `docs/review/LIVE_BENCHMARK.md`).
 
 ## 11. Next steps
 
-1. With a paid key (Claude, or Gemini with billing), run the full evaluation:
-   `python -m schemebot.evaluation --workers 4`, and re-check the threshold with answer
-   quality in view.
-2. Have Tamil and Hindi speakers verify the 194 drafts with the review sheet.
-3. Tanglish: transliterate to Tamil script before reranking, or fine-tune the reranker on
-   Tanglish question-passage pairs, and test on a fresh batch.
-4. Finish reviewing `docs/review/ocr_disagreements.csv` and `docs/review/amount_check.csv`,
-   then confirm the checked entries into `data/corrections.json`
-   (`scripts/confirm_corrections.py`). Tesseract already runs at 300 dpi.
+In this order, because each step makes the next one's numbers mean more:
+
+1. **Verify the labels.** Export the 194 drafts with their gold-page text, have Tamil and
+   Hindi speakers check them, then import the sheet:
+   `python -m schemebot.evaluation.review export review.csv` and
+   `python -m schemebot.evaluation.review import review.csv`. Ten incomplete labels have
+   already been found (section 8).
+2. **Finish the OCR review.** Go through `docs/review/ocr_disagreements.csv` (263 pages) and
+   `docs/review/amount_check.csv`, then confirm the checked entries with
+   `python scripts/confirm_corrections.py --by NAME doc_id:page` and re-run ingestion and
+   indexing. Tesseract already runs at 300 dpi.
+3. **Tanglish.** One design: transliterate Tanglish to Tamil script before reranking and
+   replace the word-list gloss (`retrieve/tanglish.py`, setting `gloss_tanglish`) with it,
+   rather than running both. Measure on a fresh batch written after the change.
+4. **Full answer evaluation.** With a paid key (Claude, or Gemini with billing) and
+   `SCHEMEBOT_MAX_DAILY_LLM_CALLS=600` or more (the judge shares the daily budget, so the
+   default 200 would end a full run partway), run
+   `python -m schemebot.evaluation --workers 4`; then re-check the 0.35 threshold with
+   answer quality in view.
