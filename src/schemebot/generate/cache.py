@@ -9,6 +9,7 @@ import hashlib
 import json
 import logging
 import math
+import pickle
 import re
 import threading
 import time
@@ -115,7 +116,10 @@ class _Entry:
 
 
 class CachedAnswerer:
-    """In-memory LRU cache wrapping an AnswerService."""
+    """LRU cache wrapping an AnswerService. With `path`, answers survive a restart: the
+    laptop backend restarts with every new tunnel, and repeated questions should stay instant.
+    The file holds hashed keys and answers only, never the question text, and is only reused
+    while the fingerprint (index, corrections, models, settings) is unchanged."""
 
     def preload(self) -> None:
         """Forwards preload call to the underlying service."""
@@ -129,6 +133,8 @@ class CachedAnswerer:
         ttl_seconds: float = 3600.0,
         fingerprint: str = "",
         clock: Callable[[], float] = time.monotonic,
+        path: Path | None = None,
+        wall_clock: Callable[[], float] = time.time,
     ) -> None:
         if max_entries < 1:
             raise ValueError(f"max_entries must be >= 1, got {max_entries}")
@@ -139,6 +145,9 @@ class CachedAnswerer:
         self._clock = clock
         self._lock = threading.Lock()
         self._entries: OrderedDict[str, _Entry] = OrderedDict()
+        self._path = path
+        self._wall_clock = wall_clock
+        self._load()
 
     @property
     def retriever(self) -> object:
@@ -155,7 +164,9 @@ class CachedAnswerer:
     ) -> Answer:
         started = self._clock()
         context = (follow_up.scheme or "") if follow_up else ""
-        key = cache_key(question, self._fingerprint, voice_mode=voice_mode, context=context)
+        key = hashlib.sha256(
+            cache_key(question, self._fingerprint, voice_mode=voice_mode, context=context).encode()
+        ).hexdigest()
         cached = self._get(key)
         if cached is not None:
             # Replaced question so subtle differences like whitespace match the caller
@@ -180,11 +191,47 @@ class CachedAnswerer:
             return entry.answer
 
     def _put(self, key: str, answer: Answer) -> None:
+        # Kept without the question text and the retrieved passages (not needed to reply).
+        stored = replace(answer, question="", understood_query=None, passages=[])
         with self._lock:
-            self._entries[key] = _Entry(answer, self._clock())
+            self._entries[key] = _Entry(stored, self._clock())
             self._entries.move_to_end(key)
             while len(self._entries) > self._max_entries:
                 self._entries.popitem(last=False)
+            self._save()
+
+    def _save(self) -> None:
+        """Called with the lock held. A failed write only costs the cache after a restart."""
+        if self._path is None:
+            return
+        now, wall = self._clock(), self._wall_clock()
+        saved = [(key, e.answer, wall - (now - e.stored_at)) for key, e in self._entries.items()]
+        temporary = self._path.with_suffix(".tmp")
+        try:
+            self._path.parent.mkdir(parents=True, exist_ok=True)
+            with temporary.open("wb") as file:
+                pickle.dump({"fingerprint": self._fingerprint, "entries": saved}, file)
+            temporary.replace(self._path)
+        except OSError as error:
+            logger.warning("could not save the answer cache: %s", error)
+
+    def _load(self) -> None:
+        if self._path is None or not self._path.is_file():
+            return
+        try:
+            with self._path.open("rb") as file:
+                # Our own file in the data folder, written by _save above.
+                data = pickle.load(file)  # noqa: S301
+        except (OSError, pickle.UnpicklingError, EOFError, AttributeError, ImportError) as error:
+            logger.warning("ignoring an unreadable answer cache: %s", error)
+            return
+        if not isinstance(data, dict) or data.get("fingerprint") != self._fingerprint:
+            return  # the index, corrections, models or settings changed: old answers may be wrong
+        now, wall = self._clock(), self._wall_clock()
+        for key, answer, saved_at in data.get("entries", [])[-self._max_entries :]:
+            age = wall - saved_at
+            if 0 <= age <= self._ttl_seconds and isinstance(answer, Answer):
+                self._entries[key] = _Entry(answer, now - age)
 
 
 def cosine_similarity(v1: list[float], v2: list[float]) -> float:
