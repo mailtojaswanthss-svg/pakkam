@@ -6,7 +6,7 @@
    "group": "en",
    "question": "Who can apply for Kalaignar Magalir Urimai Thittam?",
    "answerable": true,
-   "seconds": 9.97,
+   "seconds": 16.1,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -15,7 +15,7 @@
    "group": "en",
    "question": "What is the annual family income limit for the Magalir Urimai scheme?",
    "answerable": true,
-   "seconds": 6.36,
+   "seconds": 3.75,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -24,7 +24,7 @@
    "group": "en",
    "question": "Can a family with a central government employee get Magalir Urimai Thogai?",
    "answerable": true,
-   "seconds": 4.79,
+   "seconds": 2.58,
    "outcome": "missed",
    "reason": "not_in_documents"
   },
@@ -33,7 +33,7 @@
    "group": "en",
    "question": "How much money does a farmer get every year under PM-KISAN?",
    "answerable": true,
-   "seconds": 17.94,
+   "seconds": 3.88,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -42,7 +42,7 @@
    "group": "en",
    "question": "Is a retired pensioner eligible for PM-KISAN?",
    "answerable": true,
-   "seconds": 5.83,
+   "seconds": 5.64,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -51,7 +51,7 @@
    "group": "en",
    "question": "What are the ways to complete e-KYC for PM-KISAN?",
    "answerable": true,
-   "seconds": 5.53,
+   "seconds": 4.52,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -60,7 +60,7 @@
    "group": "en",
    "question": "Can an income tax payer join Atal Pension Yojana?",
    "answerable": true,
-   "seconds": 4.6,
+   "seconds": 3.89,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -69,7 +69,7 @@
    "group": "en",
    "question": "Which documents are needed for a new Ujjwala LPG connection?",
    "answerable": true,
-   "seconds": 4.04,
+   "seconds": 3.38,
    "outcome": "answered",
    "cited_gold_page": false
   },
@@ -78,7 +78,7 @@
    "group": "en",
    "question": "What is the interest rate on Sukanya Samriddhi Yojana deposits?",
    "answerable": false,
-   "seconds": 0.97,
+   "seconds": 1.03,
    "outcome": "correct_refusal"
   },
   {
@@ -86,7 +86,7 @@
    "group": "en",
    "question": "When will the next PM-KISAN instalment be paid?",
    "answerable": false,
-   "seconds": 3.53,
+   "seconds": 2.08,
    "outcome": "correct_refusal"
   },
   {
@@ -94,7 +94,7 @@
    "group": "ta",
    "question": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் யார் விண்ணப்பிக்கலாம்?",
    "answerable": true,
-   "seconds": 5.03,
+   "seconds": 5.64,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -103,7 +103,7 @@
    "group": "ta",
    "question": "மகளிர் உரிமைத் தொகை பெற நில உடைமை வரம்பு என்ன?",
    "answerable": true,
-   "seconds": 5.84,
+   "seconds": 3.87,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -112,7 +112,7 @@
    "group": "ta",
    "question": "மகளிர் உரிமைத் திட்டத்தில் மின்சார பயன்பாட்டு வரம்பு என்ன?",
    "answerable": true,
-   "seconds": 0.88,
+   "seconds": 0.44,
    "outcome": "clarified"
   },
   {
@@ -120,7 +120,7 @@
    "group": "ta",
    "question": "மகளிர் உரிமைத் திட்டத்தில் ஆண்டுக்கு எவ்வளவு தொகை வழங்கப்படும்?",
    "answerable": true,
-   "seconds": 0.72,
+   "seconds": 0.57,
    "outcome": "answered",
    "cited_gold_page": false
   },
@@ -129,7 +129,7 @@
    "group": "ta",
    "question": "பிஎம் கிசான் திட்டத்தில் வருமான வரி செலுத்துபவர்கள் பயன் பெற முடியுமா?",
    "answerable": true,
-   "seconds": 4.9,
+   "seconds": 13.19,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -138,7 +138,7 @@
    "group": "ta",
    "question": "அடல் ஓய்வூதியத் திட்டத்தில் சேர வயது வரம்பு என்ன?",
    "answerable": true,
-   "seconds": 0.56,
+   "seconds": 0.6,
    "outcome": "clarified"
   },
   {
@@ -146,7 +146,7 @@
    "group": "ta",
    "question": "முதலமைச்சரின் காலை உணவுத் திட்டம் எந்த வகுப்பு மாணவர்களுக்கு?",
    "answerable": true,
-   "seconds": 5.3,
+   "seconds": 4.16,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -155,7 +155,7 @@
    "group": "ta",
    "question": "புதுமைப் பெண் திட்டத்தில் மாணவிகளுக்கு மாதம் எவ்வளவு உதவித்தொகை?",
    "answerable": true,
-   "seconds": 5.6,
+   "seconds": 4.26,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -164,7 +164,7 @@
    "group": "ta",
    "question": "மகளிர் உரிமைத் தொகை அடுத்த மாதம் எந்த தேதியில் வரவு வைக்கப்படும்?",
    "answerable": false,
-   "seconds": 10.92,
+   "seconds": 3.87,
    "outcome": "correct_refusal"
   },
   {
@@ -172,7 +172,7 @@
    "group": "ta",
    "question": "புதிய குடும்ப அட்டைக்கு எப்படி விண்ணப்பிப்பது?",
    "answerable": false,
-   "seconds": 9.32,
+   "seconds": 2.59,
    "outcome": "correct_refusal"
   },
   {
@@ -180,7 +180,7 @@
    "group": "hi",
    "question": "पीएम किसान योजना में किसानों को साल में कितना पैसा मिलता है?",
    "answerable": true,
-   "seconds": 42.9,
+   "seconds": 3.62,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -189,7 +189,7 @@
    "group": "hi",
    "question": "क्या संस्थागत भूमि धारक पीएम किसान के पात्र हैं?",
    "answerable": true,
-   "seconds": 11.38,
+   "seconds": 3.74,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -198,7 +198,7 @@
    "group": "hi",
    "question": "पीएम किसान के लिए ई-केवाईसी करने के कौन-कौन से तरीके हैं?",
    "answerable": true,
-   "seconds": 8.02,
+   "seconds": 4.08,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -207,7 +207,7 @@
    "group": "hi",
    "question": "ओटीपी आधारित ई-केवाईसी के लिए क्या चाहिए?",
    "answerable": true,
-   "seconds": 10.88,
+   "seconds": 3.94,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -216,7 +216,7 @@
    "group": "hi",
    "question": "अटल पेंशन योजना में कितनी पेंशन मिलती है?",
    "answerable": true,
-   "seconds": 6.56,
+   "seconds": 4.13,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -225,7 +225,7 @@
    "group": "hi",
    "question": "अटल पेंशन योजना में शामिल होने की उम्र क्या है?",
    "answerable": true,
-   "seconds": 12.78,
+   "seconds": 4.64,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -234,7 +234,7 @@
    "group": "hi",
    "question": "उज्ज्वला योजना में गैस कनेक्शन के लिए कौन पात्र है?",
    "answerable": true,
-   "seconds": 2.64,
+   "seconds": 2.37,
    "outcome": "missed",
    "reason": "not_in_documents"
   },
@@ -243,7 +243,7 @@
    "group": "hi",
    "question": "मगलिर उरिमै योजना में परिवार की आय सीमा क्या है?",
    "answerable": true,
-   "seconds": 0.47,
+   "seconds": 0.48,
    "outcome": "clarified"
   },
   {
@@ -251,7 +251,7 @@
    "group": "hi",
    "question": "किसान क्रेडिट कार्ड पर ब्याज दर क्या है?",
    "answerable": false,
-   "seconds": 7.37,
+   "seconds": 12.44,
    "outcome": "correct_refusal"
   },
   {
@@ -259,7 +259,7 @@
    "group": "hi",
    "question": "आयुष्मान भारत कार्ड कैसे डाउनलोड करें?",
    "answerable": false,
-   "seconds": 6.35,
+   "seconds": 4.63,
    "outcome": "correct_refusal"
   },
   {
@@ -267,7 +267,7 @@
    "group": "ta-Latn",
    "question": "magalir urimai thogai ku yaar apply pannalam",
    "answerable": true,
-   "seconds": 5.36,
+   "seconds": 5.08,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -276,16 +276,16 @@
    "group": "ta-Latn",
    "question": "magalir urimai ku income limit evlo",
    "answerable": true,
-   "seconds": 5.16,
-   "outcome": "answered",
-   "cited_gold_page": true
+   "seconds": 3.38,
+   "outcome": "missed",
+   "reason": "unsupported"
   },
   {
    "id": "q039",
    "group": "ta-Latn",
    "question": "govt job la irukavanga family ku magalir urimai thogai kidaikuma",
    "answerable": true,
-   "seconds": 4.48,
+   "seconds": 4.15,
    "outcome": "missed",
    "reason": "not_in_documents"
   },
@@ -294,7 +294,7 @@
    "group": "ta-Latn",
    "question": "PM kisan la varushathuku evlo panam kidaikum",
    "answerable": true,
-   "seconds": 4.36,
+   "seconds": 4.19,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -303,7 +303,7 @@
    "group": "ta-Latn",
    "question": "PM kisan ekyc epdi pannradhu",
    "answerable": true,
-   "seconds": 5.48,
+   "seconds": 4.19,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -312,7 +312,7 @@
    "group": "ta-Latn",
    "question": "atal pension la join panna age evlo",
    "answerable": true,
-   "seconds": 3.92,
+   "seconds": 4.41,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -321,7 +321,7 @@
    "group": "ta-Latn",
    "question": "ujjwala gas connection ku enna documents venum",
    "answerable": true,
-   "seconds": 4.78,
+   "seconds": 5.07,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -330,7 +330,7 @@
    "group": "ta-Latn",
    "question": "breakfast scheme endha class pasangalukku",
    "answerable": true,
-   "seconds": 14.77,
+   "seconds": 7.04,
    "outcome": "answered",
    "cited_gold_page": true
   },
@@ -339,7 +339,7 @@
    "group": "ta-Latn",
    "question": "magalir urimai thogai indha maasam eppo varum",
    "answerable": false,
-   "seconds": 4.6,
+   "seconds": 4.27,
    "outcome": "correct_refusal"
   },
   {
@@ -347,13 +347,13 @@
    "group": "ta-Latn",
    "question": "sukanya samriddhi la interest evlo",
    "answerable": false,
-   "seconds": 6.61,
+   "seconds": 4.29,
    "outcome": "correct_refusal"
   }
  ],
  "replies": {
   "q001": {
-   "answer": "A woman who has completed 21 years of age and was born before September 15, 2002 can apply for the Kalaignar Magalir Urimai Thittam. [1] To be eligible, the applicant's family must satisfy three economic criteria: earn an annual income below Rs. 2.5 lakhs, hold less than five acres of wetland or less than ten acres of dryland, and consume less than 3600 units of electricity per year for domestic use. [2] Families earning an annual income of Rs. 2.5 lakh and above or having members who file income tax returns with an annual family income over Rs. 2.5 lakh are ineligible. [2]",
+   "answer": "A woman who has completed 21 years of age, meaning those born before September 15, 2002, can apply for the Kalaignar Magalir Urimai Thittam. [1][2] Applicants must be from families with an annual income below Rs. 2.5 lakhs, holding less than five acres of wetland or less than ten acres of dryland, and consuming less than 3600 units of electricity per year for domestic use. [3] Applicants should apply at the Application Registration camps pertaining to the fair price shop where their family card is registered. [1][2]",
    "language": "en",
    "refused": false,
    "status": "SUPPORTED",
@@ -365,25 +365,27 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "A woman who has completed 21 years of age and was born before September 15, 2002 can apply for the Kalaignar Magalir Urimai Thittam.",
+     "text": "A woman who has completed 21 years of age, meaning those born before September 15, 2002, can apply for the Kalaignar Magalir Urimai Thittam.",
      "citations": [
-      1
-     ],
-     "section": "eligibility"
-    },
-    {
-     "text": "To be eligible, the applicant's family must satisfy three economic criteria: earn an annual income below Rs. 2.5 lakhs, hold less than five acres of wetland or less than ten acres of dryland, and consume less than 3600 units of electricity per year for domestic use.",
-     "citations": [
+      1,
       2
      ],
      "section": "eligibility"
     },
     {
-     "text": "Families earning an annual income of Rs. 2.5 lakh and above or having members who file income tax returns with an annual family income over Rs. 2.5 lakh are ineligible.",
+     "text": "Applicants must be from families with an annual income below Rs. 2.5 lakhs, holding less than five acres of wetland or less than ten acres of dryland, and consuming less than 3600 units of electricity per year for domestic use.",
      "citations": [
-      2
+      3
      ],
      "section": "eligibility"
+    },
+    {
+     "text": "Applicants should apply at the Application Registration camps pertaining to the fair price shop where their family card is registered.",
+     "citations": [
+      1,
+      2
+     ],
+     "section": "apply"
     }
    ],
    "citations": [
@@ -407,6 +409,21 @@
      "scheme": "Kalaignar Magalir Urimai Thittam",
      "doc_id": "kmut-go15-2023-ta",
      "document": "G.O.(Ms) No.15, 10 July 2023",
+     "page_start": 9,
+     "page_end": 9,
+     "page": 9,
+     "source_url": "https://tncdw.org/frontend/gos/Mahalir_Urimai_Thittam-GO.pdf",
+     "excerpt": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெறத் தகுதிகள் மற்றும் தகுதியின்மைகள் குறித்து விரிவான வழிகாட்டு நெறிமுறைகள் வகுக்கப்பட்டு உள்ளன. இதுகுறித்த தகவல்களைத் தெளிவாக விளக்கி பயனாளிகளுக்கு இத்திட்டம் பற்றிய விழிப்புணர்வு ஊட்ட வேண்டும். திட்டச் செயலாக்கத்தின் போது ஏற்படக்கூடிய நடைமுறைச் சிக்கல்களைத் தவிர்க்க உரிய விழிப்புணர்வு நடவடிக்கைகளைத் திட்டமிடுதல் வேண்டும். 21விண்ணப்பிக்கும் நடைமுறைகள்\n\ni) குடும்பத் தலைவிகளுக்கான கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற, கீழ்க்கண்ட தகுதிகளைப் பெற்ற குடும்பங்களில், 21 வயது நிரம்பிய பெண் ஒருவர் விண்ணப்பிக்கலாம். அதாவது, செப்டம்பர் 15, 2002 தேதிக்கு முன்னர் பிறந்தவர்கள் விண்ணப்பிக்கலாம்.\n\ni) இத்திட்டதிற்கு பொது விநியோக நியாயவிலைக் கடைகள் ஒரு கணக்கெடுப்பு அலகாக (Enumeration unit) எடுத்துக் கொள்ளப்படும். விண்ணப்பதாரர்கள் தங்கள் குடும்ப அட்டை இருக்கும் நியாயவிலைக் கடை அமைந்திருக்கும் விண்ணப்பப் பதிவு முகாமில் மட்டுமே விண்ணப்பிக்க வேண்டும்.",
+     "snippet": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெறத் தகுதிகள் மற்றும் தகுதியின்மைகள் குறித்து விரிவான வழிகாட்டு நெறிமுறைகள் வகுக்கப்பட்டு உள்ளன. இதுகுறித்த தகவல்களைத் தெளிவாக விளக்கி பயனாளிகளுக்கு இத்திட்டம் பற்றிய விழிப்புணர்வு ஊட்ட வேண்டும். திட்டச் செயலாக்கத்தின் போது ஏற்படக்கூடிய நடைமுறைச் சிக்கல்களைத் தவிர்க்க உரிய விழிப்புணர்வு நடவடிக்கைகளைத் திட்டமிடுதல் வேண்டும். 21விண்ணப்பிக்கும் நடைமுறைகள்\n\ni) குடும்பத் தலைவிகளுக்கான கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற, கீழ்க்கண்ட தகுதிகளைப் பெற்ற குடும்பங்களில், 21 வயது நிரம்பிய பெண் ஒருவர் விண்ணப்பிக்கலாம். அதாவது, செப்டம்பர் 15, 2002 தேதிக்கு முன்னர் பிறந்தவர்கள் விண்ணப்பிக்கலாம்.\n\ni) இத்திட்டதிற்கு பொது விநியோக நியாயவிலைக் கடைகள் ஒரு கணக்கெடுப்பு அலகாக (Enumeration unit) எடுத்துக் கொள்ளப்படும். விண்ணப்பதாரர்கள் தங்கள் குடும்ப அட்டை இருக்கும் நியாயவிலைக் கடை அமைந்திருக்கும் விண்ணப்பப் பதிவு முகாமில் மட்டுமே விண்ணப்பிக்க வேண்டும்.",
+     "document_date": "2023-07-10",
+     "language": "ta",
+     "ocr_corrected": false
+    },
+    {
+     "number": 3,
+     "scheme": "Kalaignar Magalir Urimai Thittam",
+     "doc_id": "kmut-go15-2023-ta",
+     "document": "G.O.(Ms) No.15, 10 July 2023",
      "page_start": 4,
      "page_end": 4,
      "page": 4,
@@ -420,16 +437,16 @@
    ],
    "confidence": 0.9784,
    "disclaimer": "Informational only, not an official government service. Verify with the official source before acting on it.",
-   "latency_ms": 8702.8,
+   "latency_ms": 15233.6,
    "timings_ms": {
-    "fact_card_match": 221.0,
-    "retrieval": 1005.5,
-    "search": 429.2,
-    "rerank": 348.8,
-    "llm_answer": 6164.3,
-    "verifier": 1531.1,
-    "generation": 7695.5,
-    "total": 8702.8
+    "fact_card_match": 188.8,
+    "retrieval": 658.3,
+    "search": 229.0,
+    "rerank": 236.7,
+    "llm_answer": 10640.3,
+    "verifier": 3932.0,
+    "generation": 14572.4,
+    "total": 15233.6
    },
    "contact": null,
    "confirmation_text": null,
@@ -437,7 +454,7 @@
    "rejected_reasons": []
   },
   "q002": {
-   "answer": "To be eligible for the Kalaignar Magalir Urimai Thittam scheme, families must earn an annual income below Rs. 2.5 lakhs. [1][2] Families earning an annual income of Rs. 2.5 lakh and above are ineligible for the scheme. [2]",
+   "answer": "Families applying for the benefit of Kalaignar Mahalir Urimai Thittam should have an annual income below Rs. 2.5 lakhs. [1]",
    "language": "en",
    "refused": false,
    "status": "SUPPORTED",
@@ -449,17 +466,9 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "To be eligible for the Kalaignar Magalir Urimai Thittam scheme, families must earn an annual income below Rs. 2.5 lakhs.",
+     "text": "Families applying for the benefit of Kalaignar Mahalir Urimai Thittam should have an annual income below Rs. 2.5 lakhs.",
      "citations": [
-      1,
-      2
-     ],
-     "section": "eligibility"
-    },
-    {
-     "text": "Families earning an annual income of Rs. 2.5 lakh and above are ineligible for the scheme.",
-     "citations": [
-      2
+      1
      ],
      "section": "eligibility"
     }
@@ -467,21 +476,6 @@
    "citations": [
     {
      "number": 1,
-     "scheme": "Kalaignar Magalir Urimai Thittam",
-     "doc_id": "kmut-go15-2023-ta",
-     "document": "G.O.(Ms) No.15, 10 July 2023",
-     "page_start": 10,
-     "page_end": 11,
-     "page": 10,
-     "source_url": "https://tncdw.org/frontend/gos/Mahalir_Urimai_Thittam-GO.pdf",
-     "excerpt": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற விண்ணப்பிக்கும் குடும்பங்கள் கீழ்க்காணும் மூன்று பொருளாதார அளவுகோல்களுக்கு உட்பட்ட குடும்பங்களாக இருத்தல் வேண்டும்.\n\ni) ஆண்டு வருமானம் ரூ.25 இலட்சத்திற்குக் கீழ் வருமானம் ஈட்டும் குடும்பங்கள்.\n\nii) ஐந்து ஏக்கருக்குக் குறைவாக நன்செய் நிலம் அல்லது பத்து ஏக்கருக்குக் குறைவாகப் புன்செய் நிலம் வைத்துள்ள குடும்பங்கள்.\n\nரம் ஆண்டிற்கு விட்டு உபயோகத்துக்கு 3600 யூனிட்டிற்கும் குறைவாக மின்சாரம் பயன்படுத்தும் குடும்பங்கள்.\n\nபொருளாதாரத் தகுதிகளுக்காகத் தனியாக வருமானச் சான்று அல்லது நில ஆவணங்களைப் பெற்று விண்ணப்பத்துடன் இணைக்கத் தேவையில்லை. 2.21 கலைஞர் மகளிர் உறிமைத் திட்டத்தில் பயன் பெறத்தகுதி இல்லாதவர்கள் கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற விண்ணப்பிக்கும் விண்ணப்பதாரரின் குடும்ப உறுப்பினர்களில் யாரேனும், கீழ்க்காணும்\n\nஏதாவது ஒரு வகையைச் சேர்ந்த குடும்ப உறுப்பினர்களாக இருந்தால், அந்தக் குடும்பத்தைச் சேர்ந்த விண்ணப்பதாரர், கலைஞர் மகளிர் உரிமைத் கிட்டத்தில் பயன் பெறத்தகுதி இல்லாதவர் ஆவர்.\n\ni)\n\nii)\n\niii)\n\niv)\n\nv)\n\nvi)\n\nvil)\n\nviii)",
-     "snippet": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற விண்ணப்பிக்கும் குடும்பங்கள் கீழ்க்காணும் மூன்று பொருளாதார அளவுகோல்களுக்கு உட்பட்ட குடும்பங்களாக இருத்தல் வேண்டும்.\n\ni) ஆண்டு வருமானம் ரூ.25 இலட்சத்திற்குக் கீழ் வருமானம் ஈட்டும் குடும்பங்கள்.\n\nii) ஐந்து ஏக்கருக்குக் குறைவாக நன்செய் நிலம் அல்லது பத்து ஏக்கருக்குக் குறைவாகப் புன்செய் நிலம் வைத்துள்ள குடும்பங்கள்.\n\nரம் ஆண்டிற்கு விட்டு உபயோகத்துக்கு 3600 யூனிட்டிற்கும் குறைவாக மின்சாரம் பயன்படுத்தும் குடும்பங்கள்.\n\nபொருளாதாரத் தகுதிகளுக்காகத் தனியாக வருமானச் சான்று அல்லது நில ஆவணங்களைப் பெற்று விண்ணப்பத்துடன் இணைக்கத் தேவையில்லை. 2.21 கலைஞர் மகளிர் உறிமைத் திட்டத்தில் பயன் பெறத்தகுதி இல்லாதவர்கள் கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற விண்ணப்பிக்கும் விண்ணப்பதாரரின் குடும்ப உறுப்பினர்களில் யாரேனும், கீழ்க்காணும்\n\nஏதாவது ஒரு வகையைச் சேர்ந்த குடும்ப உறுப்பினர்களாக இருந்தால், அந்தக் குடும்பத்தைச் சேர்ந்த விண்ணப்பதாரர், கலைஞர் மகளிர் உரிமைத் கிட்டத்தில் பயன் பெறத்தகுதி இல்லாதவர் ஆவர்.\n\ni)\n\nii)\n\niii)\n\niv)\n\nv)\n\nvi)\n\nvil)\n\nviii)",
-     "document_date": "2023-07-10",
-     "language": "ta",
-     "ocr_corrected": false
-    },
-    {
-     "number": 2,
      "scheme": "Kalaignar Magalir Urimai Thittam",
      "doc_id": "kmut-go15-2023-ta",
      "document": "G.O.(Ms) No.15, 10 July 2023",
@@ -498,16 +492,16 @@
    ],
    "confidence": 0.8997,
    "disclaimer": "Informational only, not an official government service. Verify with the official source before acting on it.",
-   "latency_ms": 5674.3,
+   "latency_ms": 3228.0,
    "timings_ms": {
-    "fact_card_match": 167.1,
-    "retrieval": 1077.5,
-    "search": 462.3,
-    "rerank": 446.2,
-    "llm_answer": 3262.8,
-    "verifier": 1331.9,
-    "generation": 4594.8,
-    "total": 5674.3
+    "fact_card_match": 210.4,
+    "retrieval": 694.4,
+    "search": 251.3,
+    "rerank": 231.8,
+    "llm_answer": 1340.0,
+    "verifier": 1192.7,
+    "generation": 2532.8,
+    "total": 3228.0
    },
    "contact": null,
    "confirmation_text": null,
@@ -529,15 +523,15 @@
    "citations": [],
    "confidence": 0.4864,
    "disclaimer": "Informational only, not an official government service. Verify with the official source before acting on it.",
-   "latency_ms": 4124.0,
+   "latency_ms": 2001.1,
    "timings_ms": {
-    "fact_card_match": 214.2,
-    "retrieval": 1023.2,
-    "search": 557.6,
-    "rerank": 248.8,
-    "llm_answer": 3098.3,
-    "total": 4124.0,
-    "generation": 3099.7
+    "fact_card_match": 227.1,
+    "retrieval": 713.1,
+    "search": 250.9,
+    "rerank": 233.7,
+    "llm_answer": 1287.1,
+    "total": 2001.1,
+    "generation": 1287.4
    },
    "contact": {
     "scheme": "Kalaignar Magalir Urimai Thittam",
@@ -549,7 +543,7 @@
    "rejected_reasons": []
   },
   "q004": {
-   "answer": "Under the PM-KISAN scheme, Rs 6,000/- per year is transferred into the bank accounts of eligible farmers. [1][2][3]",
+   "answer": "Under the PM-KISAN scheme, Rs 6,000/- per year in three equal instalments is transferred into the Aadhaar seeded bank accounts of farmers. [1]",
    "language": "en",
    "refused": false,
    "status": "SUPPORTED",
@@ -561,11 +555,9 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "Under the PM-KISAN scheme, Rs 6,000/- per year is transferred into the bank accounts of eligible farmers.",
+     "text": "Under the PM-KISAN scheme, Rs 6,000/- per year in three equal instalments is transferred into the Aadhaar seeded bank accounts of farmers.",
      "citations": [
-      1,
-      2,
-      3
+      1
      ],
      "section": "amount"
     }
@@ -585,50 +577,20 @@
      "document_date": "2023-11-13",
      "language": "en",
      "ocr_corrected": false
-    },
-    {
-     "number": 2,
-     "scheme": "PM-KISAN",
-     "doc_id": "pmkisan-guidelines-2020-en",
-     "document": "Operational guidelines, revised 2020",
-     "page_start": 10,
-     "page_end": 10,
-     "page": 10,
-     "source_url": "https://pmkisan.gov.in/Documents/RevisedPM-KISANOperationalGuidelines(English).pdf",
-     "excerpt": "4. The verified list shall be e-signed by the District level or block / tehsil / taluka level officials as the case may be. The exclusion categories specified in scheme guidelines also need to be taken care before e-signing the verified farmers list.\n\n5. The States Nodal Officer shall submit a district wise e-Signed list of farmers to the Program Division of DAC&FW through PM-Kisan Portal. Modalities for transfer of benefit\n\n10.1 The financial benefit of Rs.6000/- per year is to be released to the eligible farmers in three installments of Rs.2000/- each every 4-month / trimester, i.e. April-July, August-November and December-March.",
-     "snippet": "4. The verified list shall be e-signed by the District level or block / tehsil / taluka level officials as the case may be. The exclusion categories specified in scheme guidelines also need to be taken care before e-signing the verified farmers list.\n\n5. The States Nodal Officer shall submit a district wise e-Signed list of farmers to the Program Division of DAC&FW through PM-Kisan Portal. Modalities for transfer of benefit\n\n10.1 The financial benefit of Rs.6000/- per year is to be released to the eligible farmers in three installments of Rs.2000/- each every 4-month / trimester, i.e. April-July, August-November and December-March.",
-     "document_date": "2020-03-29",
-     "language": "en",
-     "ocr_corrected": false
-    },
-    {
-     "number": 3,
-     "scheme": "PM-KISAN",
-     "doc_id": "pmkisan-guidelines-2020-en",
-     "document": "Operational guidelines, revised 2020",
-     "page_start": 2,
-     "page_end": 2,
-     "page": 2,
-     "source_url": "https://pmkisan.gov.in/Documents/RevisedPM-KISANOperationalGuidelines(English).pdf",
-     "excerpt": "The scheme aims to supplement the financial needs of all landholding farmers’ families in procuring various inputs to ensure proper crop health and appropriate yields, commensurate with the anticipated farm income as well as for domestic needs. Under the Scheme an amount of Rs.6000/- per year is released by the Central Government online directly into the bank accounts of the eligible farmers under Direct Benefit Transfer mode, subject to certain exclusions.\n\n3. Definition of farmer’s family\n\nA landholder farmer’s family is defined as “a family comprising of husband, wife and minor children who owns cultivable land as per land records of the concerned State/UT”. The existing land-ownership system will be used for identification of beneficiaries for calculation of benefit.",
-     "snippet": "The scheme aims to supplement the financial needs of all landholding farmers’ families in procuring various inputs to ensure proper crop health and appropriate yields, commensurate with the anticipated farm income as well as for domestic needs. Under the Scheme an amount of Rs.6000/- per year is released by the Central Government online directly into the bank accounts of the eligible farmers under Direct Benefit Transfer mode, subject to certain exclusions.\n\n3. Definition of farmer’s family\n\nA landholder farmer’s family is defined as “a family comprising of husband, wife and minor children who owns cultivable land as per land records of the concerned State/UT”. The existing land-ownership system will be used for identification of beneficiaries for calculation of benefit.",
-     "document_date": "2020-03-29",
-     "language": "en",
-     "ocr_corrected": false
     }
    ],
    "confidence": 0.9698,
    "disclaimer": "Informational only, not an official government service. Verify with the official source before acting on it.",
-   "latency_ms": 17401.2,
+   "latency_ms": 3313.2,
    "timings_ms": {
-    "fact_card_match": 240.4,
-    "retrieval": 1057.4,
-    "search": 580.0,
-    "rerank": 236.6,
-    "llm_answer": 15300.2,
-    "verifier": 1042.4,
-    "generation": 16342.6,
-    "total": 17401.2
+    "fact_card_match": 218.4,
+    "retrieval": 716.5,
+    "search": 288.1,
+    "rerank": 209.7,
+    "llm_answer": 1511.9,
+    "verifier": 1084.0,
+    "generation": 2596.0,
+    "total": 3313.2
    },
    "contact": null,
    "confirmation_text": null,
@@ -636,7 +598,7 @@
    "rejected_reasons": []
   },
   "q005": {
-   "answer": "All superannuated or retired pensioners whose monthly pension is Rs.10,000/- or more, excluding Multi Tasking Staff, Class IV, or Group D employees, are excluded from the PM-KISAN scheme. [1]",
+   "answer": "All superannuated or retired pensioners whose monthly pension is Rs.10,000/- or more, excluding Multi Tasking Staff, Class IV, or Group D employees, are excluded from PM-KISAN. [1]",
    "language": "en",
    "refused": false,
    "status": "SUPPORTED",
@@ -648,7 +610,7 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "All superannuated or retired pensioners whose monthly pension is Rs.10,000/- or more, excluding Multi Tasking Staff, Class IV, or Group D employees, are excluded from the PM-KISAN scheme.",
+     "text": "All superannuated or retired pensioners whose monthly pension is Rs.10,000/- or more, excluding Multi Tasking Staff, Class IV, or Group D employees, are excluded from PM-KISAN.",
      "citations": [
       1
      ],
@@ -672,19 +634,19 @@
      "ocr_corrected": false
     }
    ],
-   "confidence": 0.704,
+   "confidence": 0.5251,
    "disclaimer": "Informational only, not an official government service. Verify with the official source before acting on it.",
-   "latency_ms": 5080.7,
+   "latency_ms": 5149.8,
    "timings_ms": {
-    "fact_card_match": 38.6,
-    "retrieval": 588.6,
-    "search": 332.1,
-    "rerank": 217.6,
-    "rewrite": 1734.0,
-    "llm_answer": 1362.2,
-    "verifier": 1393.5,
-    "generation": 2755.8,
-    "total": 5080.7
+    "fact_card_match": 37.9,
+    "retrieval": 486.8,
+    "search": 236.4,
+    "rerank": 212.4,
+    "rewrite": 1909.0,
+    "llm_answer": 1373.5,
+    "verifier": 1378.7,
+    "generation": 2752.3,
+    "total": 5149.8
    },
    "contact": null,
    "confirmation_text": null,
@@ -692,7 +654,7 @@
    "rejected_reasons": []
   },
   "q006": {
-   "answer": "There are three modes of e-KYC available: OTP Based e-KYC, Biometric based e-KYC, and Face authentication-based e-KYC. [1]",
+   "answer": "There are three modes of e-KYC available to the farmers of the PM-KISAN scheme: OTP Based e-KYC, Biometric based e-KYC, and Face authentication-based e-KYC. [1] OTP Based e-KYC is available on the PM-KISAN Portal and Mobile App. [1] Biometric based e-KYC is available at Common Service Centres and State Seva Kendras. [1] Face authentication-based e-KYC is available on the PM-KISAN Mobile app. [1]",
    "language": "en",
    "refused": false,
    "status": "SUPPORTED",
@@ -704,11 +666,32 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "There are three modes of e-KYC available: OTP Based e-KYC, Biometric based e-KYC, and Face authentication-based e-KYC.",
+     "text": "There are three modes of e-KYC available to the farmers of the PM-KISAN scheme: OTP Based e-KYC, Biometric based e-KYC, and Face authentication-based e-KYC.",
      "citations": [
       1
      ],
      "section": "eligibility"
+    },
+    {
+     "text": "OTP Based e-KYC is available on the PM-KISAN Portal and Mobile App.",
+     "citations": [
+      1
+     ],
+     "section": "apply"
+    },
+    {
+     "text": "Biometric based e-KYC is available at Common Service Centres and State Seva Kendras.",
+     "citations": [
+      1
+     ],
+     "section": "apply"
+    },
+    {
+     "text": "Face authentication-based e-KYC is available on the PM-KISAN Mobile app.",
+     "citations": [
+      1
+     ],
+     "section": "apply"
     }
    ],
    "citations": [
@@ -730,16 +713,16 @@
    ],
    "confidence": 0.9944,
    "disclaimer": "Informational only, not an official government service. Verify with the official source before acting on it.",
-   "latency_ms": 4464.4,
+   "latency_ms": 3789.5,
    "timings_ms": {
-    "fact_card_match": 218.4,
-    "retrieval": 1280.1,
-    "search": 376.4,
-    "rerank": 684.9,
-    "llm_answer": 1539.0,
-    "verifier": 1643.4,
-    "generation": 3182.5,
-    "total": 4464.4
+    "fact_card_match": 38.8,
+    "retrieval": 626.7,
+    "search": 199.8,
+    "rerank": 387.9,
+    "llm_answer": 1942.1,
+    "verifier": 1219.6,
+    "generation": 3161.8,
+    "total": 3789.5
    },
    "contact": null,
    "confirmation_text": null,
@@ -747,7 +730,7 @@
    "rejected_reasons": []
   },
   "q007": {
-   "answer": "From 1st October, 2022, any citizen who is or has been an income-tax payer shall not be eligible to join APY. [1]",
+   "answer": "Any citizen who is or has been an income-tax payer shall not be eligible to join the Atal Pension Yojana. [1]",
    "language": "en",
    "refused": false,
    "status": "SUPPORTED",
@@ -759,7 +742,7 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "From 1st October, 2022, any citizen who is or has been an income-tax payer shall not be eligible to join APY.",
+     "text": "Any citizen who is or has been an income-tax payer shall not be eligible to join the Atal Pension Yojana.",
      "citations": [
       1
      ],
@@ -785,16 +768,16 @@
    ],
    "confidence": 0.9952,
    "disclaimer": "Informational only, not an official government service. Verify with the official source before acting on it.",
-   "latency_ms": 4079.1,
+   "latency_ms": 3426.3,
    "timings_ms": {
-    "fact_card_match": 213.1,
-    "retrieval": 929.8,
-    "search": 432.5,
-    "rerank": 283.8,
-    "llm_answer": 1778.9,
-    "verifier": 1368.5,
-    "generation": 3147.4,
-    "total": 4079.1
+    "fact_card_match": 38.5,
+    "retrieval": 698.4,
+    "search": 213.4,
+    "rerank": 446.2,
+    "llm_answer": 1427.6,
+    "verifier": 1299.3,
+    "generation": 2727.0,
+    "total": 3426.3
    },
    "contact": null,
    "confirmation_text": null,
@@ -802,7 +785,7 @@
    "rejected_reasons": []
   },
   "q008": {
-   "answer": "While submitting the application form (KYC), the applicant must submit an address proof (POA). [1] Migrant families must also provide a self-declaration of migrant status, family composition, address proof, and Aadhaar numbers of all adults mentioned in the family composition. [1]",
+   "answer": "While submitting the application form (KYC), the applicant will submit address proof as POA. [1]",
    "language": "en",
    "refused": false,
    "status": "SUPPORTED",
@@ -814,14 +797,7 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "While submitting the application form (KYC), the applicant must submit an address proof (POA).",
-     "citations": [
-      1
-     ],
-     "section": "documents"
-    },
-    {
-     "text": "Migrant families must also provide a self-declaration of migrant status, family composition, address proof, and Aadhaar numbers of all adults mentioned in the family composition.",
+     "text": "While submitting the application form (KYC), the applicant will submit address proof as POA.",
      "citations": [
       1
      ],
@@ -847,16 +823,16 @@
    ],
    "confidence": 0.9296,
    "disclaimer": "Informational only, not an official government service. Verify with the official source before acting on it.",
-   "latency_ms": 3413.2,
+   "latency_ms": 2869.4,
    "timings_ms": {
-    "fact_card_match": 208.7,
-    "retrieval": 933.5,
-    "search": 461.6,
-    "rerank": 262.0,
-    "llm_answer": 1530.6,
-    "verifier": 948.2,
-    "generation": 2478.9,
-    "total": 3413.2
+    "fact_card_match": 47.2,
+    "retrieval": 643.8,
+    "search": 231.5,
+    "rerank": 364.6,
+    "llm_answer": 1130.8,
+    "verifier": 1094.3,
+    "generation": 2225.1,
+    "total": 2869.4
    },
    "contact": null,
    "confirmation_text": null,
@@ -911,15 +887,15 @@
    "citations": [],
    "confidence": 0.4375,
    "disclaimer": "Informational only, not an official government service. Verify with the official source before acting on it.",
-   "latency_ms": 2651.1,
+   "latency_ms": 1534.7,
    "timings_ms": {
-    "fact_card_match": 243.4,
-    "retrieval": 1054.7,
-    "search": 563.9,
-    "rerank": 247.0,
-    "llm_answer": 1595.4,
-    "total": 2651.1,
-    "generation": 1595.7
+    "fact_card_match": 43.7,
+    "retrieval": 623.7,
+    "search": 192.6,
+    "rerank": 387.3,
+    "llm_answer": 910.4,
+    "total": 1534.7,
+    "generation": 910.6
    },
    "contact": {
     "scheme": "PM-KISAN",
@@ -931,7 +907,7 @@
    "rejected_reasons": []
   },
   "q013": {
-   "answer": "കുടുംബத் தலைவிகளுக்கான கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற, 21 வயது நிரம்பிய பெண் ஒருவர் விண்ணப்பிக்கலாம். [1]",
+   "answer": "குடும்பத் தலைவிகளுக்கான கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற, 21 வயது நிரம்பிய பெண் ஒருவர் விண்ணப்பிக்கலாம். [1] செப்டம்பர் 15, 2002 தேதிக்கு முன்னர் பிறந்தவர்கள் விண்ணப்பிக்கலாம். [1] விண்ணப்பதாரர்கள் தங்கள் குடும்ப அட்டை இருக்கும் நியாயவிலைக் கடை அமைந்திருக்கும் விண்ணப்பப் பதிவு முகாமில் மட்டுமே விண்ணப்பிக்க வேண்டும். [1]",
    "language": "ta",
    "refused": false,
    "status": "SUPPORTED",
@@ -943,11 +919,25 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "കുടുംബத் தலைவிகளுக்கான கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற, 21 வயது நிரம்பிய பெண் ஒருவர் விண்ணப்பிக்கலாம்.",
+     "text": "குடும்பத் தலைவிகளுக்கான கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற, 21 வயது நிரம்பிய பெண் ஒருவர் விண்ணப்பிக்கலாம்.",
      "citations": [
       1
      ],
      "section": "eligibility"
+    },
+    {
+     "text": "செப்டம்பர் 15, 2002 தேதிக்கு முன்னர் பிறந்தவர்கள் விண்ணப்பிக்கலாம்.",
+     "citations": [
+      1
+     ],
+     "section": "eligibility"
+    },
+    {
+     "text": "விண்ணப்பதாரர்கள் தங்கள் குடும்ப அட்டை இருக்கும் நியாயவிலைக் கடை அமைந்திருக்கும் விண்ணப்பப் பதிவு முகாமில் மட்டுமே விண்ணப்பிக்க வேண்டும்.",
+     "citations": [
+      1
+     ],
+     "section": "apply"
     }
    ],
    "citations": [
@@ -969,16 +959,16 @@
    ],
    "confidence": 0.9989,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 4341.2,
+   "latency_ms": 5107.4,
    "timings_ms": {
-    "fact_card_match": 192.2,
-    "retrieval": 964.0,
-    "search": 534.2,
-    "rerank": 235.7,
-    "llm_answer": 1814.0,
-    "verifier": 1560.1,
-    "generation": 3374.2,
-    "total": 4341.2
+    "fact_card_match": 45.3,
+    "retrieval": 600.6,
+    "search": 224.5,
+    "rerank": 329.6,
+    "llm_answer": 1908.4,
+    "verifier": 2597.1,
+    "generation": 4505.6,
+    "total": 5107.4
    },
    "contact": null,
    "confirmation_text": null,
@@ -1024,16 +1014,16 @@
    ],
    "confidence": 0.78,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 5197.9,
+   "latency_ms": 3304.5,
    "timings_ms": {
-    "fact_card_match": 218.1,
-    "retrieval": 1665.9,
-    "search": 494.5,
-    "rerank": 951.3,
-    "llm_answer": 1930.6,
-    "verifier": 1598.8,
-    "generation": 3529.6,
-    "total": 5197.9
+    "fact_card_match": 47.6,
+    "retrieval": 695.1,
+    "search": 233.0,
+    "rerank": 413.4,
+    "llm_answer": 1463.3,
+    "verifier": 1144.8,
+    "generation": 2608.1,
+    "total": 3304.5
    },
    "contact": null,
    "confirmation_text": null,
@@ -1060,9 +1050,9 @@
    "citations": [],
    "confidence": 0.0,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 1.6,
+   "latency_ms": 1.3,
    "timings_ms": {
-    "total": 1.6
+    "total": 1.3
    },
    "contact": null,
    "confirmation_text": null,
@@ -1108,10 +1098,10 @@
    ],
    "confidence": 0.891,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 221.4,
+   "latency_ms": 60.4,
    "timings_ms": {
-    "fact_card_match": 219.8,
-    "total": 221.4
+    "fact_card_match": 59.6,
+    "total": 60.4
    },
    "contact": {
     "scheme": "Kalaignar Magalir Urimai Thittam",
@@ -1161,16 +1151,16 @@
    ],
    "confidence": 0.875,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 4317.0,
+   "latency_ms": 12744.4,
    "timings_ms": {
-    "fact_card_match": 240.1,
-    "retrieval": 1592.7,
-    "search": 406.8,
-    "rerank": 943.5,
-    "llm_answer": 1531.2,
-    "verifier": 1191.7,
-    "generation": 2723.0,
-    "total": 4317.0
+    "fact_card_match": 180.3,
+    "retrieval": 830.7,
+    "search": 436.2,
+    "rerank": 213.2,
+    "llm_answer": 10798.9,
+    "verifier": 1114.2,
+    "generation": 11913.2,
+    "total": 12744.4
    },
    "contact": null,
    "confirmation_text": null,
@@ -1194,9 +1184,9 @@
    "citations": [],
    "confidence": 0.0,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 1.9,
+   "latency_ms": 1.1,
    "timings_ms": {
-    "total": 1.9
+    "total": 1.1
    },
    "contact": null,
    "confirmation_text": null,
@@ -1204,7 +1194,7 @@
    "rejected_reasons": []
   },
   "q019": {
-   "answer": "முதலமைச்சரின் காலை உணவுத் திட்டம் தொடக்கப் பள்ளிகளில் 1 முதல் 5-ஆம் வகுப்பு வரை பயிலும் மாணவ, மாணவியருக்கு வழங்‌கப்படுகிறது. [1][2][3]",
+   "answer": "முதலமைச்சரின் காலை உணவுத் திட்டம் தொடக்கப் பள்ளிகளில் 1 முதல் 5-ஆம் வகுப்பு வரை பயிலும் மாணவ, மாணவியருக்கு வழங்கப்படுகிறது. [1]",
    "language": "ta",
    "refused": false,
    "status": "SUPPORTED",
@@ -1216,11 +1206,9 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "முதலமைச்சரின் காலை உணவுத் திட்டம் தொடக்கப் பள்ளிகளில் 1 முதல் 5-ஆம் வகுப்பு வரை பயிலும் மாணவ, மாணவியருக்கு வழங்‌கப்படுகிறது.",
+     "text": "முதலமைச்சரின் காலை உணவுத் திட்டம் தொடக்கப் பள்ளிகளில் 1 முதல் 5-ஆம் வகுப்பு வரை பயிலும் மாணவ, மாணவியருக்கு வழங்கப்படுகிறது.",
      "citations": [
-      1,
-      2,
-      3
+      1
      ],
      "section": "eligibility"
     }
@@ -1228,21 +1216,6 @@
    "citations": [
     {
      "number": 1,
-     "scheme": "Chief Minister's Breakfast Scheme",
-     "doc_id": "cmbfs-go43-2022-ta",
-     "document": "G.O.(Ms) No.43, 27 July 2022",
-     "page_start": 14,
-     "page_end": 15,
-     "page": 14,
-     "source_url": "https://tncdw.org/frontend/gos/Breakfast_GO.43_(1).pdf",
-     "excerpt": "ட ்‌ கறத டிய அரசு சார்பு செயலாளர்‌\n\nஇணைணப்பு-2 அரசாணை (நிலை) எண்‌.43, சமூக நலன்‌ மற்றும்‌ மகளிர்‌ உரிமைத்‌ (௪ந4-1) துறை, நாள்‌. 27-07-2022 முதலமைச்சரின்‌ காலை உணவுத்‌ திட்டம்‌ வழிகாட்டு நெறிமுறைகள்‌ தொடக்கப்‌ பள்ளி மாணவ/மாணவியருக்கு காலை உணவு வழங்குதல்‌ ( 4 முதல்‌ 5ஆம்‌ வகுப்பு வரை)\n\n|. குறிக்கோள்கள்‌ :\n\nஉ மாணவ/ மாணவியர்கள்‌ பசியின்றி பள்ளிக்கு வருவதை உறுதி செய்தல்‌ உ மாணவ / மாணவியர்கள்‌ ஊட்டச்சத்து குறைபாட்டினால்‌ பாதிக்கப்படாமலிருத்தலை உறுதி செய்தல்‌, ௨ மாணவ / மாணவியரின்‌ ஊட்டச்சத்து நிலையை உயர்த்துதல்‌, குறிப்பாக இரத்த சோகை குறைபாட்டினை நீக்குதல்‌ 6 பள்ளிகளில்‌ மாணவ / மாணவியர்களின்‌ வருகையை அதிகரித்தல்‌ / தக்க வைத்துக்‌ கொள்ளுதல்‌ © வேலைக்குச்‌ செல்லும்‌ தாய்மார்களின்‌ பணிச்சுமையை குறைத்தல்‌ ll. காலை உணவு வகைகள்‌ : பின்வரும்‌ பல்வேறு விதமான சிற்றுண்டி வகைகளில்‌ ஏதேனும்‌ ஒன்றை குறிப்பிட்டுள்ள நாட்களில்‌ வழங்க வேண்டும்‌.\n\nபுதன்கிழமை-பொங்கல்‌ வகை\n\nதிங்கட்கிழமை-உப்புமா வகை செவ்வாய்கிழமை- கிச்சடி வகை ரவா காய்கறி கிச்சடி\n\nரவா பொங்கல்‌ காய்கறி சாம்பார்‌\n\nவெண்பொங்கல்‌ + காய்கறி சாம்பார்‌ |",
-     "snippet": "ட ்‌ கறத டிய அரசு சார்பு செயலாளர்‌\n\nஇணைணப்பு-2 அரசாணை (நிலை) எண்‌.43, சமூக நலன்‌ மற்றும்‌ மகளிர்‌ உரிமைத்‌ (௪ந4-1) துறை, நாள்‌. 27-07-2022 முதலமைச்சரின்‌ காலை உணவுத்‌ திட்டம்‌ வழிகாட்டு நெறிமுறைகள்‌ தொடக்கப்‌ பள்ளி மாணவ/மாணவியருக்கு காலை உணவு வழங்குதல்‌ ( 4 முதல்‌ 5ஆம்‌ வகுப்பு வரை)\n\n|. குறிக்கோள்கள்‌ :\n\nஉ மாணவ/ மாணவியர்கள்‌ பசியின்றி பள்ளிக்கு வருவதை உறுதி செய்தல்‌ உ மாணவ / மாணவியர்கள்‌ ஊட்டச்சத்து குறைபாட்டினால்‌ பாதிக்கப்படாமலிருத்தலை உறுதி செய்தல்‌, ௨ மாணவ / மாணவியரின்‌ ஊட்டச்சத்து நிலையை உயர்த்துதல்‌, குறிப்பாக இரத்த சோகை குறைபாட்டினை நீக்குதல்‌ 6 பள்ளிகளில்‌ மாணவ / மாணவியர்களின்‌ வருகையை அதிகரித்தல்‌ / தக்க வைத்துக்‌ கொள்ளுதல்‌ © வேலைக்குச்‌ செல்லும்‌ தாய்மார்களின்‌ பணிச்சுமையை குறைத்தல்‌ ll. காலை உணவு வகைகள்‌ : பின்வரும்‌ பல்வேறு விதமான சிற்றுண்டி வகைகளில்‌ ஏதேனும்‌ ஒன்றை குறிப்பிட்டுள்ள நாட்களில்‌ வழங்க வேண்டும்‌.\n\nபுதன்கிழமை-பொங்கல்‌ வகை\n\nதிங்கட்கிழமை-உப்புமா வகை செவ்வாய்கிழமை- கிச்சடி வகை ரவா காய்கறி கிச்சடி\n\nரவா பொங்கல்‌ காய்கறி சாம்பார்‌\n\nவெண்பொங்கல்‌ + காய்கறி சாம்பார்‌ |",
-     "document_date": "2022-07-27",
-     "language": "ta",
-     "ocr_corrected": false
-    },
-    {
-     "number": 2,
      "scheme": "Chief Minister's Breakfast Scheme",
      "doc_id": "cmbfs-go43-2022-ta",
      "document": "G.O.(Ms) No.43, 27 July 2022",
@@ -1255,35 +1228,20 @@
      "document_date": "2022-07-27",
      "language": "ta",
      "ocr_corrected": false
-    },
-    {
-     "number": 3,
-     "scheme": "Chief Minister's Breakfast Scheme",
-     "doc_id": "cmbfs-go43-2022-ta",
-     "document": "G.O.(Ms) No.43, 27 July 2022",
-     "page_start": 13,
-     "page_end": 15,
-     "page": 13,
-     "source_url": "https://tncdw.org/frontend/gos/Breakfast_GO.43_(1).pdf",
-     "excerpt": "5 ஈரோடு தாளவாடி 38 806\n\n6 நீலகிரி கூடலூர் 63 a 3575 மொத்தம் 237 101 |\n\nடுதொகுப்பு\n\nவ. விவரம் பள்ளிகளின் பயனாளிகளின் எண் எண்ணிக்கை எண்ணிக்கை 1 மாநகராட்சி மையங்கள் 417 43681 2 நகராட்சி மையங்கள் 463 17427 3 வட்டாரங்கள் 728 4 கொலை ம் 7 தவனும் 7 237 மலைப்பிரதேசம் மொத்தம் 1,545 114,095 வெ. இறையன்பு தலைமைச் செயலாளர் 77உண்மை நகல்7\n\nட ் கறத டிய அரசு சார்பு செயலாளர்\n\nஇணைணப்பு-2 அரசாணை (நிலை) எண்.43, சமூக நலன் மற்றும் மகளிர் உரிமைத் (௪ந4-1) துறை, நாள். 27-07-2022 முதலமைச்சரின் காலை உணவுத் திட்டம் வழிகாட்டு நெறிமுறைகள் தொடக்கப் பள்ளி மாணவ/மாணவியருக்கு காலை உணவு வழங்குதல் ( 4 முதல் 5ஆம் வகுப்பு வரை)\n\n|. குறிக்கோள்கள் :",
-     "snippet": "5 ஈரோடு தாளவாடி 38 806\n\n6 நீலகிரி கூடலூர் 63 a 3575 மொத்தம் 237 101 |\n\nடுதொகுப்பு\n\nவ. விவரம் பள்ளிகளின் பயனாளிகளின் எண் எண்ணிக்கை எண்ணிக்கை 1 மாநகராட்சி மையங்கள் 417 43681 2 நகராட்சி மையங்கள் 463 17427 3 வட்டாரங்கள் 728 4 கொலை ம் 7 தவனும் 7 237 மலைப்பிரதேசம் மொத்தம் 1,545 114,095 வெ. இறையன்பு தலைமைச் செயலாளர் 77உண்மை நகல்7\n\nட ் கறத டிய அரசு சார்பு செயலாளர்\n\nஇணைணப்பு-2 அரசாணை (நிலை) எண்.43, சமூக நலன் மற்றும் மகளிர் உரிமைத் (௪ந4-1) துறை, நாள். 27-07-2022 முதலமைச்சரின் காலை உணவுத் திட்டம் வழிகாட்டு நெறிமுறைகள் தொடக்கப் பள்ளி மாணவ/மாணவியருக்கு காலை உணவு வழங்குதல் ( 4 முதல் 5ஆம் வகுப்பு வரை)\n\n|. குறிக்கோள்கள் :",
-     "document_date": "2022-07-27",
-     "language": "ta",
-     "ocr_corrected": false
     }
    ],
    "confidence": 0.9928,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 4741.9,
+   "latency_ms": 3669.3,
    "timings_ms": {
-    "fact_card_match": 214.9,
-    "retrieval": 941.2,
-    "search": 442.8,
-    "rerank": 282.6,
-    "llm_answer": 2484.9,
-    "verifier": 1313.6,
-    "generation": 3798.6,
-    "total": 4741.9
+    "fact_card_match": 273.4,
+    "retrieval": 803.8,
+    "search": 280.2,
+    "rerank": 249.6,
+    "llm_answer": 1571.0,
+    "verifier": 1293.1,
+    "generation": 2864.2,
+    "total": 3669.3
    },
    "contact": null,
    "confirmation_text": null,
@@ -1291,7 +1249,7 @@
    "rejected_reasons": []
   },
   "q020": {
-   "answer": "புதுமைப் பெண் திட்டத்தின் கீழ் உயர்கல்வி பயிலும் மாணவிகளுக்கு மாதம் ரூ.1,000 உதவித்தொகையாக வழங்கப்படுகிறது. [1][2][3][4]",
+   "answer": "புதுமைப் பெண் திட்டத்தின் கீழ் உயர்கல்வி படிக்கும் மாணவிகளுக்கு மாதம் ரூ.1,000 உதவித்தொகை வழங்கப்படுகிறது. [1][2][3][4] அரசுப் பள்ளிகளில் ஆறாம் வகுப்பு முதல் பன்னிரெண்டாம் வகுப்பு வரை (அல்லது 6 முதல் 12-ஆம் வகுப்பு வரை) பயின்று உயர்கல்விக்குச் செல்லும் மாணவிகள் இத்திட்டத்தின் கீழ் பயன்பெற தகுதியுடையவர்கள் ஆவர். [1][4][5] இந்த ஊக்கத்தொகை பயனாளிகளின் வங்கிக் கணக்கில் நேரடியாக வரவு வைக்கப்படுகிறது. [2]",
    "language": "ta",
    "refused": false,
    "status": "SUPPORTED",
@@ -1303,7 +1261,7 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "புதுமைப் பெண் திட்டத்தின் கீழ் உயர்கல்வி பயிலும் மாணவிகளுக்கு மாதம் ரூ.1,000 உதவித்தொகையாக வழங்கப்படுகிறது.",
+     "text": "புதுமைப் பெண் திட்டத்தின் கீழ் உயர்கல்வி படிக்கும் மாணவிகளுக்கு மாதம் ரூ.1,000 உதவித்தொகை வழங்கப்படுகிறது.",
      "citations": [
       1,
       2,
@@ -1311,6 +1269,22 @@
       4
      ],
      "section": "amount"
+    },
+    {
+     "text": "அரசுப் பள்ளிகளில் ஆறாம் வகுப்பு முதல் பன்னிரெண்டாம் வகுப்பு வரை (அல்லது 6 முதல் 12-ஆம் வகுப்பு வரை) பயின்று உயர்கல்விக்குச் செல்லும் மாணவிகள் இத்திட்டத்தின் கீழ் பயன்பெற தகுதியுடையவர்கள் ஆவர்.",
+     "citations": [
+      1,
+      4,
+      5
+     ],
+     "section": "eligibility"
+    },
+    {
+     "text": "இந்த ஊக்கத்தொகை பயனாளிகளின் வங்கிக் கணக்கில் நேரடியாக வரவு வைக்கப்படுகிறது.",
+     "citations": [
+      2
+     ],
+     "section": "apply"
     }
    ],
    "citations": [
@@ -1373,20 +1347,35 @@
      "document_date": null,
      "language": "ta",
      "ocr_corrected": false
+    },
+    {
+     "number": 5,
+     "scheme": "Tamil Nadu Higher Education schemes (policy note)",
+     "doc_id": "tn-hedu-policy-note-2024-ta",
+     "document": "Policy note 2024-25",
+     "page_start": 32,
+     "page_end": 33,
+     "page": 32,
+     "source_url": "https://cms.tn.gov.in/cms_migrated/document/docfiles/hedu_t_pn_2024_25.pdf",
+     "excerpt": "60 மாணாக்கர்களுக்கும் மற்றும் அறிவியல் பாடப்பிறிவில் தகுதியான 60 மாணாக்கர்களுக்கும் மாதாந்திர உதவித்தொகையாக ரூ.25.0007-மும் கலைப் பாடப்பிரிவு மாணாக்கர்களுக்கு எதிர்பாராச் செலவுக்கான மாணியமாக ரூ.10,0007-மும் அறிவியல் பாடப்பிரிவு மாணாக்கர்களுக்கு ரூ.42,000/7-மும்\n\nஅதிகபட்சமாக 3 ஆண்டுகளுக்கு வழங்கப்படும்.\n\nஇத்திட்டத்திற்காக, 2023-24-ஆம்\n\nநிதியாண்டில் ரூ.4.60 கோடி நிதி ஒதுக்கப்பட்டுள்ளது.\n\n3.9. புதுமைப்பெண் திட்டம்\n\nஅரசு பள்ளிகளில் பயிலும் ஏழை எளிய மாணவிகளின் உயர்கல்வி கனவினை நனவாக்குதல், இடைநிற்றலின்றி அவர்கள்\n\nதொடர்ந்து கல்வி பயில ஊளக்கப்படுத்துதல் மற்றும் மாணவிகளின் உயர்கல்வி சேர்க்கை எண்ணிக்கையை உயர்த்துதல் ஆகிய உன்னத நோக்கங்களை கருத்தில் கொண்டு அரசு பள்ளிகளில் 6 முதல் 12-ஆம் வகுப்பு வரை பயின்று உயர்கல்விக்குச் செல்லும் மாணவிகளுக்கு மாதந்தோறும் ரூ.4,000/- இத்திட்டத்தின் கீழ் வழங்கப்படுகிறது. 2023-24-ஆம் கல்வியாண்டில் கலை மற்றும் அறிவியல் கல்லூரிகளில் பயின்று வரும் 271710 மாணவிகள் இத்திட்டத்தின் கீழ்\n\nபயன்பெற்றுள்ளனர். இத்திட்டம் தற்போது",
+     "snippet": "60 மாணாக்கர்களுக்கும் மற்றும் அறிவியல் பாடப்பிறிவில் தகுதியான 60 மாணாக்கர்களுக்கும் மாதாந்திர உதவித்தொகையாக ரூ.25.0007-மும் கலைப் பாடப்பிரிவு மாணாக்கர்களுக்கு எதிர்பாராச் செலவுக்கான மாணியமாக ரூ.10,0007-மும் அறிவியல் பாடப்பிரிவு மாணாக்கர்களுக்கு ரூ.42,000/7-மும்\n\nஅதிகபட்சமாக 3 ஆண்டுகளுக்கு வழங்கப்படும்.\n\nஇத்திட்டத்திற்காக, 2023-24-ஆம்\n\nநிதியாண்டில் ரூ.4.60 கோடி நிதி ஒதுக்கப்பட்டுள்ளது.\n\n3.9. புதுமைப்பெண் திட்டம்\n\nஅரசு பள்ளிகளில் பயிலும் ஏழை எளிய மாணவிகளின் உயர்கல்வி கனவினை நனவாக்குதல், இடைநிற்றலின்றி அவர்கள்\n\nதொடர்ந்து கல்வி பயில ஊளக்கப்படுத்துதல் மற்றும் மாணவிகளின் உயர்கல்வி சேர்க்கை எண்ணிக்கையை உயர்த்துதல் ஆகிய உன்னத நோக்கங்களை கருத்தில் கொண்டு அரசு பள்ளிகளில் 6 முதல் 12-ஆம் வகுப்பு வரை பயின்று உயர்கல்விக்குச் செல்லும் மாணவிகளுக்கு மாதந்தோறும் ரூ.4,000/- இத்திட்டத்தின் கீழ் வழங்கப்படுகிறது. 2023-24-ஆம் கல்வியாண்டில் கலை மற்றும் அறிவியல் கல்லூரிகளில் பயின்று வரும் 271710 மாணவிகள் இத்திட்டத்தின் கீழ்\n\nபயன்பெற்றுள்ளனர். இத்திட்டம் தற்போது",
+     "document_date": null,
+     "language": "ta",
+     "ocr_corrected": false
     }
    ],
    "confidence": 0.9908,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 4822.7,
+   "latency_ms": 3729.3,
    "timings_ms": {
-    "fact_card_match": 228.2,
-    "retrieval": 1194.1,
-    "search": 482.2,
-    "rerank": 483.1,
-    "llm_answer": 2277.3,
-    "verifier": 1348.7,
-    "generation": 3626.2,
-    "total": 4822.7
+    "fact_card_match": 232.5,
+    "retrieval": 741.9,
+    "search": 281.3,
+    "rerank": 227.8,
+    "llm_answer": 1613.0,
+    "verifier": 1373.1,
+    "generation": 2986.1,
+    "total": 3729.3
    },
    "contact": null,
    "confirmation_text": null,
@@ -1408,16 +1397,16 @@
    "citations": [],
    "confidence": 0.6928,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 10396.5,
+   "latency_ms": 3385.4,
    "timings_ms": {
-    "fact_card_match": 245.9,
-    "retrieval": 1096.4,
-    "search": 433.8,
-    "rerank": 413.8,
-    "rewrite": 1758.6,
-    "llm_answer": 7539.0,
-    "total": 10396.5,
-    "generation": 7539.3
+    "fact_card_match": 296.9,
+    "retrieval": 770.1,
+    "search": 246.0,
+    "rerank": 226.0,
+    "rewrite": 1590.2,
+    "llm_answer": 1023.8,
+    "total": 3385.4,
+    "generation": 1024.0
    },
    "contact": {
     "scheme": "Kalaignar Magalir Urimai Thittam",
@@ -1443,15 +1432,15 @@
    "citations": [],
    "confidence": 0.8539,
    "disclaimer": "இது தகவலுக்காக மட்டுமே; அதிகாரப்பூர்வ அரசு சேவை அல்ல. செயல்படும் முன் அதிகாரப்பூர்வ ஆதாரத்துடன் சரிபார்க்கவும்.",
-   "latency_ms": 8713.3,
+   "latency_ms": 2031.8,
    "timings_ms": {
-    "fact_card_match": 209.4,
-    "retrieval": 1129.7,
-    "search": 428.5,
-    "rerank": 488.8,
-    "llm_answer": 7581.4,
-    "total": 8713.3,
-    "generation": 7581.9
+    "fact_card_match": 314.9,
+    "retrieval": 835.0,
+    "search": 272.1,
+    "rerank": 247.0,
+    "llm_answer": 1195.7,
+    "total": 2031.8,
+    "generation": 1195.9
    },
    "contact": {
     "scheme": "Kalaignar Magalir Urimai Thittam",
@@ -1463,7 +1452,7 @@
    "rejected_reasons": []
   },
   "q025": {
-   "answer": "पीएम-किसान योजना के तहत पात्र किसानों को प्रति वर्ष 6,000/- रुपये की राशि प्रदान की जाती है। [1][2][3][4] यह राशि प्रत्यक्ष लाभ अंतरण (डीबीटी) के माध्यम से 2,000/- रुपये की तीन समान किस्तों में सीधे बैंक खातों में अंतरित की जाती है। [1][2][3]",
+   "answer": "पीएम-किसान योजना के तहत किसानों को प्रति वर्ष 6,000/- रुपये तीन समान किस्तों में दिए जाते हैं। [1][2]",
    "language": "hi",
    "refused": false,
    "status": "SUPPORTED",
@@ -1475,21 +1464,10 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "पीएम-किसान योजना के तहत पात्र किसानों को प्रति वर्ष 6,000/- रुपये की राशि प्रदान की जाती है।",
+     "text": "पीएम-किसान योजना के तहत किसानों को प्रति वर्ष 6,000/- रुपये तीन समान किस्तों में दिए जाते हैं।",
      "citations": [
       1,
-      2,
-      3,
-      4
-     ],
-     "section": "amount"
-    },
-    {
-     "text": "यह राशि प्रत्यक्ष लाभ अंतरण (डीबीटी) के माध्यम से 2,000/- रुपये की तीन समान किस्तों में सीधे बैंक खातों में अंतरित की जाती है।",
-     "citations": [
-      1,
-      2,
-      3
+      2
      ],
      "section": "amount"
     }
@@ -1524,50 +1502,20 @@
      "document_date": "2023-11-13",
      "language": "en",
      "ocr_corrected": false
-    },
-    {
-     "number": 3,
-     "scheme": "PM-KISAN",
-     "doc_id": "pmkisan-guidelines-2020-en",
-     "document": "Operational guidelines, revised 2020",
-     "page_start": 10,
-     "page_end": 10,
-     "page": 10,
-     "source_url": "https://pmkisan.gov.in/Documents/RevisedPM-KISANOperationalGuidelines(English).pdf",
-     "excerpt": "4. The verified list shall be e-signed by the District level or block / tehsil / taluka level officials as the case may be. The exclusion categories specified in scheme guidelines also need to be taken care before e-signing the verified farmers list.\n\n5. The States Nodal Officer shall submit a district wise e-Signed list of farmers to the Program Division of DAC&FW through PM-Kisan Portal. Modalities for transfer of benefit\n\n10.1 The financial benefit of Rs.6000/- per year is to be released to the eligible farmers in three installments of Rs.2000/- each every 4-month / trimester, i.e. April-July, August-November and December-March.",
-     "snippet": "4. The verified list shall be e-signed by the District level or block / tehsil / taluka level officials as the case may be. The exclusion categories specified in scheme guidelines also need to be taken care before e-signing the verified farmers list.\n\n5. The States Nodal Officer shall submit a district wise e-Signed list of farmers to the Program Division of DAC&FW through PM-Kisan Portal. Modalities for transfer of benefit\n\n10.1 The financial benefit of Rs.6000/- per year is to be released to the eligible farmers in three installments of Rs.2000/- each every 4-month / trimester, i.e. April-July, August-November and December-March.",
-     "document_date": "2020-03-29",
-     "language": "en",
-     "ocr_corrected": false
-    },
-    {
-     "number": 4,
-     "scheme": "PM-KISAN",
-     "doc_id": "pmkisan-guidelines-2020-en",
-     "document": "Operational guidelines, revised 2020",
-     "page_start": 2,
-     "page_end": 2,
-     "page": 2,
-     "source_url": "https://pmkisan.gov.in/Documents/RevisedPM-KISANOperationalGuidelines(English).pdf",
-     "excerpt": "The scheme aims to supplement the financial needs of all landholding farmers’ families in procuring various inputs to ensure proper crop health and appropriate yields, commensurate with the anticipated farm income as well as for domestic needs. Under the Scheme an amount of Rs.6000/- per year is released by the Central Government online directly into the bank accounts of the eligible farmers under Direct Benefit Transfer mode, subject to certain exclusions.\n\n3. Definition of farmer’s family\n\nA landholder farmer’s family is defined as “a family comprising of husband, wife and minor children who owns cultivable land as per land records of the concerned State/UT”. The existing land-ownership system will be used for identification of beneficiaries for calculation of benefit.",
-     "snippet": "The scheme aims to supplement the financial needs of all landholding farmers’ families in procuring various inputs to ensure proper crop health and appropriate yields, commensurate with the anticipated farm income as well as for domestic needs. Under the Scheme an amount of Rs.6000/- per year is released by the Central Government online directly into the bank accounts of the eligible farmers under Direct Benefit Transfer mode, subject to certain exclusions.\n\n3. Definition of farmer’s family\n\nA landholder farmer’s family is defined as “a family comprising of husband, wife and minor children who owns cultivable land as per land records of the concerned State/UT”. The existing land-ownership system will be used for identification of beneficiaries for calculation of benefit.",
-     "document_date": "2020-03-29",
-     "language": "en",
-     "ocr_corrected": false
     }
    ],
    "confidence": 0.9932,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 42385.9,
+   "latency_ms": 3137.1,
    "timings_ms": {
-    "fact_card_match": 215.3,
-    "retrieval": 940.1,
-    "search": 474.4,
-    "rerank": 249.6,
-    "llm_answer": 40228.0,
-    "verifier": 1216.4,
-    "generation": 41444.6,
-    "total": 42385.9
+    "fact_card_match": 238.0,
+    "retrieval": 701.8,
+    "search": 228.6,
+    "rerank": 234.8,
+    "llm_answer": 1171.3,
+    "verifier": 1263.3,
+    "generation": 2434.6,
+    "total": 3137.1
    },
    "contact": null,
    "confirmation_text": null,
@@ -1575,7 +1523,7 @@
    "rejected_reasons": []
   },
   "q026": {
-   "answer": "संस्थागत भूमि धारक पीएम-किसान योजना के तहत लाभ पाने के लिए पात्र नहीं हैं। [1]",
+   "answer": "सभी संस्थागत भूमि धारक पीएम-किसान योजना के लाभ के लिए पात्र नहीं हैं। [1]",
    "language": "hi",
    "refused": false,
    "status": "SUPPORTED",
@@ -1587,7 +1535,7 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "संस्थागत भूमि धारक पीएम-किसान योजना के तहत लाभ पाने के लिए पात्र नहीं हैं।",
+     "text": "सभी संस्थागत भूमि धारक पीएम-किसान योजना के लाभ के लिए पात्र नहीं हैं।",
      "citations": [
       1
      ],
@@ -1613,16 +1561,16 @@
    ],
    "confidence": 0.8933,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 10654.7,
+   "latency_ms": 3254.8,
    "timings_ms": {
-    "fact_card_match": 219.0,
-    "retrieval": 992.5,
-    "search": 518.9,
-    "rerank": 253.9,
-    "llm_answer": 7981.9,
-    "verifier": 1678.9,
-    "generation": 9660.9,
-    "total": 10654.7
+    "fact_card_match": 219.8,
+    "retrieval": 670.8,
+    "search": 225.9,
+    "rerank": 224.7,
+    "llm_answer": 1305.7,
+    "verifier": 1277.6,
+    "generation": 2583.4,
+    "total": 3254.8
    },
    "contact": null,
    "confirmation_text": null,
@@ -1630,7 +1578,7 @@
    "rejected_reasons": []
   },
   "q027": {
-   "answer": "पीएम-किसान योजना के तहत ई-केवाईसी करने के तीन तरीके उपलब्ध हैं। [1][2] पहला तरीका पीएम-किसान पोर्टल और मोबाइल ऐप पर उपलब्ध ओटीपी आधारित ई-केवाईसी है। [1][2] दूसरा तरीका कॉमन सर्विस सेंटर (सीएससी) और राज्य सेवा केंद्र (एसएसके) पर उपलब्ध बायोमेट्रिक आधारित ई-केवाईसी है। [1][2] तीसरा तरीका पीएम किसान मोबाइल ऐप पर उपलब्ध फेस ऑथेंटिकेशन-आधारित ई-केवाईसी है। [2][3]",
+   "answer": "पीएम-किसान योजना के लिए ई-केवाईसी के तीन तरीके उपलब्ध हैं: ओटीपी आधारित ई-केवाईसी, बायोमेट्रिक आधारित ई-केवाईसी और फेस-ऑथेंटिकेशन आधारित ई-केवाईसी। [1][2][3]",
    "language": "hi",
    "refused": false,
    "status": "SUPPORTED",
@@ -1642,36 +1590,13 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "पीएम-किसान योजना के तहत ई-केवाईसी करने के तीन तरीके उपलब्ध हैं।",
+     "text": "पीएम-किसान योजना के लिए ई-केवाईसी के तीन तरीके उपलब्ध हैं: ओटीपी आधारित ई-केवाईसी, बायोमेट्रिक आधारित ई-केवाईसी और फेस-ऑथेंटिकेशन आधारित ई-केवाईसी।",
      "citations": [
       1,
-      2
-     ],
-     "section": "other"
-    },
-    {
-     "text": "पहला तरीका पीएम-किसान पोर्टल और मोबाइल ऐप पर उपलब्ध ओटीपी आधारित ई-केवाईसी है।",
-     "citations": [
-      1,
-      2
-     ],
-     "section": "other"
-    },
-    {
-     "text": "दूसरा तरीका कॉमन सर्विस सेंटर (सीएससी) और राज्य सेवा केंद्र (एसएसके) पर उपलब्ध बायोमेट्रिक आधारित ई-केवाईसी है।",
-     "citations": [
-      1,
-      2
-     ],
-     "section": "other"
-    },
-    {
-     "text": "तीसरा तरीका पीएम किसान मोबाइल ऐप पर उपलब्ध फेस ऑथेंटिकेशन-आधारित ई-केवाईसी है।",
-     "citations": [
       2,
       3
      ],
-     "section": "other"
+     "section": "eligibility"
     }
    ],
    "citations": [
@@ -1693,21 +1618,6 @@
     {
      "number": 2,
      "scheme": "PM-KISAN",
-     "doc_id": "pmkisan-ekyc-note-2023-en",
-     "document": "Note on e-KYC, November 2023",
-     "page_start": 1,
-     "page_end": 1,
-     "page": 1,
-     "source_url": "https://pmkisan.gov.in/Documents/Note-on-Modes-and-processes-of-ekyc-13th-Nov-English.pdf",
-     "excerpt": "Why eKYC?: To ensure the benefit of the PM KISAN scheme reaches to the intended beneficiaries in their Aadhaar seeded bank accounts without involvement of any middlemen\n\nModes of the eKYC: There are following three modes of eKYC available to the farmers of the PM- KISAN scheme: (i) OTP Based e-KYC (available on PM-KISAN Portal and Mobile App) (ii) Biometric based e-KYC (available at Common Service Centres (CSCs) and State Seva Kendra (SSKs)) (iii) Face authentication-based e-KYC (available on PM KISAN Mobile app which is used by millions of farmers)\n\nOTP Based e-KYC To execute, OTP based eKYC, the farmer is required to have Aadhaar linked active mobile number. For this follow the given steps: i. Visit the PM-KISAN portal (https://pmkisan.gov.in/) ii. Click on e-KYC (on the top right corner of the website) iii. Enter your Aadhaar number and complete your eKYC after submitting your OTP",
-     "snippet": "Why eKYC?: To ensure the benefit of the PM KISAN scheme reaches to the intended beneficiaries in their Aadhaar seeded bank accounts without involvement of any middlemen\n\nModes of the eKYC: There are following three modes of eKYC available to the farmers of the PM- KISAN scheme: (i) OTP Based e-KYC (available on PM-KISAN Portal and Mobile App) (ii) Biometric based e-KYC (available at Common Service Centres (CSCs) and State Seva Kendra (SSKs)) (iii) Face authentication-based e-KYC (available on PM KISAN Mobile app which is used by millions of farmers)\n\nOTP Based e-KYC To execute, OTP based eKYC, the farmer is required to have Aadhaar linked active mobile number. For this follow the given steps: i. Visit the PM-KISAN portal (https://pmkisan.gov.in/) ii. Click on e-KYC (on the top right corner of the website) iii. Enter your Aadhaar number and complete your eKYC after submitting your OTP",
-     "document_date": "2023-11-13",
-     "language": "en",
-     "ocr_corrected": false
-    },
-    {
-     "number": 3,
-     "scheme": "PM-KISAN",
      "doc_id": "pmkisan-ekyc-note-2023-hi",
      "document": "Note on e-KYC, November 2023",
      "page_start": 1,
@@ -1719,20 +1629,35 @@
      "document_date": "2023-11-13",
      "language": "hi",
      "ocr_corrected": false
+    },
+    {
+     "number": 3,
+     "scheme": "PM-KISAN",
+     "doc_id": "pmkisan-ekyc-note-2023-en",
+     "document": "Note on e-KYC, November 2023",
+     "page_start": 1,
+     "page_end": 1,
+     "page": 1,
+     "source_url": "https://pmkisan.gov.in/Documents/Note-on-Modes-and-processes-of-ekyc-13th-Nov-English.pdf",
+     "excerpt": "Why eKYC?: To ensure the benefit of the PM KISAN scheme reaches to the intended beneficiaries in their Aadhaar seeded bank accounts without involvement of any middlemen\n\nModes of the eKYC: There are following three modes of eKYC available to the farmers of the PM- KISAN scheme: (i) OTP Based e-KYC (available on PM-KISAN Portal and Mobile App) (ii) Biometric based e-KYC (available at Common Service Centres (CSCs) and State Seva Kendra (SSKs)) (iii) Face authentication-based e-KYC (available on PM KISAN Mobile app which is used by millions of farmers)\n\nOTP Based e-KYC To execute, OTP based eKYC, the farmer is required to have Aadhaar linked active mobile number. For this follow the given steps: i. Visit the PM-KISAN portal (https://pmkisan.gov.in/) ii. Click on e-KYC (on the top right corner of the website) iii. Enter your Aadhaar number and complete your eKYC after submitting your OTP",
+     "snippet": "Why eKYC?: To ensure the benefit of the PM KISAN scheme reaches to the intended beneficiaries in their Aadhaar seeded bank accounts without involvement of any middlemen\n\nModes of the eKYC: There are following three modes of eKYC available to the farmers of the PM- KISAN scheme: (i) OTP Based e-KYC (available on PM-KISAN Portal and Mobile App) (ii) Biometric based e-KYC (available at Common Service Centres (CSCs) and State Seva Kendra (SSKs)) (iii) Face authentication-based e-KYC (available on PM KISAN Mobile app which is used by millions of farmers)\n\nOTP Based e-KYC To execute, OTP based eKYC, the farmer is required to have Aadhaar linked active mobile number. For this follow the given steps: i. Visit the PM-KISAN portal (https://pmkisan.gov.in/) ii. Click on e-KYC (on the top right corner of the website) iii. Enter your Aadhaar number and complete your eKYC after submitting your OTP",
+     "document_date": "2023-11-13",
+     "language": "en",
+     "ocr_corrected": false
     }
    ],
    "confidence": 0.999,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 7313.1,
+   "latency_ms": 3597.7,
    "timings_ms": {
-    "fact_card_match": 259.6,
-    "retrieval": 987.6,
-    "search": 461.1,
-    "rerank": 266.2,
-    "llm_answer": 4756.9,
-    "verifier": 1566.5,
-    "generation": 6323.6,
-    "total": 7313.1
+    "fact_card_match": 191.2,
+    "retrieval": 741.0,
+    "search": 327.5,
+    "rerank": 221.9,
+    "llm_answer": 1392.3,
+    "verifier": 1463.4,
+    "generation": 2855.8,
+    "total": 3597.7
    },
    "contact": null,
    "confirmation_text": null,
@@ -1740,7 +1665,7 @@
    "rejected_reasons": []
   },
   "q028": {
-   "answer": "ओटीपी आधारित ई-केवाईसी करने के लिए किसान के पास आधार से जुड़ा सक्रिय मोबाइल नंबर होना आवश्यक है। [1][2]",
+   "answer": "ओटीपी आधारित ई-केवाईसी निष्पादित करने के लिए, किसान के पास आधार से जुड़ा सक्रिय मोबाइल नंबर होना आवश्यक है। [1]",
    "language": "hi",
    "refused": false,
    "status": "SUPPORTED",
@@ -1752,10 +1677,9 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "ओटीपी आधारित ई-केवाईसी करने के लिए किसान के पास आधार से जुड़ा सक्रिय मोबाइल नंबर होना आवश्यक है।",
+     "text": "ओटीपी आधारित ई-केवाईसी निष्पादित करने के लिए, किसान के पास आधार से जुड़ा सक्रिय मोबाइल नंबर होना आवश्यक है।",
      "citations": [
-      1,
-      2
+      1
      ],
      "section": "eligibility"
     }
@@ -1775,35 +1699,20 @@
      "document_date": "2023-11-13",
      "language": "hi",
      "ocr_corrected": false
-    },
-    {
-     "number": 2,
-     "scheme": "PM-KISAN",
-     "doc_id": "pmkisan-ekyc-note-2023-en",
-     "document": "Note on e-KYC, November 2023",
-     "page_start": 1,
-     "page_end": 1,
-     "page": 1,
-     "source_url": "https://pmkisan.gov.in/Documents/Note-on-Modes-and-processes-of-ekyc-13th-Nov-English.pdf",
-     "excerpt": "Why eKYC?: To ensure the benefit of the PM KISAN scheme reaches to the intended beneficiaries in their Aadhaar seeded bank accounts without involvement of any middlemen\n\nModes of the eKYC: There are following three modes of eKYC available to the farmers of the PM- KISAN scheme: (i) OTP Based e-KYC (available on PM-KISAN Portal and Mobile App) (ii) Biometric based e-KYC (available at Common Service Centres (CSCs) and State Seva Kendra (SSKs)) (iii) Face authentication-based e-KYC (available on PM KISAN Mobile app which is used by millions of farmers)\n\nOTP Based e-KYC To execute, OTP based eKYC, the farmer is required to have Aadhaar linked active mobile number. For this follow the given steps: i. Visit the PM-KISAN portal (https://pmkisan.gov.in/) ii. Click on e-KYC (on the top right corner of the website) iii. Enter your Aadhaar number and complete your eKYC after submitting your OTP",
-     "snippet": "Why eKYC?: To ensure the benefit of the PM KISAN scheme reaches to the intended beneficiaries in their Aadhaar seeded bank accounts without involvement of any middlemen\n\nModes of the eKYC: There are following three modes of eKYC available to the farmers of the PM- KISAN scheme: (i) OTP Based e-KYC (available on PM-KISAN Portal and Mobile App) (ii) Biometric based e-KYC (available at Common Service Centres (CSCs) and State Seva Kendra (SSKs)) (iii) Face authentication-based e-KYC (available on PM KISAN Mobile app which is used by millions of farmers)\n\nOTP Based e-KYC To execute, OTP based eKYC, the farmer is required to have Aadhaar linked active mobile number. For this follow the given steps: i. Visit the PM-KISAN portal (https://pmkisan.gov.in/) ii. Click on e-KYC (on the top right corner of the website) iii. Enter your Aadhaar number and complete your eKYC after submitting your OTP",
-     "document_date": "2023-11-13",
-     "language": "en",
-     "ocr_corrected": false
     }
    ],
    "confidence": 0.9929,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 10173.6,
+   "latency_ms": 3350.0,
    "timings_ms": {
-    "fact_card_match": 227.8,
-    "retrieval": 918.5,
-    "search": 390.3,
-    "rerank": 297.7,
-    "llm_answer": 8141.3,
-    "verifier": 1112.3,
-    "generation": 9253.7,
-    "total": 10173.6
+    "fact_card_match": 173.9,
+    "retrieval": 766.9,
+    "search": 339.4,
+    "rerank": 252.7,
+    "llm_answer": 1386.1,
+    "verifier": 1196.2,
+    "generation": 2582.3,
+    "total": 3350.0
    },
    "contact": null,
    "confirmation_text": null,
@@ -1811,7 +1720,7 @@
    "rejected_reasons": []
   },
   "q029": {
-   "answer": "अटल पेंशन योजना में अभिदाता को 60 वर्ष की आयु प्राप्त करने के बाद प्रति माह 1000 रुपये, 2000 रुपये, 3000 रुपये, 4000 रुपये या 5000 रुपये की न्यूनतम मासिक पेंशन मिलती है। [1][2][3][4]",
+   "answer": "अटल पेंशन योजना अभिदाता के 60 वर्ष की आयु प्राप्त करने पर रु. 1000 से 5000 की आजीवन न्यूनतम गारंटीड पेंशन प्रदान करती है। [1][2][3]",
    "language": "hi",
    "refused": false,
    "status": "SUPPORTED",
@@ -1823,12 +1732,11 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "अटल पेंशन योजना में अभिदाता को 60 वर्ष की आयु प्राप्त करने के बाद प्रति माह 1000 रुपये, 2000 रुपये, 3000 रुपये, 4000 रुपये या 5000 रुपये की न्यूनतम मासिक पेंशन मिलती है।",
+     "text": "अटल पेंशन योजना अभिदाता के 60 वर्ष की आयु प्राप्त करने पर रु. 1000 से 5000 की आजीवन न्यूनतम गारंटीड पेंशन प्रदान करती है।",
      "citations": [
       1,
       2,
-      3,
-      4
+      3
      ],
      "section": "amount"
     }
@@ -1873,21 +1781,6 @@
      "page_end": 1,
      "page": 1,
      "source_url": "https://www.pfrda.org.in/documents/33652/307349/APY%20Subscriber%20Information%20Brochure%20English",
-     "excerpt": "• APY chat bot (KYNA) is available on Protean CRA website for real time resolution of queries\n\nor • NPS Trust Website: http://www.npstrust.org.in >>Atal Pension Yojana >> APYSchemedetails.pdf, http://www.npstrust.org.in >>Atal Pension Yojana >>APYFAQs10092015.pdf\n\nor\n\n• Call PFRDA’s Atal Pension Yojana Help desk (Toll Free) at 1800 1100 69.\n\nor\n\n• Listen to APY Podcast\n\nor\n\n• Watch APY YouTube video\n\nBasic features of APY • APY offers the choice of minimum monthly pension guaranteed by Govt. of India of Rs. 1000, Rs 2000, Rs 3000, Rs 4000, Rs. 5000 per month after 60 years of age. • For opening of APY account, an individual should be a citizen of India between the age of 18 and 40 years and he should not be an income tax payer. • It is mandatory to provide nomination and spouse details while opening of APY account. • Contributions can be made on a Monthly or Quarterly or Half yearly basis through auto debit facility from savings Bank account.",
-     "snippet": "• APY chat bot (KYNA) is available on Protean CRA website for real time resolution of queries\n\nor • NPS Trust Website: http://www.npstrust.org.in >>Atal Pension Yojana >> APYSchemedetails.pdf, http://www.npstrust.org.in >>Atal Pension Yojana >>APYFAQs10092015.pdf\n\nor\n\n• Call PFRDA’s Atal Pension Yojana Help desk (Toll Free) at 1800 1100 69.\n\nor\n\n• Listen to APY Podcast\n\nor\n\n• Watch APY YouTube video\n\nBasic features of APY • APY offers the choice of minimum monthly pension guaranteed by Govt. of India of Rs. 1000, Rs 2000, Rs 3000, Rs 4000, Rs. 5000 per month after 60 years of age. • For opening of APY account, an individual should be a citizen of India between the age of 18 and 40 years and he should not be an income tax payer. • It is mandatory to provide nomination and spouse details while opening of APY account. • Contributions can be made on a Monthly or Quarterly or Half yearly basis through auto debit facility from savings Bank account.",
-     "document_date": null,
-     "language": "en",
-     "ocr_corrected": false
-    },
-    {
-     "number": 4,
-     "scheme": "Atal Pension Yojana",
-     "doc_id": "apy-brochure-en",
-     "document": "Subscriber information brochure",
-     "page_start": 1,
-     "page_end": 1,
-     "page": 1,
-     "source_url": "https://www.pfrda.org.in/documents/33652/307349/APY%20Subscriber%20Information%20Brochure%20English",
      "excerpt": "Triple benefits of APY after attaining the age of 60\n\nHow to join or subscribe APY • Fill up the application form and submit it to your bank. Or • Online onboarding platform by using Aadhaar eKYC https://enps.nsdl.com/eNPS/ApySubRegistration.ht ml\n\nOr • APY registration through APY mobile application which is available for APY users free of cost. Android users can download APY mobile application from Google play store by typing ‘APY and NPS Lite’ in search option.\n\nOr\n\n• Login into your net banking account of your bank and join. (if provided by your Bank)\n\nOr\n\n• Go to bank’s web portal and apply for APY directly. (if provided by your Bank)\n\n1. Lifelong minimum guaranteed Pension of Rs.1000 to Rs.5000 per month to the subscriber 2.The same pension to the Spouse for lifetime, after death of the subscriber. 3.Return of pension wealth accumulated till 60 years of age to the nominee after death of the subscriber and spouse.",
      "snippet": "Triple benefits of APY after attaining the age of 60\n\nHow to join or subscribe APY • Fill up the application form and submit it to your bank. Or • Online onboarding platform by using Aadhaar eKYC https://enps.nsdl.com/eNPS/ApySubRegistration.ht ml\n\nOr • APY registration through APY mobile application which is available for APY users free of cost. Android users can download APY mobile application from Google play store by typing ‘APY and NPS Lite’ in search option.\n\nOr\n\n• Login into your net banking account of your bank and join. (if provided by your Bank)\n\nOr\n\n• Go to bank’s web portal and apply for APY directly. (if provided by your Bank)\n\n1. Lifelong minimum guaranteed Pension of Rs.1000 to Rs.5000 per month to the subscriber 2.The same pension to the Spouse for lifetime, after death of the subscriber. 3.Return of pension wealth accumulated till 60 years of age to the nominee after death of the subscriber and spouse.",
      "document_date": null,
@@ -1897,16 +1790,16 @@
    ],
    "confidence": 0.9662,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 5977.3,
+   "latency_ms": 3602.3,
    "timings_ms": {
-    "fact_card_match": 209.2,
-    "retrieval": 907.8,
-    "search": 393.6,
-    "rerank": 304.4,
-    "llm_answer": 3872.5,
-    "verifier": 1195.1,
-    "generation": 5067.8,
-    "total": 5977.3
+    "fact_card_match": 261.1,
+    "retrieval": 802.1,
+    "search": 249.4,
+    "rerank": 291.3,
+    "llm_answer": 1462.0,
+    "verifier": 1337.2,
+    "generation": 2799.2,
+    "total": 3602.3
    },
    "contact": null,
    "confirmation_text": null,
@@ -1984,16 +1877,16 @@
    ],
    "confidence": 0.9956,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 12281.5,
+   "latency_ms": 3628.6,
    "timings_ms": {
-    "fact_card_match": 263.4,
-    "retrieval": 956.0,
-    "search": 399.0,
-    "rerank": 292.7,
-    "llm_answer": 10016.6,
-    "verifier": 1307.0,
-    "generation": 11323.7,
-    "total": 12281.5
+    "fact_card_match": 240.0,
+    "retrieval": 718.4,
+    "search": 226.7,
+    "rerank": 251.3,
+    "llm_answer": 1442.1,
+    "verifier": 1467.2,
+    "generation": 2909.3,
+    "total": 3628.6
    },
    "contact": null,
    "confirmation_text": null,
@@ -2015,15 +1908,15 @@
    "citations": [],
    "confidence": 0.9191,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 1943.3,
+   "latency_ms": 1673.2,
    "timings_ms": {
-    "fact_card_match": 178.6,
-    "retrieval": 925.7,
-    "search": 508.4,
-    "rerank": 237.9,
-    "llm_answer": 1016.6,
-    "total": 1943.3,
-    "generation": 1017.0
+    "fact_card_match": 287.7,
+    "retrieval": 829.9,
+    "search": 322.4,
+    "rerank": 219.4,
+    "llm_answer": 842.8,
+    "total": 1673.2,
+    "generation": 843.0
    },
    "contact": {
     "scheme": "Pradhan Mantri Ujjwala Yojana",
@@ -2053,9 +1946,9 @@
    "citations": [],
    "confidence": 0.0,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 1.5,
+   "latency_ms": 0.7,
    "timings_ms": {
-    "total": 1.5
+    "total": 0.7
    },
    "contact": null,
    "confirmation_text": null,
@@ -2075,18 +1968,18 @@
    "refusal_reason": "not_in_documents",
    "sentences": [],
    "citations": [],
-   "confidence": 0.4039,
+   "confidence": 0.447,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 6892.9,
+   "latency_ms": 11951.1,
    "timings_ms": {
-    "fact_card_match": 170.3,
-    "retrieval": 1153.7,
-    "search": 589.0,
-    "rerank": 392.4,
-    "rewrite": 1803.2,
-    "llm_answer": 3933.2,
-    "total": 6892.9,
-    "generation": 3933.6
+    "fact_card_match": 219.7,
+    "retrieval": 822.7,
+    "search": 223.9,
+    "rerank": 378.1,
+    "rewrite": 1793.8,
+    "llm_answer": 9332.8,
+    "total": 11951.1,
+    "generation": 9333.0
    },
    "contact": {
     "scheme": "Tamil Nadu BC, MBC and Minorities Welfare schemes (policy note)",
@@ -2110,18 +2003,18 @@
    "refusal_reason": "not_in_documents",
    "sentences": [],
    "citations": [],
-   "confidence": 0.4819,
+   "confidence": 0.5044,
    "disclaimer": "यह केवल जानकारी के लिए है, आधिकारिक सरकारी सेवा नहीं। कोई कदम उठाने से पहले आधिकारिक स्रोत से पुष्टि करें।",
-   "latency_ms": 5771.5,
+   "latency_ms": 3867.3,
    "timings_ms": {
-    "fact_card_match": 207.6,
-    "retrieval": 1377.9,
-    "search": 480.0,
-    "rerank": 687.2,
-    "rewrite": 2997.0,
-    "llm_answer": 1393.3,
-    "total": 5771.5,
-    "generation": 1393.7
+    "fact_card_match": 188.5,
+    "retrieval": 723.6,
+    "search": 311.4,
+    "rerank": 222.8,
+    "rewrite": 1622.1,
+    "llm_answer": 1520.5,
+    "total": 3867.3,
+    "generation": 1520.6
    },
    "contact": {
     "scheme": "Tamil Nadu Health and Family Welfare schemes (policy note)",
@@ -2133,7 +2026,7 @@
    "rejected_reasons": []
   },
   "q037": {
-   "answer": "Kalaignar Magalir Urimai Thittam-il 21 vayathu niraintha, September 15, 2002-ku munnor pirantha kudumba thalaivigal apply pannalam. [1][2] Vinnappatharangalungaludaya kudumba attai irukkum niyayavilaikadai amainthirukkum vinnappa pathivu mugamil mattum vinnappikka vendum. [1][2]",
+   "answer": "Kalaignar Magalir Urimai Thittam-il 21 vayathu nirantha, September 15, 2002-ku munnavar poranthavarvagal applicate pannalam. [1][2] Aingku ekarathukku kuraivana nansey nilam alladhu paththu ekarathukku kuraivana punsey nilam vaithirukkum kutumbangal apply pannalam. [3] Kudumba payanattirkku oru varushathukku 3600 unit-kum kuraivana minsarathai payanpaduthum kutumbangal thaguthiyanavai. [3] Ungal kutumba attai register seyyappatta nayavilai kadaiyirkku uriya vivappathu patiya mukamiltan விண்ணப்பிக்க (apply) vendum. [1][2]",
    "language": "ta-Latn",
    "refused": false,
    "status": "SUPPORTED",
@@ -2145,7 +2038,7 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "Kalaignar Magalir Urimai Thittam-il 21 vayathu niraintha, September 15, 2002-ku munnor pirantha kudumba thalaivigal apply pannalam.",
+     "text": "Kalaignar Magalir Urimai Thittam-il 21 vayathu nirantha, September 15, 2002-ku munnavar poranthavarvagal applicate pannalam.",
      "citations": [
       1,
       2
@@ -2153,7 +2046,21 @@
      "section": "eligibility"
     },
     {
-     "text": "Vinnappatharangalungaludaya kudumba attai irukkum niyayavilaikadai amainthirukkum vinnappa pathivu mugamil mattum vinnappikka vendum.",
+     "text": "Aingku ekarathukku kuraivana nansey nilam alladhu paththu ekarathukku kuraivana punsey nilam vaithirukkum kutumbangal apply pannalam.",
+     "citations": [
+      3
+     ],
+     "section": "eligibility"
+    },
+    {
+     "text": "Kudumba payanattirkku oru varushathukku 3600 unit-kum kuraivana minsarathai payanpaduthum kutumbangal thaguthiyanavai.",
+     "citations": [
+      3
+     ],
+     "section": "eligibility"
+    },
+    {
+     "text": "Ungal kutumba attai register seyyappatta nayavilai kadaiyirkku uriya vivappathu patiya mukamiltan விண்ணப்பிக்க (apply) vendum.",
      "citations": [
       1,
       2
@@ -2191,67 +2098,9 @@
      "document_date": "2023-07-10",
      "language": "ta",
      "ocr_corrected": false
-    }
-   ],
-   "confidence": 0.4472,
-   "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 4832.2,
-   "timings_ms": {
-    "fact_card_match": 199.7,
-    "retrieval": 899.3,
-    "search": 433.6,
-    "rerank": 262.3,
-    "llm_answer": 2265.1,
-    "verifier": 1665.2,
-    "generation": 3930.4,
-    "total": 4832.2
-   },
-   "contact": null,
-   "confirmation_text": null,
-   "scheme": "Kalaignar Magalir Urimai Thittam",
-   "rejected_reasons": [
-    "number_not_in_source"
-   ]
-  },
-  "q038": {
-   "answer": "Porulathara thakuthikkakath thaniyaga varumanachaanthu petru vinnappathudan inaikka thevaiyillai. [1][2]",
-   "language": "ta-Latn",
-   "refused": false,
-   "status": "SUPPORTED",
-   "path": "rag",
-   "understood_query": "magalir உரிமை ku income limit evlo",
-   "candidate_schemes": [],
-   "passages": null,
-   "needs_confirmation": true,
-   "refusal_reason": null,
-   "sentences": [
-    {
-     "text": "Porulathara thakuthikkakath thaniyaga varumanachaanthu petru vinnappathudan inaikka thevaiyillai.",
-     "citations": [
-      1,
-      2
-     ],
-     "section": "documents"
-    }
-   ],
-   "citations": [
-    {
-     "number": 1,
-     "scheme": "Kalaignar Magalir Urimai Thittam",
-     "doc_id": "kmut-go15-2023-ta",
-     "document": "G.O.(Ms) No.15, 10 July 2023",
-     "page_start": 10,
-     "page_end": 11,
-     "page": 10,
-     "source_url": "https://tncdw.org/frontend/gos/Mahalir_Urimai_Thittam-GO.pdf",
-     "excerpt": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற விண்ணப்பிக்கும் குடும்பங்கள் கீழ்க்காணும் மூன்று பொருளாதார அளவுகோல்களுக்கு உட்பட்ட குடும்பங்களாக இருத்தல் வேண்டும்.\n\ni) ஆண்டு வருமானம் ரூ.25 இலட்சத்திற்குக் கீழ் வருமானம் ஈட்டும் குடும்பங்கள்.\n\nii) ஐந்து ஏக்கருக்குக் குறைவாக நன்செய் நிலம் அல்லது பத்து ஏக்கருக்குக் குறைவாகப் புன்செய் நிலம் வைத்துள்ள குடும்பங்கள்.\n\nரம் ஆண்டிற்கு விட்டு உபயோகத்துக்கு 3600 யூனிட்டிற்கும் குறைவாக மின்சாரம் பயன்படுத்தும் குடும்பங்கள்.\n\nபொருளாதாரத் தகுதிகளுக்காகத் தனியாக வருமானச் சான்று அல்லது நில ஆவணங்களைப் பெற்று விண்ணப்பத்துடன் இணைக்கத் தேவையில்லை. 2.21 கலைஞர் மகளிர் உறிமைத் திட்டத்தில் பயன் பெறத்தகுதி இல்லாதவர்கள் கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற விண்ணப்பிக்கும் விண்ணப்பதாரரின் குடும்ப உறுப்பினர்களில் யாரேனும், கீழ்க்காணும்\n\nஏதாவது ஒரு வகையைச் சேர்ந்த குடும்ப உறுப்பினர்களாக இருந்தால், அந்தக் குடும்பத்தைச் சேர்ந்த விண்ணப்பதாரர், கலைஞர் மகளிர் உரிமைத் கிட்டத்தில் பயன் பெறத்தகுதி இல்லாதவர் ஆவர்.\n\ni)\n\nii)\n\niii)\n\niv)\n\nv)\n\nvi)\n\nvil)\n\nviii)",
-     "snippet": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற விண்ணப்பிக்கும் குடும்பங்கள் கீழ்க்காணும் மூன்று பொருளாதார அளவுகோல்களுக்கு உட்பட்ட குடும்பங்களாக இருத்தல் வேண்டும்.\n\ni) ஆண்டு வருமானம் ரூ.25 இலட்சத்திற்குக் கீழ் வருமானம் ஈட்டும் குடும்பங்கள்.\n\nii) ஐந்து ஏக்கருக்குக் குறைவாக நன்செய் நிலம் அல்லது பத்து ஏக்கருக்குக் குறைவாகப் புன்செய் நிலம் வைத்துள்ள குடும்பங்கள்.\n\nரம் ஆண்டிற்கு விட்டு உபயோகத்துக்கு 3600 யூனிட்டிற்கும் குறைவாக மின்சாரம் பயன்படுத்தும் குடும்பங்கள்.\n\nபொருளாதாரத் தகுதிகளுக்காகத் தனியாக வருமானச் சான்று அல்லது நில ஆவணங்களைப் பெற்று விண்ணப்பத்துடன் இணைக்கத் தேவையில்லை. 2.21 கலைஞர் மகளிர் உறிமைத் திட்டத்தில் பயன் பெறத்தகுதி இல்லாதவர்கள் கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன் பெற விண்ணப்பிக்கும் விண்ணப்பதாரரின் குடும்ப உறுப்பினர்களில் யாரேனும், கீழ்க்காணும்\n\nஏதாவது ஒரு வகையைச் சேர்ந்த குடும்ப உறுப்பினர்களாக இருந்தால், அந்தக் குடும்பத்தைச் சேர்ந்த விண்ணப்பதாரர், கலைஞர் மகளிர் உரிமைத் கிட்டத்தில் பயன் பெறத்தகுதி இல்லாதவர் ஆவர்.\n\ni)\n\nii)\n\niii)\n\niv)\n\nv)\n\nvi)\n\nvil)\n\nviii)",
-     "document_date": "2023-07-10",
-     "language": "ta",
-     "ocr_corrected": false
     },
     {
-     "number": 2,
+     "number": 3,
      "scheme": "Kalaignar Magalir Urimai Thittam",
      "doc_id": "kmut-go15-2023-ta",
      "document": "G.O.(Ms) No.15, 10 July 2023",
@@ -2266,23 +2115,61 @@
      "ocr_corrected": false
     }
    ],
-   "confidence": 0.3885,
+   "confidence": 0.4472,
    "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 4561.4,
+   "latency_ms": 4493.8,
    "timings_ms": {
-    "fact_card_match": 209.0,
-    "retrieval": 979.3,
-    "search": 499.6,
-    "rerank": 267.5,
-    "llm_answer": 2554.0,
-    "verifier": 1026.6,
-    "generation": 3580.7,
-    "total": 4561.4
+    "fact_card_match": 304.0,
+    "retrieval": 736.9,
+    "search": 197.5,
+    "rerank": 234.2,
+    "llm_answer": 2594.1,
+    "verifier": 1161.9,
+    "generation": 3756.0,
+    "total": 4493.8
    },
    "contact": null,
    "confirmation_text": null,
    "scheme": "Kalaignar Magalir Urimai Thittam",
    "rejected_reasons": [
+    "number_not_in_source"
+   ]
+  },
+  "q038": {
+   "answer": "Ennidam irukkura official scheme documents-la indha thagaval kidaikkala, adhanala nambagamaa badhil solla mudiyala. Scheme-oda official website-a paarunga, illa pakkathula irukkura arasu sevai maiyathula kelunga. Kalaignar Magalir Urimai Thittam pathi udhavikku https://kmut.tn.gov.in/ paarunga.",
+   "language": "ta-Latn",
+   "refused": true,
+   "status": "INSUFFICIENT_EVIDENCE",
+   "path": "rag",
+   "understood_query": "magalir உரிமை ku income limit evlo",
+   "candidate_schemes": [],
+   "passages": null,
+   "needs_confirmation": true,
+   "refusal_reason": "unsupported",
+   "sentences": [],
+   "citations": [],
+   "confidence": 0.3885,
+   "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
+   "latency_ms": 2843.1,
+   "timings_ms": {
+    "fact_card_match": 236.0,
+    "retrieval": 675.7,
+    "search": 197.9,
+    "rerank": 240.9,
+    "llm_answer": 2165.8,
+    "verifier": 0.8,
+    "generation": 2166.6,
+    "total": 2843.1
+   },
+   "contact": {
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "website": "https://kmut.tn.gov.in/",
+    "helpline": null
+   },
+   "confirmation_text": null,
+   "scheme": null,
+   "rejected_reasons": [
+    "number_not_in_source",
     "number_not_in_source"
    ]
   },
@@ -2301,16 +2188,16 @@
    "citations": [],
    "confidence": 0.9007,
    "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 3973.1,
+   "latency_ms": 3600.4,
    "timings_ms": {
-    "fact_card_match": 202.1,
-    "retrieval": 950.1,
-    "search": 483.1,
-    "rerank": 262.5,
-    "rewrite": 1902.0,
-    "llm_answer": 1119.4,
-    "total": 3973.1,
-    "generation": 1119.7
+    "fact_card_match": 218.2,
+    "retrieval": 687.2,
+    "search": 214.6,
+    "rerank": 253.3,
+    "rewrite": 1860.9,
+    "llm_answer": 1051.1,
+    "total": 3600.4,
+    "generation": 1051.3
    },
    "contact": {
     "scheme": "Kalaignar Magalir Urimai Thittam",
@@ -2322,7 +2209,7 @@
    "rejected_reasons": []
   },
   "q040": {
-   "answer": "PM-Kisan yojanaiyin keezh oru varushathuku 6,000/- rupaa tharak padukirathu. [1] Intha panam moondru samaana thavanaiyil naanangu maathangalukku oru murai 2,000/- rupaa vitham tharak padukirathu. [2]",
+   "answer": "PM-Kisan yojanaiyin keezh oru varushathuku 6,000/- rubaai moondru saman kishtangalaaga valangappadugiradhu. [1]",
    "language": "ta-Latn",
    "refused": false,
    "status": "SUPPORTED",
@@ -2334,16 +2221,9 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "PM-Kisan yojanaiyin keezh oru varushathuku 6,000/- rupaa tharak padukirathu.",
+     "text": "PM-Kisan yojanaiyin keezh oru varushathuku 6,000/- rubaai moondru saman kishtangalaaga valangappadugiradhu.",
      "citations": [
       1
-     ],
-     "section": "amount"
-    },
-    {
-     "text": "Intha panam moondru samaana thavanaiyil naanangu maathangalukku oru murai 2,000/- rupaa vitham tharak padukirathu.",
-     "citations": [
-      2
      ],
      "section": "amount"
     }
@@ -2363,35 +2243,20 @@
      "document_date": "2023-11-13",
      "language": "en",
      "ocr_corrected": false
-    },
-    {
-     "number": 2,
-     "scheme": "PM-KISAN",
-     "doc_id": "pmkisan-guidelines-2020-en",
-     "document": "Operational guidelines, revised 2020",
-     "page_start": 10,
-     "page_end": 10,
-     "page": 10,
-     "source_url": "https://pmkisan.gov.in/Documents/RevisedPM-KISANOperationalGuidelines(English).pdf",
-     "excerpt": "4. The verified list shall be e-signed by the District level or block / tehsil / taluka level officials as the case may be. The exclusion categories specified in scheme guidelines also need to be taken care before e-signing the verified farmers list.\n\n5. The States Nodal Officer shall submit a district wise e-Signed list of farmers to the Program Division of DAC&FW through PM-Kisan Portal. Modalities for transfer of benefit\n\n10.1 The financial benefit of Rs.6000/- per year is to be released to the eligible farmers in three installments of Rs.2000/- each every 4-month / trimester, i.e. April-July, August-November and December-March.",
-     "snippet": "4. The verified list shall be e-signed by the District level or block / tehsil / taluka level officials as the case may be. The exclusion categories specified in scheme guidelines also need to be taken care before e-signing the verified farmers list.\n\n5. The States Nodal Officer shall submit a district wise e-Signed list of farmers to the Program Division of DAC&FW through PM-Kisan Portal. Modalities for transfer of benefit\n\n10.1 The financial benefit of Rs.6000/- per year is to be released to the eligible farmers in three installments of Rs.2000/- each every 4-month / trimester, i.e. April-July, August-November and December-March.",
-     "document_date": "2020-03-29",
-     "language": "en",
-     "ocr_corrected": false
     }
    ],
    "confidence": 0.8271,
    "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 3804.1,
+   "latency_ms": 3721.7,
    "timings_ms": {
-    "fact_card_match": 196.2,
-    "retrieval": 975.4,
-    "search": 511.8,
-    "rerank": 266.9,
-    "llm_answer": 1533.7,
-    "verifier": 1292.8,
-    "generation": 2826.6,
-    "total": 3804.1
+    "fact_card_match": 210.0,
+    "retrieval": 804.8,
+    "search": 341.1,
+    "rerank": 253.4,
+    "llm_answer": 1592.9,
+    "verifier": 1323.2,
+    "generation": 2916.2,
+    "total": 3721.7
    },
    "contact": null,
    "confirmation_text": null,
@@ -2399,7 +2264,7 @@
    "rejected_reasons": []
   },
   "q041": {
-   "answer": "PM-KISAN portal (https://pmkisan.gov.in/) -ku poi, athula e-KYC click panni, ungaloda Aadhaar number-ah enter panni, OTP submit panni eKYC-ah mudikkalam. [1] Google Play Store-la irunthu PM-KISAN mobile app-um Aadhaar Face RD app-um download panni, face authentication-um seyyalam. [2] Common Service Centres (CSCs) matrum State Seva Kendra (SSKs)-la biometric based e-KYC seyyalam. [1]",
+   "answer": "PM-KISAN portal (pmkisan.gov.in) matrum mobile app-il e-KYC option-ai click seithu, ungal Aadhaar number matrum OTP submit seithu OTP based eKYC mudikkalam. [1] Google Play Store-il irunthu PM-KISAN mobile app matrum Aadhaar Face RD app-ai download seithu, face authentication mulamum eKYC seiyalam. [2] Common Service Centres (CSCs) matrum State Seva Kendra (SSKs)-il biometric based e-KYC seiyalam. [1][3]",
    "language": "ta-Latn",
    "refused": false,
    "status": "SUPPORTED",
@@ -2411,23 +2276,24 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "PM-KISAN portal (https://pmkisan.gov.in/) -ku poi, athula e-KYC click panni, ungaloda Aadhaar number-ah enter panni, OTP submit panni eKYC-ah mudikkalam.",
+     "text": "PM-KISAN portal (pmkisan.gov.in) matrum mobile app-il e-KYC option-ai click seithu, ungal Aadhaar number matrum OTP submit seithu OTP based eKYC mudikkalam.",
      "citations": [
       1
      ],
      "section": "apply"
     },
     {
-     "text": "Google Play Store-la irunthu PM-KISAN mobile app-um Aadhaar Face RD app-um download panni, face authentication-um seyyalam.",
+     "text": "Google Play Store-il irunthu PM-KISAN mobile app matrum Aadhaar Face RD app-ai download seithu, face authentication mulamum eKYC seiyalam.",
      "citations": [
       2
      ],
      "section": "apply"
     },
     {
-     "text": "Common Service Centres (CSCs) matrum State Seva Kendra (SSKs)-la biometric based e-KYC seyyalam.",
+     "text": "Common Service Centres (CSCs) matrum State Seva Kendra (SSKs)-il biometric based e-KYC seiyalam.",
      "citations": [
-      1
+      1,
+      3
      ],
      "section": "apply"
     }
@@ -2462,20 +2328,35 @@
      "document_date": "2023-11-13",
      "language": "en",
      "ocr_corrected": false
+    },
+    {
+     "number": 3,
+     "scheme": "PM-KISAN",
+     "doc_id": "pmkisan-ekyc-note-2023-hi",
+     "document": "Note on e-KYC, November 2023",
+     "page_start": 1,
+     "page_end": 1,
+     "page": 1,
+     "source_url": "https://pmkisan.gov.in/Documents/Note-on-Modes-and-processes-of-ekyc-13th-Nov-Hindi.pdf",
+     "excerpt": "पीएम-किसान योजना\n\nकृषि एवं किसान कल्याण मंत्रालय एवं किसान कल्याण मंत्रालय\n\nकृषि एवं किसान कल्याण विभाग पीएम किसान योजना में ई-केवाईसी के तरीकों और प्रक्रियाओं से संबंधित नोट।\n\nसार:\n\nपीएम-किसान योजना, देशभर में भूमि-धारक किसानों की वित्तीय जरूरतों को पूरा करने के लिए फरवरी 209 में शुरू की गई थी। इस योजना के तहत, प्रत्यक्ष लाभ अंतरण (डीबीटी) के माध्यम से किसानों के आधार से जुड़े बैंक खातों मैं तीन समान किस्तों में प्रति वर्ष 6,000/- रुपये अंतरित किए जाते हैं।\n\nईकेवाईसी Fai: यह सुनिश्चित करने के लिए कि पीएम किसान योजना का लाभ किसी भी बिचौलिए की भागीदारी के बिना इच्छित लाभार्थी किसानों के आधार से जुड़े बैंक खातों में पहुंचे।\n\nईकेवाईसी के तरीके:\n\nपीएम-किसान योजना के किसानों के लिए ईकेवाईसी के निम्नलिखित तीन तरीके उपलब्ध हैं:\n\n(i) ओटीपी आधारित ई-केवाईसी (पीएम-किसान पोर्टल और मोबाइल ऐप पर उपलब्ध) (ii) बायोमेट्रिक आधारित ई-केवाईसी (कॉमन सर्विस सेंटर (सीएससी) और राज्य सेवा केंद्र (एसएसके) पर उपलब्ध)",
+     "snippet": "पीएम-किसान योजना\n\nकृषि एवं किसान कल्याण मंत्रालय एवं किसान कल्याण मंत्रालय\n\nकृषि एवं किसान कल्याण विभाग पीएम किसान योजना में ई-केवाईसी के तरीकों और प्रक्रियाओं से संबंधित नोट।\n\nसार:\n\nपीएम-किसान योजना, देशभर में भूमि-धारक किसानों की वित्तीय जरूरतों को पूरा करने के लिए फरवरी 209 में शुरू की गई थी। इस योजना के तहत, प्रत्यक्ष लाभ अंतरण (डीबीटी) के माध्यम से किसानों के आधार से जुड़े बैंक खातों मैं तीन समान किस्तों में प्रति वर्ष 6,000/- रुपये अंतरित किए जाते हैं।\n\nईकेवाईसी Fai: यह सुनिश्चित करने के लिए कि पीएम किसान योजना का लाभ किसी भी बिचौलिए की भागीदारी के बिना इच्छित लाभार्थी किसानों के आधार से जुड़े बैंक खातों में पहुंचे।\n\nईकेवाईसी के तरीके:\n\nपीएम-किसान योजना के किसानों के लिए ईकेवाईसी के निम्नलिखित तीन तरीके उपलब्ध हैं:\n\n(i) ओटीपी आधारित ई-केवाईसी (पीएम-किसान पोर्टल और मोबाइल ऐप पर उपलब्ध) (ii) बायोमेट्रिक आधारित ई-केवाईसी (कॉमन सर्विस सेंटर (सीएससी) और राज्य सेवा केंद्र (एसएसके) पर उपलब्ध)",
+     "document_date": "2023-11-13",
+     "language": "hi",
+     "ocr_corrected": false
     }
    ],
    "confidence": 0.9614,
    "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 4959.8,
+   "latency_ms": 3752.6,
    "timings_ms": {
-    "fact_card_match": 251.0,
-    "retrieval": 820.1,
-    "search": 304.5,
-    "rerank": 263.9,
-    "llm_answer": 2457.7,
-    "verifier": 1680.5,
-    "generation": 4138.3,
-    "total": 4959.8
+    "fact_card_match": 288.3,
+    "retrieval": 792.4,
+    "search": 255.3,
+    "rerank": 248.4,
+    "llm_answer": 1675.0,
+    "verifier": 1284.4,
+    "generation": 2959.5,
+    "total": 3752.6
    },
    "contact": null,
    "confirmation_text": null,
@@ -2483,7 +2364,7 @@
    "rejected_reasons": []
   },
   "q042": {
-   "answer": "Atal Pension Yojana la join panna age 18kum 40kum edaila irukanum. [1][2][3]",
+   "answer": "Atal Pension Yojana la join panna age 18 and 40 irukum. [1][2][3]",
    "language": "ta-Latn",
    "refused": false,
    "status": "SUPPORTED",
@@ -2495,7 +2376,7 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "Atal Pension Yojana la join panna age 18kum 40kum edaila irukanum.",
+     "text": "Atal Pension Yojana la join panna age 18 and 40 irukum.",
      "citations": [
       1,
       2,
@@ -2553,16 +2434,16 @@
    ],
    "confidence": 0.9519,
    "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 3456.0,
+   "latency_ms": 3825.5,
    "timings_ms": {
-    "fact_card_match": 58.4,
-    "retrieval": 795.8,
-    "search": 405.6,
-    "rerank": 331.2,
-    "llm_answer": 1531.0,
-    "verifier": 1127.1,
-    "generation": 2658.1,
-    "total": 3456.0
+    "fact_card_match": 175.6,
+    "retrieval": 711.7,
+    "search": 280.6,
+    "rerank": 255.1,
+    "llm_answer": 1634.4,
+    "verifier": 1478.5,
+    "generation": 3112.9,
+    "total": 3825.5
    },
    "contact": null,
    "confirmation_text": null,
@@ -2570,7 +2451,7 @@
    "rejected_reasons": []
   },
   "q043": {
-   "answer": "Ujjwala gas connectionkku thevayana documents: KYC Form, Proof of Identity (PoI), Proof of Address (PoA), Ration Card issued by the state or other State Govt document certifying family composition or Self Declaration, Aadhaar of beneficiary and adult family members appearing in the family composition document, Bank Account Number and IFSC, and poor household 14-point declaration. [1] An adult woman belonging to categories like SC Households, ST Households, Pradhan Mantri Awas Yojana (Gramin), Most Backward Classes, Antyodaya Anna Yojana (AAY), Tea and Ex-Tea Garden tribes, Forest Dwellers, People residing in Islands and River Islands, SECC Households (AHL TIN), or Poor Household as per 14-point declaration is eligible. [1]",
+   "answer": "Ujjwala gas connection-ku thevayana documents: KYC Form, Proof of Identity (PoI), Proof of Address (PoA), family composition-kaaga stateissued Ration Card / other State Govt document certifying family composition / Self Declaration, beneficiary matrum adult family members-oda Aadhaar, pinbula Bank Account Number and IFSC. [1] Adult woman antha specific categories (SC Households, ST Households, Pradhan Mantri Awas Yojana (Gramin), Most Backward Classes, Antyodaya Anna Yojana (AAY), Tea and Ex- Tea Garden tribes, Forest Dwellers, People residing in Islands and River Islands, SECC Households (AHL TIN), Poor Household as per 14-point declaration) la irukkanum. [1]",
    "language": "ta-Latn",
    "refused": false,
    "status": "SUPPORTED",
@@ -2582,14 +2463,14 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "Ujjwala gas connectionkku thevayana documents: KYC Form, Proof of Identity (PoI), Proof of Address (PoA), Ration Card issued by the state or other State Govt document certifying family composition or Self Declaration, Aadhaar of beneficiary and adult family members appearing in the family composition document, Bank Account Number and IFSC, and poor household 14-point declaration.",
+     "text": "Ujjwala gas connection-ku thevayana documents: KYC Form, Proof of Identity (PoI), Proof of Address (PoA), family composition-kaaga stateissued Ration Card / other State Govt document certifying family composition / Self Declaration, beneficiary matrum adult family members-oda Aadhaar, pinbula Bank Account Number and IFSC.",
      "citations": [
       1
      ],
      "section": "documents"
     },
     {
-     "text": "An adult woman belonging to categories like SC Households, ST Households, Pradhan Mantri Awas Yojana (Gramin), Most Backward Classes, Antyodaya Anna Yojana (AAY), Tea and Ex-Tea Garden tribes, Forest Dwellers, People residing in Islands and River Islands, SECC Households (AHL TIN), or Poor Household as per 14-point declaration is eligible.",
+     "text": "Adult woman antha specific categories (SC Households, ST Households, Pradhan Mantri Awas Yojana (Gramin), Most Backward Classes, Antyodaya Anna Yojana (AAY), Tea and Ex- Tea Garden tribes, Forest Dwellers, People residing in Islands and River Islands, SECC Households (AHL TIN), Poor Household as per 14-point declaration) la irukkanum.",
      "citations": [
       1
      ],
@@ -2615,16 +2496,16 @@
    ],
    "confidence": 0.82,
    "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 3748.8,
+   "latency_ms": 4130.1,
    "timings_ms": {
-    "fact_card_match": 52.9,
-    "retrieval": 1271.6,
-    "search": 376.8,
-    "rerank": 840.9,
-    "llm_answer": 1422.7,
-    "verifier": 1053.5,
-    "generation": 2476.3,
-    "total": 3748.8
+    "fact_card_match": 181.1,
+    "retrieval": 712.8,
+    "search": 321.2,
+    "rerank": 210.0,
+    "llm_answer": 2145.4,
+    "verifier": 1270.9,
+    "generation": 3416.6,
+    "total": 4130.1
    },
    "contact": null,
    "confirmation_text": null,
@@ -2632,7 +2513,7 @@
    "rejected_reasons": []
   },
   "q044": {
-   "answer": "Indha thittam 1 mudhal 5-aam vaguppu varai payilum thodakka palli manava, manaviyarukku than tharum. [1][2][3]",
+   "answer": "Indha thittam 1 mudhal 5-aam vaguppu varai payilum thodakka palli manaava manaviyarkalukku aanaathu. [1][2][3]",
    "language": "ta-Latn",
    "refused": false,
    "status": "SUPPORTED",
@@ -2644,7 +2525,7 @@
    "refusal_reason": null,
    "sentences": [
     {
-     "text": "Indha thittam 1 mudhal 5-aam vaguppu varai payilum thodakka palli manava, manaviyarukku than tharum.",
+     "text": "Indha thittam 1 mudhal 5-aam vaguppu varai payilum thodakka palli manaava manaviyarkalukku aanaathu.",
      "citations": [
       1,
       2,
@@ -2674,12 +2555,12 @@
      "scheme": "Chief Minister's Breakfast Scheme",
      "doc_id": "cmbfs-go43-2022-ta",
      "document": "G.O.(Ms) No.43, 27 July 2022",
-     "page_start": 5,
-     "page_end": 5,
-     "page": 5,
+     "page_start": 4,
+     "page_end": 4,
+     "page": 4,
      "source_url": "https://tncdw.org/frontend/gos/Breakfast_GO.43_(1).pdf",
-     "excerpt": "14. மேற்கண்ட சமூக நல இயக்குநர் அவர்களின், கருத்துருவினை அரசு விரிவாகப் பறிசிலனை செய்து பின்வருமாறு ஆணைகளை வெளியிடுகிறது:-\n\n1. மாநகராட்சி, நகராட்சி, ஊரக (கிராம ஊராட்சி) மற்றும் மலைப்பகுதிகளில் செயல்படும், இவ்வாணையின் இணைப்பு-1இல் குறிப்பிடப்பட்டுள்ள 1545 அரசுப் பள்ளிகளில் பயிலும் 114,095 தொடக்கப் பள்ளி (1 முதல் 5ஆம் வகுப்பு வரை) குழந்தைகளுக்கு காலை உணவு வழங்கும் திட்டத்தினை 2022-2023-ஆம் ஆண்டில் முதற்கட்டமாகச் செயல்படுத்திட, ரூ.33.56 கோடி (ரூபாய் முப்பத்து மூன்று கோடியே ஐம்பத்து ஆறு இலட்சம் மட்டும்) நிதி ஒப்பளிப்பு செய்து அரசு ஆணையிடுகிறது.\n\nர். திட்டத்தின் நோக்கம், சிற்றுண்டியின் வகைகள், பொதுவான நடைமுறைகள், கண்காணிப்பு மற்றும் மதிப்பீடு ஆகியவற்றை உள்ளடக்கிய பொதுவான வழிகாட்டு நெறிமுறைகள் இவ்வாணையின் இணைப்பு-2-இல் வெளியிடப்படுகிறது.\n\nii, இவ்வாணையின் இணைபப்பு-2-இல் குறிப்பிடப்பட்டுள்ள சிற்றுண்டி வகைகளிலிருந்து ஏதாவது ஒரு சிற்றுண்டியினை அனைத்துப் பள்ளி வேலை நாட்களிலும் வழங்கப்பட வேண்டும். ஒவ்வொரு வாரத்திலும் குறைந்தது இரண்டு நாட்களிலாவது, இயன்ற அளவு, அந்தந்தப்",
-     "snippet": "14. மேற்கண்ட சமூக நல இயக்குநர் அவர்களின், கருத்துருவினை அரசு விரிவாகப் பறிசிலனை செய்து பின்வருமாறு ஆணைகளை வெளியிடுகிறது:-\n\n1. மாநகராட்சி, நகராட்சி, ஊரக (கிராம ஊராட்சி) மற்றும் மலைப்பகுதிகளில் செயல்படும், இவ்வாணையின் இணைப்பு-1இல் குறிப்பிடப்பட்டுள்ள 1545 அரசுப் பள்ளிகளில் பயிலும் 114,095 தொடக்கப் பள்ளி (1 முதல் 5ஆம் வகுப்பு வரை) குழந்தைகளுக்கு காலை உணவு வழங்கும் திட்டத்தினை 2022-2023-ஆம் ஆண்டில் முதற்கட்டமாகச் செயல்படுத்திட, ரூ.33.56 கோடி (ரூபாய் முப்பத்து மூன்று கோடியே ஐம்பத்து ஆறு இலட்சம் மட்டும்) நிதி ஒப்பளிப்பு செய்து அரசு ஆணையிடுகிறது.\n\nர். திட்டத்தின் நோக்கம், சிற்றுண்டியின் வகைகள், பொதுவான நடைமுறைகள், கண்காணிப்பு மற்றும் மதிப்பீடு ஆகியவற்றை உள்ளடக்கிய பொதுவான வழிகாட்டு நெறிமுறைகள் இவ்வாணையின் இணைப்பு-2-இல் வெளியிடப்படுகிறது.\n\nii, இவ்வாணையின் இணைபப்பு-2-இல் குறிப்பிடப்பட்டுள்ள சிற்றுண்டி வகைகளிலிருந்து ஏதாவது ஒரு சிற்றுண்டியினை அனைத்துப் பள்ளி வேலை நாட்களிலும் வழங்கப்பட வேண்டும். ஒவ்வொரு வாரத்திலும் குறைந்தது இரண்டு நாட்களிலாவது, இயன்ற அளவு, அந்தந்தப்",
+     "excerpt": "\"SE பள்ளி மாணவர்களுக்கு இணிமேல் காலைச் சிற்றுண்டி வழங்கப்படும். நகரப் பகுதிகளிலும், கிராமப் பகுதிகளிலும், பள்ளிக்குச் செல்லக் ௯டிய குழந்தைகள் காலையிலேயே புறப்பட்டு விடுகிறறாறீகள். இதனால் பெறாம்பாலான குழந்தைகள் காலை உணவு சாப்பிடுவது இல்லை என்ற தகவல் அரசுக்குக் கிடைத்திருக்கிறறது. பள்ளிகள் மிகத் தூரமாக இருப்பது மட்டுமல்ல, சிலறுடைய குடும்பச் சூழலும் கைற்குக் காரணமாக இருக்கிறது. இதனை மனதில் வைத்துக் கொண்டு அந்தத் திட்டத்தை நாம் தீட்டி இருக்கிறோம். முதற்கட்டமாக சில மாநகராட்சி நகராட்சிகளிலும் தொலைதூரக் கிராமங்களிலும் கக்கிட்டம் கொடங்கப்படவள்ளது. ஒன்றாம் வகுப்பு முதல் ஐந்தாம் வகுப்பு வரை பயிலக்௯கூடிய தொடக்கப் பள்ளி மாணலறீகளுக்கு அனைத்துப் பள்ளி நாட்களிலும் காலை வேளையில் சத்தான சிற்றுண்டி வழங்கப்படும்.\n\nHOOT உள்ளாட்சி அமைப்புகள் மூலமாக வழங்குவோம், படிப்படியாக அணைத்துப் பகுதிகளுக்கும் அந்தத் திட்டம் விறிவைடுத்தப்படும் \".",
+     "snippet": "\"SE பள்ளி மாணவர்களுக்கு இணிமேல் காலைச் சிற்றுண்டி வழங்கப்படும். நகரப் பகுதிகளிலும், கிராமப் பகுதிகளிலும், பள்ளிக்குச் செல்லக் ௯டிய குழந்தைகள் காலையிலேயே புறப்பட்டு விடுகிறறாறீகள். இதனால் பெறாம்பாலான குழந்தைகள் காலை உணவு சாப்பிடுவது இல்லை என்ற தகவல் அரசுக்குக் கிடைத்திருக்கிறறது. பள்ளிகள் மிகத் தூரமாக இருப்பது மட்டுமல்ல, சிலறுடைய குடும்பச் சூழலும் கைற்குக் காரணமாக இருக்கிறது. இதனை மனதில் வைத்துக் கொண்டு அந்தத் திட்டத்தை நாம் தீட்டி இருக்கிறோம். முதற்கட்டமாக சில மாநகராட்சி நகராட்சிகளிலும் தொலைதூரக் கிராமங்களிலும் கக்கிட்டம் கொடங்கப்படவள்ளது. ஒன்றாம் வகுப்பு முதல் ஐந்தாம் வகுப்பு வரை பயிலக்௯கூடிய தொடக்கப் பள்ளி மாணலறீகளுக்கு அனைத்துப் பள்ளி நாட்களிலும் காலை வேளையில் சத்தான சிற்றுண்டி வழங்கப்படும்.\n\nHOOT உள்ளாட்சி அமைப்புகள் மூலமாக வழங்குவோம், படிப்படியாக அணைத்துப் பகுதிகளுக்கும் அந்தத் திட்டம் விறிவைடுத்தப்படும் \".",
      "document_date": "2022-07-27",
      "language": "ta",
      "ocr_corrected": false
@@ -2693,26 +2574,26 @@
      "page_end": 4,
      "page": 4,
      "source_url": "https://tncdw.org/frontend/gos/Breakfast_GO.43_(1).pdf",
-     "excerpt": "\"SE பள்ளி மாணவர்களுக்கு இணிமேல் காலைச் சிற்றுண்டி வழங்கப்படும். நகரப் பகுதிகளிலும், கிராமப் பகுதிகளிலும், பள்ளிக்குச் செல்லக் ௯டிய குழந்தைகள் காலையிலேயே புறப்பட்டு விடுகிறறாறீகள். இதனால் பெறாம்பாலான குழந்தைகள் காலை உணவு சாப்பிடுவது இல்லை என்ற தகவல் அரசுக்குக் கிடைத்திருக்கிறறது. பள்ளிகள் மிகத் தூரமாக இருப்பது மட்டுமல்ல, சிலறுடைய குடும்பச் சூழலும் கைற்குக் காரணமாக இருக்கிறது. இதனை மனதில் வைத்துக் கொண்டு அந்தத் திட்டத்தை நாம் தீட்டி இருக்கிறோம். முதற்கட்டமாக சில மாநகராட்சி நகராட்சிகளிலும் தொலைதூரக் கிராமங்களிலும் கக்கிட்டம் கொடங்கப்படவள்ளது. ஒன்றாம் வகுப்பு முதல் ஐந்தாம் வகுப்பு வரை பயிலக்௯கூடிய தொடக்கப் பள்ளி மாணலறீகளுக்கு அனைத்துப் பள்ளி நாட்களிலும் காலை வேளையில் சத்தான சிற்றுண்டி வழங்கப்படும்.\n\nHOOT உள்ளாட்சி அமைப்புகள் மூலமாக வழங்குவோம், படிப்படியாக அணைத்துப் பகுதிகளுக்கும் அந்தத் திட்டம் விறிவைடுத்தப்படும் \".",
-     "snippet": "\"SE பள்ளி மாணவர்களுக்கு இணிமேல் காலைச் சிற்றுண்டி வழங்கப்படும். நகரப் பகுதிகளிலும், கிராமப் பகுதிகளிலும், பள்ளிக்குச் செல்லக் ௯டிய குழந்தைகள் காலையிலேயே புறப்பட்டு விடுகிறறாறீகள். இதனால் பெறாம்பாலான குழந்தைகள் காலை உணவு சாப்பிடுவது இல்லை என்ற தகவல் அரசுக்குக் கிடைத்திருக்கிறறது. பள்ளிகள் மிகத் தூரமாக இருப்பது மட்டுமல்ல, சிலறுடைய குடும்பச் சூழலும் கைற்குக் காரணமாக இருக்கிறது. இதனை மனதில் வைத்துக் கொண்டு அந்தத் திட்டத்தை நாம் தீட்டி இருக்கிறோம். முதற்கட்டமாக சில மாநகராட்சி நகராட்சிகளிலும் தொலைதூரக் கிராமங்களிலும் கக்கிட்டம் கொடங்கப்படவள்ளது. ஒன்றாம் வகுப்பு முதல் ஐந்தாம் வகுப்பு வரை பயிலக்௯கூடிய தொடக்கப் பள்ளி மாணலறீகளுக்கு அனைத்துப் பள்ளி நாட்களிலும் காலை வேளையில் சத்தான சிற்றுண்டி வழங்கப்படும்.\n\nHOOT உள்ளாட்சி அமைப்புகள் மூலமாக வழங்குவோம், படிப்படியாக அணைத்துப் பகுதிகளுக்கும் அந்தத் திட்டம் விறிவைடுத்தப்படும் \".",
+     "excerpt": "HOOT உள்ளாட்சி அமைப்புகள் மூலமாக வழங்குவோம், படிப்படியாக அணைத்துப் பகுதிகளுக்கும் அந்தத் திட்டம் விறிவைடுத்தப்படும் \".\n\n11. மேற்காணும் அறிவிப்பினைச் செயல்படுத்தும் பொருட்டு சமூக நல இயக்குநர் அவர்கள், மேலே எட்டாவதாக படிக்கப்பட்ட கடிதத்தில், மாநிலத்தின் அனைத்து மாவட்டங்களையும் உள்ளடக்கிய வகையில் மாநகராட்சி, நகராட்சி, ஊரக (கிராம ஊராட்சி) மற்றும் மலைப்பகுதிகளில் உள்ள அரசுத் தொடக்கப் பள்ளிகளில் (1 முதல் 5ஆம் வகுப்பு வரை) பயிலும் மாணவ மாணவியருக்கு சூடான சமைத்த, சத்தான மற்றும் சுவையான காலை உணவினை வழங்குவதற்கான கருத்துருவினை அனுப்பியுள்ளார்.",
+     "snippet": "HOOT உள்ளாட்சி அமைப்புகள் மூலமாக வழங்குவோம், படிப்படியாக அணைத்துப் பகுதிகளுக்கும் அந்தத் திட்டம் விறிவைடுத்தப்படும் \".\n\n11. மேற்காணும் அறிவிப்பினைச் செயல்படுத்தும் பொருட்டு சமூக நல இயக்குநர் அவர்கள், மேலே எட்டாவதாக படிக்கப்பட்ட கடிதத்தில், மாநிலத்தின் அனைத்து மாவட்டங்களையும் உள்ளடக்கிய வகையில் மாநகராட்சி, நகராட்சி, ஊரக (கிராம ஊராட்சி) மற்றும் மலைப்பகுதிகளில் உள்ள அரசுத் தொடக்கப் பள்ளிகளில் (1 முதல் 5ஆம் வகுப்பு வரை) பயிலும் மாணவ மாணவியருக்கு சூடான சமைத்த, சத்தான மற்றும் சுவையான காலை உணவினை வழங்குவதற்கான கருத்துருவினை அனுப்பியுள்ளார்.",
      "document_date": "2022-07-27",
      "language": "ta",
      "ocr_corrected": false
     }
    ],
-   "confidence": 0.9317,
+   "confidence": 0.9355,
    "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 14208.5,
+   "latency_ms": 6065.4,
    "timings_ms": {
-    "fact_card_match": 211.8,
-    "retrieval": 1417.7,
-    "search": 436.4,
-    "rerank": 768.9,
-    "rewrite": 2269.0,
-    "llm_answer": 9330.3,
-    "verifier": 1188.8,
-    "generation": 10519.2,
-    "total": 14208.5
+    "fact_card_match": 172.4,
+    "retrieval": 667.9,
+    "search": 256.4,
+    "rerank": 238.7,
+    "rewrite": 2854.2,
+    "llm_answer": 1497.0,
+    "verifier": 1044.4,
+    "generation": 2541.4,
+    "total": 6065.4
    },
    "contact": null,
    "confirmation_text": null,
@@ -2732,18 +2613,18 @@
    "refusal_reason": "not_in_documents",
    "sentences": [],
    "citations": [],
-   "confidence": 0.5948,
+   "confidence": 0.9208,
    "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 4044.3,
+   "latency_ms": 3671.5,
    "timings_ms": {
-    "fact_card_match": 172.5,
-    "retrieval": 1075.2,
-    "search": 421.1,
-    "rerank": 479.6,
-    "rewrite": 1837.1,
-    "llm_answer": 1129.2,
-    "total": 4044.3,
-    "generation": 1129.6
+    "fact_card_match": 185.6,
+    "retrieval": 842.5,
+    "search": 256.3,
+    "rerank": 399.6,
+    "rewrite": 1650.3,
+    "llm_answer": 1177.9,
+    "total": 3671.5,
+    "generation": 1178.1
    },
    "contact": {
     "scheme": "Kalaignar Magalir Urimai Thittam",
@@ -2767,18 +2648,18 @@
    "refusal_reason": "not_in_documents",
    "sentences": [],
    "citations": [],
-   "confidence": 0.9752,
+   "confidence": 0.9585,
    "disclaimer": "Idhu thagavalukkaga mattum; official arasu sevai illa. Edhuvum seyyum munnaadi official source-la check pannunga.",
-   "latency_ms": 5572.9,
+   "latency_ms": 3816.9,
    "timings_ms": {
-    "fact_card_match": 193.3,
-    "retrieval": 1114.5,
-    "search": 477.6,
-    "rerank": 441.8,
-    "rewrite": 2361.9,
-    "llm_answer": 2094.2,
-    "total": 5572.9,
-    "generation": 2094.6
+    "fact_card_match": 172.3,
+    "retrieval": 835.2,
+    "search": 296.4,
+    "rerank": 365.6,
+    "rewrite": 1527.0,
+    "llm_answer": 1453.5,
+    "total": 3816.9,
+    "generation": 1453.7
    },
    "contact": {
     "scheme": "Tamil Nadu BC, MBC and Minorities Welfare schemes (policy note)",

@@ -322,5 +322,77 @@
     "author": "AI draft (31 Oct 2026), grounded in the cited page; check against the PDF before signing off",
     "verified_by": null,
     "verified_on": null
+  },
+  {
+    "card_id": "kmut_exclusions_en",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "who_qualifies",
+    "language": "en",
+    "question_examples": [
+      "Can a family with a central government employee get Magalir Urimai Thogai?",
+      "Who is not eligible for Kalaignar Magalir Urimai Thittam?",
+      "Can government employees get the Magalir Urimai amount?",
+      "Can pensioners or car owners get Magalir Urimai Thittam?"
+    ],
+    "answer_text": "A family cannot get Kalaignar Magalir Urimai Thittam if any member: earns over Rs.2.5 lakh a year; files income tax; pays professional tax on income over Rs.2.5 lakh; is a State or Union (central) government employee or pensioner, or works for or draws a pension from a public sector undertaking, bank, board, local body or cooperative; is an elected representative (ward members excepted); owns a car, jeep, tractor or heavy vehicle for own use; runs a business with turnover over Rs.50 lakh a year paying GST; or already gets a social security pension (old age, widow, welfare board) or a government pension.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 11,
+    "document_date": "2023-07-10",
+    "author": "AI draft (1 Nov 2026), copied from the cited page image; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "kmut_exclusions_ta",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "who_qualifies",
+    "language": "ta",
+    "question_examples": [
+      "அரசு ஊழியர் குடும்பத்துக்கு மகளிர் உரிமைத் தொகை கிடைக்குமா?",
+      "மகளிர் உரிமைத் திட்டத்தில் யாருக்குத் தகுதி இல்லை?",
+      "ஓய்வூதியம் பெறுபவர்களுக்கு மகளிர் உரிமைத் தொகை கிடைக்குமா?"
+    ],
+    "answer_text": "குடும்ப உறுப்பினர்களில் யாரேனும் பின்வருமாறு இருந்தால் அந்தக் குடும்பம் கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன்பெறத் தகுதியில்லை: ஆண்டு வருமானம் ரூ.2.5 இலட்சத்துக்கு மேல்; வருமான வரி செலுத்துபவர்; ரூ.2.5 இலட்சத்துக்கு மேல் வருமானம் ஈட்டி தொழில் வரி செலுத்துபவர்; மாநில, ஒன்றிய அரசு ஊழியர்கள், பொதுத்துறை நிறுவனங்கள், வங்கிகள், வாரியங்கள், உள்ளாட்சி அமைப்புகள், கூட்டுறவு அமைப்புகளின் ஊழியர்கள் அல்லது ஓய்வூதியதாரர்கள்; தேர்ந்தெடுக்கப்பட்ட மக்கள் பிரதிநிதிகள் (ஊராட்சி மன்ற வார்டு உறுப்பினர்கள் தவிர); சொந்தப் பயன்பாட்டுக்கு கார், ஜீப், டிராக்டர், கனரக வாகனம் வைத்திருப்பவர்கள்; ஆண்டுக்கு ரூ.50 இலட்சத்துக்கு மேல் விற்பனை செய்து GST செலுத்தும் தொழில் உரிமையாளர்கள்; ஏற்கனவே முதியோர், விதவை, நலவாரிய ஓய்வூதியம் போன்ற சமூகப் பாதுகாப்பு ஓய்வூதியம் அல்லது அரசு ஓய்வூதியம் பெறும் குடும்பங்கள்.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 11,
+    "document_date": "2023-07-10",
+    "author": "AI draft (1 Nov 2026), copied from the cited page image; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "ujjwala_eligibility_en",
+    "scheme": "Pradhan Mantri Ujjwala Yojana",
+    "field": "who_qualifies",
+    "language": "en",
+    "question_examples": [
+      "Who is eligible for an Ujjwala gas connection?",
+      "Who can get a free LPG connection under Ujjwala?",
+      "Ujjwala Yojana eligibility"
+    ],
+    "answer_text": "An Ujjwala connection is for an adult woman from any of these: SC households, ST households, Pradhan Mantri Awas Yojana (Gramin), Most Backward Classes, Antyodaya Anna Yojana, tea and ex-tea garden tribes, forest dwellers, people living on islands and river islands, SECC households (AHL TIN), or a poor household as per the 14-point declaration.",
+    "source_document": "pmuy-sop-2023-en",
+    "source_page": 2,
+    "document_date": "2023-10-10",
+    "author": "AI draft (1 Nov 2026), copied from the cited page image; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "ujjwala_eligibility_ta",
+    "scheme": "Pradhan Mantri Ujjwala Yojana",
+    "field": "who_qualifies",
+    "language": "ta",
+    "question_examples": [
+      "உஜ்வலா எரிவாயு இணைப்பு யாருக்குக் கிடைக்கும்?",
+      "உஜ்வலா திட்டத்துக்கு யார் தகுதியானவர்?"
+    ],
+    "answer_text": "உஜ்வலா இணைப்பு பின்வரும் பிரிவுகளில் ஏதாவது ஒன்றைச் சேர்ந்த வயது வந்த பெண்ணுக்கு வழங்கப்படும்: பட்டியல் சாதி (SC) குடும்பங்கள், பழங்குடியினர் (ST) குடும்பங்கள், பிரதமர் ஆவாஸ் யோஜனா (கிராமின்), மிகவும் பிற்படுத்தப்பட்ட வகுப்பினர், அந்த்யோதயா அன்ன யோஜனா, தேயிலைத் தோட்டப் பழங்குடியினர், வனவாசிகள், தீவுகள் மற்றும் ஆற்றுத் தீவுகளில் வசிப்பவர்கள், SECC குடும்பங்கள் (AHL TIN), அல்லது 14 அம்ச அறிவிப்பின்படி ஏழைக் குடும்பம்.",
+    "source_document": "pmuy-sop-2023-en",
+    "source_page": 2,
+    "document_date": "2023-10-10",
+    "author": "AI draft (1 Nov 2026), copied from the cited page image; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
   }
 ]
