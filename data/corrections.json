@@ -79,5 +79,41 @@
     "confirmed_by": null,
     "confirmed_on": null,
     "note": "Income above which families are not eligible (same misread as page 10). Printed page not checked by a person yet."
+  },
+  {
+    "doc_id": "kmut-go15-2023-ta",
+    "page": 11,
+    "ocr_reads": "ஆண்டுக்கு ரூ.25",
+    "pdf_shows": "ஆண்டுக்கு ரூ.2.5",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "Professional-tax exclusion (section 2.2.1 iii): the page image shows 'ஆண்டுக்கு ரூ.2.5 இலட்சத்திற்குமேல்'; OCR dropped the decimal point (checked by Claude from the page image, 1 Nov 2026)."
+  },
+  {
+    "doc_id": "tn-bcmbc-policy-note-2024-ta",
+    "page": 34,
+    "ocr_reads": "ரூ.25 இலட்சத்திற்கு மிகாமல்",
+    "pdf_shows": "ரூ.2.5 இலட்சத்திற்கு மிகாமல்",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "SUSPECTED, page not seen yet: school scholarship parental income limit read as 25 lakh (flagged by scripts/check_amounts.py). Blocks the 25 lakh figure until someone checks the printed page."
+  },
+  {
+    "doc_id": "tn-bcmbc-policy-note-2024-ta",
+    "page": 36,
+    "ocr_reads": "ரூ.250 இலட்சத்திற்கு மிகாமல்",
+    "pdf_shows": "ரூ.2.50 இலட்சத்திற்கு மிகாமல்",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "SUSPECTED, page not seen yet: parental income limit read as 250 lakh (flagged by scripts/check_amounts.py). Blocks the figure until someone checks the printed page."
+  },
+  {
+    "doc_id": "tn-bcmbc-policy-note-2024-ta",
+    "page": 43,
+    "ocr_reads": "ரூ.250 இலட்சத்திற்கு மிகாமல்",
+    "pdf_shows": "ரூ.2.50 இலட்சத்திற்கு மிகாமல்",
+    "confirmed_by": null,
+    "confirmed_on": null,
+    "note": "SUSPECTED, page not seen yet: parental income limit read as 250 lakh (flagged by scripts/check_amounts.py). Blocks the figure until someone checks the printed page."
   }
 ]
