@@ -117,4 +117,16 @@ def build_answerer(settings: Settings, retriever: Retriever | None = None) -> An
         fact_cards=matcher,
         alias_matcher=alias_matcher,
         rewriter=build_llm(settings, "verifier") if settings.rewrite_unclear_questions else None,
+        doc_urls=_doc_urls(settings),
+        clarification_floor=settings.clarification_floor,
     )
+
+
+def _doc_urls(settings: Settings) -> dict[str, str]:
+    """doc_id -> official PDF link from data/sources.json (empty if the file is missing)."""
+    import json
+
+    path = settings.data_dir / "sources.json"
+    if not path.is_file():
+        return {}
+    return {d["doc_id"]: d["source_url"] for d in json.loads(path.read_text(encoding="utf-8"))}

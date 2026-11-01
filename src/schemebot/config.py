@@ -101,10 +101,13 @@ class Settings(BaseSettings):
     retrieval_top_k: int = Field(default=20, ge=1, le=100)
     rerank_top_k: int = Field(default=5, ge=1, le=20)
     refusal_threshold: float = Field(default=0.35, ge=0.0, le=1.0)
+    clarification_floor: float = Field(default=0.30, ge=0.0, le=1.0)
+    """From here up to refusal_threshold, ask "which scheme do you mean?" instead of refusing."""
     gloss_tanglish: bool = True
     """Give the reranker an English gloss of Tanglish questions (retrieve/tanglish.py)."""
 
-    # Public demo limits on POST /ask (each question can cost two LLM calls)
+    # Public demo limits on POST /ask (a question costs up to four LLM calls: rewrite, answer,
+    # a retry in the wrong script, verifier; fact cards and refusals cost none)
     ask_limit_per_client_per_minute: int = Field(default=10, ge=1)
     ask_limit_total_per_day: int = Field(default=500, ge=1)
     # Exact-match only: the same words (ignoring case, spaces and a final "?") in the same

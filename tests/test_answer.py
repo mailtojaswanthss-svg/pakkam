@@ -317,6 +317,8 @@ def test_answer_still_in_the_wrong_script_is_not_shown(corpus: list[Chunk]) -> N
         ("hi", "पीएम-किसान (PM-KISAN) योजना के तहत 6,000 रुपये।", True),
         ("hi", "PM-KISAN pays Rs 6,000 a year.", False),
         ("ta-Latn", "PM-KISAN la varudathukku Rs 6,000 kidaikum.", True),
+        ("ta-Latn", "Families earning annual income below Rs. 2.5 lakhs are eligible.", False),
+        ("ta-Latn", "Magalir Urimai Thittam-la maasam Rs.1,000 kidaikum.", True),
         ("ta-Latn", "பிஎம்-கிசான் திட்டத்தில் ஆண்டுக்கு ரூ.6,000 கிடைக்கும்.", False),
         ("en", "PM-KISAN pays Rs 6,000 a year.", True),
     ],
@@ -359,3 +361,88 @@ def test_answer_names_its_scheme_but_never_a_policy_note(corpus: list[Chunk]) ->
     answerer._alias_matcher = None
     note = "Tamil Nadu Social Welfare schemes (policy note)"
     assert answerer.main_scheme("who can get it", None, "...", [note]) is None
+
+
+def _answerer(corpus: list[Chunk], llm: FakeLlm, **options: Any) -> Answerer:
+    client = open_client(None)
+    encoder = FakeEncoder()
+    build_index(client, COLLECTION, corpus, encoder)
+    retriever = Retriever(
+        HybridRetriever(client, COLLECTION, encoder, 10), FakeReranker(), candidates=5, keep=3
+    )
+    return Answerer(retriever, llm, refusal_threshold=THRESHOLD, **options)
+
+
+class CountingVerifier:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
+        self.calls += 1
+        return {"verdicts": [{"sentence": 1, "supported": True}]}
+
+
+def test_voice_answers_are_verified_even_without_numbers(corpus: list[Chunk]) -> None:
+    # Eligibility rules carry no numbers: the number check cannot judge them, the verifier can.
+    verifier = CountingVerifier()
+    llm = FakeLlm(sentences(("All land-holding farmer families can get PM-KISAN.", [1])))
+
+    answer = _answerer(corpus, llm, verifier=verifier).answer(QUESTION, voice_mode=True)
+
+    assert verifier.calls == 1
+    assert not answer.refused
+
+
+def test_clarification_floor_is_a_setting(corpus: list[Chunk]) -> None:
+    from schemebot.config import Settings
+
+    assert Settings().clarification_floor == 0.30
+    answerer = _answerer(corpus, FakeLlm(ENGLISH), verifier=None, clarification_floor=0.2)
+    assert answerer._clarification_floor == 0.2
+
+
+def test_fact_card_cites_the_pdf_page_not_the_website(corpus: list[Chunk]) -> None:
+    from schemebot.generate.fact_cards import FactCard
+
+    card = FactCard(
+        card_id="pmk",
+        scheme="PM-KISAN",
+        field="amount",
+        language="en",
+        question_examples=["x"],
+        answer_text="Rs.6,000 a year.",
+        source_document="pmkisan-ekyc-note-2023-en",
+        source_page=1,
+        document_date="2023-11-13",
+        verified_by="Tester",
+        verified_on="2026-11-01",
+    )
+
+    class OneCard:
+        def match(self, question: str) -> tuple[FactCard, float]:
+            return card, 0.99
+
+    pdf = "https://pmkisan.gov.in/Documents/ekyc.pdf"
+    answerer = _answerer(
+        corpus,
+        FakeLlm(ENGLISH),
+        verifier=None,
+        fact_cards=OneCard(),
+        doc_urls={"pmkisan-ekyc-note-2023-en": pdf},
+    )
+    answer = answerer.answer("How much does PM-KISAN pay?")
+
+    assert answer.path == "fact_card"
+    assert answer.citations[0].source_url == pdf
+    assert answer.citations[0].page_start == 1
+
+
+def test_tanglish_question_answered_in_english_is_kept_after_one_retry(
+    corpus: list[Chunk],
+) -> None:
+    llm = FakeLlm(ENGLISH)
+
+    answer = answer_with(llm, corpus, "PM Kisan la evlo panam kidaikum per year?")
+
+    assert len(llm.user_messages) == 2  # asked once more for Tanglish
+    assert not answer.refused  # English beats a refusal

@@ -67,6 +67,15 @@ def _script_counts(text: str) -> tuple[int, int, int]:
     return tamil, devanagari, latin
 
 
+_TANGLISH_WORDS = re.compile(
+    r"\b(kidai\w*|irukk?\w*|venum|vendum|panna\w*|pann\w*|thittam\w*|scheme-la|kku|ku|"
+    r"la|illa\w*|maasam\w*|maasa\w*|masa\w*|varusha\w*|varuda\w*|vayasu\w*|"
+    r"thevai\w*|eppadi|enna|yaar\w*|mattum|varai|kooda|kudumba\w*|pengal\w*|"
+    r"vivasayi\w*|thogai|kelunga|paarunga|aagum|undu)\b|\w+-(la|ku|kku|ukku|oda|ah|aa)\b",
+    re.IGNORECASE,
+)
+
+
 def written_in_script_of(language: str, text: str) -> bool:
     """False when the answer is plainly in another script than the asked language, e.g. a
     Hindi passage copied as the answer to a Tamil question. Scheme names in English letters
@@ -76,7 +85,10 @@ def written_in_script_of(language: str, text: str) -> bool:
         return tamil > devanagari and tamil > 0
     if language == "hi":
         return devanagari > tamil and devanagari > 0
-    if language in ("en", "ta-Latn"):
+    if language == "ta-Latn":
+        # Tanglish, not English: Tamil words in English letters.
+        return latin > tamil + devanagari and bool(_TANGLISH_WORDS.search(text))
+    if language == "en":
         return latin > tamil + devanagari
     return True
 
