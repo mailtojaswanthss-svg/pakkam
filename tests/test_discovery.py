@@ -30,6 +30,12 @@ def test_broad_questions_are_discovery(question: str) -> None:
         "What documents are needed for the gas scheme?",
         "Who is the chief minister of Kerala?",
         "How do I apply?",
+        # From the live benchmark: specific questions naming a scheme in an inflected form.
+        "அடல் ஓய்வூதியத் திட்டத்தில் சேர வயது வரம்பு என்ன?",
+        "மகளிர் உரிமைத் திட்டத்தில் மின்சார பயன்பாட்டு வரம்பு என்ன?",
+        "मगलिर उरिमै योजना में परिवार की आय सीमा क्या है?",
+        "govt job la irukavanga family ku magalir urimai thogai kidaikuma",
+        "पीएम किसान योजना में साल में कितना पैसा मिलता है?",
     ],
 )
 def test_specific_or_unrelated_questions_are_not(question: str) -> None:
