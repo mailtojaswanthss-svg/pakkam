@@ -225,3 +225,33 @@ def test_cache_hit_still_counts_against_the_rate_limit(tmp_path: Path) -> None:
     assert first.status_code == 200
     assert second.status_code == 429
     assert len(service.calls) == 1
+
+
+def test_answers_survive_a_restart_without_the_question_text(tmp_path: Path) -> None:
+    path = tmp_path / "answer-cache.pkl"
+    first = CountingService(ANSWER)
+    CachedAnswerer(first, fingerprint="f1", path=path).answer("Who can join APY?")
+
+    assert b"Who can join APY" not in path.read_bytes()
+    second = CountingService(ANSWER)
+    again = CachedAnswerer(second, fingerprint="f1", path=path).answer("Who can join APY?")
+    assert second.calls == []
+    assert again.question == "Who can join APY?"
+
+
+def test_a_changed_index_or_model_drops_the_saved_answers(tmp_path: Path) -> None:
+    path = tmp_path / "answer-cache.pkl"
+    CachedAnswerer(CountingService(ANSWER), fingerprint="f1", path=path).answer("Who can join APY?")
+
+    service = CountingService(ANSWER)
+    CachedAnswerer(service, fingerprint="f2", path=path).answer("Who can join APY?")
+    assert len(service.calls) == 1
+
+
+def test_an_unreadable_cache_file_is_ignored(tmp_path: Path) -> None:
+    path = tmp_path / "answer-cache.pkl"
+    path.write_bytes(b"not a pickle")
+    service = CountingService(ANSWER)
+
+    CachedAnswerer(service, fingerprint="f1", path=path).answer("Who can join APY?")
+    assert len(service.calls) == 1

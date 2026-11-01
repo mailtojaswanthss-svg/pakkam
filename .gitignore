@@ -41,6 +41,8 @@ data/voice/field_clips/
 data/voice/prisma_raw_sample.json
 
 data/audio_cache/
+data/answer-cache.pkl
+data/answer-cache.tmp
 *.wav
 *.mp3
 
