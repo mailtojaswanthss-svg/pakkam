@@ -67,8 +67,8 @@
     "page": 10,
     "ocr_reads": "ரூ.25 இலட்சத்திற்குக் கீழ்",
     "pdf_shows": "ரூ.2.5 இலட்சத்திற்குக் கீழ்",
-    "confirmed_by": null,
-    "confirmed_on": null,
+    "confirmed_by": "Jaswanth S S",
+    "confirmed_on": "2026-11-01",
     "note": "Annual family income limit for eligibility. OCR dropped the decimal point; the scheme limit is Rs.2.5 lakh. Found in a live answer on 31 Oct 2026 that said Rs.25 lakh. Printed page not checked by a person yet."
   },
   {
@@ -76,8 +76,8 @@
     "page": 11,
     "ocr_reads": "ரூபாய் 25 இலட்சத்திற்குமேல்",
     "pdf_shows": "ரூபாய் 2.5 இலட்சத்திற்குமேல்",
-    "confirmed_by": null,
-    "confirmed_on": null,
+    "confirmed_by": "Jaswanth S S",
+    "confirmed_on": "2026-11-01",
     "note": "Income above which families are not eligible (same misread as page 10). Printed page not checked by a person yet."
   },
   {
@@ -85,8 +85,8 @@
     "page": 11,
     "ocr_reads": "ஆண்டுக்கு ரூ.25",
     "pdf_shows": "ஆண்டுக்கு ரூ.2.5",
-    "confirmed_by": null,
-    "confirmed_on": null,
+    "confirmed_by": "Jaswanth S S",
+    "confirmed_on": "2026-11-01",
     "note": "Professional-tax exclusion (section 2.2.1 iii): the page image shows 'ஆண்டுக்கு ரூ.2.5 இலட்சத்திற்குமேல்'; OCR dropped the decimal point (checked by Claude from the page image, 1 Nov 2026)."
   },
   {
