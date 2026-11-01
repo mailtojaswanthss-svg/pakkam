@@ -20,3 +20,14 @@ Questions sent to `https://pakkam-alpha.vercel.app` one at a time, as a visitor 
 
 Raw replies: `data/eval/live_benchmark.json`. Questions: `data/eval/questions.jsonl`
 (the reference answers are drafts; correctness of wording is graded separately).
+
+## Notes on this run
+
+- The 3 "clarified" replies came from a backend still running code from before the
+  discovery fix (merged as #34): the replies took about 1 ms and were not cache hits. They
+  are specific questions and will be answered once the laptop runs the latest main.
+- `q038` (Tanglish income limit): a correct "2.5 laksham" answer was rejected by the number
+  check. Fixed: Tanglish lakh and crore spellings are now read.
+- `q003`, `q039` (central government employee and Magalir Urimai), `q031` (Hindi Ujjwala
+  eligibility): the rule is in the documents (G.O. 15 p.11 "மாநில, ஒன்றிய அரசு ஊழியர்கள்";
+  PMUY SoP p.2). New fact cards cover them once signed.
