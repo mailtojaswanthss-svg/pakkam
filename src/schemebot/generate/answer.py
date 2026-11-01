@@ -228,6 +228,8 @@ class Answerer:
         fact_cards: Any | None = None,
         alias_matcher: Any | None = None,
         rewriter: JsonLlm | None = None,
+        doc_urls: dict[str, str] | None = None,
+        clarification_floor: float = 0.30,
     ) -> None:
         self._retriever = retriever
         self._llm = llm
@@ -241,6 +243,10 @@ class Answerer:
         self._alias_matcher = alias_matcher
         # A small, fast model that rewrites unclear questions (see _rewrite_and_search).
         self._rewriter = rewriter
+        # doc_id -> official PDF link, so a fact card cites its page, not just a website.
+        self._doc_urls = doc_urls or {}
+        # Confidence from here up to the refusal threshold asks "did you mean …?".
+        self._clarification_floor = clarification_floor
         self._recent: OrderedDict[str, tuple[float, RetrievalResult]] = OrderedDict()
         self._recent_lock = threading.Lock()
 
@@ -412,7 +418,8 @@ class Answerer:
                     scheme=card.scheme,
                     page_start=card.source_page,
                     page_end=card.source_page,
-                    source_url=str(contact.website) if contact else "https://www.tn.gov.in",
+                    source_url=self._doc_urls.get(card.source_document)
+                    or (str(contact.website) if contact else "https://www.tn.gov.in"),
                     text=card.answer_text,
                     language=card.language,
                     ocr_corrected=False,
@@ -512,8 +519,8 @@ class Answerer:
             )
 
         if confidence < self._refusal_threshold:
-            # Step 4B: Near-threshold clarification band [0.30, 0.35)
-            if confidence >= 0.30 and retrieval.passages:
+            # Near-threshold band [clarification_floor, refusal_threshold): ask which scheme
+            if confidence >= self._clarification_floor and retrieval.passages:
                 candidates = list(
                     dict.fromkeys(p.chunk.scheme for p in retrieval.passages if p.chunk.scheme)
                 )[:2]
@@ -559,7 +566,12 @@ class Answerer:
                 reply = parse_reply(
                     AnswerReply, self._llm.complete_json(prompt_to_use, retry, ANSWER_SCHEMA)
                 )
-                if reply.answerable and not _in_asked_script(language, reply):
+                # Tanglish answered in English is still useful; another script is not.
+                if (
+                    reply.answerable
+                    and not _in_asked_script(language, reply)
+                    and not (language == "ta-Latn" and _in_asked_script("en", reply))
+                ):
                     return refuse("unsupported")
             timings["llm_answer"] = (time.perf_counter() - generation_started) * 1000
             drafts = [
@@ -569,9 +581,9 @@ class Answerer:
             if not reply.answerable or not drafts:
                 return refuse("not_in_documents")
 
-            # Voice optimization: skip LLM verifier if answer text has no numbers or dates
-            has_numbers = any(bool(numbers_in(s.text)) for s in drafts)
-            verifier_to_use = None if (voice_mode and not has_numbers) else self._verifier
+            # Voice answers get the same verifier as text: eligibility rules carry no numbers
+            # and are exactly what the number check cannot judge.
+            verifier_to_use = self._verifier
 
             verify_started = time.perf_counter()
             checked = check_answer(drafts, passage_texts, verifier_to_use, misread)
