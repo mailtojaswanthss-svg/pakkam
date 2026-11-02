@@ -175,6 +175,20 @@ class Answer:
     scheme: str | None = None
     """The one scheme the answer is about, by its own name (not a policy note's title), for
     follow-up questions. None when unclear."""
+    scheme_facts: list["SchemeFact"] = field(default_factory=list)
+    """For "what can I get?": per suggested scheme, its signed amount and who qualifies."""
+
+
+@dataclass(frozen=True)
+class SchemeFact:
+    """One scheme's signed facts for the "tell me your situation" view: no model involved."""
+
+    scheme: str
+    amount: str | None
+    amount_citation: Citation | None
+    who: str | None
+    who_citation: Citation | None
+    yearly_amount: int | None
 
 
 def _citation(number: int, passage: RetrievedPassage) -> Citation:
@@ -273,6 +287,46 @@ class Answerer:
         if scheme and not names_scheme and scheme.casefold() not in search_q.casefold():
             search_q = f"{search_q} {scheme}"
         return search_q
+
+    def _card_citation(self, card: Any) -> Citation:
+        contact = self._contacts.get(card.scheme)
+        return Citation(
+            number=1,
+            doc_id=card.source_document,
+            scheme=card.scheme,
+            page_start=card.source_page,
+            page_end=card.source_page,
+            source_url=self._doc_urls.get(card.source_document)
+            or (str(contact.website) if contact else "https://www.tn.gov.in"),
+            text=card.answer_text,
+            language=card.language,
+            checked_by=card.verified_by,
+            checked_on=card.verified_on,
+        )
+
+    def scheme_facts(self, schemes: list[str], language: Language) -> list[SchemeFact]:
+        """Each scheme's signed amount and eligibility card, in the question's language
+        (Tamil cards for Tamil, English otherwise). Schemes without a signed card are listed
+        with no facts rather than guessed."""
+        cards = list(getattr(self._fact_cards, "cards", None) or [])
+        card_language = "ta" if language == "ta" else "en"
+        facts = []
+        for scheme in schemes:
+            mine = [c for c in cards if c.scheme == scheme and c.language == card_language]
+            amount = next((c for c in mine if c.field == "amount"), None)
+            # The first eligibility card is the main rule (exclusions come later in the file).
+            who = next((c for c in mine if c.field == "who_qualifies"), None)
+            facts.append(
+                SchemeFact(
+                    scheme=scheme,
+                    amount=amount.answer_text if amount else None,
+                    amount_citation=self._card_citation(amount) if amount else None,
+                    who=who.answer_text if who else None,
+                    who_citation=self._card_citation(who) if who else None,
+                    yearly_amount=amount.yearly_amount if amount else None,
+                )
+            )
+        return facts
 
     def main_scheme(
         self, question: str, follow_up: FollowUp | None, answer_text: str, cited: list[str]
@@ -390,6 +444,7 @@ class Answerer:
             self._alias_matcher is not None and self._alias_matcher.match(cleaned_q) is not None
         )
         if is_discovery(cleaned_q, names_a_scheme):
+            suggested = suggest_schemes(cleaned_q)
             timings["total"] = (time.perf_counter() - started) * 1000
             return Answer(
                 question=question,
@@ -405,7 +460,8 @@ class Answerer:
                 path="discovery",
                 status="needs_clarification",
                 understood_query=cleaned_q,
-                candidate_schemes=suggest_schemes(cleaned_q),
+                candidate_schemes=suggested,
+                scheme_facts=self.scheme_facts(suggested, language),
             )
 
         if self._fact_cards is not None:

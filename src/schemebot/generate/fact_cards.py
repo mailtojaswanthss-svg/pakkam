@@ -59,6 +59,9 @@ class FactCard(BaseModel):
     document_date: str = "unknown"
     verified_by: str | None = None
     verified_on: str | None = None
+    yearly_amount: int | None = None
+    """Rupees a year, for amount cards whose benefit is a fixed sum: lets "what can I get?"
+    add up a family's total. Set only where the page states it (or a stated monthly sum x 12)."""
 
 
 def load_verified_cards(path: Path) -> list[FactCard]:

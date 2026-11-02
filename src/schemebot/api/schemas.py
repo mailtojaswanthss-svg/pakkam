@@ -94,6 +94,17 @@ class FallbackPassage(BaseModel):
     source_url: str
 
 
+class SchemeFactOut(BaseModel):
+    scheme: str
+    amount: str | None = Field(description="The signed amount card's text, or null.")
+    amount_citation: CitationOut | None = None
+    who: str | None = Field(description="The signed eligibility card's text, or null.")
+    who_citation: CitationOut | None = None
+    yearly_amount: int | None = Field(
+        default=None, description="Rupees a year where the benefit is a fixed sum."
+    )
+
+
 class AskResponse(BaseModel):
     answer: str = Field(description="Full answer with [n] markers, or the refusal message.")
     language: Language
@@ -151,6 +162,10 @@ class AskResponse(BaseModel):
     scheme: str | None = Field(
         default=None,
         description="The scheme the answer is about, for follow-up questions (None if unclear).",
+    )
+    scheme_facts: list[SchemeFactOut] = Field(
+        default_factory=list,
+        description="Broad 'what can I get?' questions: each suggested scheme's signed facts.",
     )
     rejected_reasons: list[str] = Field(
         default_factory=list,
@@ -275,6 +290,17 @@ class AskResponse(BaseModel):
             latency_ms=round(answer.timings_ms.get("total", 0.0), 1),
             timings_ms=rounded_timings(answer.timings_ms),
             scheme=getattr(answer, "scheme", None),
+            scheme_facts=[
+                SchemeFactOut(
+                    scheme=f.scheme,
+                    amount=f.amount,
+                    amount_citation=_citation_out(f.amount_citation, titles, doc_dates),
+                    who=f.who,
+                    who_citation=_citation_out(f.who_citation, titles, doc_dates),
+                    yearly_amount=f.yearly_amount,
+                )
+                for f in getattr(answer, "scheme_facts", [])
+            ],
             rejected_reasons=[r.reason for r in getattr(answer, "rejected", [])],
             contact=(
                 ContactOut(
@@ -397,4 +423,28 @@ class ForwardResponse(BaseModel):
         default_factory=list,
         description="Warning signs found by fixed rules: a non-government link, a request for "
         "an OTP, money or ID numbers, or 'today only' pressure.",
+    )
+
+
+def _citation_out(
+    c: Any, titles: Mapping[str, str], doc_dates: Mapping[str, str | None]
+) -> CitationOut | None:
+    if c is None:
+        return None
+    return CitationOut(
+        number=c.number,
+        scheme=c.scheme,
+        doc_id=c.doc_id,
+        document=titles.get(c.doc_id, c.doc_id),
+        page_start=c.page_start,
+        page_end=c.page_end,
+        page=c.page_start,
+        source_url=c.source_url,
+        excerpt=c.text,
+        snippet=c.text,
+        document_date=doc_dates.get(c.doc_id),
+        language=c.language,
+        ocr_corrected=c.ocr_corrected,
+        checked_by=c.checked_by,
+        checked_on=c.checked_on,
     )
