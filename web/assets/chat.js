@@ -701,6 +701,14 @@
   }
 
   // "Did you mean A or B?": each scheme is a button that asks the same question about it.
+  // "What can I get?": signed amounts per scheme, and the yearly total of the fixed ones.
+  const FACTS_TEXT = {
+    en: { total: (n, k) => `You may be eligible for up to ₹${n} a year from ${k} scheme${k > 1 ? 's' : ''}, if you meet each scheme's conditions.`, ask: 'Ask more' },
+    ta: { total: (n, k) => `ஒவ்வொரு திட்டத்தின் நிபந்தனைகளும் பொருந்தினால், ${k} திட்டங்களிலிருந்து ஆண்டுக்கு ₹${n} வரை கிடைக்கலாம்.`, ask: 'மேலும் கேள்' },
+    'ta-Latn': { total: (n, k) => `Ovvoru scheme-oda conditions porundhina, ${k} scheme-la irundhu varushathukku ₹${n} varai kidaikalam.`, ask: 'Innum kelu' },
+    hi: { total: (n, k) => `हर योजना की शर्तें पूरी होने पर, ${k} योजनाओं से साल में ₹${n} तक मिल सकता है।`, ask: 'और पूछें' },
+  };
+
   // A broad question ("a scheme for farmers?") gets the matching schemes as buttons; with no
   // group named, also the groups to narrow by.
   function clarifyCard(data, question) {
@@ -711,7 +719,43 @@
     setLang(title, data.language);
     card.append(title);
     const actions = el('div', 'clarify-actions');
-    data.candidate_schemes.forEach((scheme) => {
+    const facts = discovery ? (data.scheme_facts || []).filter((f) => f.amount || f.who) : [];
+    if (facts.length) {
+      const words2 = FACTS_TEXT[data.language] || FACTS_TEXT.en;
+      const total = facts.reduce((sum, f) => sum + (f.yearly_amount || 0), 0);
+      const counted = facts.filter((f) => f.yearly_amount).length;
+      if (total > 0) {
+        const sum = el('p', 'facts-total', words2.total(total.toLocaleString('en-IN'), counted));
+        setLang(sum, data.language);
+        card.append(sum);
+      }
+      const list = el('div', 'facts-list');
+      facts.forEach((f) => {
+        const item = el('div', 'facts-item');
+        item.append(el('p', 'facts-scheme', f.scheme));
+        if (f.amount) item.append(el('p', 'facts-line', `₹ ${f.amount}`));
+        if (f.who) item.append(el('p', 'facts-line', `👤 ${f.who}`));
+        const cites = [f.amount_citation, f.who_citation].filter(Boolean).map((c, i) => ({ ...c, number: i + 1 }));
+        const lines = [f.amount, f.who].filter(Boolean);
+        const proofData = {
+          language: data.language,
+          citations: cites,
+          sentences: lines.map((text, i) => ({ text, citations: [i + 1], section: i === 0 && f.amount ? 'amount' : 'eligibility' })),
+        };
+        const row = el('div', 'facts-actions');
+        const proof = el('button', 'proof-open-btn', `📄 ${proofText(data.language).show}`);
+        proof.type = 'button';
+        proof.addEventListener('click', () => openProof(proofData, null, proof));
+        const more = el('button', 'follow-up', words2.ask);
+        more.type = 'button';
+        more.addEventListener('click', () => ask(words.about(f.scheme), { followUp: { question, scheme: f.scheme } }));
+        row.append(proof, more);
+        item.append(row);
+        list.append(item);
+      });
+      card.append(list);
+    }
+    data.candidate_schemes.filter((scheme) => !facts.some((f) => f.scheme === scheme)).forEach((scheme) => {
       const button = el('button', 'clarify-btn', scheme);
       button.type = 'button';
       button.addEventListener('click', () => (discovery
