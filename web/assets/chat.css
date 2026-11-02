@@ -618,3 +618,31 @@ body.proof-open { overflow: hidden; }
 .proof-btn { padding: 8px 14px; color: var(--stamp); background: var(--canvas); border: 1px solid var(--stamp-line); border-radius: 999px; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
 .proof-btn:hover { background: var(--stamp); color: var(--on-stamp); }
 @media (prefers-color-scheme: dark) { .proof-checked { color: #b7f0c8; background: #123d22; } }
+
+/* Rumour shield */
+.forward-start { margin-top: var(--s-2); }
+.shield-input { width: 100%; min-height: 7em; padding: 10px; color: var(--ink); background: var(--canvas); border: 1px solid var(--border); border-radius: 8px; font: inherit; font-size: 1.05rem; resize: vertical; }
+.shield-row { padding: 10px 0 0; border: 0; }
+.shield-check { background: var(--stamp); color: var(--on-stamp); }
+.shield-status { margin-top: 8px; }
+.shield-overall { margin: 12px 0 8px; padding: 10px 12px; border-radius: 8px; font-size: 1.15rem; font-weight: 700; background: var(--canvas); }
+.shield-wrong .shield-verdict, .shield-overall.shield-wrong { color: #9b1c1c; }
+.shield-overall.shield-wrong { background: #fde8e8; }
+.shield-overall.shield-looks_right { background: #e5f5ea; color: #0f5a2c; }
+.shield-overall.shield-partly_wrong, .shield-overall.shield-not_in_documents { background: #fff4d6; color: #7a4b00; }
+.shield-claim { margin: 8px 0; padding: 10px 12px; border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 8px; }
+.shield-claim.shield-contradicted { border-left-color: #c53030; }
+.shield-claim.shield-supported { border-left-color: #2f855a; }
+.shield-claim.shield-not_in_documents { border-left-color: #c58a00; }
+.shield-verdict { margin: 0; font-weight: 700; }
+.shield-claim-text { margin: 4px 0; font-style: italic; }
+.shield-why { margin: 0 0 8px; }
+.shield-warn { margin: 10px 0; padding: 10px 12px; background: #fde8e8; color: #7f1d1d; border-radius: 8px; }
+.shield-warn-title { margin: 0 0 4px; font-weight: 700; }
+.shield-warn ul { margin: 0; padding-left: 1.2em; }
+.shield-wa { background: #25d366; color: #fff; border-color: #25d366; }
+@media (prefers-color-scheme: dark) {
+  .shield-overall.shield-wrong, .shield-warn { background: #4a1414; color: #fecaca; }
+  .shield-overall.shield-looks_right { background: #123d22; color: #b7f0c8; }
+  .shield-overall.shield-partly_wrong, .shield-overall.shield-not_in_documents { background: #4a3500; color: #ffe4a3; }
+}

@@ -250,6 +250,7 @@
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
     if (document.getElementById('proof')) closeProof();
+    else if (document.getElementById('shield')) closeShield();
     else if (app.classList.contains('menu-open')) setMenu(false);
     else if (open) closeSources(true);
   });
@@ -301,6 +302,14 @@
     const sheet = document.getElementById('proof');
     if (sheet) sheet.remove();
     if (proofAudio) { proofAudio.pause(); proofAudio = null; }
+    if (!document.getElementById('shield')) document.body.classList.remove('proof-open');
+  }
+
+  // The forward checker sits under a proof card opened from it, so it closes separately.
+  function closeShield() {
+    closeProof();
+    const sheet = document.getElementById('shield');
+    if (sheet) sheet.remove();
     document.body.classList.remove('proof-open');
   }
 
@@ -419,6 +428,200 @@
     render();
     close.focus();
   }
+
+  /* ---------- rumour shield ("is this forward true?") ---------- */
+  // Each claim in a forward checked against the official documents, with the page as proof,
+  // plus warning signs found by fixed rules (links, OTP, money, ID numbers, urgency).
+  const SHIELD = {
+    en: {
+      title: 'Is this forward true?', placeholder: 'Paste the WhatsApp message here, or tap the mic and read it out.',
+      check: 'Check it', checking: 'Checking each claim against the government orders…', speak: 'Read it out', stop: 'Stop',
+      overall: { wrong: '❌ This forward is wrong', partly_wrong: '⚠️ Partly wrong', looks_right: '✅ Matches the official documents',
+        not_in_documents: '⚠️ Not in any official document. Be careful.', no_claims: 'No scheme claim found in this message.' },
+      verdict: { supported: '✅ True', contradicted: '❌ Wrong', not_in_documents: '⚠️ Not in the documents' },
+      signs: { unofficial_link: 'The link is not a government website (.gov.in). Do not open it or enter details.',
+        official_link: 'The link is a government website (.gov.in).',
+        otp: 'It asks for an OTP. Government schemes never ask for your OTP. Never share it.',
+        payment: 'It asks for money. Applying for these schemes does not need payment to anyone in a message.',
+        personal_data: 'It asks for Aadhaar or bank details. Do not send them to unknown people.',
+        urgency: '"Today only" pressure is a common trick. Check first.' },
+      warnings: 'Warning signs', proof: 'Show proof', share: 'Send the correction on WhatsApp', listen: 'Read the result',
+      correction: 'Fact-check by Pakkam (from the official government documents):', failed: 'Pakkam could not check this now. Try again in a minute.' },
+    ta: {
+      title: 'இந்த வாட்ஸ்அப் செய்தி உண்மையா?', placeholder: 'வாட்ஸ்அப் செய்தியை இங்கே ஒட்டுங்கள், அல்லது மைக்கைத் தொட்டு படியுங்கள்.',
+      check: 'சரிபார்', checking: 'ஒவ்வொரு கூற்றும் அரசாணையுடன் சரிபார்க்கப்படுகிறது…', speak: 'படித்துச் சொல்', stop: 'நிறுத்து',
+      overall: { wrong: '❌ இந்தச் செய்தி தவறு', partly_wrong: '⚠️ ஓரளவு தவறு', looks_right: '✅ அதிகாரப்பூர்வ ஆவணங்களுடன் பொருந்துகிறது',
+        not_in_documents: '⚠️ எந்த அதிகாரப்பூர்வ ஆவணத்திலும் இல்லை. கவனம்.', no_claims: 'இந்தச் செய்தியில் திட்டம் பற்றிய கூற்று இல்லை.' },
+      verdict: { supported: '✅ உண்மை', contradicted: '❌ தவறு', not_in_documents: '⚠️ ஆவணங்களில் இல்லை' },
+      signs: { unofficial_link: 'இந்த இணைப்பு அரசு இணையதளம் (.gov.in) அல்ல. திறக்க வேண்டாம், விவரங்களைக் கொடுக்க வேண்டாம்.',
+        official_link: 'இந்த இணைப்பு அரசு இணையதளம் (.gov.in).',
+        otp: 'OTP கேட்கிறது. அரசுத் திட்டங்கள் ஒருபோதும் OTP கேட்பதில்லை. பகிர வேண்டாம்.',
+        payment: 'பணம் கேட்கிறது. இந்தத் திட்டங்களுக்கு செய்தி மூலம் யாருக்கும் பணம் கட்டத் தேவையில்லை.',
+        personal_data: 'ஆதார் அல்லது வங்கி விவரங்களைக் கேட்கிறது. தெரியாதவர்களுக்கு அனுப்ப வேண்டாம்.',
+        urgency: '"இன்று மட்டும்" என்ற அவசரம் ஒரு வழக்கமான ஏமாற்று. முதலில் சரிபாருங்கள்.' },
+      warnings: 'எச்சரிக்கை அறிகுறிகள்', proof: 'ஆதாரம் காட்டு', share: 'திருத்தத்தை வாட்ஸ்அப்பில் அனுப்பு', listen: 'முடிவைப் படித்துக் காட்டு',
+      correction: 'பக்கம் சரிபார்ப்பு (அதிகாரப்பூர்வ அரசு ஆவணங்களிலிருந்து):', failed: 'இப்போது சரிபார்க்க முடியவில்லை. ஒரு நிமிடம் கழித்து முயற்சிக்கவும்.' },
+    hi: {
+      title: 'क्या यह व्हाट्सऐप संदेश सच है?', placeholder: 'व्हाट्सऐप संदेश यहाँ चिपकाएँ, या माइक दबाकर पढ़ें।',
+      check: 'जाँचें', checking: 'हर दावे को सरकारी आदेश से जाँचा जा रहा है…', speak: 'पढ़कर सुनाएँ', stop: 'रोकें',
+      overall: { wrong: '❌ यह संदेश गलत है', partly_wrong: '⚠️ आंशिक रूप से गलत', looks_right: '✅ आधिकारिक दस्तावेज़ों से मेल खाता है',
+        not_in_documents: '⚠️ किसी आधिकारिक दस्तावेज़ में नहीं। सावधान रहें।', no_claims: 'इस संदेश में योजना का कोई दावा नहीं मिला।' },
+      verdict: { supported: '✅ सही', contradicted: '❌ गलत', not_in_documents: '⚠️ दस्तावेज़ों में नहीं' },
+      signs: { unofficial_link: 'यह लिंक सरकारी वेबसाइट (.gov.in) नहीं है। इसे न खोलें।',
+        official_link: 'यह लिंक सरकारी वेबसाइट (.gov.in) है।',
+        otp: 'यह OTP माँगता है। सरकारी योजनाएँ कभी OTP नहीं माँगतीं। इसे साझा न करें।',
+        payment: 'यह पैसे माँगता है। इन योजनाओं के लिए संदेश से किसी को भुगतान नहीं करना होता।',
+        personal_data: 'यह आधार या बैंक विवरण माँगता है। अनजान लोगों को न भेजें।',
+        urgency: '"आज ही" का दबाव एक आम चाल है। पहले जाँचें।' },
+      warnings: 'चेतावनी के संकेत', proof: 'प्रमाण दिखाएँ', share: 'सुधार व्हाट्सऐप पर भेजें', listen: 'नतीजा सुनाएँ',
+      correction: 'पक्कम द्वारा जाँच (आधिकारिक सरकारी दस्तावेज़ों से):', failed: 'अभी जाँच नहीं हो सकी। एक मिनट बाद कोशिश करें।' },
+  };
+  SHIELD['ta-Latn'] = { ...SHIELD.en,
+    title: 'Indha WhatsApp forward unmaiya?', check: 'Check pannu', checking: 'Ovvoru claim-um G.O. kooda check aagudhu…',
+    overall: { ...SHIELD.en.overall, wrong: '❌ Indha forward thappu', partly_wrong: '⚠️ Konjam thappu', looks_right: '✅ Official documents kooda sariya irukku' },
+    verdict: { supported: '✅ Unmai', contradicted: '❌ Thappu', not_in_documents: '⚠️ Documents-la illa' },
+    share: 'Correction-a WhatsApp-la anuppu' };
+  const shieldText = (lang) => SHIELD[lang] || SHIELD.en;
+  const pageLabel = (c) => `${c.document}, ${proofText('en').page} ${c.page_start}`;
+
+  function shieldResult(result, ui, box) {
+    const lang = (result.claims.find((c) => c.answer && c.answer.language) || {}).answer?.language || ui;
+    const words = shieldText(lang);
+    const out = el('div', 'shield-result');
+    setLang(out, lang);
+    out.append(el('p', `shield-overall shield-${result.overall}`, words.overall[result.overall] || result.overall));
+    const lines = [words.correction];
+    result.claims.forEach((c) => {
+      const card = el('div', `shield-claim shield-${c.verdict}`);
+      card.append(el('p', 'shield-verdict', words.verdict[c.verdict] || c.verdict));
+      card.append(el('p', 'shield-claim-text', `“${c.claim}”`));
+      card.append(el('p', 'shield-why', c.explanation));
+      const cites = (c.answer && c.answer.citations) || [];
+      if (cites.length && c.answer.sentences.length) {
+        const proof = el('button', 'proof-open-btn', `📄 ${words.proof}`);
+        proof.type = 'button';
+        proof.addEventListener('click', () => openProof(c.answer, null, proof));
+        card.append(proof);
+        lines.push(`${words.verdict[c.verdict]}: "${c.claim}". ${c.explanation} (${pageLabel(cites[0])})`);
+      } else {
+        lines.push(`${words.verdict[c.verdict]}: "${c.claim}".`);
+      }
+      out.append(card);
+    });
+    const signs = (result.scam_signs || []).filter((s) => s !== 'official_link');
+    if (signs.length) {
+      const warn = el('div', 'shield-warn');
+      warn.append(el('p', 'shield-warn-title', `🚨 ${words.warnings}`));
+      const list = el('ul');
+      signs.forEach((s) => { list.append(el('li', null, words.signs[s])); lines.push(`🚨 ${words.signs[s]}`); });
+      warn.append(list);
+      out.append(warn);
+    }
+    const actions = el('div', 'proof-actions');
+    const text = `${lines.join('\n')}\n${location.origin}/chat/`;
+    const wa = el('a', 'proof-btn shield-wa', `💬 ${words.share}`);
+    wa.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    wa.target = '_blank';
+    wa.rel = 'noopener noreferrer';
+    const listenBtn = el('button', 'proof-btn', `🔊 ${words.listen}`);
+    listenBtn.type = 'button';
+    listenBtn.addEventListener('click', async () => {
+      if (proofAudio) { proofAudio.pause(); proofAudio = null; return; }
+      const spoken = [words.overall[result.overall], ...result.claims.map((c) => `${words.verdict[c.verdict].replace(/^\S+\s/, '')}. ${c.explanation}`)].join(' ');
+      try {
+        listenBtn.disabled = true;
+        proofAudio = new Audio(await fetchSentenceAudio(spoken.slice(0, 900), lang));
+        proofAudio.addEventListener('ended', () => { proofAudio = null; });
+        await proofAudio.play();
+      } catch { /* the written result stands on its own */ } finally { listenBtn.disabled = false; }
+    });
+    actions.append(listenBtn, wa);
+    out.append(actions);
+    box.replaceChildren(out);
+    out.scrollIntoView({ block: 'start' });
+  }
+
+  function openShield() {
+    closeShield();
+    const ui = voiceLanguage();
+    const words = shieldText(ui);
+    const sheet = el('div', 'proof');
+    sheet.id = 'shield';
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    sheet.setAttribute('aria-labelledby', 'shield-title');
+    setLang(sheet, ui);
+    const box = el('div', 'proof-box');
+    const head = el('div', 'proof-head');
+    const heading = el('h2', 'proof-title', `🛡️ ${words.title}`);
+    heading.id = 'shield-title';
+    const close = el('button', 'proof-close', '✕');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close');
+    close.addEventListener('click', closeShield);
+    head.append(heading, close);
+    const body = el('div', 'proof-body');
+    const input = document.createElement('textarea');
+    input.className = 'shield-input';
+    input.rows = 5;
+    input.maxLength = 1500;
+    input.placeholder = words.placeholder;
+    const row = el('div', 'proof-actions shield-row');
+    const mic = el('button', 'proof-btn', `🎤 ${words.speak}`);
+    mic.type = 'button';
+    const check = el('button', 'proof-btn shield-check', words.check);
+    check.type = 'button';
+    const status = el('p', 'proof-note shield-status');
+    status.setAttribute('aria-live', 'polite');
+    const results = el('div');
+    row.append(mic, check);
+    body.append(input, row, status, results);
+    box.append(head, body);
+    sheet.append(box);
+    sheet.addEventListener('click', (event) => { if (event.target === sheet) closeShield(); });
+    document.body.append(sheet);
+    document.body.classList.add('proof-open');
+    input.focus();
+
+    let rec = null;
+    mic.addEventListener('click', async () => {
+      if (rec) {
+        const recorder = rec; rec = null;
+        mic.textContent = `🎤 ${words.speak}`;
+        status.textContent = words.checking;
+        try {
+          const form = new FormData();
+          form.append('audio', await recorder.stop(), 'forward.wav');
+          form.append('language', voiceLanguage());
+          const heard = await fetch('/transcribe', { method: 'POST', body: form });
+          if (!heard.ok) throw new Error('stt');
+          input.value = (await heard.json()).transcript;
+          status.textContent = '';
+        } catch { status.textContent = words.failed; }
+        return;
+      }
+      if (!window.PakkamRecorder || !window.PakkamRecorder.supported) { status.textContent = TEXT.micBlocked; return; }
+      try {
+        rec = await window.PakkamRecorder.start({});
+        mic.textContent = `⏹ ${words.stop}`;
+      } catch { status.textContent = TEXT.micBlocked; }
+    });
+    check.addEventListener('click', async () => {
+      const message = input.value.trim();
+      if (message.length < 10) { input.focus(); return; }
+      check.disabled = true;
+      status.textContent = words.checking;
+      try {
+        const res = await fetch('/check-forward', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        status.textContent = '';
+        shieldResult(await res.json(), ui, results);
+      } catch { status.textContent = words.failed; } finally { check.disabled = false; }
+    });
+  }
+  document.querySelectorAll('[data-forward]').forEach((b) => b.addEventListener('click', openShield));
 
   function proofButton(data) {
     const words = proofText(data.language);
