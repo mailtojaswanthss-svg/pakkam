@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 from pathlib import Path
 from typing import Any, Literal
 
@@ -80,6 +81,53 @@ def cosine_similarity(v1: list[float], v2: list[float]) -> float:
     return dot / (norm1 * norm2)
 
 
+# What a question asks, so a card only answers its own kind of question: "how much per year?"
+# must not get the income-limit card just because the two read alike. Checked in this order:
+# an income or age limit is an eligibility question even though it says "how much".
+_ASKS: list[tuple[str, re.Pattern[str]]] = [
+    (
+        "who_qualifies",
+        re.compile(
+            r"\b(eligib\w*|who|limit|income|age|qualif\w*|can (i|a|we|my)|can \w+ get|employees?|"
+            r"pensioners?|excluded|yaar\w*|thagudhi|"
+            r"varumanam|vayasu|kidaikuma)\b|யார்|தகுதி|வருமான|வயது|வரம்பு|கிடைக்குமா|"
+            r"पात्र|कौन|आय|उम्र|सीमा|किसे",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "documents",
+        re.compile(
+            r"\b(documents?|papers?|certificates?|proofs?)\b|ஆவண|சான்று|दस्तावेज़|कागज",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "how_to_apply",
+        re.compile(
+            r"\b(apply|application|register|e-?kyc|how (do|to|can) i)\b|விண்ணப்ப|आवेदन",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "amount",
+        re.compile(
+            r"\b(how much|amount|money|pension|evlo|evvalavu|panam|thogai)\b|எவ்வளவு|தொகை|"
+            r"कितना|कितनी|कितने|राशि|पैसा",
+            re.IGNORECASE,
+        ),
+    ),
+]
+
+
+def asked_field(question: str) -> str | None:
+    """The kind of fact a question asks for, or None when it is not clear."""
+    for field, pattern in _ASKS:
+        if pattern.search(question):
+            return field
+    return None
+
+
 def scheme_matches(scheme: str, text: str) -> bool:
     t_lower = text.lower()
     if scheme.lower() in t_lower:
@@ -133,9 +181,13 @@ class FactCardMatcher:
         # A card answers in its own words and language: only a card in the question's
         # language may answer (Hindi and Tanglish questions go to the documents instead).
         language = detect_language(question)
+        asked = asked_field(question)
         for card, example_embs in self._card_embeddings:
             # Scheme must be identified in question text
             if card.language != language or not scheme_matches(card.scheme, question):
+                continue
+            # A card answers only its own kind of question (amount, eligibility, ...).
+            if asked is not None and card.field != asked:
                 continue
 
             for emb in example_embs:
