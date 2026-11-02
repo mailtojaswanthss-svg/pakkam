@@ -153,6 +153,10 @@ class CachedAnswerer:
     def retriever(self) -> object:
         return getattr(self._service, "retriever", None)
 
+    def checklist(self, scheme: str, language: str) -> object:
+        checklist = getattr(self._service, "checklist", None)
+        return checklist(scheme, language) if checklist is not None else []
+
     def sources(self, question: str, follow_up: FollowUp | None = None) -> object:
         sources = getattr(self._service, "sources", None)
         if sources is None:

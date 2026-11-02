@@ -400,5 +400,74 @@
     "author": "AI draft (1 Nov 2026), copied from the cited page image; check against the PDF before signing off",
     "verified_by": "Jaswanth S S",
     "verified_on": "2026-11-01"
+  },
+  {
+    "card_id": "kmut_apply_en",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "how_to_apply",
+    "language": "en",
+    "question_examples": [
+      "How do I apply for Magalir Urimai Thogai?",
+      "Where to apply for Kalaignar Magalir Urimai Thittam?",
+      "Magalir Urimai application process"
+    ],
+    "answer_text": "Apply only at the registration camp held at the ration shop where your family card is registered. A woman aged 21 or above from an eligible family can apply, and only one person per family card.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 9,
+    "document_date": "2023-07-10",
+    "author": "AI draft (2 Nov 2026), copied from the cited page image of G.O. 15; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "kmut_apply_ta",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "how_to_apply",
+    "language": "ta",
+    "question_examples": [
+      "மகளிர் உரிமைத் தொகைக்கு எப்படி விண்ணப்பிப்பது?",
+      "மகளிர் உரிமைத் திட்டத்துக்கு எங்கே விண்ணப்பிக்க வேண்டும்?"
+    ],
+    "answer_text": "உங்கள் குடும்ப அட்டை உள்ள நியாயவிலைக் கடை அமைந்துள்ள விண்ணப்பப் பதிவு முகாமில் மட்டுமே விண்ணப்பிக்க வேண்டும். தகுதியான குடும்பத்தில் 21 வயது நிரம்பிய பெண் ஒருவர் விண்ணப்பிக்கலாம்; ஒரு குடும்ப அட்டைக்கு ஒரு பயனாளி மட்டுமே.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 9,
+    "document_date": "2023-07-10",
+    "author": "AI draft (2 Nov 2026), copied from the cited page image of G.O. 15; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "kmut_docs_en",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "documents",
+    "language": "en",
+    "question_examples": [
+      "What documents are needed for Magalir Urimai Thogai?",
+      "Do I need an income certificate for Magalir Urimai?"
+    ],
+    "answer_text": "For the economic conditions, you do not need to get a separate income certificate or land documents and attach them to the application.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 10,
+    "document_date": "2023-07-10",
+    "author": "AI draft (2 Nov 2026), copied from the cited page image of G.O. 15; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
+  },
+  {
+    "card_id": "kmut_docs_ta",
+    "scheme": "Kalaignar Magalir Urimai Thittam",
+    "field": "documents",
+    "language": "ta",
+    "question_examples": [
+      "மகளிர் உரிமைத் தொகைக்கு என்ன ஆவணங்கள் தேவை?",
+      "மகளிர் உரிமைத் தொகைக்கு வருமானச் சான்று வேண்டுமா?"
+    ],
+    "answer_text": "பொருளாதாரத் தகுதிகளுக்காகத் தனியாக வருமானச் சான்று அல்லது நில ஆவணங்களைப் பெற்று விண்ணப்பத்துடன் இணைக்கத் தேவையில்லை.",
+    "source_document": "kmut-go15-2023-ta",
+    "source_page": 10,
+    "document_date": "2023-07-10",
+    "author": "AI draft (2 Nov 2026), copied from the cited page image of G.O. 15; check against the PDF before signing off",
+    "verified_by": null,
+    "verified_on": null
   }
 ]

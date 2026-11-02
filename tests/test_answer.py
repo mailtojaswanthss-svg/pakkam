@@ -485,3 +485,37 @@ def test_what_can_i_get_lists_signed_amounts_with_a_yearly_total(corpus: list[Ch
     assert fact.scheme == "PM-KISAN"
     assert fact.amount == "Rs.6,000 a year." and fact.yearly_amount == 6000
     assert fact.who_citation is not None and fact.who_citation.checked_by == "Tester"
+
+
+def test_visit_checklist_uses_signed_documents_and_apply_cards(corpus: list[Chunk]) -> None:
+    from schemebot.generate.fact_cards import FactCard
+
+    def card(cid: str, field: str, text: str, language: str = "en") -> FactCard:
+        return FactCard(
+            card_id=cid,
+            scheme="PM-KISAN",
+            field=field,  # type: ignore[arg-type]
+            language=language,
+            question_examples=["x"],
+            answer_text=text,
+            source_document="pmkisan-ekyc-note-2023-en",
+            source_page=1,
+            verified_by="Tester",
+            verified_on="2026-11-01",
+        )
+
+    class Cards:
+        cards = [
+            card("apply", "how_to_apply", "Do e-KYC at a CSC."),
+            card("docs", "documents", "Carry Aadhaar."),
+            card("amount", "amount", "Rs.6,000 a year."),
+            card("docs_ta", "documents", "ஆதார் எடுத்துச் செல்லுங்கள்.", "ta"),
+        ]
+
+    answerer = _answerer(corpus, FakeLlm(ENGLISH), verifier=None, fact_cards=Cards())
+
+    english = answerer.checklist("PM-KISAN", "en")
+    assert [text for text, _ in english] == ["Carry Aadhaar.", "Do e-KYC at a CSC."]
+    assert english[0][1].checked_by == "Tester"
+    assert [text for text, _ in answerer.checklist("PM-KISAN", "ta")] == ["ஆதார் எடுத்துச் செல்லுங்கள்."]
+    assert answerer.checklist("Atal Pension Yojana", "en") == []

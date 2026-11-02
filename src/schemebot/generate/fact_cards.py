@@ -89,19 +89,19 @@ def cosine_similarity(v1: list[float], v2: list[float]) -> float:
 # an income or age limit is an eligibility question even though it says "how much".
 _ASKS: list[tuple[str, re.Pattern[str]]] = [
     (
+        "documents",
+        re.compile(
+            r"\b(documents?|papers?|certificates?|proofs?)\b|ஆவண|சான்று|दस्तावेज़|कागज",
+            re.IGNORECASE,
+        ),
+    ),
+    (
         "who_qualifies",
         re.compile(
             r"\b(eligib\w*|who|limit|income|age|qualif\w*|can (i|a|we|my)|can \w+ get|employees?|"
             r"pensioners?|excluded|yaar\w*|thagudhi|"
             r"varumanam|vayasu|kidaikuma)\b|யார்|தகுதி|வருமான|வயது|வரம்பு|கிடைக்குமா|"
             r"पात्र|कौन|आय|उम्र|सीमा|किसे",
-            re.IGNORECASE,
-        ),
-    ),
-    (
-        "documents",
-        re.compile(
-            r"\b(documents?|papers?|certificates?|proofs?)\b|ஆவண|சான்று|दस्तावेज़|कागज",
             re.IGNORECASE,
         ),
     ),

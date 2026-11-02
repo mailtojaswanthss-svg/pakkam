@@ -669,3 +669,19 @@ body.easy .sentences, body.easy .refusal-text, body.easy .facts-line { font-size
 body.easy .listen-btn, body.easy .proof-open-btn, body.easy .follow-up, body.easy .voice-action { padding: 10px 16px; font-size: 1.05rem; }
 body.easy #q { font-size: 1.15rem; }
 body.easy .icon-btn, body.easy .send { transform: scale(1.15); }
+
+/* Visit checklist and appeal helper */
+.check-list { margin: 8px 0 0; padding: 0; list-style: none; }
+.check-item { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--border); font-size: 1.05rem; line-height: 1.5; }
+.check-item input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--stamp); }
+.check-item input:checked + label { color: var(--ink-2); text-decoration: line-through; }
+.appeal-label { display: grid; gap: 4px; font-weight: 600; }
+.appeal-rule { padding: 10px 12px; background: var(--canvas); border-left: 4px solid var(--stamp); border-radius: 8px; }
+.appeal-rule p { margin: 0 0 6px; }
+.appeal-note { font-family: inherit; white-space: pre-wrap; }
+@media print {
+  body.proof-open > *:not(.proof) { display: none !important; }
+  .proof { position: static; background: none; padding: 0; }
+  .proof-box { box-shadow: none; max-height: none; }
+  .proof-actions, .proof-close, .appeal-form { display: none !important; }
+}

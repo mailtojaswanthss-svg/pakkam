@@ -29,6 +29,8 @@ from schemebot.api.schemas import (
     AskRequest,
     AskResponse,
     AskSourcesResponse,
+    ChecklistItem,
+    ChecklistResponse,
     FallbackPassage,
     FeedbackRequest,
     FeedbackResponse,
@@ -609,6 +611,22 @@ def create_app(
             if opus is not None:
                 return Response(content=opus, media_type="audio/ogg", headers=headers)
         return Response(content=audio, media_type="audio/wav", headers=headers)
+
+    @app.get("/checklist", dependencies=[Depends(limit_sources)])
+    def checklist(scheme: str, lang: str, state: StateDep) -> ChecklistResponse:
+        """What to carry and how to apply for one scheme: signed fact cards only, no model."""
+        get = getattr(state.service, "checklist", None)
+        items = get(scheme[:120], lang[:10]) if get is not None else []
+        from schemebot.api.schemas import citation_out
+
+        return ChecklistResponse(
+            scheme=scheme,
+            items=[
+                ChecklistItem(text=text, citation=out)
+                for text, citation in items
+                if (out := citation_out(citation, state.titles, state.doc_dates)) is not None
+            ],
+        )
 
     @app.post("/officer-request", dependencies=[Depends(limit_feedback)])
     def officer_request(body: OfficerRequest) -> OfficerRequestResponse:
