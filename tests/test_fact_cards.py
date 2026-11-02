@@ -18,6 +18,8 @@ class MockEncoder:
             "How much under KMUT?": [0.95, 0.05, 0.0],
             "Unrelated query about KMUT": [0.1, 0.9, 0.0],
             "Random text": [0.0, 0.0, 1.0],
+            "KMUT amount evlo kidaikum?": [0.97, 0.03, 0.0],
+            "KMUT தொகை எவ்வளவு?": [0.97, 0.03, 0.0],
         }
 
     def encode(self, texts, *, is_query: bool):
@@ -121,7 +123,9 @@ def test_a_card_only_answers_in_its_own_language(sample_cards: list[FactCard]) -
     matcher = FactCardMatcher([sample_cards[0]], encoder=MockEncoder(), threshold=0.85)
 
     assert matcher.match("KMUT amount?")[0] is not None
-    assert matcher.match("KMUT amount evlo kidaikum?")[0] is None  # Tanglish: from the documents
+    # Tanglish reads English letters, so the English card answers it; Tamil script does not.
+    assert matcher.match("KMUT amount evlo kidaikum?")[0] is not None
+    assert matcher.match("KMUT தொகை எவ்வளவு?")[0] is None
 
 
 def test_every_card_example_asks_for_that_cards_kind_of_fact() -> None:

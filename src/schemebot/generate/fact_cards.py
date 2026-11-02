@@ -182,12 +182,16 @@ class FactCardMatcher:
         best_score = 0.0
 
         # A card answers in its own words and language: only a card in the question's
-        # language may answer (Hindi and Tanglish questions go to the documents instead).
+        # language may answer, or an English card for Tanglish (Hindi goes to the documents).
         language = detect_language(question)
         asked = asked_field(question)
         for card, example_embs in self._card_embeddings:
             # Scheme must be identified in question text
-            if card.language != language or not scheme_matches(card.scheme, question):
+            # Tanglish is read in English letters: the English card answers it.
+            readable = card.language == language or (
+                language == "ta-Latn" and card.language == "en"
+            )
+            if not readable or not scheme_matches(card.scheme, question):
                 continue
             # A card answers only its own kind of question (amount, eligibility, ...).
             if asked is not None and card.field != asked:
