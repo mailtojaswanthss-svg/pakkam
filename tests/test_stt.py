@@ -179,3 +179,56 @@ def test_tanglish_is_sent_as_tamil() -> None:
 def test_no_key_means_no_transcriber() -> None:
     assert build_transcriber(Settings(_env_file=None, gnani_api_key=None)) is None
     assert build_transcriber(Settings(_env_file=None, gnani_api_key=SecretStr("k"))) is not None
+
+
+def _form(request: httpx.Request) -> str:
+    return request.content.decode("utf-8", "replace")
+
+
+def test_prisma_v3_sends_model_hints_and_scheme_names() -> None:
+    seen: list[httpx.Request] = []
+
+    def reply(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "success": True,
+                "transcript": "magalir urimai evlo",
+                "detected_language_code": "ta-IN",
+            },
+        )
+
+    stt = GnaniStt(
+        "k",
+        URL,
+        transport=httpx.MockTransport(reply),
+        model="prisma-v3.0",
+        keyterms=["Magalir Urimai"],
+    )
+    assert stt.transcribe(make_wav(1), "q.wav", "ta-IN") == "magalir urimai evlo"
+    body = _form(seen[0])
+    assert "prisma-v3.0" in body and "ta-IN,en-IN" in body and "Magalir Urimai" in body
+    assert stt.last_detected_language == "ta-IN"
+
+
+def test_prisma_v3_refusal_falls_back_to_v25() -> None:
+    seen: list[httpx.Request] = []
+
+    def reply(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        if "prisma-v3.0" in _form(request):
+            return httpx.Response(400, json={"success": False, "error": "INVALID_CONTEXT"})
+        return httpx.Response(200, json={"success": True, "transcript": "PM Kisan"})
+
+    stt = GnaniStt("k", URL, transport=httpx.MockTransport(reply), model="prisma-v3.0")
+    assert stt.transcribe(make_wav(1), "q.wav", "en-IN") == "PM Kisan"
+    assert len(seen) == 2 and "prisma-v3.0" not in _form(seen[1])
+
+
+def test_scheme_keyterms_come_from_the_alias_file() -> None:
+    from schemebot.voice.stt import scheme_keyterms
+
+    terms = scheme_keyterms(Settings())
+    assert "PM-KISAN" in terms and "Pudhumai Penn Scheme" in terms
+    assert len(terms) <= 200

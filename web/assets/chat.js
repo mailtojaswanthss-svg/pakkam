@@ -623,6 +623,17 @@
   }
   document.querySelectorAll('[data-forward]').forEach((b) => b.addEventListener('click', openShield));
 
+  // Phone-call mode: every recording is turned into phone-line audio before it is sent.
+  const phoneToggle = document.getElementById('phone-mode');
+  if (phoneToggle && window.PakkamRecorder) {
+    phoneToggle.addEventListener('click', () => {
+      const on = phoneToggle.getAttribute('aria-pressed') !== 'true';
+      window.PakkamRecorder.phoneMode = on;
+      phoneToggle.setAttribute('aria-pressed', String(on));
+      document.body.classList.toggle('phone-mode-on', on);
+    });
+  }
+
   function proofButton(data) {
     const words = proofText(data.language);
     const button = el('button', 'proof-open-btn', `📄 ${words.show}`);
@@ -918,12 +929,47 @@
     playing = null;
   }
 
+  // Spoken last, after the answer: where it comes from, so the source is heard, not only seen.
+  const SOURCE_SPOKEN = {
+    en: (c) => `Source: ${c.document}, page ${c.page_start}.`,
+    ta: (c) => `ஆதாரம்: ${c.document}, பக்கம் ${c.page_start}.`,
+    'ta-Latn': (c) => `ஆதாரம்: ${c.document}, பக்கம் ${c.page_start}.`,
+    hi: (c) => `स्रोत: ${c.document}, पेज ${c.page_start}.`,
+  };
+
   function getSentencesToSpeak(data) {
     const first = data.confirmation_text ? [data.confirmation_text] : [];
     if (data.refused || !data.sentences || data.sentences.length === 0) {
       return [...first, data.answer];
     }
-    return [...first, ...data.sentences.map((s) => s.text.trim()).filter(Boolean)];
+    const said = [...first, ...data.sentences.map((s) => s.text.trim()).filter(Boolean)];
+    const cited = data.citations && data.citations.find((c) => data.sentences.some((s) => s.citations.includes(c.number)));
+    if (cited) said.push((SOURCE_SPOKEN[data.language] || SOURCE_SPOKEN.en)(cited));
+    return said;
+  }
+
+  // Said the moment a Talk-mode question is sent, so there is no silence while Pakkam reads
+  // the documents. Fetched once per language when Talk mode opens, then played instantly.
+  const FILLER = {
+    ta: 'ஒரு நிமிடம், அரசாணையில் பார்க்கிறேன்.',
+    'ta-Latn': 'ஒரு நிமிடம், அரசாணையில் பார்க்கிறேன்.',
+    hi: 'एक पल, सरकारी आदेश में देख रहा हूँ।',
+    en: 'One moment, checking the government order.',
+  };
+  const fillerUrls = {};
+  function prefetchFiller(lang) {
+    if (fillerUrls[lang] || !FILLER[lang]) return;
+    fillerUrls[lang] = fetchSentenceAudio(FILLER[lang], lang === 'ta-Latn' ? 'ta' : lang).catch(() => {
+      delete fillerUrls[lang];
+      return null;
+    });
+  }
+  async function playFiller(lang) {
+    prefetchFiller(lang); // a language picked mid-talk is ready from the next question
+    try {
+      const url = await fillerUrls[lang];
+      if (url) await new Audio(url).play();
+    } catch { /* the answer still comes; the filler is only comfort */ }
   }
 
   // Called once when an answer has been read out to the end (not when stopped).
@@ -1461,6 +1507,7 @@
   }
 
   function openTalk() {
+    prefetchFiller(voiceLanguage());
     if (!window.PakkamRecorder || !window.PakkamRecorder.supported) return showFormMsg(TEXT.micBlocked);
     talkOn = true;
     talk.hidden = false;
@@ -1570,6 +1617,7 @@
     if (busy) return;
     stopPlaying();
     setTalk('thinking');
+    playFiller(voiceLanguage());
     const result = await ask(text, { followUp });
     if (!talkOn || !result || !result.data) return setTalk('idle', TEXT.talkFailed);
     const button = result.item && result.item.querySelector('.listen-btn');

@@ -28,6 +28,33 @@
     return out;
   }
 
+  // "Phone-call mode": what a call sounds like by the time it reaches a server. Band-limited
+  // to 8 kHz, squeezed through 8-bit mu-law (the telephone codec) and mixed with line noise
+  // at about 15 dB SNR, then returned at 16 kHz. Shows that Pakkam copes with phone audio.
+  function phoneLine(samples) {
+    const MU = 255;
+    const narrow = new Float32Array(Math.floor(samples.length / 2));
+    for (let i = 0; i < narrow.length; i += 1) narrow[i] = (samples[2 * i] + samples[2 * i + 1]) / 2;
+    let power = 0;
+    for (let i = 0; i < narrow.length; i += 1) power += narrow[i] * narrow[i];
+    const noise = Math.sqrt(power / Math.max(narrow.length, 1)) * 0.18; // about 15 dB below speech
+    for (let i = 0; i < narrow.length; i += 1) {
+      let x = Math.max(-1, Math.min(1, narrow[i] + (Math.random() * 2 - 1) * noise));
+      const sign = x < 0 ? -1 : 1;
+      let y = sign * Math.log1p(MU * Math.abs(x)) / Math.log1p(MU);
+      y = Math.round(y * 127) / 127; // 8-bit
+      x = sign * (Math.pow(1 + MU, Math.abs(y)) - 1) / MU;
+      narrow[i] = x;
+    }
+    const wide = new Float32Array(narrow.length * 2);
+    for (let i = 0; i < narrow.length; i += 1) {
+      const next = i + 1 < narrow.length ? narrow[i + 1] : narrow[i];
+      wide[2 * i] = narrow[i];
+      wide[2 * i + 1] = (narrow[i] + next) / 2;
+    }
+    return wide;
+  }
+
   function encodeWav(samples) {
     const buffer = new ArrayBuffer(44 + samples.length * 2);
     const view = new DataView(buffer);
@@ -99,7 +126,8 @@
         stream.getTracks().forEach((track) => track.stop());
         const rate = context.sampleRate;
         await context.close();
-        return encodeWav(downsample(mergeChunks(chunks), rate));
+        const clean = downsample(mergeChunks(chunks), rate);
+        return encodeWav(window.PakkamRecorder.phoneMode ? phoneLine(clean) : clean);
       },
       cancel() {
         processor.disconnect();
