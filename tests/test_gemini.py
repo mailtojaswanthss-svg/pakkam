@@ -145,6 +145,7 @@ def test_llm_limits_reach_both_clients() -> None:
     options = gemini._client._api_client._http_options
     assert options.timeout == 12_000
     assert options.retry_options.attempts == 2  # the first try plus one retry
+    assert 429 not in options.retry_options.http_status_codes  # quota: fail over, don't wait
     assert isinstance(claude, ClaudeJsonLlm)
     assert claude._client.timeout == 12
     assert claude._client.max_retries == 1
