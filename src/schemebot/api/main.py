@@ -427,6 +427,10 @@ def create_app(
         if body.voice_mode:
             response.confirmation_text = _voice_confirmation(answer)
             response.needs_confirmation = response.confirmation_text is not None
+        if request.headers.get("x-pakkam-debug") == "drafts":
+            # For benchmarks only: the model's drafts the checks dropped, to see why. The page
+            # never sends this header, so citizens never see unchecked text.
+            response.rejected_drafts = [r.sentence.text for r in answer.rejected]
         return response
 
     @app.post("/ask/sources", dependencies=[Depends(limit_sources)])
