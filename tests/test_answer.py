@@ -448,3 +448,40 @@ def test_tanglish_question_answered_in_english_is_kept_after_one_retry(
 
     assert len(llm.user_messages) == 2  # asked once more for Tanglish
     assert not answer.refused  # English beats a refusal
+
+
+def test_what_can_i_get_lists_signed_amounts_with_a_yearly_total(corpus: list[Chunk]) -> None:
+    from schemebot.generate.fact_cards import FactCard
+
+    def card(cid: str, field: str, text: str, yearly: int | None = None) -> FactCard:
+        return FactCard(
+            card_id=cid,
+            scheme="PM-KISAN",
+            field=field,  # type: ignore[arg-type]
+            language="en",
+            question_examples=["x"],
+            answer_text=text,
+            source_document="pmkisan-ekyc-note-2023-en",
+            source_page=1,
+            verified_by="Tester",
+            verified_on="2026-11-01",
+            yearly_amount=yearly,
+        )
+
+    class Cards:
+        cards = [
+            card("a", "amount", "Rs.6,000 a year.", 6000),
+            card("w", "who_qualifies", "Farmer families."),
+        ]
+
+        def match(self, question: str) -> tuple[None, float]:
+            return None, 0.0
+
+    answer = _answerer(corpus, FakeLlm(ENGLISH), verifier=None, fact_cards=Cards()).answer(
+        "Which schemes are there for farmers?"
+    )
+
+    [fact] = answer.scheme_facts
+    assert fact.scheme == "PM-KISAN"
+    assert fact.amount == "Rs.6,000 a year." and fact.yearly_amount == 6000
+    assert fact.who_citation is not None and fact.who_citation.checked_by == "Tester"

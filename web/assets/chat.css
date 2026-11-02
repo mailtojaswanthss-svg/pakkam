@@ -648,3 +648,12 @@ body.proof-open { overflow: hidden; }
 }
 
 .phone-mode[aria-pressed="true"] { color: var(--on-stamp); background: var(--stamp); border-color: var(--stamp); }
+
+/* What can I get: signed facts per scheme */
+.facts-total { margin: 4px 0 10px; padding: 10px 12px; color: #0f5a2c; background: #e5f5ea; border-radius: 8px; font-weight: 700; }
+.facts-list { display: grid; gap: 10px; margin-bottom: 10px; }
+.facts-item { padding: 10px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; }
+.facts-scheme { margin: 0 0 4px; font-weight: 700; }
+.facts-line { margin: 2px 0; line-height: 1.5; }
+.facts-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+@media (prefers-color-scheme: dark) { .facts-total { color: #b7f0c8; background: #123d22; } }
