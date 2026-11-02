@@ -11,6 +11,7 @@ import logging
 import re
 from functools import lru_cache
 from pathlib import Path
+from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,8 @@ def render_page(pdf_path: Path, page: int, mark: str = "") -> bytes:
         raise PageUnavailable("PDF rendering needs pymupdf (uv sync --extra ingest)") from error
     if not pdf_path.is_file():
         raise PageUnavailable(f"{pdf_path.name} is not in data/raw/")
-    with pymupdf.open(pdf_path) as doc:
+    # cast: pymupdf ships no types, and CI may type-check without it installed.
+    with cast(Any, pymupdf).open(pdf_path) as doc:
         if not 1 <= page <= doc.page_count:
             raise PageUnavailable(f"page {page} is outside 1-{doc.page_count}")
         pdf_page = doc[page - 1]

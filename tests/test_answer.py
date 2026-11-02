@@ -434,6 +434,8 @@ def test_fact_card_cites_the_pdf_page_not_the_website(corpus: list[Chunk]) -> No
 
     assert answer.path == "fact_card"
     assert answer.citations[0].source_url == pdf
+    assert answer.citations[0].checked_by == "Tester"  # shown as "checked by" on the proof card
+    assert answer.citations[0].checked_on == "2026-11-01"
     assert answer.citations[0].page_start == 1
 
 
