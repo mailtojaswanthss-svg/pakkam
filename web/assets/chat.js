@@ -249,7 +249,8 @@
   sheetScrim.addEventListener('click', () => closeSources(true));
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
-    if (app.classList.contains('menu-open')) setMenu(false);
+    if (document.getElementById('proof')) closeProof();
+    else if (app.classList.contains('menu-open')) setMenu(false);
     else if (open) closeSources(true);
   });
 
@@ -263,6 +264,170 @@
   const uiText = (lang) => UI[lang] || UI.en;
   const SECTION_ORDER = ['amount', 'eligibility', 'documents', 'apply', 'other'];
   const SECTION_ICON = { amount: '₹', eligibility: '👤', documents: '📄', apply: '📝' };
+
+  /* ---------- proof card ("show the officer") ---------- */
+  // The government's own page, the cited lines marked, who checked the fact and the next
+  // steps from the answer: something to hold up at the counter, not a paragraph a model wrote.
+  const PROOF = {
+    en: { show: 'Show proof', title: 'Official proof', page: 'page', dated: 'dated',
+      checked: (who, on) => `✔ Checked against the printed page by ${who}${on ? ` on ${on}` : ''}`,
+      fromDoc: 'Quoted from the official document. The highlighted lines are what the answer is based on.',
+      next: 'Your next steps', read: 'Read aloud', share: 'Share', open: 'Open official PDF', close: 'Close',
+      noImage: 'The page image is not available here. Open the official PDF instead.',
+      says: (doc, page) => `${doc}, page ${page} says:` },
+    ta: { show: 'ஆதாரம் காட்டு', title: 'அதிகாரப்பூர்வ ஆதாரம்', page: 'பக்கம்', dated: 'நாள்',
+      checked: (who, on) => `✔ அச்சிட்ட பக்கத்துடன் சரிபார்த்தவர்: ${who}${on ? `, ${on}` : ''}`,
+      fromDoc: 'அதிகாரப்பூர்வ ஆவணத்திலிருந்து. மஞ்சள் வரிகளின் அடிப்படையில் பதில் தரப்பட்டது.',
+      next: 'அடுத்து செய்ய வேண்டியவை', read: 'படித்துக் காட்டு', share: 'பகிர்', open: 'அதிகாரப்பூர்வ PDF', close: 'மூடு',
+      noImage: 'பக்கப் படம் இங்கு கிடைக்கவில்லை. அதிகாரப்பூர்வ PDF-ஐத் திறக்கவும்.',
+      says: (doc, page) => `${doc}, பக்கம் ${page} சொல்வது:` },
+    'ta-Latn': { show: 'Proof kaattu', title: 'Official proof', page: 'page', dated: 'date',
+      checked: (who, on) => `✔ Print page-oda check pannavar: ${who}${on ? `, ${on}` : ''}`,
+      fromDoc: 'Official document-la irundhu. Highlight panna lines-a vechu dhaan badhil.',
+      next: 'Adutha step', read: 'Padichu kaattu', share: 'Share', open: 'Official PDF', close: 'Close',
+      noImage: 'Page image inga illa. Official PDF-a open pannunga.',
+      says: (doc, page) => `${doc}, page ${page} solradhu:` },
+    hi: { show: 'प्रमाण दिखाएँ', title: 'आधिकारिक प्रमाण', page: 'पेज', dated: 'दिनांक',
+      checked: (who, on) => `✔ छपे पेज से जाँचा: ${who}${on ? `, ${on}` : ''}`,
+      fromDoc: 'आधिकारिक दस्तावेज़ से। हाइलाइट की गई पंक्तियों पर उत्तर आधारित है।',
+      next: 'आगे क्या करें', read: 'सुनाएँ', share: 'साझा करें', open: 'आधिकारिक PDF', close: 'बंद करें',
+      noImage: 'पेज की छवि यहाँ उपलब्ध नहीं है। आधिकारिक PDF खोलें।',
+      says: (doc, page) => `${doc}, पेज ${page} में लिखा है:` },
+  };
+  const proofText = (lang) => PROOF[lang] || PROOF.en;
+  let proofAudio = null;
+
+  function closeProof() {
+    const sheet = document.getElementById('proof');
+    if (sheet) sheet.remove();
+    if (proofAudio) { proofAudio.pause(); proofAudio = null; }
+    document.body.classList.remove('proof-open');
+  }
+
+  function openProof(data, number, opener) {
+    closeProof();
+    const words = proofText(data.language);
+    const cited = new Set(data.sentences.flatMap((s) => s.citations));
+    const citations = data.citations.filter((c) => cited.has(c.number));
+    if (!citations.length) return;
+    let current = citations.find((c) => c.number === number) || citations[0];
+
+    const sheet = el('div', 'proof');
+    sheet.id = 'proof';
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    setLang(sheet, data.language);
+    const box = el('div', 'proof-box');
+    const head = el('div', 'proof-head');
+    const heading = el('h2', 'proof-title', words.title);
+    heading.id = 'proof-title';
+    sheet.setAttribute('aria-labelledby', 'proof-title');
+    const close = el('button', 'proof-close', '✕');
+    close.type = 'button';
+    close.setAttribute('aria-label', words.close);
+    close.addEventListener('click', () => { closeProof(); if (opener) opener.focus(); });
+    head.append(heading, close);
+
+    const body = el('div', 'proof-body');
+    const tabs = el('div', 'proof-tabs');
+    const render = () => {
+      body.textContent = '';
+      const c = current;
+      const doc = el('p', 'proof-doc', c.document);
+      const meta = el('p', 'proof-meta', `${words.page} ${c.page_start}${c.document_date ? ` · ${words.dated} ${c.document_date}` : ''}`);
+      body.append(doc, meta);
+      body.append(el('p', c.checked_by ? 'proof-checked' : 'proof-note',
+        c.checked_by ? words.checked(c.checked_by, c.checked_on) : words.fromDoc));
+      const figure = el('figure', 'proof-page');
+      const img = document.createElement('img');
+      img.alt = `${c.document}, ${words.page} ${c.page_start}`;
+      img.loading = 'eager';
+      const mark = (c.excerpt || '').slice(0, 600);
+      img.src = `/page?doc=${encodeURIComponent(c.doc_id)}&p=${c.page_start}&mark=${encodeURIComponent(mark)}`;
+      img.addEventListener('error', () => { figure.replaceChildren(el('p', 'proof-note', words.noImage)); });
+      // Tap for the full-size page, readable across a counter.
+      const zoom = el('a', 'proof-zoom');
+      zoom.href = img.src;
+      zoom.target = '_blank';
+      zoom.rel = 'noopener';
+      zoom.append(img);
+      figure.append(zoom);
+      body.append(figure);
+      const steps = data.sentences.filter((s) => s.section === 'documents' || s.section === 'apply');
+      if (steps.length) {
+        body.append(el('h3', 'proof-next', words.next));
+        const list = el('ol', 'proof-steps');
+        steps.forEach((s) => list.append(el('li', null, s.text)));
+        body.append(list);
+      }
+      tabs.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.n) === c.number)));
+    };
+    if (citations.length > 1) {
+      citations.forEach((c) => {
+        const tab = el('button', 'proof-tab', pageShort(c));
+        tab.type = 'button';
+        tab.dataset.n = String(c.number);
+        tab.addEventListener('click', () => { current = c; render(); });
+        tabs.append(tab);
+      });
+    }
+
+    const actions = el('div', 'proof-actions');
+    const read = el('button', 'proof-btn', `🔊 ${words.read}`);
+    read.type = 'button';
+    read.addEventListener('click', async () => {
+      if (proofAudio) { proofAudio.pause(); proofAudio = null; return; }
+      const first = data.sentences.find((s) => s.citations.includes(current.number)) || data.sentences[0];
+      const text = `${words.says(current.document, current.page_start)} ${first ? first.text : ''}`;
+      try {
+        read.disabled = true;
+        const url = await fetchSentenceAudio(text, data.language);
+        proofAudio = new Audio(url);
+        proofAudio.addEventListener('ended', () => { proofAudio = null; });
+        await proofAudio.play();
+      } catch { /* the page itself is the proof; audio is a bonus */ } finally { read.disabled = false; }
+    });
+    actions.append(read);
+    const pdf = safeUrl(current.source_url);
+    if (navigator.share) {
+      const share = el('button', 'proof-btn', `↗ ${words.share}`);
+      share.type = 'button';
+      share.addEventListener('click', () => {
+        const first = data.sentences.find((s) => s.citations.includes(current.number)) || data.sentences[0];
+        const link = safeUrl(current.source_url);
+        navigator.share({
+          title: words.title,
+          text: `${first ? first.text : ''}\n${words.says(current.document, current.page_start)}${current.checked_by ? `\n${words.checked(current.checked_by, current.checked_on)}` : ''}`,
+          ...(link ? { url: `${link}#page=${current.page_start}` } : {}),
+        }).catch(() => {});
+      });
+      actions.append(share);
+    }
+    if (pdf) {
+      const open = el('a', 'proof-btn', words.open);
+      open.href = `${pdf}#page=${current.page_start}`;
+      open.target = '_blank';
+      open.rel = 'noopener noreferrer';
+      actions.append(open);
+    }
+
+    box.append(head, tabs, body, actions);
+    sheet.append(box);
+    sheet.addEventListener('click', (event) => { if (event.target === sheet) closeProof(); });
+    document.body.append(sheet);
+    document.body.classList.add('proof-open');
+    render();
+    close.focus();
+  }
+
+  function proofButton(data) {
+    const words = proofText(data.language);
+    const button = el('button', 'proof-open-btn', `📄 ${words.show}`);
+    button.type = 'button';
+    setLang(button, data.language);
+    button.addEventListener('click', () => openProof(data, null, button));
+    return button;
+  }
 
   // Buttons that ask the next natural question about the same scheme. They send the scheme
   // along (follow_up), so "How do I apply?" is read as "how do I apply for <scheme>?".
@@ -479,6 +644,7 @@
 
     const meta = el('div', 'a-meta');
     if (!clarify && !busy) meta.append(listenButton(data));
+    if (!refused && !clarify && data.citations && data.citations.length) meta.append(proofButton(data));
     if (data.latency_ms && !refused && !clarify) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
     if (!refused && !clarify) meta.append(feedbackRow(data));
     body.append(meta);

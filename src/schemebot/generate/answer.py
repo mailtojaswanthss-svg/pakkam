@@ -85,6 +85,10 @@ class Citation:
     """Language of the passage, so the UI can tag and render it correctly."""
     ocr_corrected: bool = False
     """The passage holds a misreading fixed by hand from the printed page."""
+    checked_by: str | None = None
+    """For a signed fact card: the person who checked it against the printed page."""
+    checked_on: str | None = None
+    """...and the date they did (YYYY-MM-DD)."""
 
 
 @dataclass(frozen=True)
@@ -425,6 +429,8 @@ class Answerer:
                     text=card.answer_text,
                     language=card.language,
                     ocr_corrected=False,
+                    checked_by=card.verified_by,
+                    checked_on=card.verified_on,
                 )
                 sentence = AnswerSentence(
                     text=card.answer_text,
