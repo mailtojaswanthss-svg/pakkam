@@ -406,7 +406,9 @@ class Answerer:
 
         if self._fact_cards is not None:
             card_started = time.perf_counter()
-            card, card_score = self._fact_cards.match(cleaned_q)
+            # The question as typed: cleaning rewrites words ("Urimai" -> "உரிமை"), which
+            # hides the scheme name the card matcher looks for.
+            card, card_score = self._fact_cards.match(question)
             card_ms = (time.perf_counter() - card_started) * 1000
             timings["fact_card_match"] = card_ms
             if card is not None:

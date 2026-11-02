@@ -122,3 +122,37 @@ def test_a_card_only_answers_in_its_own_language(sample_cards: list[FactCard]) -
 
     assert matcher.match("KMUT amount?")[0] is not None
     assert matcher.match("KMUT amount evlo kidaikum?")[0] is None  # Tanglish: from the documents
+
+
+def test_every_card_example_asks_for_that_cards_kind_of_fact() -> None:
+    """Otherwise the kind check would stop the card from ever answering its own example."""
+    import json
+
+    from schemebot.generate.fact_cards import asked_field
+
+    cards = json.loads(
+        (Path(__file__).resolve().parents[1] / "data" / "fact_cards.json").read_text()
+    )
+    wrong = [
+        (c["card_id"], q)
+        for c in cards
+        for q in c["question_examples"]
+        if asked_field(q) not in (None, c["field"])
+    ]
+    assert wrong == []
+
+
+def test_an_amount_question_never_gets_the_income_limit_card() -> None:
+    # Live benchmark q016: "how much per year?" was answered with the income-limit card.
+    from schemebot.generate.fact_cards import asked_field
+
+    assert asked_field("மகளிர் உரிமைத் திட்டத்தில் ஆண்டுக்கு எவ்வளவு தொகை வழங்கப்படும்?") == "amount"
+    assert asked_field("மகளிர் உரிமைத் தொகைக்கு வருமான வரம்பு என்ன?") == "who_qualifies"
+    assert asked_field("What are the ways to complete e-KYC for PM-KISAN?") == "how_to_apply"
+
+
+def test_card_matching_uses_the_question_as_typed(sample_cards: list[FactCard]) -> None:
+    matcher = FactCardMatcher([sample_cards[0]], encoder=MockEncoder(), threshold=0.85)
+    card = sample_cards[0].model_copy(update={"field": "who_qualifies"})
+    matcher = FactCardMatcher([card], encoder=MockEncoder(), threshold=0.85)
+    assert matcher.match("KMUT amount?")[0] is None  # an amount question, an eligibility card
