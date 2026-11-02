@@ -391,3 +391,10 @@ class ForwardClaimOut(BaseModel):
 class ForwardResponse(BaseModel):
     overall: Literal["looks_right", "partly_wrong", "wrong", "not_in_documents", "no_claims"]
     claims: list[ForwardClaimOut]
+    scam_signs: list[
+        Literal["unofficial_link", "official_link", "otp", "payment", "personal_data", "urgency"]
+    ] = Field(
+        default_factory=list,
+        description="Warning signs found by fixed rules: a non-government link, a request for "
+        "an OTP, money or ID numbers, or 'today only' pressure.",
+    )

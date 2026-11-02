@@ -517,6 +517,7 @@ def create_app(
                 )
                 for c in result.claims
             ],
+            scam_signs=result.scam_signs,
         )
 
     @app.post("/feedback", dependencies=[Depends(limit_feedback)])

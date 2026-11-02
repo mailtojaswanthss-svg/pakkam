@@ -89,6 +89,10 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
             <span><strong>Talk to Pakkam</strong><small>Ask by voice and hear the answer. No typing or reading needed.</small></span>
           </button>
+          <button type="button" class="talk-start forward-start" data-forward>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+            <span><strong>Is this WhatsApp forward true?</strong><small>Paste or read out a forward. Pakkam checks each claim against the government order.</small></span>
+          </button>
           <ul class="suggestions">
             <li><button type="button" class="suggest" data-q><span class="suggest-topic">Not sure which scheme?</span><span class="suggest-q" lang="en">Which schemes can I get?</span></button></li>
             <li><button type="button" class="suggest" data-q><span class="suggest-topic">Women's entitlement</span><span class="suggest-q" lang="ta">மகளிர் உரிமைத் தொகை பெற யார் தகுதியானவர்?</span></button></li>
@@ -121,6 +125,7 @@
       </form>
       <div class="voice-row">
         <button type="button" class="voice-action talk-open" data-talk>Talk mode</button>
+        <button type="button" class="voice-action talk-open" data-forward>Check a forward</button>
         <details class="voice-lang-pick" id="voice-lang-pick">
           <summary title="The language you will speak in, for the mic and Talk mode. Typed questions are detected automatically.">Voice: <span id="voice-lang-now" lang="ta">தமிழ்</span></summary>
         <fieldset class="voice-langs" id="voice-lang">
