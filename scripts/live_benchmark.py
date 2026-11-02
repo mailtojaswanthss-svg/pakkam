@@ -50,7 +50,10 @@ def pick(questions: list[dict[str, Any]], per_group: int | None) -> list[dict[st
 def ask(url: str, question: str, timeout: float) -> tuple[dict[str, Any] | None, float, str]:
     body = json.dumps({"question": question}).encode()
     request = urllib.request.Request(
-        f"{url.rstrip('/')}/ask", body, {"Content-Type": "application/json"}
+        f"{url.rstrip('/')}/ask",
+        body,
+        # The debug header returns drafts the checks dropped, to explain each miss.
+        {"Content-Type": "application/json", "X-Pakkam-Debug": "drafts"},
     )
     started = time.perf_counter()
     try:
@@ -86,7 +89,8 @@ def grade(question: dict[str, Any], data: dict[str, Any] | None, error: str) -> 
     if discovery:
         return {"outcome": "clarified"}
     if not answered:
-        return {"outcome": "missed", "reason": data.get("refusal_reason")}
+        reasons = ",".join(data.get("rejected_reasons") or [])
+        return {"outcome": "missed", "reason": f"{data.get('refusal_reason')} {reasons}".strip()}
     return {"outcome": "answered", "cited_gold_page": gold_hit(question, data)}
 
 
@@ -152,12 +156,25 @@ def main() -> None:
     parser.add_argument("--per-group", type=int, default=None, help="questions per language")
     parser.add_argument("--pause", type=float, default=7.0, help="seconds between questions")
     parser.add_argument("--timeout", type=float, default=90.0)
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="keep earlier results and ask only questions not yet answered (or busy / failed)",
+    )
     args = parser.parse_args()
 
     questions = [json.loads(line) for line in QUESTIONS.read_text(encoding="utf-8").splitlines()]
     chosen = pick(questions, args.per_group)
     rows: list[dict[str, Any]] = []
     raw: dict[str, Any] = {}
+    if args.resume and RAW_OUT.is_file():
+        earlier = json.loads(RAW_OUT.read_text(encoding="utf-8"))
+        rows = [r for r in earlier["rows"] if r["outcome"] not in ("busy", "error")]
+        raw = {r["id"]: earlier["replies"].get(r["id"]) for r in rows}
+        done = {r["id"] for r in rows}
+        chosen = [q for q in chosen if q["id"] not in done]
+        print(f"resuming: {len(done)} kept, {len(chosen)} to ask")
+    failures_in_a_row = 0
     for n, question in enumerate(chosen, start=1):
         data, seconds, error = ask(args.url, question["question"], args.timeout)
         row = {
@@ -171,6 +188,15 @@ def main() -> None:
         rows.append(row)
         raw[question["id"]] = data
         print(f"{n:3}/{len(chosen)} {row['group']:7} {row['outcome']:18} {seconds:5.1f}s")
+        # Saved after every question, so a stop (budget, network) loses nothing.
+        RAW_OUT.write_text(
+            json.dumps({"url": args.url, "rows": rows, "replies": raw}, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        failures_in_a_row = failures_in_a_row + 1 if row["outcome"] in ("busy", "error") else 0
+        if failures_in_a_row >= 4:
+            print("4 busy/failed replies in a row (daily budget?): stopping; rerun with --resume")
+            break
         if n < len(chosen):
             time.sleep(args.pause)
 

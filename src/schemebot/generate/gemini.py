@@ -30,9 +30,12 @@ THINKING_LEVEL: dict[Effort, str] = {
     "max": "HIGH",
 }
 
-# Rate-limited (429), server errors (5xx) and timeouts are retried with backoff (2, 4, 8 ...
-# capped at 60 s) before the call counts as unavailable. The number of retries and the time
-# per attempt come from settings (llm_retries, llm_timeout_seconds).
+# Server errors (5xx) and timeouts are retried with backoff (2, 4, 8 ... capped at 60 s)
+# before the call counts as unavailable. A 429 (quota) is NOT retried: the free tier's daily
+# quota does not come back in seconds, and waiting made a forward check overrun Cloudflare's
+# 100 s limit (3 Nov). The backup model answers at once instead. The number of retries and
+# the time per attempt come from settings (llm_retries, llm_timeout_seconds).
+RETRY_STATUS_CODES = [500, 502, 503, 504]
 RETRY_INITIAL_DELAY_S = 2.0
 RETRY_MAX_DELAY_S = 60.0
 
@@ -71,6 +74,7 @@ class GeminiJsonLlm:
                 attempts=retries + 1,
                 initial_delay=RETRY_INITIAL_DELAY_S,
                 max_delay=RETRY_MAX_DELAY_S,
+                http_status_codes=RETRY_STATUS_CODES,
             ),
         )
         # api_key=None lets the SDK use GEMINI_API_KEY or GOOGLE_API_KEY. With none of
