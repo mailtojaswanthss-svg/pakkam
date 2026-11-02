@@ -22,6 +22,7 @@ from fastapi.responses import JSONResponse
 from pydantic import TypeAdapter, ValidationError
 
 from schemebot.api.audit import AuditLog
+from schemebot.api.dashboard import add_officer_request, dashboard_stats
 from schemebot.api.pages import PageUnavailable, render_page
 from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import (
@@ -35,6 +36,8 @@ from schemebot.api.schemas import (
     ForwardRequest,
     ForwardResponse,
     HealthResponse,
+    OfficerRequest,
+    OfficerRequestResponse,
     SourceOut,
     SpeakRequest,
     TranscribeResponse,
@@ -42,6 +45,7 @@ from schemebot.api.schemas import (
 )
 from schemebot.config import PROJECT_ROOT, get_settings
 from schemebot.generate.answer import Answer, FollowUp
+from schemebot.generate.messages import contains_pii
 from schemebot.ingest.models import SourceDoc
 from schemebot.voice.audio import convert_to_wav16k, wav_to_opus
 from schemebot.voice.numbers import phone_numbers_as_digits, spell_amounts
@@ -505,6 +509,12 @@ def create_app(
             ) from error
         for claim in result.claims:
             state.audit.record(request.state.request_id, claim.answer)
+        state.audit.record_forward(
+            request.state.request_id,
+            result.overall,
+            [c.verdict for c in result.claims],
+            list(result.scam_signs),
+        )
         return ForwardResponse(
             overall=result.overall,
             claims=[
@@ -599,6 +609,27 @@ def create_app(
             if opus is not None:
                 return Response(content=opus, media_type="audio/ogg", headers=headers)
         return Response(content=audio, media_type="audio/wav", headers=headers)
+
+    @app.post("/officer-request", dependencies=[Depends(limit_feedback)])
+    def officer_request(body: OfficerRequest) -> OfficerRequestResponse:
+        """A question the documents could not answer, left for an officer to follow up.
+        The person chooses to send it; the contact is stored but never shown publicly."""
+        if contains_pii(body.question):
+            raise HTTPException(
+                status_code=422,
+                detail="Please remove Aadhaar or other ID numbers from the question.",
+            )
+        ticket = add_officer_request(
+            log_dir_for_feedback, body.question, body.scheme, body.language, body.contact
+        )
+        return OfficerRequestResponse(ticket=ticket)
+
+    @app.get("/dashboard/stats", dependencies=[Depends(limit_sources)])
+    def stats() -> dict[str, object]:
+        """Counts for the department dashboard: no question text from the audit log, and no
+        contact details from officer requests."""
+        audit_dir = log_dir or get_settings().log_dir
+        return dashboard_stats(audit_dir / AUDIT_LOG_NAME, log_dir_for_feedback)
 
     @app.get("/page", dependencies=[Depends(limit_pages)])
     def page_image(doc: str, p: int, mark: str = "") -> Response:
