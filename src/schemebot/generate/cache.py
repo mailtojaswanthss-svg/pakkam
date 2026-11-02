@@ -84,6 +84,29 @@ def _digest_files(paths: list[Path], root: Path) -> str:
     return digest.hexdigest()
 
 
+def _answer_format() -> str:
+    from dataclasses import fields
+
+    from schemebot.generate.answer import AnswerSentence
+
+    names = [
+        f"{cls.__name__}:{','.join(f.name for f in fields(cls))}"
+        for cls in (Answer, Citation, AnswerSentence)
+    ]
+    return hashlib.sha256("|".join(names).encode()).hexdigest()[:12]
+
+
+def _complete(answer: object) -> bool:
+    """A saved answer with every field of today's Answer (an older one would crash replace())."""
+    from dataclasses import fields
+
+    if not isinstance(answer, Answer):
+        return False
+    return all(hasattr(answer, f.name) for f in fields(Answer)) and all(
+        hasattr(c, f.name) for c in answer.citations for f in fields(Citation)
+    )
+
+
 def answer_fingerprint(settings: Settings, answer_model: str, verifier_model: str) -> str:
     """Hash of what an answer depends on besides the question. Read once at startup."""
     index = settings.index_dir
@@ -92,6 +115,9 @@ def answer_fingerprint(settings: Settings, answer_model: str, verifier_model: st
     index_files = [p for p in found if p.is_file() and not p.name.startswith(".")]
     corrections = settings.data_dir / CORRECTIONS_NAME
     parts = {
+        # The shape of a saved answer: new fields (e.g. scheme_facts) make old saved answers
+        # unusable, so they must not be reused after an upgrade.
+        "answer_format": _answer_format(),
         "answer_model": answer_model,
         "verifier_model": verifier_model if settings.verify_answers else "off",
         "effort": settings.llm_effort,
@@ -234,7 +260,7 @@ class CachedAnswerer:
         now, wall = self._clock(), self._wall_clock()
         for key, answer, saved_at in data.get("entries", [])[-self._max_entries :]:
             age = wall - saved_at
-            if 0 <= age <= self._ttl_seconds and isinstance(answer, Answer):
+            if 0 <= age <= self._ttl_seconds and _complete(answer):
                 self._entries[key] = _Entry(answer, now - age)
 
 

@@ -255,3 +255,26 @@ def test_an_unreadable_cache_file_is_ignored(tmp_path: Path) -> None:
 
     CachedAnswerer(service, fingerprint="f1", path=path).answer("Who can join APY?")
     assert len(service.calls) == 1
+
+
+def test_answers_saved_in_an_older_format_are_not_reused(tmp_path: Path) -> None:
+    # 2 Nov: answers saved before scheme_facts existed crashed /ask with a 500 on reuse.
+    import pickle
+
+    path = tmp_path / "answer-cache.pkl"
+    CachedAnswerer(CountingService(ANSWER), fingerprint="f1", path=path).answer("Who can join APY?")
+    data = pickle.loads(path.read_bytes())
+    for _, answer, _ in data["entries"]:
+        del answer.__dict__["scheme_facts"]  # what an older file holds
+    path.write_bytes(pickle.dumps(data))
+
+    service = CountingService(ANSWER)
+    again = CachedAnswerer(service, fingerprint="f1", path=path).answer("Who can join APY?")
+    assert len(service.calls) == 1  # answered afresh, no crash
+    assert again.question == "Who can join APY?"
+
+
+def test_answer_format_is_part_of_the_fingerprint() -> None:
+    from schemebot.generate.cache import _answer_format
+
+    assert len(_answer_format()) == 12
