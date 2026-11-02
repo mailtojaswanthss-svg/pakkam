@@ -167,6 +167,10 @@ class AskResponse(BaseModel):
         default_factory=list,
         description="Broad 'what can I get?' questions: each suggested scheme's signed facts.",
     )
+    rejected_drafts: list[str] | None = Field(
+        default=None,
+        description="Only with the X-Pakkam-Debug: drafts header: drafts the checks dropped.",
+    )
     rejected_reasons: list[str] = Field(
         default_factory=list,
         description="Why drafted sentences were dropped (codes only, e.g. 'number_not_in_source'); "

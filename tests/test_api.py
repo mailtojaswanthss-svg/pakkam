@@ -708,3 +708,27 @@ def test_ask_sources_503_when_no_retriever(tmp_path: Path) -> None:
     with TestClient(create_app(lambda: svc, log_dir=tmp_path)) as client:
         res = client.post("/ask/sources", json={"question": "What is APY?"})
         assert res.status_code == 503
+
+
+def test_rejected_drafts_only_with_the_debug_header(tmp_path: Path) -> None:
+    from dataclasses import replace
+
+    from schemebot.generate.guardrails import DraftSentence, RejectedSentence
+
+    refused = replace(
+        CITED,
+        refused=True,
+        refusal_reason="unsupported",
+        sentences=[],
+        rejected=[
+            RejectedSentence(DraftSentence("It is Rs.25 lakh.", [1]), "number_not_in_source")
+        ],
+    )
+    app = create_app(lambda: FakeService(refused), log_dir=tmp_path)
+    with TestClient(app) as client:
+        plain = client.post("/ask", json={"question": "Income limit?"}).json()
+        debug = client.post(
+            "/ask", json={"question": "Income limit?"}, headers={"X-Pakkam-Debug": "drafts"}
+        ).json()
+    assert plain["rejected_drafts"] is None
+    assert debug["rejected_drafts"] == ["It is Rs.25 lakh."]
