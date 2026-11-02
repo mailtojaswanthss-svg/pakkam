@@ -631,6 +631,19 @@
   }
   document.querySelectorAll('[data-forward]').forEach((b) => b.addEventListener('click', openShield));
 
+  // Easy mode (for elderly people, and a volunteer helping someone): bigger text and buttons,
+  // every answer read aloud, slower speech. Remembered on this phone only.
+  let easyMode = false;
+  const easyToggle = document.getElementById('easy-mode');
+  function setEasy(on) {
+    easyMode = on;
+    document.body.classList.toggle('easy', on);
+    if (easyToggle) easyToggle.setAttribute('aria-pressed', String(on));
+    try { localStorage.setItem('pakkam-easy', on ? '1' : '0'); } catch { /* private mode */ }
+  }
+  if (easyToggle) easyToggle.addEventListener('click', () => setEasy(!easyMode));
+  try { if (localStorage.getItem('pakkam-easy') === '1') setEasy(true); } catch { /* private mode */ }
+
   // Phone-call mode: every recording is turned into phone-line audio before it is sent.
   const phoneToggle = document.getElementById('phone-mode');
   if (phoneToggle && window.PakkamRecorder) {
@@ -1167,6 +1180,7 @@
 
         const url = urls[currentIdx];
         const audio = new Audio(url);
+        if (easyMode) audio.playbackRate = 0.85; // slower for elderly listeners, same pitch
         state.audio = audio;
 
         // Prefetch next sentence while current sentence is playing
@@ -1400,12 +1414,20 @@
     autosize();
     stopPlaying();
     const followUp = options.followUp || followUpFor(question);
-    return runTurn(options.label || question, (bubble, hooks) => fetch('/ask', {
+    const turn = runTurn(options.label || question, (bubble, hooks) => fetch('/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: askBody(question, followUp),
       signal: hooks.signal,
     }), question, followUp);
+    // Easy mode reads every answer aloud, so nobody has to read the screen.
+    if (easyMode && !talkOn) {
+      turn.then((result) => {
+        const button = result && result.item && result.item.querySelector('.listen-btn');
+        if (button) listen(result.data, button, true);
+      });
+    }
+    return turn;
   }
 
   /* ---------- asking by voice (Gnani speech to text on the server) ---------- */

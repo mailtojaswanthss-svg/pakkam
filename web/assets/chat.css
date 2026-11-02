@@ -662,3 +662,10 @@ body.proof-open { overflow: hidden; }
 .officer-form { display: grid; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
 .officer-intro { margin: 0; color: var(--ink-2); }
 .officer-contact { padding: 8px 10px; color: var(--ink); background: var(--canvas); border: 1px solid var(--border); border-radius: 8px; font: inherit; }
+
+/* Easy mode: bigger text and touch targets for elderly users and helpers */
+body.easy { font-size: 118%; }
+body.easy .sentences, body.easy .refusal-text, body.easy .facts-line { font-size: 1.2rem; line-height: 1.7; }
+body.easy .listen-btn, body.easy .proof-open-btn, body.easy .follow-up, body.easy .voice-action { padding: 10px 16px; font-size: 1.05rem; }
+body.easy #q { font-size: 1.15rem; }
+body.easy .icon-btn, body.easy .send { transform: scale(1.15); }
