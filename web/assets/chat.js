@@ -397,6 +397,14 @@
       } catch { /* the page itself is the proof; audio is a bonus */ } finally { read.disabled = false; }
     });
     actions.append(read);
+    const remind = el('button', 'proof-btn', `📅 ${REMIND[data.language] || REMIND.en}`);
+    remind.type = 'button';
+    remind.addEventListener('click', () => {
+      const steps = data.sentences.filter((s) => s.section === 'documents' || s.section === 'apply').map((s) => s.text);
+      const first = data.sentences.find((s) => s.citations.includes(current.number)) || data.sentences[0];
+      downloadReminder(`Pakkam: ${current.scheme || current.document}`, [first ? first.text : '', ...steps, words.says(current.document, current.page_start), safeUrl(current.source_url) ? `${current.source_url}#page=${current.page_start}` : ''].filter(Boolean).join('\n'));
+    });
+    actions.append(remind);
     const pdf = safeUrl(current.source_url);
     if (navigator.share) {
       const share = el('button', 'proof-btn', `↗ ${words.share}`);
@@ -632,6 +640,27 @@
       phoneToggle.setAttribute('aria-pressed', String(on));
       document.body.classList.toggle('phone-mode-on', on);
     });
+  }
+
+  // "Remind me": a calendar event 3 days ahead with the answer, next steps and the page link.
+  // It stays on the person's phone; nothing is stored on the server.
+  const REMIND = { en: 'Remind me', ta: 'நினைவூட்டு', 'ta-Latn': 'Remind pannu', hi: 'याद दिलाएँ' };
+  function downloadReminder(title, details) {
+    const start = new Date(Date.now() + 3 * 86400000);
+    start.setHours(10, 0, 0, 0);
+    const stamp = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const esc = (t) => t.replace(/\\/g, '\\\\').replace(/[,;]/g, (m) => `\\${m}`).replace(/\n/g, '\\n');
+    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Pakkam//EN', 'BEGIN:VEVENT',
+      `UID:${Date.now()}@pakkam`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(start)}`,
+      `DTEND:${stamp(new Date(start.getTime() + 1800000))}`, `SUMMARY:${esc(title)}`, `DESCRIPTION:${esc(details)}`,
+      'BEGIN:VALARM', 'TRIGGER:-PT30M', 'ACTION:DISPLAY', `DESCRIPTION:${esc(title)}`, 'END:VALARM',
+      'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+    link.download = 'pakkam-reminder.ics';
+    document.body.append(link);
+    link.click();
+    link.remove();
   }
 
   function proofButton(data) {
@@ -919,6 +948,60 @@
     return item;
   }
 
+  // When the documents cannot answer: leave the question for an officer to follow up.
+  const OFFICER = {
+    en: { ask: 'Ask an officer', intro: 'Pakkam will pass your question to the scheme help desk. Do not write Aadhaar or bank numbers.',
+      contact: 'Phone number for the call back (optional)', send: 'Send to an officer', sent: (t) => `Sent. Your reference is ${t}. Keep it to follow up.`, failed: 'Could not send now. Try again later.' },
+    ta: { ask: 'அதிகாரியிடம் கேள்', intro: 'உங்கள் கேள்வி திட்ட உதவி மையத்துக்கு அனுப்பப்படும். ஆதார், வங்கி எண்களை எழுத வேண்டாம்.',
+      contact: 'திரும்ப அழைக்க தொலைபேசி எண் (விருப்பம்)', send: 'அதிகாரிக்கு அனுப்பு', sent: (t) => `அனுப்பப்பட்டது. உங்கள் குறிப்பு எண் ${t}.`, failed: 'இப்போது அனுப்ப முடியவில்லை. பின்னர் முயற்சிக்கவும்.' },
+    'ta-Latn': { ask: 'Officer-kitta kelu', intro: 'Unga kelvi scheme help desk-ku pogum. Aadhaar, bank number ezhudha vendaam.',
+      contact: 'Call back-ku phone number (optional)', send: 'Officer-ku anuppu', sent: (t) => `Anuppiyaachu. Unga reference ${t}.`, failed: 'Ippo anuppa mudiyala. Apram try pannunga.' },
+    hi: { ask: 'अधिकारी से पूछें', intro: 'आपका सवाल योजना हेल्प डेस्क को भेजा जाएगा। आधार या बैंक नंबर न लिखें।',
+      contact: 'वापस कॉल के लिए फ़ोन नंबर (वैकल्पिक)', send: 'अधिकारी को भेजें', sent: (t) => `भेज दिया। आपका संदर्भ ${t} है।`, failed: 'अभी नहीं भेज सके। बाद में कोशिश करें।' },
+  };
+
+  function officerForm(data) {
+    const words = OFFICER[data.language] || OFFICER.en;
+    const form = el('form', 'officer-form');
+    setLang(form, data.language);
+    form.append(el('p', 'officer-intro', words.intro));
+    const question = document.createElement('textarea');
+    question.className = 'shield-input';
+    question.rows = 2;
+    question.maxLength = 500;
+    question.value = data.question || lastAsked || '';
+    const phone = document.createElement('input');
+    phone.type = 'tel';
+    phone.className = 'officer-contact';
+    phone.placeholder = words.contact;
+    phone.maxLength = 40;
+    const send = el('button', 'proof-btn shield-check', words.send);
+    send.type = 'submit';
+    const status = el('p', 'proof-note');
+    status.setAttribute('aria-live', 'polite');
+    form.append(question, phone, send, status);
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      send.disabled = true;
+      try {
+        const res = await fetch('/officer-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: question.value, scheme: (data.contact && data.contact.scheme) || null, language: data.language, contact: phone.value || null }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(typeof body.detail === 'string' ? body.detail : words.failed);
+        status.textContent = words.sent(body.ticket);
+        question.disabled = true;
+        phone.disabled = true;
+      } catch (error) {
+        status.textContent = error.message || words.failed;
+        send.disabled = false;
+      }
+    });
+    return form;
+  }
+
   function refusalCard(data) {
     const words = REFUSAL_TEXT[data.language] || REFUSAL_TEXT.en;
     const card = el('div', 'refusal');
@@ -943,6 +1026,12 @@
       link.rel = 'noopener noreferrer';
       link.append(el('span', 'refusal-host', new URL(url).host));
       actions.append(link);
+    }
+    if (data.refusal_reason !== 'service_unavailable' && data.refusal_reason !== 'pii_detected') {
+      const officer = el('button', 'refusal-link', `🙋 ${(OFFICER[data.language] || OFFICER.en).ask}`);
+      officer.type = 'button';
+      officer.addEventListener('click', () => { officer.disabled = true; card.append(officerForm(data)); });
+      actions.append(officer);
     }
     if (data.refusal_reason !== 'service_unavailable') {
       const schemes = el('button', 'refusal-schemes', words.schemes);
@@ -1150,6 +1239,7 @@
   // The last answered scheme. A short follow-up ("how do I apply?") is sent with it so the
   // server reads it as a question about that scheme. Kept only in this page, never stored.
   let lastTurn = null; // { question, scheme }
+  let lastAsked = '';
   const showFormMsg = (text) => { formMsg.textContent = text; };
 
   function autosize() {
@@ -1257,6 +1347,7 @@
       }
       setLang(bubble, data.language);
       const asked = question || hooks.asked || data.transcript || bubble.textContent;
+      lastAsked = asked;
       const item = renderAnswer(data, asked);
       pending.replaceWith(item);
       if (!data.refused && data.scheme) {
