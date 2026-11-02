@@ -42,6 +42,12 @@ class AuditLog:
             "cited": [f"{c.doc_id}:p{c.page_start}" for c in answer.citations],
             "sentences": len(answer.sentences),
             "removed_by_guardrail": [r.reason for r in answer.rejected],
+            # For the department dashboard: which scheme, and how it was answered.
+            "scheme": answer.scheme
+            or next((c.scheme for c in answer.citations), None)
+            or (answer.candidate_schemes[0] if len(answer.candidate_schemes) == 1 else None),
+            "path": answer.path,
+            "status": answer.status,
             "timings_ms": {k: round(v, 1) for k, v in timings.items()},
         }
         self._write(entry)
@@ -68,6 +74,21 @@ class AuditLog:
                 "kind": "transcript",
                 "language_code": language_code,
                 "timings_ms": {"stt": round(stt_ms, 1)},
+            }
+        )
+
+    def record_forward(
+        self, request_id: str, overall: str, verdicts: list[str], scam_signs: list[str]
+    ) -> None:
+        """A forward check: the verdicts and warning signs only, never the message."""
+        self._write(
+            {
+                "time": datetime.now(UTC).isoformat(timespec="seconds"),
+                "request_id": request_id,
+                "kind": "forward",
+                "overall": overall,
+                "verdicts": verdicts,
+                "scam_signs": scam_signs,
             }
         )
 

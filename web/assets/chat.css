@@ -657,3 +657,8 @@ body.proof-open { overflow: hidden; }
 .facts-line { margin: 2px 0; line-height: 1.5; }
 .facts-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 @media (prefers-color-scheme: dark) { .facts-total { color: #b7f0c8; background: #123d22; } }
+
+/* Ask an officer */
+.officer-form { display: grid; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+.officer-intro { margin: 0; color: var(--ink-2); }
+.officer-contact { padding: 8px 10px; color: var(--ink); background: var(--canvas); border: 1px solid var(--border); border-radius: 8px; font: inherit; }

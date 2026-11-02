@@ -400,6 +400,19 @@ class FeedbackResponse(BaseModel):
     message: str = Field(default="Feedback recorded. Thank you for improving Pakkam.")
 
 
+class OfficerRequest(BaseModel):
+    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=500)]
+    scheme: Annotated[str, StringConstraints(max_length=120)] | None = None
+    language: str = Field(default="ta", max_length=10)
+    contact: Annotated[str, StringConstraints(strip_whitespace=True, max_length=40)] | None = Field(
+        default=None, description="How the officer can reach the person (optional)."
+    )
+
+
+class OfficerRequestResponse(BaseModel):
+    ticket: str = Field(description="Reference to quote when following up, e.g. PKM-261102-A1B2C3.")
+
+
 class ForwardRequest(BaseModel):
     message: Annotated[
         str, StringConstraints(strip_whitespace=True, min_length=10, max_length=1500)
