@@ -10,6 +10,8 @@ comparison with `en-IN` on real clips is still to be done.
 """
 
 import io
+import json
+import logging
 import wave
 from typing import Literal, Protocol
 
@@ -17,6 +19,8 @@ import httpx  # installed with fastapi[standard] (the `api` extra)
 
 from schemebot.config import Settings
 from schemebot.voice.budget import CALLS_FILE_NAME, BudgetExhausted, CallBudget, shared_budget
+
+logger = logging.getLogger(__name__)
 
 VoiceLanguage = Literal["ta", "hi", "en", "ta-Latn"]
 
@@ -26,6 +30,15 @@ GNANI_LANGUAGE_CODES: dict[VoiceLanguage, str] = {
     "en": "en-IN",
     "ta-Latn": "ta-IN",  # untested choice; see the module docstring
 }
+
+# Prisma v3.0 takes up to 4 language hints (not a lock): Tamil speech mixed with English
+# (Tanglish) is the normal case, so English is always a second hint.
+PRISMA_V3_HINTS: dict[str, str] = {
+    "ta-IN": "ta-IN,en-IN",
+    "hi-IN": "hi-IN,en-IN",
+    "en-IN": "en-IN,ta-IN,hi-IN",
+}
+MAX_KEYTERMS = 200
 
 AUDIO_EXTENSIONS = (".wav", ".mp3", ".ogg", ".flac", ".aac", ".m4a")
 """The formats Gnani's STT REST docs list. Browser WebM recordings are not on the list."""
@@ -120,24 +133,52 @@ class GnaniStt:
         url: str,
         timeout_seconds: float = 30.0,
         transport: httpx.BaseTransport | None = None,
+        model: str | None = None,
+        keyterms: list[str] | None = None,
     ) -> None:
         # `transport` lets tests answer requests without touching the network.
         self._client = httpx.Client(
             headers={"X-API-Key-ID": api_key}, timeout=timeout_seconds, transport=transport
         )
         self._url = url
+        # "prisma-v3.0": language hints, code-mixed speech, and key terms (scheme names) so
+        # "Magalir Urimai" is heard right the first time. None: Prisma v2.5, the default.
+        self._model = model
+        self._keyterms = (keyterms or [])[:MAX_KEYTERMS]
         self.last_confidence: float | None = None
+        self.last_detected_language: str | None = None
 
-    def transcribe(self, audio: bytes, filename: str, language_code: str) -> str:
+    def _form(self, language_code: str, v3: bool) -> dict[str, str]:
+        if not v3:
+            return {"language_code": language_code}
+        form = {
+            "model": self._model or "prisma-v3.0",
+            "language_code": PRISMA_V3_HINTS.get(language_code, language_code),
+            "format": "transcribe",
+        }
+        if self._keyterms:
+            form["keyterms"] = json.dumps(self._keyterms, ensure_ascii=False)
+        return form
+
+    def _post(self, audio: bytes, filename: str, form: dict[str, str]) -> httpx.Response:
         try:
-            response = self._client.post(
-                self._url,
-                data={"language_code": language_code},
-                files={"audio_file": (filename, audio)},
-            )
+            return self._client.post(self._url, data=form, files={"audio_file": (filename, audio)})
         except httpx.HTTPError as error:
             raise SttError("The speech service could not be reached.") from error
+
+    def transcribe(self, audio: bytes, filename: str, language_code: str) -> str:
+        v3 = self._model is not None
+        response = self._post(audio, filename, self._form(language_code, v3))
+        if v3 and response.status_code == 400:
+            # v3.0 refused this request (plan, a field limit): voice must still work.
+            logger.warning("Prisma v3.0 refused the request; falling back to v2.5")
+            response = self._post(audio, filename, self._form(language_code, False))
         transcript, confidence = _read_transcript(response)
+        try:
+            detected = response.json().get("detected_language_code")
+        except ValueError:
+            detected = None
+        self.last_detected_language = detected if isinstance(detected, str) else None
         self.last_confidence = confidence
         return transcript
 
@@ -182,6 +223,19 @@ class BudgetedTranscriber:
         return result
 
 
+def scheme_keyterms(settings: Settings) -> list[str]:
+    """Scheme names in English and Tamil (data/scheme_aliases.json), for Prisma v3.0 to favour."""
+    path = settings.data_dir / "scheme_aliases.json"
+    if not path.is_file():
+        return []
+    terms: list[str] = []
+    for group in json.loads(path.read_text(encoding="utf-8")):
+        for term in [group["canonical"], *group.get("aliases", [])]:
+            if term not in terms and len(term) <= 60:
+                terms.append(term)
+    return terms[:MAX_KEYTERMS]
+
+
 def build_budget(settings: Settings) -> CallBudget:
     """The daily Gnani cap shared by speech to text and text to speech."""
     return shared_budget(settings.log_dir / CALLS_FILE_NAME, settings.gnani_max_calls_per_day)
@@ -195,5 +249,7 @@ def build_transcriber(settings: Settings) -> BudgetedTranscriber | None:
         settings.gnani_api_key.get_secret_value(),
         settings.gnani_stt_url,
         settings.stt_timeout_seconds,
+        model=settings.stt_model if settings.stt_model != "prisma-v2.5" else None,
+        keyterms=scheme_keyterms(settings) if settings.stt_model != "prisma-v2.5" else None,
     )
     return BudgetedTranscriber(gnani, build_budget(settings))

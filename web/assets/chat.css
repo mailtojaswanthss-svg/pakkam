@@ -646,3 +646,5 @@ body.proof-open { overflow: hidden; }
   .shield-overall.shield-looks_right { background: #123d22; color: #b7f0c8; }
   .shield-overall.shield-partly_wrong, .shield-overall.shield-not_in_documents { background: #4a3500; color: #ffe4a3; }
 }
+
+.phone-mode[aria-pressed="true"] { color: var(--on-stamp); background: var(--stamp); border-color: var(--stamp); }
