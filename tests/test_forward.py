@@ -73,9 +73,43 @@ def test_check_forward_endpoint(tmp_path: Path) -> None:
     )
     with TestClient(app) as client:
         response = client.post(
-            "/check-forward", json={"message": "Rs.4,000 every month for women!"}
+            "/check-forward",
+            json={"message": "Rs.4,000 every month for women! Register at bit.ly/x, send OTP"},
         )
     assert response.status_code == 200
     data = response.json()
     assert data["overall"] == "wrong"
     assert data["claims"][0]["answer"]["sentences"][0]["text"].startswith("Rs.1,000")
+    assert data["scam_signs"] == ["unofficial_link", "otp"]
+
+
+import pytest  # noqa: E402
+
+from schemebot.generate.forward import scam_signs  # noqa: E402
+
+
+@pytest.mark.parametrize(
+    ("message", "signs"),
+    [
+        (
+            "PM Kisan ₹4000 bonus! Register at bit.ly/pmk today only, share OTP",
+            ["unofficial_link", "otp", "urgency"],
+        ),
+        ("Details at https://kmut.tn.gov.in", ["official_link"]),
+        ("Pay ₹100 registration fee and send Aadhaar number", ["payment", "personal_data"]),
+        ("மகளிர் உரிமைத் தொகை ₹2000 உயர்வு, உடனே விண்ணப்பிக்கவும்", ["urgency"]),
+        ("Rs.1,000 a month for women heads of families", []),
+    ],
+)
+def test_scam_signs(message: str, signs: list[str]) -> None:
+    assert scam_signs(message) == signs
+
+
+def test_no_claims_still_reports_scam_signs() -> None:
+    class NoClaims:
+        def complete_json(self, *args: Any) -> dict[str, Any]:
+            return {"claims": []}
+
+    result = ForwardChecker(Service(), NoClaims()).check("Click bit.ly/x and share your OTP now")
+    assert result.overall == "no_claims"
+    assert result.scam_signs == ["unofficial_link", "otp"]

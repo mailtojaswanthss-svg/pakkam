@@ -8,8 +8,9 @@ it can only point at what the cited answer says.
 """
 
 import logging
+import re
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal, Protocol
 
 from pydantic import BaseModel, ValidationError
@@ -64,6 +65,47 @@ VERDICT_SCHEMA: dict[str, object] = {
 }
 
 
+# Scam signs in a forward, found by fixed rules (no model): a link that is not a government
+# site, a request for an OTP, money or ID numbers, and "today only" pressure. Fake scheme
+# messages (PM-KISAN "bonus" SMS, fake registration links) use exactly these.
+ScamSign = Literal["unofficial_link", "official_link", "otp", "payment", "personal_data", "urgency"]
+_LINK = re.compile(
+    r"(https?://|www\.)\S+|\b[\w-]+\.(?:com|in|org|net|xyz|online|site|info|ly|me|apk)\b\S*",
+    re.I,
+)
+_OFFICIAL_HOST = re.compile(r"(^|\.)(gov\.in|nic\.in)$", re.I)
+_SIGNS: dict[ScamSign, re.Pattern[str]] = {
+    "otp": re.compile(r"\botp\b|ஓடிபி|ओटीपी|one.?time.?password|verification code", re.I),
+    "payment": re.compile(
+        r"\b(pay|fee|fees|charges?|deposit|processing|registration amount|upi|gpay|phonepe|"
+        r"paytm|kattanam|panam kattu)\b|கட்டணம்|செலுத்த|शुल्क|फीस|भुगतान|जमा करें",
+        re.I,
+    ),
+    "personal_data": re.compile(
+        r"\b(aadhaar|aadhar|pan|bank account|account number|atm|card number|cvv|pin)\b|ஆதார்|"
+        r"வங்கி கணக்கு|आधार|बैंक खाता",
+        re.I,
+    ),
+    "urgency": re.compile(
+        r"\b(today only|last date today|hurry|urgent|immediately|before midnight|limited|"
+        r"inniku mattum|udane)\b|இன்று மட்டும்|உடனே|அவசர|आज ही|तुरंत|जल्दी",
+        re.I,
+    ),
+}
+
+
+def scam_signs(message: str) -> list[ScamSign]:
+    """Warning signs in a forwarded message, in a fixed order."""
+    found: list[ScamSign] = []
+    for match in _LINK.finditer(message):
+        host = re.sub(r"^(https?://)?(www\.)?", "", match.group(0), flags=re.I).split("/")[0]
+        sign: ScamSign = "official_link" if _OFFICIAL_HOST.search(host) else "unofficial_link"
+        if sign not in found:
+            found.append(sign)
+    found += [name for name, pattern in _SIGNS.items() if pattern.search(message)]
+    return found
+
+
 class AnswerService(Protocol):
     def answer(self, question: str, voice_mode: bool = False) -> Answer: ...
 
@@ -95,6 +137,7 @@ class CheckedClaim:
 class ForwardCheck:
     overall: Literal["looks_right", "partly_wrong", "wrong", "not_in_documents", "no_claims"]
     claims: list[CheckedClaim]
+    scam_signs: list[ScamSign] = field(default_factory=list)
 
 
 class ForwardChecker:
@@ -103,6 +146,7 @@ class ForwardChecker:
         self._llm = llm
 
     def check(self, message: str) -> ForwardCheck:
+        signs = scam_signs(message)
         try:
             raw = self._llm.complete_json(CLAIMS_SYSTEM, message, CLAIMS_SCHEMA)
             claims = _Claims.model_validate(raw).claims[:MAX_CLAIMS]
@@ -110,11 +154,11 @@ class ForwardChecker:
             logger.info("forward: no claims extracted (%s)", error)
             claims = []
         if not claims:
-            return ForwardCheck("no_claims", [])
+            return ForwardCheck("no_claims", [], signs)
         # Claims are independent: check them at the same time (search takes turns on the GPU).
         with ThreadPoolExecutor(max_workers=len(claims)) as pool:
             checked = list(pool.map(self._check_claim, claims))
-        return ForwardCheck(_overall([c.verdict for c in checked]), checked)
+        return ForwardCheck(_overall([c.verdict for c in checked]), checked, signs)
 
     def _check_claim(self, claim: _Claim) -> CheckedClaim:
         answer = self._service.answer(claim.question)
