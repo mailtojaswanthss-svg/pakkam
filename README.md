@@ -5,15 +5,15 @@
 **Ask about an Indian government scheme in your own language.<br>
 See the exact page of the official document behind every sentence.**
 
-Tamil · Hindi · English · Tanglish &nbsp;|&nbsp; text or voice &nbsp;|&nbsp; cited, or honestly "I don't know"
+Tamil · Hindi · English · Tanglish &nbsp;|&nbsp; text or voice (Gnani Prisma + Timbre) &nbsp;|&nbsp; the official page as proof, or honestly "I don't know"
 
 [![CI](https://github.com/mailtojaswanthss-svg/pakkam/actions/workflows/ci.yml/badge.svg)](https://github.com/mailtojaswanthss-svg/pakkam/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB)
-![Tests](https://img.shields.io/badge/tests-532%20passing-2E7D32)
+![Tests](https://img.shields.io/badge/tests-634%20passing-2E7D32)
 ![License](https://img.shields.io/badge/code-MIT-5A36A3)
 ![Status](https://img.shields.io/badge/status-research%20prototype-E3A33B)
 
-[**Live site**](https://pakkam-alpha.vercel.app) · [**Chat**](https://pakkam-alpha.vercel.app/chat/) · [How it works](#how-it-works) · [Results](#results) · [Quickstart](#quickstart) · [Status](STATUS.md)
+[**Live site**](https://pakkam-alpha.vercel.app) · [**Chat**](https://pakkam-alpha.vercel.app/chat/) · [Pakkam Desk](https://pakkam-alpha.vercel.app/dashboard/) · [How it works](#how-it-works) · [Results](#results) · [Quickstart](#quickstart) · [Status](STATUS.md)
 
 </div>
 
@@ -44,18 +44,27 @@ documents don't say, **tells you so and gives the official helpline** instead of
 
 ## Highlights
 
+**What Pakkam does that a general chatbot does not:** every answer ends with the government's
+own page as proof, a named person stands behind the common facts, and it helps people act:
+check a WhatsApp rumour, know what to carry, appeal a rejection.
+
 | | |
 |---|---|
-| **Every sentence is cited** | Each answer sentence links to the document and page it came from, with the passage and the official PDF one tap away. |
-| **Four ways to ask** | Tamil, Hindi, English and Tanglish (Tamil in English letters), typed or spoken. Answers come back in the question's language. |
-| **Numbers are checked, not trusted** | Every number in an answer (amounts, ages, dates, income limits, 2.5 lakh = 2,50,000) must appear in the cited text (`guardrails.py`); a second model checks the rest. Unsupported sentences are dropped. |
-| **Honest refusals** | Low confidence means no LLM call: a calm card says the documents don't cover it and links the official contact. |
-| **Sources in under half a second** | `/ask/sources` shows the cited pages in about 0.3-0.4 s while the answer is still being written. |
-| **A conversation, not a form** | The page shows what it found while the answer is written, can be stopped, offers follow-ups ("How do I apply?") that remember the scheme, turns "did you mean A or B?" into buttons, shows the official pages when the model is busy, and asks for 👍/👎. |
-| **Voice with Gnani** | Prisma speech to text ("Pakkam heard: ..."), a short spoken-style answer that is read out automatically, sentence by sentence, with "I heard X, is that right?" when unsure. |
-| **Verified fact cards** | Ready answers for common questions with no LLM call and cached audio. A card is served only after a person signs it off (`verified_by`); the 2 drafted cards are not signed off yet. |
-| **Private by design** | The audit log stores a hash of the question, never its text. No accounts, no personal data. |
-| **Built for cheap phones** | Plain HTML/CSS/JS, no framework, light and dark themes, reduced-motion support, 44 px touch targets. |
+| **Proof card ("show the officer")** | "📄 Show proof" opens the **official PDF page as an image with the cited lines highlighted**, the G.O. number and date, *"Checked against the printed page by …"*, the next steps, read aloud, share and the PDF link. Something to hold up at the counter. |
+| **Rumour Shield** | "Is this WhatsApp forward true?": paste or read out a forward; each claim is marked ✅ true / ❌ wrong / ⚠️ not in the documents, with its proof card. **Scam signs** (non-government link, OTP, money, Aadhaar, "today only") are flagged by fixed rules, and the correction can be sent back on WhatsApp. |
+| **Signed fact cards** | 26 common facts, each checked against the printed page and **signed by a named person**; answered instantly with no LLM call. A card only answers its own kind of question (amount, eligibility, documents, how to apply), in the question's language (English cards also serve Tanglish). |
+| **What can I get?** | "Any scheme for women?" lists the matching schemes with their signed amounts and eligibility, and *"up to ₹24,000 a year, if you meet each scheme's conditions"*. |
+| **Visit checklist** | "Before you go": what to carry and how to apply, each item with its page; tick, read aloud, share or print. |
+| **Rejected? → appeal note** | Give the scheme and the rejection reason; Pakkam shows the rule from the G.O. with its proof and fills a fixed appeal template quoting that rule and page. The note is never written by a model. |
+| **Every sentence is cited** | Each answer sentence links to the document and page it came from; answers are grouped as *How much · Who can get it · Documents · How to apply*. |
+| **Numbers are checked, not trusted** | Every number (amounts, ages, income limits; 2.5 lakh = 2.5 laksham = 2,50,000) must appear in the cited text; a second model checks support; known OCR misreads are blocked or corrected after a person confirms them (`data/corrections.json`). |
+| **Honest refusals, then help** | When the documents don't say, Pakkam says so, gives the official contact, and offers **"Ask an officer"**: the question goes to a help-desk queue with a reference number. |
+| **Voice with Gnani** | **Prisma v3.0** speech to text with language hints for code-mixed speech and **scheme names as key terms**; **Timbre** speaks the answer, its source (*"Source: G.O. 15, page 10"*) and an instant *"checking the government order…"* line. Talk mode is hands-free. |
+| **Phone-call mode** | One toggle turns a recording into 8 kHz telephone-codec audio with line noise before Pakkam hears it: a demo of phone-quality speech without a phone line. |
+| **Easy mode** | Bigger text and buttons, every answer read aloud, slower speech: for elderly people and the volunteers who help them. |
+| **Pakkam Desk** | A department dashboard ([/dashboard/](https://pakkam-alpha.vercel.app/dashboard/)): most asked schemes, **gaps in the official documents** (refusals by scheme), rumours checked and their scam signs, languages, questions waiting for an officer. Counts only. |
+| **Private by design** | The audit log stores a hash of the question, never its text; Aadhaar and phone numbers in a question are refused before any model call; officer contacts are never shown. |
+| **Built for cheap phones** | Plain HTML/CSS/JS, no framework, light and dark themes, reduced-motion support, large touch targets; "Remind me" saves next steps to the phone's calendar. |
 
 ## Screenshots
 
@@ -76,11 +85,11 @@ documents don't say, **tells you so and gives the official helpline** instead of
 |---|---|
 | Documents | 18 official PDFs (Tamil Nadu and central schemes), Tesseract OCR + Krutrim Chitrapathak-2 crop OCR for hard numerals |
 | Search | BAAI `bge-m3` dense + learned sparse vectors in Qdrant, `bge-reranker-v2-m3` |
-| Answers | Claude (`claude-opus-5-5` answers, `claude-haiku-5-5` checks) or Gemini, structured JSON with per-sentence citations, optional failover to the other provider, a daily call budget |
-| Voice | Gnani Prisma v2.5 (speech to text), Gnani Timbre (text to speech), ffmpeg |
+| Answers | Gemini (Flash, with Flash-Lite as backup on rate limits) or Claude, structured JSON with per-sentence citations, optional failover to the other provider, a daily call budget. Gnani's Evon is not used: its hosted API launches after the deadline, and Gnani's team confirmed another LLM is fine for the submission |
+| Voice | Gnani Prisma v3.0 (speech to text, key terms, language hints; falls back to v2.5), Gnani Timbre (text to speech), ffmpeg |
 | API | FastAPI, rate limits, privacy-preserving audit log |
 | Web | Plain HTML, CSS and JavaScript; Baloo 2 / Hind fonts; Vercel |
-| Quality | pytest (532 tests), ruff, mypy, GitHub Actions |
+| Quality | pytest (634 tests), ruff, mypy, GitHub Actions; `scripts/live_feature_check.py` and `scripts/live_benchmark.py` test the deployed site |
 
 ---
 
@@ -104,11 +113,13 @@ documents don't say, **tells you so and gives the official helpline** instead of
 ## How it works
 
 ```
-Question (typed, or spoken -> Gnani Prisma v2.5 speech to text)
+Question (typed, or spoken -> Gnani Prisma v3.0 speech to text, scheme names as key terms)
    │
    ├─ normalise (Unicode, numerals, Tanglish gloss for the reranker)
    │
-   ├─ verified fact card matches? ── yes ──► card answer, 0 LLM calls, cached audio
+   ├─ broad ("any scheme for women?") ──► matching schemes + signed amounts, 0 LLM calls
+   │
+   ├─ signed fact card matches (same kind of question)? ── yes ──► card answer, 0 LLM calls
    │
    ▼
 Hybrid search in Qdrant: BGE-M3 dense + BGE-M3 learned sparse, fused
@@ -127,7 +138,8 @@ must appear in the cited chunk (guardrails.py) · a second model checks support
    │
    ├─ unsupported sentences removed; nothing left ──► refuse
    │
-Answer + citations (+ Gnani Timbre speech, sentence by sentence)
+Answer + citations + proof card (official page image) + visit checklist
+(+ Gnani Timbre speech, sentence by sentence, ending with the source)
 ```
 
 The pipeline stages live in `src/schemebot/`: `ingest/` → `index/` → `retrieve/` →
@@ -151,6 +163,21 @@ same questions, so treat them as development numbers. Each links to its full rep
 | Spoken question → right page | 87.1% (27/31) | 31 | same | same |
 | OCR numerals on known problem pages | Chitrapathak-2 7/7, Tesseract 0/7 | 7 pages chosen *because* Tesseract failed | `run_hybrid_ocr.py` | [OCR report](docs/review/ocr_benchmark_report.md) |
 | Fact cards: false matches | 0 of 40 unanswerable questions | 40 | `fact_card_eval.py` | [fact cards](docs/review/FACT_CARD_EVAL.md) |
+
+**Live, end to end through the website** (`scripts/live_benchmark.py`, Gemini free tier,
+laptop backend behind a Cloudflare tunnel; full report in
+[LIVE_BENCHMARK.md](docs/review/LIVE_BENCHMARK.md)):
+
+| Run | Questions | Answered (covered) | Cited a correct page | Refused when not covered | Median |
+|---|---|---|---|---|---|
+| 2 Nov | 60 (15 per language) | 81% | **97%** | 92% | 9.2 s |
+| Full set | 194 | *running; numbers added when complete* | | | |
+
+**Live feature check** (`scripts/live_feature_check.py`, 3 Nov): 10/11 features pass through the
+website: cited answer, proof page image, Tanglish answer, honest refusal, "what can I get",
+visit checklist, ask an officer, dashboard, Timbre speech, and **Prisma v3.0 hearing Timbre's
+Tamil back word for word**. The rumour shield timed out once on an exhausted free Gemini
+quota (fixed: a 429 now fails over at once).
 
 **Retrieval ablation** (`pakkam_chitra` collection, 194 draft questions):
 
@@ -207,14 +234,15 @@ Open http://localhost:8000/chat/ (API docs at `/docs`). To use the Chitrapathak 
 collection, set `SCHEMEBOT_QDRANT_COLLECTION=pakkam_chitra`. Every setting is listed in
 [.env.example](.env.example).
 
-**Speed and limits.** Answers use thinking effort `low` (several times faster than
-`medium` for short cited answers), each LLM call waits at most 30 s and is retried once,
-repeated questions come from an in-memory cache, and at most 200 LLM calls are made a day
-(`SCHEMEBOT_MAX_DAILY_LLM_CALLS`; each answer uses two). A rate-limit reply (429) pauses that
-model for 60 s, not for the day. With a paid Claude key (`SCHEMEBOT_LLM_PROVIDER=claude`),
-Gemini can serve as the backup: `SCHEMEBOT_LLM_FALLBACK_ENABLED=true` plus a Gemini key. On
-Gemini's free tier, set the daily cap near your free quota; Google may use free-tier prompts
-to improve its products.
+**Speed and limits.** Signed fact-card answers are instant and use no LLM call. Other
+answers use Gemini Flash, switching to Flash-Lite at once when Flash replies 429 (a 429 is
+not retried, so nothing waits on a back-off). Each LLM call waits at most 30 s, repeated
+questions come from a saved answer cache (`data/answer-cache.pkl`, cleared automatically
+when the answer format changes), and at most 200 LLM calls are made a day
+(`SCHEMEBOT_MAX_DAILY_LLM_CALLS`; a full answer with its check uses two or three). On
+Gemini's free tier the Flash daily quota is small; Google may use free-tier prompts to
+improve its products. With a paid Claude key (`SCHEMEBOT_LLM_PROVIDER=claude`), Gemini can
+serve as the backup: `SCHEMEBOT_LLM_FALLBACK_ENABLED=true` plus a Gemini key.
 
 Windows step-by-step: [docs/HANDOFF.md](docs/HANDOFF.md) and
 [docs/GNANI_RUNBOOK.md](docs/GNANI_RUNBOOK.md).
@@ -234,6 +262,11 @@ Full schema: [docs/API_CONTRACT.md](docs/API_CONTRACT.md).
 | POST | `/speak` | Text → 24 kHz WAV via Gnani Timbre |
 | POST | `/feedback` | Thumbs up/down with an optional reason |
 | GET | `/sources` | The 18 documents Pakkam reads |
+| GET | `/page?doc=…&p=…&mark=…` | The cited page of the official PDF as a PNG, the passage highlighted (proof card) |
+| POST | `/check-forward` | A forwarded message → claims marked supported / contradicted / not in the documents, each with a cited answer, plus `scam_signs` |
+| GET | `/checklist?scheme=…&lang=…` | Signed "documents" and "how to apply" facts for a scheme (visit checklist) |
+| POST | `/officer-request` | Leave an unanswered question for the help desk → reference `PKM-…` |
+| GET | `/dashboard/stats` | Pakkam Desk counts: questions, gaps, rumours, officer requests (no text, no contacts) |
 | GET | `/health` | Model and budget status (no secrets) |
 
 A refusal is a normal `200` response with its reason. `/ask` is rate limited per visitor
@@ -247,8 +280,8 @@ own, larger limits, and a spoken sentence is cached so replaying it costs no new
 
 | Part | Where | Notes |
 |---|---|---|
-| Website (`web/`) | Vercel, free | Plain HTML/CSS/JS, no build step |
-| Backend (FastAPI + models + index) | Developer's laptop, reached through a Cloudflare quick tunnel | `web/vercel.json` forwards `/ask`, `/ask/sources`, `/sources`, `/transcribe`, `/speak`, `/feedback`; the tunnel URL changes on every restart |
+| Website (`web/`) | Vercel, free | Plain HTML/CSS/JS, no build step; chat at `/chat/`, Pakkam Desk at `/dashboard/` |
+| Backend (FastAPI + models + index) | Developer's laptop, reached through a Cloudflare quick tunnel | `scripts/start_pakkam.ps1` starts it, opens the tunnel and points every API path at it (a test checks that each path the pages use is routed); the tunnel URL changes on every restart |
 | Planned | Google Cloud Run (CPU) | [deploy/cloudrun/](deploy/cloudrun/README.md); the script asks for a GPU today |
 
 Vercel cannot run the backend (PyTorch and about 4.5 GB of models exceed its function
@@ -271,7 +304,7 @@ src/schemebot/
   evaluation/   question set, metrics, judge, runner
 data/           sources.json, contacts.json, corrections.json, fact_cards.json,
                 eval/questions.jsonl (raw/, processed/, index/ are not committed)
-web/            home page (index.html), chat app (chat/), assets/
+web/            home page (index.html), chat app (chat/), Pakkam Desk (dashboard/), assets/
 scripts/        benchmarks, evaluations and report generators (see below)
 tests/          unit and integration tests (fake models, no network)
 docs/           reports and guides (see below); docs/archive/ holds superseded notes
@@ -312,7 +345,9 @@ before they spend.
 | OCR | `run_hybrid_ocr.py`, `run_crop_ocr.py`, `colab_chitrapathak.py`, `ocr_compare.py`, `flag_ocr_pages.py`, `generate_gate_pages.py`, `analyze_disagreements.py`, `report_ocr_stats.py`, `check_corrections.py` |
 | Reports | `generate_gnani_report.py`, `generate_voice_report.py`, `generate_docx_report.py`, `summarize_questions.py` |
 | Running | `start_pakkam.ps1` (one click: latest code, backend, tunnel, website pointed at it) |
-| Checks | `scan_git_secrets.py`, `check_helplines.py`, `verify_dod.py`, `review_feedback.py` |
+| Checks | `scan_git_secrets.py`, `check_helplines.py`, `verify_dod.py`, `review_feedback.py`, `check_amounts.py` |
+| Live site | `live_feature_check.py` (every feature, with a Timbre → Prisma round trip), `live_benchmark.py` (194 questions end to end, `--resume`) |
+| Sign-off | `sign_fact_cards.py`, `confirm_corrections.py` |
 
 The package also has its own commands: `python -m schemebot.evaluation`,
 `python -m schemebot.voice` (compare, tts-samples, eval-script, eval, amounts) and
@@ -325,7 +360,7 @@ The package also has its own commands: `python -m schemebot.evaluation`,
 ```bash
 uv run ruff check . && uv run ruff format --check .
 uv run mypy src
-uv run pytest -q              # 532 tests, fake models
+uv run pytest -q              # 634 tests, fake models
 uv run pytest -m models       # slower tests with the real models (~4.5 GB download)
 ```
 
@@ -338,17 +373,16 @@ pull request, without PyTorch, and builds the Docker image on pushes.
 
 - Questions are **drafts** by one person; native-speaker review and an independent held-out
   set are pending.
-- Answer quality has not been graded by people yet (`docs/review/grading_sheet.csv`).
-- Voice is tested on clean read speech only; real phone recordings and spoken Tanglish are
-  untested.
-- Tanglish has the highest false-refusal rate of the four language groups.
+- Answer wording has not been graded by people yet (`docs/review/grading_sheet.csv`);
+  live benchmarks score answered / cited page / refusal automatically.
+- Spoken Tanglish and real noisy phone audio are not yet measured on recorded clips; the
+  phone-call mode simulates phone audio but is not a phone line.
+- Page highlighting needs a text layer: scanned Tamil pages are shown without the yellow mark.
 - Hindi coverage is thin (2 Hindi documents).
-- 263 OCR number disagreements and the OCR corrections in `data/corrections.json` still
-  need a person to confirm them.
-- Helpline numbers in `data/contacts.json` must be checked against official pages
-  (`docs/review/helpline_check.csv`).
-- On Gemini's free tier, answers can take 10 s to over a minute and the daily quota runs out
-  quickly; a paid key (Claude or Gemini) is needed for a public demo.
+- 263 OCR number disagreements still need review; three KMUT corrections are confirmed.
+- The backend runs on the developer's laptop; when it is off, the live site says so.
+- On Gemini's free tier, Flash's daily quota runs out quickly and answers fall back to
+  Flash-Lite; a paid key gives faster, better answers for a public demo.
 
 ---
 
