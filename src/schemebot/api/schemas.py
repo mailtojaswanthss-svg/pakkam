@@ -59,6 +59,11 @@ class CitationOut(BaseModel):
         default=None, description="Official publication date of source document."
     )
     language: Language
+    checked_by: str | None = Field(
+        default=None,
+        description="Signed fact card: who checked it against the printed page (else null).",
+    )
+    checked_on: str | None = Field(default=None, description="Date it was checked, YYYY-MM-DD.")
     ocr_corrected: bool = Field(
         default=False,
         description="The excerpt holds an OCR misreading corrected by hand from the printed "
@@ -260,6 +265,8 @@ class AskResponse(BaseModel):
                     document_date=doc_dates.get(c.doc_id),
                     language=c.language,
                     ocr_corrected=c.ocr_corrected,
+                    checked_by=getattr(c, "checked_by", None),
+                    checked_on=getattr(c, "checked_on", None),
                 )
                 for c in answer.citations
             ],

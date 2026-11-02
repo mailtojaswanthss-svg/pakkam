@@ -22,6 +22,7 @@ from fastapi.responses import JSONResponse
 from pydantic import TypeAdapter, ValidationError
 
 from schemebot.api.audit import AuditLog
+from schemebot.api.pages import PageUnavailable, render_page
 from schemebot.api.ratelimit import AskLimiter
 from schemebot.api.schemas import (
     AskRequest,
@@ -221,6 +222,7 @@ def create_app(
     source_limiter = sources_limiter or AskLimiter(30, 5000)
     tts_limiter = speak_limiter or AskLimiter(60, 5000)
     feedback_limit = feedback_limiter or AskLimiter(20, 5000)
+    page_limiter = AskLimiter(30, 3000)
     spoken: OrderedDict[tuple[str, str], bytes] = OrderedDict()
     log_dir_for_feedback = log_dir or get_settings().log_dir
 
@@ -242,6 +244,9 @@ def create_app(
 
     def limit_sources(request: Request) -> None:
         check_limit(source_limiter, request)
+
+    def limit_pages(request: Request) -> None:
+        check_limit(page_limiter, request)
 
     def limit_speak(request: Request) -> None:
         check_limit(tts_limiter, request)
@@ -593,6 +598,25 @@ def create_app(
             if opus is not None:
                 return Response(content=opus, media_type="audio/ogg", headers=headers)
         return Response(content=audio, media_type="audio/wav", headers=headers)
+
+    @app.get("/page", dependencies=[Depends(limit_pages)])
+    def page_image(doc: str, p: int, mark: str = "") -> Response:
+        """The cited page of an official PDF as a PNG, the passage highlighted where the text
+        layer allows: proof a citizen can show at the office ("show the officer")."""
+        known = {d.doc_id: d for d in load_sources()}
+        source = known.get(doc)
+        if source is None:  # only documents in sources.json: no paths from the request
+            raise HTTPException(status_code=404, detail="Unknown document.")
+        try:
+            image = render_page(get_settings().raw_dir / source.file, p, mark[:600])
+        except PageUnavailable as error:
+            logger.warning("page image unavailable: %s", error)
+            raise HTTPException(status_code=404, detail="That page is not available.") from error
+        return Response(
+            content=image,
+            media_type="image/png",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
 
     @app.get("/sources")
     def sources() -> list[SourceOut]:
