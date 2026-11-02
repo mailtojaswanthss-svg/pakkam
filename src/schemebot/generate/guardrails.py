@@ -29,8 +29,8 @@ _NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
 _LAKH, _CRORE = Decimal(100_000), Decimal(10_000_000)
 _UNITS = re.compile(
     r"(?P<number>\d+(?:[.,]\d+)*)\s*"
-    # Tanglish too: "2.5 laksham", "2.5 latcham", "1 kodi".
-    r"(?:(?P<lakh>lakh\w*|lacs?\b|laks\w*|lach\w*|latch\w*|latsh\w*|இ?லட்ச|लाख)|"
+    # Tanglish too: "2.5 laksham", "2.5 latcham", "2.5 ilatcham", "1 kodi".
+    r"(?:(?P<lakh>lakh\w*|lacs?\b|i?laks\w*|i?lach\w*|i?latch\w*|i?latsh\w*|i?latc\w*|இ?லட்ச|लाख)|"
     r"(?P<crore>crores?\b|kodi\b|கோடி|करोड))",
     re.IGNORECASE,
 )

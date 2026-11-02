@@ -203,6 +203,9 @@ def test_refusal_response_says_which_check_rejected_the_draft() -> None:
     assert AskResponse.from_answer(answer).rejected_reasons == ["period_not_in_source"]
 
 
-@pytest.mark.parametrize("text", ["2.5 laksham", "2.5 latcham-ku keezh", "2.5 laksathukku"])
+@pytest.mark.parametrize(
+    "text",
+    ["2.5 laksham", "2.5 latcham-ku keezh", "2.5 laksathukku", "roopai 2.5 ilatchathirku keel"],
+)
 def test_tanglish_lakh_spellings(text: str) -> None:
     assert "250000" in numbers_in(text)
