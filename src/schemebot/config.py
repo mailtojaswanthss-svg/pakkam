@@ -121,6 +121,8 @@ class Settings(BaseSettings):
     # Gnani voice (Prisma v2.5 speech to text). The key lives only in .env.
     gnani_api_key: SecretStr | None = None
     gnani_stt_url: str = "https://api.vachana.ai/stt/v3"
+    stt_model: Literal["prisma-v2.5", "prisma-v3.0"] = "prisma-v3.0"
+    """v3.0: language hints with English for Tanglish, and scheme names as key terms."""
     stt_max_seconds: float = Field(default=30.0, gt=0, le=60)
     """Gnani's docs say both 30 s and 60 s; 30 s is the safe limit until tested."""
     stt_max_bytes: int = Field(default=5_000_000, ge=1)
