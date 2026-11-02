@@ -676,6 +676,252 @@
     link.remove();
   }
 
+  /* ---------- visit checklist ---------- */
+  // What to carry and how to apply, before going to the e-Sevai centre or ration shop: the
+  // answer's own documents/apply sentences plus the scheme's signed cards, each with its page.
+  const CHECK = {
+    en: { button: 'Visit checklist', title: 'Before you go', hint: 'Tick each item as you get it ready.', read: 'Read aloud', share: 'Share', print: 'Print',
+      empty: 'The official documents in Pakkam do not list the papers for this scheme. Ask at your e-Sevai centre.' },
+    ta: { button: 'செல்லும் முன் பட்டியல்', title: 'செல்லும் முன்', hint: 'ஒவ்வொன்றும் தயாரானதும் குறியிடுங்கள்.', read: 'படித்துக் காட்டு', share: 'பகிர்', print: 'அச்சிடு',
+      empty: 'இந்தத் திட்டத்துக்கான ஆவணங்கள் பக்கத்தில் உள்ள அதிகாரப்பூர்வ ஆவணங்களில் இல்லை. இ-சேவை மையத்தில் கேளுங்கள்.' },
+    hi: { button: 'जाने से पहले सूची', title: 'जाने से पहले', hint: 'हर चीज़ तैयार होने पर टिक करें।', read: 'सुनाएँ', share: 'साझा करें', print: 'प्रिंट',
+      empty: 'पक्कम के आधिकारिक दस्तावेज़ों में इस योजना के कागज़ों की सूची नहीं है। ई-सेवा केंद्र पर पूछें।' },
+  };
+  CHECK['ta-Latn'] = { ...CHECK.en, button: 'Pogum munnadi list', title: 'Pogum munnadi', hint: 'Ready aana tick pannunga.' };
+  const checkText = (lang) => CHECK[lang] || CHECK.en;
+
+  async function openChecklist(data, scheme, opener) {
+    closeProof();
+    const words = checkText(data.language);
+    const items = [];
+    const seen = new Set();
+    const add = (text, citation) => {
+      const key = text.trim();
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      items.push({ text: key, citation });
+    };
+    data.sentences.filter((s) => s.section === 'documents' || s.section === 'apply').forEach((s) => {
+      add(s.text, data.citations.find((c) => s.citations.includes(c.number)));
+    });
+    try {
+      const res = await fetch(`/checklist?scheme=${encodeURIComponent(scheme)}&lang=${encodeURIComponent(data.language)}`);
+      if (res.ok) (await res.json()).items.forEach((i) => add(i.text, i.citation));
+    } catch { /* the answer's own steps still show */ }
+
+    const sheet = el('div', 'proof');
+    sheet.id = 'proof';
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    sheet.setAttribute('aria-labelledby', 'check-title');
+    setLang(sheet, data.language);
+    const box = el('div', 'proof-box');
+    const head = el('div', 'proof-head');
+    const heading = el('h2', 'proof-title', `🧾 ${words.title}: ${scheme}`);
+    heading.id = 'check-title';
+    const close = el('button', 'proof-close', '✕');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close');
+    close.addEventListener('click', () => { closeProof(); if (opener) opener.focus(); });
+    head.append(heading, close);
+    const body = el('div', 'proof-body');
+    if (!items.length) {
+      body.append(el('p', 'proof-note', words.empty));
+    } else {
+      body.append(el('p', 'proof-note', words.hint));
+      const list = el('ul', 'check-list');
+      items.forEach((item, i) => {
+        const li = el('li', 'check-item');
+        const box2 = document.createElement('input');
+        box2.type = 'checkbox';
+        box2.id = `check-${i}`;
+        const label = el('label', null, item.text);
+        label.htmlFor = box2.id;
+        li.append(box2, label);
+        if (item.citation) {
+          const page = el('button', 'chip', pageShort(item.citation));
+          page.type = 'button';
+          page.title = item.citation.document;
+          page.addEventListener('click', () => openProof({ language: data.language, citations: [{ ...item.citation, number: 1 }], sentences: [{ text: item.text, citations: [1], section: 'documents' }] }, 1, page));
+          li.append(page);
+        }
+        list.append(li);
+      });
+      body.append(list);
+    }
+    const actions = el('div', 'proof-actions');
+    const read = el('button', 'proof-btn', `🔊 ${words.read}`);
+    read.type = 'button';
+    read.addEventListener('click', async () => {
+      if (proofAudio) { proofAudio.pause(); proofAudio = null; return; }
+      try {
+        read.disabled = true;
+        proofAudio = new Audio(await fetchSentenceAudio(items.map((i) => i.text).join(' ').slice(0, 900) || words.empty, data.language));
+        if (easyMode) proofAudio.playbackRate = 0.85;
+        proofAudio.addEventListener('ended', () => { proofAudio = null; });
+        await proofAudio.play();
+      } catch { /* written list stands */ } finally { read.disabled = false; }
+    });
+    const shareText = `${words.title}: ${scheme}\n${items.map((i) => `☐ ${i.text}${i.citation ? ` (${i.citation.document}, p.${i.citation.page_start})` : ''}`).join('\n')}`;
+    const wa = el('a', 'proof-btn shield-wa', `💬 ${words.share}`);
+    wa.href = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    wa.target = '_blank';
+    wa.rel = 'noopener noreferrer';
+    const print = el('button', 'proof-btn', `🖨 ${words.print}`);
+    print.type = 'button';
+    print.addEventListener('click', () => window.print());
+    actions.append(read, wa, print);
+    box.append(head, body, actions);
+    sheet.append(box);
+    sheet.addEventListener('click', (event) => { if (event.target === sheet) closeProof(); });
+    document.body.append(sheet);
+    document.body.classList.add('proof-open');
+    close.focus();
+  }
+
+  function checklistButton(data) {
+    const button = el('button', 'proof-open-btn', `🧾 ${checkText(data.language).button}`);
+    button.type = 'button';
+    setLang(button, data.language);
+    button.addEventListener('click', () => openChecklist(data, data.scheme, button));
+    return button;
+  }
+
+  /* ---------- rejected? from the rule to an appeal note ---------- */
+  // The person gives the scheme and the rejection reason. Pakkam asks the documents what the
+  // rule says (a normal cited answer), then fills a fixed appeal template with that rule and
+  // its page. The note is never written by a model: only the cited official sentences go in.
+  const APPEAL = {
+    en: { start: 'My application was rejected', title: 'Application rejected?', scheme: 'Scheme', reason: 'Reason given in the rejection message',
+      situation: 'Your situation (optional), e.g. "we only have a two-wheeler"', go: 'Find the rule', working: 'Finding the rule in the government order…',
+      rule: 'What the rule says', note: 'Draft appeal note (edit before you use it)', copy: 'Copy', share: 'Share', print: 'Print',
+      noRule: 'The official documents in Pakkam do not cover this reason. You can ask an officer.',
+      disclaimer: 'This is a draft to help you, not legal advice. Check every detail and ask at your e-Sevai centre how and by when to submit an appeal.',
+      ask: (scheme, reason) => `Under ${scheme}, is this a reason not to be eligible: ${reason}? What does the rule say?`,
+      template: (t) => `To\nThe officer concerned, ${t.scheme}\n\nSubject: Request to reconsider my application\n\nMy application under ${t.scheme} (Application No: __________) was rejected for this reason: "${t.reason}".\n${t.situation ? `My situation: ${t.situation}\n` : ''}\nThe government rule says (${t.document}, page ${t.page}):\n"${t.rule}"\n\nI request you to reconsider my application in the light of this rule.\n\nName: __________        Family card No: __________\nPhone: __________       Date: __________\nSignature: __________` },
+    ta: { start: 'என் விண்ணப்பம் நிராகரிக்கப்பட்டது', title: 'விண்ணப்பம் நிராகரிக்கப்பட்டதா?', scheme: 'திட்டம்', reason: 'நிராகரிப்புச் செய்தியில் சொன்ன காரணம்',
+      situation: 'உங்கள் நிலைமை (விருப்பம்), எ.கா. "எங்களிடம் இரு சக்கர வாகனம் மட்டுமே உள்ளது"', go: 'விதியைக் கண்டுபிடி', working: 'அரசாணையில் விதி தேடப்படுகிறது…',
+      rule: 'விதி சொல்வது', note: 'மேல்முறையீட்டுக் கடித வரைவு (பயன்படுத்தும் முன் திருத்துங்கள்)', copy: 'நகலெடு', share: 'பகிர்', print: 'அச்சிடு',
+      noRule: 'இந்தக் காரணம் பக்கத்தில் உள்ள அதிகாரப்பூர்வ ஆவணங்களில் இல்லை. அதிகாரியிடம் கேட்கலாம்.',
+      disclaimer: 'இது உதவிக்கான வரைவு மட்டுமே, சட்ட ஆலோசனை அல்ல. ஒவ்வொரு விவரத்தையும் சரிபார்த்து, மேல்முறையீட்டை எப்படி, எப்போதுக்குள் தர வேண்டும் என்று இ-சேவை மையத்தில் கேளுங்கள்.',
+      ask: (scheme, reason) => `${scheme} திட்டத்தில், இது தகுதியின்மைக்கான காரணமா: ${reason}? விதி என்ன சொல்கிறது?`,
+      template: (t) => `பெறுநர்\nசம்பந்தப்பட்ட அலுவலர், ${t.scheme}\n\nபொருள்: எனது விண்ணப்பத்தை மறுபரிசீலனை செய்யக் கோருதல்\n\n${t.scheme} திட்டத்தின் கீழ் எனது விண்ணப்பம் (விண்ணப்ப எண்: __________) "${t.reason}" என்ற காரணத்தால் நிராகரிக்கப்பட்டது.\n${t.situation ? `எனது நிலைமை: ${t.situation}\n` : ''}\nஅரசு விதி (${t.document}, பக்கம் ${t.page}) கூறுவது:\n"${t.rule}"\n\nஇந்த விதியின் அடிப்படையில் எனது விண்ணப்பத்தை மறுபரிசீலனை செய்யுமாறு கேட்டுக்கொள்கிறேன்.\n\nபெயர்: __________        குடும்ப அட்டை எண்: __________\nதொலைபேசி: __________       தேதி: __________\nகையொப்பம்: __________` },
+  };
+  APPEAL['ta-Latn'] = APPEAL.en;
+  APPEAL.hi = { ...APPEAL.en };
+  const APPEAL_SCHEMES = ['Kalaignar Magalir Urimai Thittam', 'PM-KISAN', 'Pudhumai Penn Scheme', 'Pradhan Mantri Ujjwala Yojana', 'Atal Pension Yojana'];
+
+  function openAppeal() {
+    closeShield();
+    const ui = voiceLanguage() === 'ta' ? 'ta' : 'en';
+    const words = APPEAL[ui];
+    const sheet = el('div', 'proof');
+    sheet.id = 'shield';
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    sheet.setAttribute('aria-labelledby', 'appeal-title');
+    setLang(sheet, ui);
+    const box = el('div', 'proof-box');
+    const head = el('div', 'proof-head');
+    const heading = el('h2', 'proof-title', `📝 ${words.title}`);
+    heading.id = 'appeal-title';
+    const close = el('button', 'proof-close', '✕');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close');
+    close.addEventListener('click', closeShield);
+    head.append(heading, close);
+    const body = el('div', 'proof-body');
+    const form = el('form', 'officer-form appeal-form');
+    const schemeLabel = el('label', 'appeal-label', words.scheme);
+    const scheme = document.createElement('select');
+    scheme.className = 'officer-contact';
+    APPEAL_SCHEMES.forEach((name) => { const o = el('option', null, name); o.value = name; scheme.append(o); });
+    schemeLabel.append(scheme);
+    const reason = document.createElement('textarea');
+    reason.className = 'shield-input';
+    reason.rows = 2;
+    reason.maxLength = 300;
+    reason.placeholder = words.reason;
+    reason.required = true;
+    const situation = document.createElement('textarea');
+    situation.className = 'shield-input';
+    situation.rows = 2;
+    situation.maxLength = 300;
+    situation.placeholder = words.situation;
+    const go = el('button', 'proof-btn shield-check', words.go);
+    go.type = 'submit';
+    const status = el('p', 'proof-note');
+    status.setAttribute('aria-live', 'polite');
+    const result = el('div');
+    form.append(schemeLabel, reason, situation, go, status);
+    body.append(form, result);
+    box.append(head, body);
+    sheet.append(box);
+    sheet.addEventListener('click', (event) => { if (event.target === sheet) closeShield(); });
+    document.body.append(sheet);
+    document.body.classList.add('proof-open');
+    reason.focus();
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const why = reason.value.trim();
+      if (why.length < 3) return;
+      go.disabled = true;
+      status.textContent = words.working;
+      try {
+        const res = await fetch('/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: words.ask(scheme.value, why).slice(0, 500), follow_up: { question: why, scheme: scheme.value } }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        const data = await res.json();
+        status.textContent = '';
+        result.textContent = '';
+        if (data.refused || !data.sentences.length) {
+          result.append(el('p', 'proof-note', words.noRule));
+          result.append(officerForm({ ...data, question: `${scheme.value}: ${why}` }));
+          return;
+        }
+        const c = data.citations.find((x) => data.sentences.some((s) => s.citations.includes(x.number))) || data.citations[0];
+        result.append(el('h3', 'proof-next', words.rule));
+        const rule = el('div', 'appeal-rule');
+        data.sentences.forEach((s) => rule.append(el('p', null, s.text)));
+        result.append(rule);
+        const proof = el('button', 'proof-open-btn', `📄 ${proofText(data.language).show}`);
+        proof.type = 'button';
+        proof.addEventListener('click', () => openProof(data, null, proof));
+        result.append(proof);
+        result.append(el('h3', 'proof-next', words.note));
+        const note = document.createElement('textarea');
+        note.className = 'shield-input appeal-note';
+        note.rows = 14;
+        note.value = words.template({ scheme: scheme.value, reason: why, situation: situation.value.trim(), document: c.document, page: c.page_start,
+          rule: data.sentences.map((s) => s.text).join(' ') });
+        result.append(note);
+        result.append(el('p', 'proof-note', words.disclaimer));
+        const actions = el('div', 'proof-actions');
+        const copy = el('button', 'proof-btn', `📋 ${words.copy}`);
+        copy.type = 'button';
+        copy.addEventListener('click', () => { navigator.clipboard && navigator.clipboard.writeText(note.value).catch(() => {}); });
+        const wa = el('a', 'proof-btn shield-wa', `💬 ${words.share}`);
+        wa.target = '_blank';
+        wa.rel = 'noopener noreferrer';
+        const syncLink = () => { wa.href = `https://wa.me/?text=${encodeURIComponent(note.value)}`; };
+        syncLink();
+        note.addEventListener('input', syncLink);
+        const print = el('button', 'proof-btn', `🖨 ${words.print}`);
+        print.type = 'button';
+        print.addEventListener('click', () => window.print());
+        actions.append(copy, wa, print, checklistButton({ ...data, scheme: scheme.value }));
+        result.append(actions);
+      } catch {
+        status.textContent = (SHIELD[ui] || SHIELD.en).failed;
+      } finally { go.disabled = false; }
+    });
+  }
+  document.querySelectorAll('[data-appeal]').forEach((b) => b.addEventListener('click', openAppeal));
+
   function proofButton(data) {
     const words = proofText(data.language);
     const button = el('button', 'proof-open-btn', `📄 ${words.show}`);
@@ -945,6 +1191,7 @@
     const meta = el('div', 'a-meta');
     if (!clarify && !busy) meta.append(listenButton(data));
     if (!refused && !clarify && data.citations && data.citations.length) meta.append(proofButton(data));
+    if (!refused && !clarify && data.scheme) meta.append(checklistButton(data));
     if (data.latency_ms && !refused && !clarify) meta.append(el('span', 'a-time', TEXT.answeredIn(data.latency_ms)));
     if (!refused && !clarify) meta.append(feedbackRow(data));
     body.append(meta);
