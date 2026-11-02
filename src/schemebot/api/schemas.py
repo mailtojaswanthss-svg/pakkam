@@ -294,9 +294,9 @@ class AskResponse(BaseModel):
                 SchemeFactOut(
                     scheme=f.scheme,
                     amount=f.amount,
-                    amount_citation=_citation_out(f.amount_citation, titles, doc_dates),
+                    amount_citation=citation_out(f.amount_citation, titles, doc_dates),
                     who=f.who,
-                    who_citation=_citation_out(f.who_citation, titles, doc_dates),
+                    who_citation=citation_out(f.who_citation, titles, doc_dates),
                     yearly_amount=f.yearly_amount,
                 )
                 for f in getattr(answer, "scheme_facts", [])
@@ -400,6 +400,18 @@ class FeedbackResponse(BaseModel):
     message: str = Field(default="Feedback recorded. Thank you for improving Pakkam.")
 
 
+class ChecklistItem(BaseModel):
+    text: str
+    citation: CitationOut
+
+
+class ChecklistResponse(BaseModel):
+    scheme: str
+    items: list[ChecklistItem] = Field(
+        description="Signed 'documents' and 'how to apply' facts for the scheme, each cited."
+    )
+
+
 class OfficerRequest(BaseModel):
     question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=500)]
     scheme: Annotated[str, StringConstraints(max_length=120)] | None = None
@@ -439,7 +451,7 @@ class ForwardResponse(BaseModel):
     )
 
 
-def _citation_out(
+def citation_out(
     c: Any, titles: Mapping[str, str], doc_dates: Mapping[str, str | None]
 ) -> CitationOut | None:
     if c is None:

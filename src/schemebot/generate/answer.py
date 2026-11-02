@@ -304,6 +304,20 @@ class Answerer:
             checked_on=card.verified_on,
         )
 
+    def checklist(self, scheme: str, language: Language) -> list[tuple[str, Citation]]:
+        """Signed 'documents' and 'how to apply' cards for one scheme, for a visit checklist:
+        (card text, citation). Tamil cards for Tamil, English otherwise."""
+        cards = list(getattr(self._fact_cards, "cards", None) or [])
+        card_language = "ta" if language in ("ta", "ta-Latn") else "en"
+        order = {"documents": 0, "how_to_apply": 1}
+        chosen = [
+            c
+            for c in cards
+            if c.scheme == scheme and c.language == card_language and c.field in order
+        ]
+        chosen.sort(key=lambda c: order[c.field])
+        return [(c.answer_text, self._card_citation(c)) for c in chosen]
+
     def scheme_facts(self, schemes: list[str], language: Language) -> list[SchemeFact]:
         """Each scheme's signed amount and eligibility card, in the question's language
         (Tamil cards for Tamil, English otherwise). Schemes without a signed card are listed
