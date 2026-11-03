@@ -25,13 +25,13 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project \
-    --extra index --extra generate --extra gemini --extra api
+    --extra ingest --extra index --extra generate --extra gemini --extra api
 
 # The project itself, installed in editable mode so the app finds web/ and data/ under /app.
 COPY README.md ./
 COPY src ./src
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --extra index --extra generate --extra gemini --extra api
+    uv sync --frozen --no-dev --extra ingest --extra index --extra generate --extra gemini --extra api
 
 # ---------- runtime ----------
 FROM ${PYTHON_IMAGE} AS runtime
