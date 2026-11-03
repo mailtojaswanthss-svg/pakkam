@@ -38,7 +38,7 @@ def test_keys_become_secrets_and_the_rest_variables() -> None:
         }
     )
     assert secrets == {"SCHEMEBOT_GEMINI_API_KEY": "k1", "SCHEMEBOT_GNANI_API_KEY": "k2"}
-    assert variables == {"SCHEMEBOT_LLM_PROVIDER": "gemini"}
+    assert variables == {"SCHEMEBOT_LLM_PROVIDER": "gemini"} | push.SPACE_OVERRIDES
 
 
 def test_model_revisions_are_baked_into_the_dockerfile() -> None:

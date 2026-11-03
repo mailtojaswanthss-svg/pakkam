@@ -46,6 +46,9 @@ SKIP = {
     "SCHEMEBOT_TESSDATA_DIR",
     "SCHEMEBOT_OCR_ENGINE",
 }
+# The free Space is a slower backup (2 CPU cores): rerank 10 search results instead of 20,
+# which halves the reranker's time. Same models and refusal threshold as the laptop.
+SPACE_OVERRIDES = {"SCHEMEBOT_RETRIEVAL_TOP_K": "10"}
 # Baked into the image at build time (Dockerfile ARGs), as well as set at run time.
 BUILD_ARGS = {
     "SCHEMEBOT_EMBEDDING_MODEL": "EMBEDDING_MODEL",
@@ -79,7 +82,7 @@ def read_env(path: Path) -> dict[str, str]:
 def split_settings(env: dict[str, str]) -> tuple[dict[str, str], dict[str, str]]:
     """(secrets, variables): anything named like a key or token is a secret."""
     secrets = {k: v for k, v in env.items() if any(w in k for w in SECRET_WORDS)}
-    variables = {k: v for k, v in env.items() if k not in secrets}
+    variables = {k: v for k, v in env.items() if k not in secrets} | SPACE_OVERRIDES
     return secrets, variables
 
 

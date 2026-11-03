@@ -11,6 +11,19 @@
   const VOICE_ERRORS = new Set([400, 413, 415, 422, 502, 503]);
   // After this long, say so: "This is taking longer than usual."
   const SLOW_ANSWER_S = 20;
+  // Shown while answers come from the slower backup server (assets/backup.js).
+  window.addEventListener('pakkam-backup', (event) => {
+    let pill = document.getElementById('backup-note');
+    if (!pill) {
+      pill = document.createElement('p');
+      pill.id = 'backup-note';
+      pill.className = 'backup-note';
+      pill.setAttribute('role', 'status');
+      pill.textContent = 'Using the backup server: answers can take up to a minute. · மாற்று சர்வர்: பதில் வர ஒரு நிமிடம் ஆகலாம்.';
+      document.body.append(pill);
+    }
+    pill.hidden = !event.detail.on;
+  });
   const TEXT = {
     tooShort: 'Type at least 3 characters.',
     tooLong: 'Keep it under 500 characters.',
@@ -352,8 +365,14 @@
       img.alt = `${c.document}, ${words.page} ${c.page_start}`;
       img.loading = 'eager';
       const mark = (c.excerpt || '').slice(0, 600);
-      img.src = `/page?doc=${encodeURIComponent(c.doc_id)}&p=${c.page_start}&mark=${encodeURIComponent(mark)}`;
-      img.addEventListener('error', () => { figure.replaceChildren(el('p', 'proof-note', words.noImage)); });
+      const pagePath = `/page?doc=${encodeURIComponent(c.doc_id)}&p=${c.page_start}&mark=${encodeURIComponent(mark)}`;
+      const backup = window.PakkamBackup;
+      img.src = backup ? backup.url(pagePath) : pagePath;
+      img.addEventListener('error', () => {
+        // The laptop may be offline: try the backup server once before giving up.
+        if (backup && !img.src.startsWith(backup.backupUrl(''))) { img.src = backup.backupUrl(pagePath); zoom.href = img.src; return; }
+        figure.replaceChildren(el('p', 'proof-note', words.noImage));
+      });
       // Tap for the full-size page, readable across a counter.
       const zoom = el('a', 'proof-zoom');
       zoom.href = img.src;
