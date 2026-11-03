@@ -32,6 +32,13 @@ if ($old) { Start-Sleep -Seconds 3 }
 $indexBuild = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
     Where-Object { $_.CommandLine -and $_.CommandLine -match "schemebot\.(index|ingest)" }
 if ($indexBuild) { throw "An index rebuild is still running. Wait for it to finish, then start Pakkam again." }
+# Both models already downloaded: load them from disk without asking huggingface.co for a newer
+# version, so a dropped connection to the Hub cannot stop the backend from starting.
+$hub = if ($env:HF_HOME) { Join-Path $env:HF_HOME "hub" } else { Join-Path $env:USERPROFILE ".cache\huggingface\hub" }
+if ((Test-Path (Join-Path $hub "models--BAAI--bge-m3")) -and (Test-Path (Join-Path $hub "models--BAAI--bge-reranker-v2-m3"))) {
+    $env:HF_HUB_OFFLINE = "1"
+    Write-Host "    Models found on this laptop: loading them offline." -ForegroundColor DarkGray
+}
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "uv run --extra ingest --extra index --extra generate --extra gemini --extra api fastapi run"
 $ready = $false
 for ($i = 0; $i -lt 60; $i++) {
