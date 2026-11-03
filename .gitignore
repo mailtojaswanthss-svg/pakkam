@@ -47,3 +47,6 @@ data/answer-cache.tmp
 *.mp3
 
 data/eval/answer_eval_raw/
+
+# Google Cloud bundle (holds API keys): deploy/gcp/bundle.py
+pakkam-gcp.zip
