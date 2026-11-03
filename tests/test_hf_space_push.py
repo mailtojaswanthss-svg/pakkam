@@ -52,3 +52,14 @@ def test_dockerfile_installs_what_the_api_imports() -> None:
     text = (ROOT / "deploy" / "hf-space" / "Dockerfile").read_text(encoding="utf-8")
     assert "--extra ingest" in text and "--extra api" in text
     assert "whl/cpu" in text
+
+
+def test_hf_token_is_used_for_upload_but_never_sent_to_the_space(tmp_path: Path) -> None:
+    env = tmp_path / ".env"
+    env.write_text(
+        "HF_TOKEN=hf_abc\nSCHEMEBOT_HF_API_KEY=hf_abc\nSCHEMEBOT_GEMINI_API_KEY=g\n",
+        encoding="utf-8",
+    )
+    assert push.hf_token(env) == "hf_abc"
+    assert push.read_env(env) == {"SCHEMEBOT_GEMINI_API_KEY": "g"}
+    assert push.hf_token(tmp_path / "missing.env") is None
