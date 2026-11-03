@@ -171,13 +171,17 @@ laptop backend behind a Cloudflare tunnel; full report in
 | Run | Questions | Answered (covered) | Cited a correct page | Refused when not covered | Median |
 |---|---|---|---|---|---|
 | 2 Nov | 60 (15 per language) | 81% | **97%** | 92% | 9.2 s |
-| Full set | 194 | *running; numbers added when complete* | | | |
+| **3 Nov, full set** | **194** (all languages) | **88%** (136/154) | **98%** (133/136) | **98%** (39/40) | **4.8 s** |
 
-**Live feature check** (`scripts/live_feature_check.py`, 3 Nov): 10/11 features pass through the
-website: cited answer, proof page image, Tanglish answer, honest refusal, "what can I get",
-visit checklist, ask an officer, dashboard, Timbre speech, and **Prisma v3.0 hearing Timbre's
-Tamil back word for word**. The rumour shield timed out once on an exhausted free Gemini
-quota (fixed: a 429 now fails over at once).
+By language on the full set: English 97% answered / 100% correct page, Tamil 92% / 94%,
+Hindi 84% / 100%, Tanglish 79% / 97%. All 18 misses were refusals, not wrong answers: 11 where search
+did not find the right page, 7 where the checks rejected a draft they could not verify. Each is
+listed with its reason in the report.
+
+**Live feature check** (`scripts/live_feature_check.py`, 3 Nov): **11/11 features pass** through
+the website: cited answer, proof page image, Tanglish answer, honest refusal, "what can I get",
+visit checklist, rumour shield with scam signs, ask an officer, dashboard, Timbre speech, and
+**Prisma v3.0 hearing Timbre's Tamil back word for word**.
 
 **Retrieval ablation** (`pakkam_chitra` collection, 194 draft questions):
 

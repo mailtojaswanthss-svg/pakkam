@@ -1,6 +1,6 @@
 # Pakkam: status
 
-Last updated: 2 Nov 2026. Deadline: **10 Nov 2026, 11:59 PM IST** (Gnani.ai Great Indian AI
+Last updated: 3 Nov 2026. Deadline: **10 Nov 2026, 11:59 PM IST** (Gnani.ai Great Indian AI
 Internship Challenge). Target submission: 8 Nov.
 
 ## Where things stand
@@ -9,8 +9,8 @@ Internship Challenge). Target submission: 8 Nov.
 |---|---|
 | Live site | https://pakkam-alpha.vercel.app (chat at `/chat/`, Pakkam Desk at `/dashboard/`); backend on the developer's laptop through a Cloudflare tunnel, started with `scripts/start_pakkam.ps1` |
 | Tests | 634 passing; ruff, format and mypy clean; CI on every push |
-| Live feature check | 10/11 through the website on 2 Nov (`scripts/live_feature_check.py`); the rumour shield timeout is fixed (Gemini 429 no longer retried) |
-| Live benchmark | 2 Nov, 60 questions: 81% answered, **97% cite a correct page**, 92% correct refusals. Full 194-question run in progress (`scripts/live_benchmark.py --resume`) |
+| Live feature check | **11/11** through the website on 3 Nov (`scripts/live_feature_check.py`) |
+| Live benchmark | 3 Nov, **all 194 questions**: 88% answered, **98% cite a correct page**, 98% correct refusals, median 4.8 s, no errors ([LIVE_BENCHMARK.md](docs/review/LIVE_BENCHMARK.md)) |
 | Fact cards | 26 cards, **all signed** by Jaswanth S S against the printed pages ([FACT_CARD_CHECK.md](docs/review/FACT_CARD_CHECK.md)) |
 | OCR corrections | KMUT G.O. 15 pp.10-11 ("25 lakh" read for 2.5 lakh) confirmed and applied; 3 suspected BC/MBC pages blocked until checked |
 | Voice | Gnani Prisma v3.0 (key terms, language hints, v2.5 fallback) and Timbre, live; Timbre → Prisma round trip passes |
@@ -33,7 +33,7 @@ Internship Challenge). Target submission: 8 Nov.
 
 | When | What | Who |
 |---|---|---|
-| 2-3 Nov | Finish the full 194-question benchmark; update README and report numbers | Claude |
+| 3-4 Nov | Move the backend to Hugging Face Spaces (only if it passes 11/11 there too) | Both |
 | 3 Nov | Teaser post on LinkedIn/X (tag Gnani, #GnaniAI #GreatIndianAIInternshipChallenge) | Jaswanth |
 | 3-4 Nov | Record 20 voice clips (`docs/voice/CLIP_PLAN.md`) for spoken Tanglish and noise numbers | Jaswanth |
 | 4 Nov | Spoken Tanglish / noisy-audio evaluation on the clips | Claude |
