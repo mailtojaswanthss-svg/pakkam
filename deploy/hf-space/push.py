@@ -134,7 +134,9 @@ def assemble(target: Path, env: dict[str, str]) -> list[tuple[str, int]]:
             shutil.copytree(source, out, ignore=IGNORE)
         else:
             shutil.copy2(source, out)
-    (target / "Dockerfile").write_text(dockerfile(env), encoding="utf-8")
+    (target / "Dockerfile").write_text(
+        dockerfile(env).replace("\r\n", "\n"), encoding="utf-8", newline="\n"
+    )
     return sorted(
         (str(p.relative_to(target)).replace("\\", "/"), p.stat().st_size)
         for p in target.rglob("*")
