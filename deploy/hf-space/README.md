@@ -20,10 +20,10 @@ An independent student project, not an official service and not affiliated with 
 government body. Answers are informational only: check the official source before you act.
 Your question text is not stored by the app.
 
-This free Space runs on CPU, so the first question after a quiet spell waits a minute or two
-while the models load, and answers take several seconds.
+This free Space is Pakkam's **backup** answer server. The site (pakkam-alpha.vercel.app)
+normally answers from a laptop with a GPU; when that is offline, the chat page sends questions
+here instead (`web/assets/backup.js`). It runs on 2 CPU cores, so answers take up to a minute;
+signed fact-card answers and repeated questions are instant.
 
-Settings (Space → Settings → Variables and secrets):
-
-- secret `SCHEMEBOT_GEMINI_API_KEY`: the Gemini API key (or `SCHEMEBOT_ANTHROPIC_API_KEY`)
-- variable `SCHEMEBOT_LLM_PROVIDER`: `gemini` or `claude`
+Settings are copied from the laptop's `.env` by `deploy/hf-space/push.py`: API keys as Space
+secrets, everything else as variables.
