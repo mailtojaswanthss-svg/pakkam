@@ -62,7 +62,7 @@ def ask(url: str, question: str, timeout: float) -> tuple[dict[str, Any] | None,
         return data, time.perf_counter() - started, ""
     except urllib.error.HTTPError as error:
         return None, time.perf_counter() - started, f"HTTP {error.code}"
-    except (urllib.error.URLError, TimeoutError) as error:
+    except (urllib.error.URLError, OSError) as error:  # timeouts, resets mid-reply
         return None, time.perf_counter() - started, str(error)[:80]
 
 
