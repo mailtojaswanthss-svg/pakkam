@@ -1,6 +1,6 @@
 """Publish Pakkam to a free Hugging Face Space (Docker, CPU).
 
-    uv run hf auth login                                   # once, with a "write" token
+    (put HF_TOKEN=<a "write" token> in .env, or run `hf auth login` once)
     uv run python deploy/hf-space/push.py --dry-run        # list what would be uploaded
     uv run python deploy/hf-space/push.py                  # create/update the Space
 
@@ -58,8 +58,8 @@ BUILD_ARGS = {
 }
 
 
-def read_env(path: Path) -> dict[str, str]:
-    """SCHEMEBOT_* settings from a .env file (KEY=value lines; quotes and comments allowed)."""
+def parse_env(path: Path) -> dict[str, str]:
+    """Every NAME=value line of a .env file (quotes and comments allowed; empty values dropped)."""
     values: dict[str, str] = {}
     if not path.is_file():
         return values
@@ -74,9 +74,30 @@ def read_env(path: Path) -> dict[str, str]:
             value = value[1:-1]
         else:
             value = value.split(" #", 1)[0].strip()
-        if name.startswith("SCHEMEBOT_") and name not in SKIP and value:
+        if value:
             values[name] = value
     return values
+
+
+def is_hf_token(name: str) -> bool:
+    """The Hugging Face token that uploads the Space. It is never copied into the Space."""
+    upper = name.upper()
+    return ("HF" in upper or "HUGGING" in upper) and any(w in upper for w in ("TOKEN", "KEY"))
+
+
+def read_env(path: Path) -> dict[str, str]:
+    """SCHEMEBOT_* settings for the Space, without laptop-only ones or the HF token."""
+    return {
+        k: v
+        for k, v in parse_env(path).items()
+        if k.startswith("SCHEMEBOT_") and k not in SKIP and not is_hf_token(k)
+    }
+
+
+def hf_token(path: Path) -> str | None:
+    """The Hugging Face token from .env (HF_TOKEN or similar), else None (use `hf auth login`)."""
+    found = [v for k, v in parse_env(path).items() if is_hf_token(k)]
+    return found[0] if found else None
 
 
 def split_settings(env: dict[str, str]) -> tuple[dict[str, str], dict[str, str]]:
@@ -140,6 +161,8 @@ def main() -> int:
         print(f"{len(files)} files, {total / 1e6:.1f} MB")
         print(f"secrets ({len(secrets)}): {', '.join(sorted(secrets)) or 'none'}")
         print(f"variables ({len(variables)}): {', '.join(sorted(variables)) or 'none'}")
+        source = "found in .env" if hf_token(args.env) else "not in .env: run `hf auth login`"
+        print(f"Hugging Face token: {source} (used to upload, never copied to the Space)")
         if args.dry_run:
             for name, size in files:
                 if not name.startswith(("src/", "web/")):
@@ -149,7 +172,8 @@ def main() -> int:
 
         from huggingface_hub import HfApi
 
-        api = HfApi()
+        token = hf_token(args.env)
+        api = HfApi(token=token)  # None: the token saved by `hf auth login`
         user = api.whoami()["name"]
         repo_id = f"{user}/{args.space}"
         api.create_repo(repo_id, repo_type="space", space_sdk="docker", exist_ok=True)
