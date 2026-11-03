@@ -685,3 +685,14 @@ body.easy .icon-btn, body.easy .send { transform: scale(1.15); }
   .proof-box { box-shadow: none; max-height: none; }
   .proof-actions, .proof-close, .appeal-form { display: none !important; }
 }
+
+/* Backup server notice (assets/backup.js) */
+.backup-note {
+  position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 60;
+  max-width: min(92vw, 560px); margin: 0; padding: 8px 14px;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--border);
+  border-radius: 999px; box-shadow: 0 2px 10px rgb(0 0 0 / 0.15);
+  font-size: 0.9rem; text-align: center;
+}
+.backup-note[hidden] { display: none; }
+@media print { .backup-note { display: none !important; } }
