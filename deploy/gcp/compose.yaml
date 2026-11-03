@@ -1,0 +1,31 @@
+# Pakkam on a Google Cloud server: the app (CPU, port 7860 inside) behind Caddy, which gets
+# a free HTTPS certificate for SITE (an sslip.io name made from the server's fixed address).
+# vm-setup.sh starts it with:  SITE=<name> docker compose up -d --build
+
+services:
+  pakkam:
+    build: .
+    env_file: pakkam.env
+    volumes:
+      - logs:/app/logs
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.10
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE: ${SITE:?set SITE to the server's https name}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - pakkam
+    restart: unless-stopped
+
+volumes:
+  logs:
+  caddy_data:
+  caddy_config:
