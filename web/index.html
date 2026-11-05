@@ -17,13 +17,14 @@
       <!-- Left: Provided Ribbon P PNG + Bold Arial PAKKAM -->
       <a href="#home" class="brand-logo" data-nav="home">
         <img src="./assets/images/Logo for pakkam.png" alt="Pakkam Emblem" class="brand-logo__img" />
-        <span class="brand-logo__text">AKKAM</span>
+        <span class="brand-logo__text">PAKKAM</span>
       </a>
 
       <!-- Center: Navigation Items + Language Dropdown -->
       <ul class="nav-links">
         <li><button class="nav-item active" data-nav="home" data-i18n="nav.home">Home</button></li>
         <li><button class="nav-item" data-nav="schemes" data-i18n="nav.schemes">Schemes</button></li>
+        <li><button class="nav-item" data-nav="shield" data-i18n="nav.shield">Check a forward</button></li>
         <li><button class="nav-item" data-nav="documents" data-i18n="nav.documents">Documents</button></li>
         <li><button class="nav-item" data-nav="history" data-i18n="nav.history">History</button></li>
         <li><button class="nav-item" data-nav="about" data-i18n="nav.about">About</button></li>
@@ -96,7 +97,7 @@
           </div>
 
           <div id="hero-orb-trigger" class="central-orb-container" role="button" tabindex="0" aria-label="Activate Pakkam Voice Assistant" data-i18n-aria="assistant.shortcut">
-            <img id="hero-orb-img" src="./assets/images/Dark theme orb.png" alt="Pakkam Voice Orb" class="central-orb-img" />
+            <img id="hero-orb-img" src="./assets/images/dark-orb.webp" alt="Pakkam Voice Orb" class="central-orb-img" />
           </div>
 
           <div class="waveform-wing" aria-hidden="true">
@@ -125,10 +126,19 @@
           <span data-i18n="home.title">Government schemes, explained from the official page.</span>
         </h1>
         <p class="hero-subtitle" data-i18n="home.subtitle">Your language. Your rights. Your access.</p>
-        <button id="cta-ask-pakkam" class="cta-button">
-          <span data-i18n="home.ask">ASK PAKKAM AI</span>
-          <span aria-hidden="true">→</span>
-        </button>
+        <div class="hero-actions">
+          <button id="cta-ask-pakkam" class="cta-button">
+            <span data-i18n="home.ask">ASK PAKKAM AI</span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <button class="chip-btn hero-secondary" type="button" data-nav="shield" data-i18n="home.shield">🛡️ Check a WhatsApp forward</button>
+        </div>
+        <label class="conv-toggle"><input type="checkbox" class="conv-mode-input" /> <span data-i18n="conv.mode">Conversation mode: keep listening after each answer</span></label>
+        <div id="home-convo" class="home-convo" aria-live="polite">
+          <p id="home-status" class="home-status" data-i18n="home.tapOrb">Tap the orb and ask your question</p>
+          <p id="home-heard" class="home-heard"></p>
+          <div id="home-answer" class="home-answer glass-panel" hidden></div>
+        </div>
       </div>
 
     </div>
@@ -160,14 +170,16 @@
       <aside class="glass-panel orb-dock">
         <div id="assistant-orb-assembly" class="orb-waveform-assembly">
           <div id="assistant-mic-orb" class="central-orb-container" title="Click to Speak">
-          <img class="central-orb-img theme-bound-orb" src="./assets/images/Dark theme orb.png" alt="Voice Assistant Orb" />
+          <img class="central-orb-img theme-bound-orb" src="./assets/images/dark-orb.webp" alt="Voice Assistant Orb" />
           </div>
         </div>
           <h2 id="voice-status-label" style="font-size: 1.1rem;" data-i18n="assistant.tap">Tap Orb to Speak</h2>
-        <p id="live-transcript-preview" style="font-size: 0.85rem; color: var(--text-secondary); min-height: 40px;">
+        <p id="live-transcript-preview" class="live-transcript">
           <span data-i18n="assistant.languages">Supports Tamil, Hindi & English</span>
         </p>
-        <button id="stop-audio-btn" class="chip-btn" style="display: none;">⏹ Stop Audio Playback</button>
+        <div id="voice-lang-chips" class="voice-lang-chips" role="group" data-i18n-aria="language.aria"></div>
+        <label class="conv-toggle"><input type="checkbox" class="conv-mode-input" /> <span data-i18n="conv.short">Conversation mode</span></label>
+        <button id="stop-audio-btn" class="chip-btn" style="display: none;" data-i18n="assistant.stop">⏹ Stop Audio Playback</button>
       </aside>
 
       <!-- Right Conversational Thread -->
@@ -176,6 +188,7 @@
           <div class="chat-bubble ai">
             <strong data-i18n="assistant.name">Pakkam AI</strong><br />
             <span data-i18n="assistant.welcome">Ask about a government service, document or official procedure in Tamil, Hindi or English.</span>
+            <div id="welcome-chips" class="citation-pills welcome-chips"></div>
           </div>
         </div>
 
@@ -192,6 +205,30 @@
           <button type="submit" class="cta-button" style="padding: 12px 24px;" data-i18n="common.send">Send</button>
         </form>
       </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       RUMOUR SHIELD: is this WhatsApp forward true? (POST /check-forward)
+       ======================================================================== -->
+  <section id="page-shield" class="page-section">
+    <div class="page-header">
+      <div>
+        <p class="hero-eyebrow" data-i18n="shield.eyebrow">RUMOUR SHIELD</p>
+        <h1 data-i18n="shield.title">Is this WhatsApp forward true?</h1>
+        <p class="page-intro" data-i18n="shield.intro">Paste the message. Pakkam checks every claim against the official government documents and points out scam signs.</p>
+      </div>
+    </div>
+    <div class="glass-panel shield-panel">
+      <form id="shield-form" class="shield-form">
+        <textarea id="shield-input" class="shield-input" rows="5" maxlength="1500" required data-i18n-placeholder="shield.placeholder" placeholder="Paste the WhatsApp message here"></textarea>
+        <div class="shield-actions">
+          <button type="button" class="chip-btn" id="shield-example" data-i18n="shield.example">Try an example</button>
+          <button type="submit" class="cta-button" id="shield-check" data-i18n="shield.check">Check it</button>
+        </div>
+      </form>
+      <p id="shield-status" class="document-status" role="status" aria-live="polite"></p>
+      <div id="shield-result" class="shield-result"></div>
     </div>
   </section>
 
@@ -277,6 +314,8 @@
       <p class="hero-eyebrow" data-i18n="about.eyebrow">THE STORY BEHIND PAKKAM</p>
       <h1 data-i18n="about.title">It started with a conversation.</h1>
       <p data-i18n="about.lede">A conversation with a grandfather about the everyday difficulty of reaching public services.</p>
+      <button id="about-listen" class="cta-button about-listen" type="button"><span data-i18n="about.listen">🔊 Hear Pakkam explain itself</span></button>
+      <p id="about-listen-text" class="about-listen-text" hidden></p>
     </header>
     <article class="about-story">
       <section><p class="story-index">01 / <span data-i18n="about.storyLabel">A family conversation</span></p><p data-i18n="about.story">I love my grandparents very much. One day, my grandfather told me how hard it was to access loans, read government messages and find his way through complicated portals on a mobile phone. That conversation stayed with me.</p></section>
