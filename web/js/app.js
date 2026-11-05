@@ -90,7 +90,7 @@ const state = {
   waveformFrame: null,
   micStream: null,
   activeDocumentId: null,
-  history: JSON.parse(localStorage.getItem('pakkam_history') || '[]'),
+  history: (() => { try { return JSON.parse(localStorage.getItem('pakkam_history') || '[]'); } catch (_) { return []; } })(),
 };
 
 function setOrbState(name) {
@@ -192,416 +192,551 @@ function navigateTo(pageKey) {
 }
 
 /* ==========================================================================
-   3. VOICE RECORDING (GNANI PRISMA STT) & AUDIO PLAYBACK (GNANI TIMBRE TTS)
+   Text for the parts connected to the Pakkam backend (merged into MESSAGES)
    ========================================================================== */
-async function toggleVoiceRecording() {
-  const statusLabel = document.getElementById('voice-status-label');
-  const preview = document.getElementById('live-transcript-preview');
-
-  if (state.isRecording && state.mediaRecorder) {
-    state.mediaRecorder.stop();
-    state.isRecording = false;
-    stopWaveformMeter();
-    state.micStream?.getTracks().forEach((track) => track.stop());
-    state.micStream = null;
-    setOrbState('processing');
-    if (statusLabel) statusLabel.textContent = t('status.processing');
-    return;
-  }
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    state.micStream = stream;
-    state.audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
-    await state.audioContext.resume();
-    startWaveformMeter(state.audioContext.createMediaStreamSource(stream));
-    state.audioChunks = [];
-    state.mediaRecorder = new MediaRecorder(stream);
-
-    state.mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) state.audioChunks.push(e.data);
-    };
-
-    state.mediaRecorder.onstop = async () => {
-      stream.getTracks().forEach((track) => track.stop());
-      const audioBlob = new Blob(state.audioChunks, { type: 'audio/webm' });
-      await sendAudioToGnaniSTT(audioBlob);
-    };
-
-    state.mediaRecorder.start();
-    state.isRecording = true;
-    navigateTo('assistant');
-    setOrbState('listening');
-    if (statusLabel) statusLabel.textContent = t('status.listening');
-    if (preview) preview.textContent = `Listening in ${state.language}...`;
-  } catch (err) {
-    stopWaveformMeter();
-    setOrbState('error');
-    if (statusLabel) statusLabel.textContent = t('status.micError');
-  }
-}
-
-async function sendAudioToGnaniSTT(audioBlob) {
-  const statusLabel = document.getElementById('voice-status-label');
-  const preview = document.getElementById('live-transcript-preview');
-
-  const formData = new FormData();
-  formData.append('audio', audioBlob, 'voice_query.webm');
-  formData.append('language', state.language);
-
-  try {
-    const res = await fetch(`${API_BASE}/api/v1/voice/stt`, {
-      method: 'POST',
-      body: formData,
-    });
-    if (!res.ok) throw new Error('STT endpoint returned non-200');
-    const data = await res.json();
-    const transcript = data.transcript || data.text || '';
-
-    if (preview) preview.textContent = `"${transcript}"`;
-    if (statusLabel) statusLabel.textContent = t('assistant.tap');
-    if (transcript.trim()) {
-      await submitChatQuery(transcript);
-    } else {
-      setOrbState('idle');
-    }
-  } catch (err) {
-    setOrbState('error');
-    if (statusLabel) statusLabel.textContent = t('assistant.tap');
-    if (preview) preview.textContent = t('status.voiceError');
-  }
-}
-
-async function playGnaniTTS(text) {
-  if (!state.autoPlayTTS || !text) return;
-  const stopBtn = document.getElementById('stop-audio-btn');
-
-  try {
-    const res = await fetch(`${API_BASE}/api/v1/voice/tts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, language: state.language }),
-    });
-    if (!res.ok) return;
-
-    const data = await res.json();
-    const audioSrc = data.audio_url || (data.audio_base64 ? `data:audio/wav;base64,${data.audio_base64}` : null);
-    if (!audioSrc) return;
-
-    if (state.currentAudio) state.currentAudio.pause();
-    state.currentAudio = new Audio(audioSrc);
-    if (stopBtn) stopBtn.style.display = 'inline-block';
-
-    state.currentAudio.onended = () => {
-      if (stopBtn) stopBtn.style.display = 'none';
-      stopWaveformMeter();
-      setOrbState('idle');
-    };
-    await state.currentAudio.play();
-    setOrbState('speaking');
-    try {
-      const audioUrl = new URL(audioSrc, window.location.href);
-      if (audioSrc.startsWith('data:') || audioUrl.origin === window.location.origin) {
-        state.audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
-        await state.audioContext.resume();
-        startWaveformMeter(state.audioContext.createMediaElementSource(state.currentAudio), true);
-      }
-    } catch (_) {
-      // Audio playback remains available if waveform access is restricted.
-    }
-  } catch (_) {
-    // Fail gracefully if TTS stream is unavailable
-  }
-}
+Object.assign(MESSAGES['en-IN'], {
+  'home.title': 'Government schemes, explained from the official page.',
+  'home.step2Title': 'See the official page', 'home.step2Body': 'Every answer shows the government document and page it comes from.',
+  'home.step3Title': 'No page, no answer', 'home.step3Body': 'When the documents do not say it, Pakkam says so instead of guessing.',
+  'feature.01': 'See the Proof', 'feature.01body': 'Each answer opens the exact page of the official document.',
+  'feature.02body': 'Ask in Tamil, Tanglish, Hindi or English.',
+  'assistant.languages': 'Supports Tamil, Tanglish, Hindi & English',
+  'documents.eyebrow': 'OFFICIAL SOURCES', 'documents.title': 'The documents Pakkam reads',
+  'documents.intro': 'Every answer comes from one of these official documents, with the page it is on.',
+  'documents.note': 'Pakkam answers only from these documents, downloaded from official government websites. Open any of them to read it yourself.',
+  'documents.open': 'Open official PDF', 'documents.dated': 'Dated', 'documents.loading': 'Loading the documents...',
+  'documents.offline': 'The document list is unavailable while the Pakkam server is offline.',
+  'schemes.intro': 'The schemes Pakkam can answer about. Tap a question to ask it.',
+  'schemes.askAmount': 'How much?', 'schemes.askWho': 'Who can apply?', 'schemes.askDocs': 'Documents needed?',
+  'schemes.docCount': 'official documents',
+  'proof.open': 'See the page', 'proof.title': 'Proof from the official document', 'proof.page': 'Page',
+  'proof.checked': 'Checked against the printed page by', 'proof.unchecked': 'Taken from the document text by Pakkam; check the page yourself.',
+  'proof.source': 'Open the official PDF', 'proof.close': 'Close', 'proof.noImage': 'The page image is not available right now.',
+  'answer.refused': 'Not in the documents', 'answer.call': 'Helpline', 'answer.didYouMean': 'Which scheme do you mean?',
+  'status.tooMany': 'Pakkam is getting a lot of questions. Wait a minute, then ask again.',
+  'status.timeout': 'Pakkam took too long to answer. Ask again in a moment.',
+  'status.noSpeech': 'I did not hear anything. Tap the orb and try again.',
+  'footer.line': 'A student project, not a government service. Always check the official source before you act.',
+});
+Object.assign(MESSAGES['ta-IN'], {
+  'home.title': 'அரசு திட்டங்கள், அதிகாரப்பூர்வ பக்கத்திலிருந்தே.',
+  'home.step2Title': 'அரசு பக்கத்தைப் பாருங்கள்', 'home.step2Body': 'ஒவ்வொரு பதிலும் அது வந்த அரசு ஆவணத்தையும் பக்கத்தையும் காட்டும்.',
+  'home.step3Title': 'பக்கம் இல்லையேல் பதில் இல்லை', 'home.step3Body': 'ஆவணங்களில் இல்லாததை ஊகிக்காமல், இல்லை என்று நேர்மையாகச் சொல்லும்.',
+  'feature.01': 'ஆதாரத்தைப் பாருங்கள்', 'feature.01body': 'ஒவ்வொரு பதிலும் அதிகாரப்பூர்வ ஆவணத்தின் சரியான பக்கத்தைத் திறக்கும்.',
+  'feature.02body': 'தமிழ், Tanglish, இந்தி அல்லது ஆங்கிலத்தில் கேளுங்கள்.',
+  'assistant.languages': 'தமிழ், Tanglish, இந்தி, ஆங்கிலம்',
+  'documents.eyebrow': 'அதிகாரப்பூர்வ ஆதாரங்கள்', 'documents.title': 'பக்கம் படிக்கும் ஆவணங்கள்',
+  'documents.intro': 'ஒவ்வொரு பதிலும் இந்த அதிகாரப்பூர்வ ஆவணங்களில் ஒன்றிலிருந்து, பக்க எண்ணுடன் வருகிறது.',
+  'documents.note': 'அரசு இணையதளங்களிலிருந்து பதிவிறக்கிய இந்த ஆவணங்களிலிருந்து மட்டுமே பக்கம் பதில் சொல்லும். எதை வேண்டுமானாலும் திறந்து நீங்களே படிக்கலாம்.',
+  'documents.open': 'அதிகாரப்பூர்வ PDF-ஐத் திற', 'documents.dated': 'தேதி', 'documents.loading': 'ஆவணங்கள் ஏற்றப்படுகின்றன...',
+  'documents.offline': 'பக்கம் சர்வர் இயங்காததால் ஆவணப் பட்டியல் இப்போது கிடைக்கவில்லை.',
+  'schemes.intro': 'பக்கம் பதில் சொல்லக்கூடிய திட்டங்கள். கேள்வியைத் தொட்டுக் கேளுங்கள்.',
+  'schemes.askAmount': 'எவ்வளவு?', 'schemes.askWho': 'யார் விண்ணப்பிக்கலாம்?', 'schemes.askDocs': 'என்ன ஆவணங்கள்?',
+  'schemes.docCount': 'அதிகாரப்பூர்வ ஆவணங்கள்',
+  'proof.open': 'பக்கத்தைப் பாருங்கள்', 'proof.title': 'அதிகாரப்பூர்வ ஆவணத்திலிருந்து ஆதாரம்', 'proof.page': 'பக்கம்',
+  'proof.checked': 'அச்சுப் பக்கத்துடன் சரிபார்த்தவர்', 'proof.unchecked': 'ஆவண உரையிலிருந்து பக்கம் எடுத்தது; பக்கத்தை நீங்களே சரிபாருங்கள்.',
+  'proof.source': 'அதிகாரப்பூர்வ PDF-ஐத் திற', 'proof.close': 'மூடு', 'proof.noImage': 'பக்கப் படம் இப்போது கிடைக்கவில்லை.',
+  'answer.refused': 'ஆவணங்களில் இல்லை', 'answer.call': 'உதவி எண்', 'answer.didYouMean': 'எந்தத் திட்டத்தைக் கேட்கிறீர்கள்?',
+  'status.tooMany': 'நிறைய கேள்விகள் வருகின்றன. ஒரு நிமிடம் கழித்துக் கேளுங்கள்.',
+  'status.timeout': 'பதில் வர நேரமாகிவிட்டது. மீண்டும் கேளுங்கள்.',
+  'status.noSpeech': 'எதுவும் கேட்கவில்லை. உருண்டையைத் தொட்டு மீண்டும் பேசுங்கள்.',
+  'footer.line': 'இது ஒரு மாணவர் திட்டம், அரசு சேவை அல்ல. முடிவெடுக்கும் முன் அதிகாரப்பூர்வ ஆதாரத்தைச் சரிபாருங்கள்.',
+});
+Object.assign(MESSAGES['hi-IN'], {
+  'home.title': 'सरकारी योजनाएँ, आधिकारिक पन्ने से समझें।',
+  'home.step2Title': 'आधिकारिक पन्ना देखें', 'home.step2Body': 'हर जवाब दिखाता है कि वह किस सरकारी दस्तावेज़ के किस पन्ने से है।',
+  'home.step3Title': 'पन्ना नहीं, तो जवाब नहीं', 'home.step3Body': 'दस्तावेज़ों में न हो तो पक्कम अंदाज़ा नहीं लगाता, साफ़ बता देता है।',
+  'feature.01': 'सबूत देखें', 'feature.01body': 'हर जवाब आधिकारिक दस्तावेज़ का सही पन्ना खोलता है।',
+  'feature.02body': 'तमिल, Tanglish, हिंदी या अंग्रेज़ी में पूछें।',
+  'assistant.languages': 'तमिल, Tanglish, हिंदी और अंग्रेज़ी',
+  'documents.eyebrow': 'आधिकारिक स्रोत', 'documents.title': 'पक्कम जो दस्तावेज़ पढ़ता है',
+  'documents.intro': 'हर जवाब इन्हीं आधिकारिक दस्तावेज़ों में से किसी एक से, पन्ना संख्या के साथ आता है।',
+  'documents.note': 'पक्कम सिर्फ़ इन्हीं दस्तावेज़ों से जवाब देता है, जो सरकारी वेबसाइटों से लिए गए हैं। कोई भी खोलकर ख़ुद पढ़ें।',
+  'documents.open': 'आधिकारिक PDF खोलें', 'documents.dated': 'दिनांक', 'documents.loading': 'दस्तावेज़ लोड हो रहे हैं...',
+  'documents.offline': 'पक्कम सर्वर बंद होने से दस्तावेज़ सूची अभी उपलब्ध नहीं है।',
+  'schemes.intro': 'जिन योजनाओं के बारे में पक्कम जवाब दे सकता है। सवाल पर टैप करके पूछें।',
+  'schemes.askAmount': 'कितना पैसा?', 'schemes.askWho': 'कौन आवेदन कर सकता है?', 'schemes.askDocs': 'कौन से दस्तावेज़?',
+  'schemes.docCount': 'आधिकारिक दस्तावेज़',
+  'proof.open': 'पन्ना देखें', 'proof.title': 'आधिकारिक दस्तावेज़ से सबूत', 'proof.page': 'पन्ना',
+  'proof.checked': 'छपे पन्ने से जाँचा', 'proof.unchecked': 'दस्तावेज़ के पाठ से लिया गया; पन्ना ख़ुद जाँच लें।',
+  'proof.source': 'आधिकारिक PDF खोलें', 'proof.close': 'बंद करें', 'proof.noImage': 'पन्ने की तस्वीर अभी उपलब्ध नहीं है।',
+  'answer.refused': 'दस्तावेज़ों में नहीं', 'answer.call': 'हेल्पलाइन', 'answer.didYouMean': 'आप किस योजना के बारे में पूछ रहे हैं?',
+  'status.tooMany': 'बहुत सवाल आ रहे हैं। एक मिनट बाद फिर पूछें।',
+  'status.timeout': 'जवाब में देर हो गई। फिर से पूछें।',
+  'status.noSpeech': 'कुछ सुनाई नहीं दिया। ऑर्ब टैप करके फिर बोलें।',
+  'footer.line': 'यह एक छात्र प्रोजेक्ट है, सरकारी सेवा नहीं। फ़ैसले से पहले आधिकारिक स्रोत देखें।',
+});
 
 /* ==========================================================================
-   4. RAG CHAT (BGE-M3 + QDRANT + BGE RERANKER + CLAUDE/GEMINI)
+   3. TALKING TO THE PAKKAM BACKEND (FastAPI: /ask, /transcribe, /speak, /page, /sources)
    ========================================================================== */
-function appendChatBubble(role, text, citations = [], containerId = 'chat-messages') {
-  const container = document.getElementById(containerId);
-  if (!container) return;
+const ASK_TIMEOUT_MS = 120000;
+const MAX_VOICE_SECONDS = 30;
+// The site's language codes, and the codes the backend takes for speech.
+const VOICE_LANG = { 'en-IN': 'en', 'ta-IN': 'ta', 'hi-IN': 'hi' };
+const CITATION_MARKER = /\s*\[\d+(?:,\s*\d+)*\]/g;
 
-  const bubble = document.createElement('div');
-  bubble.className = `chat-bubble ${role}`;
-
-  const content = document.createElement('div');
-  content.textContent = text;
-  bubble.appendChild(content);
-
-  if (citations && citations.length > 0) {
-    const citeWrap = document.createElement('div');
-    citeWrap.className = 'citation-pills';
-    citations.forEach((cite) => {
-      const pill = document.createElement('span');
-      pill.className = 'citation-tag';
-      pill.textContent = `${cite.source || cite.title || 'Official Gazette'}${cite.page ? ` • p.${cite.page}` : ''}`;
-      citeWrap.appendChild(pill);
-    });
-    bubble.appendChild(citeWrap);
-  }
-
-  container.appendChild(bubble);
-  container.scrollTop = container.scrollHeight;
+class ApiError extends Error {
+  constructor(status, detail) { super(detail || `HTTP ${status}`); this.status = status; }
 }
 
-async function submitChatQuery(queryText, containerId = 'chat-messages') {
-  const container = document.getElementById(containerId);
-  if (container && containerId !== 'chat-messages' && container.querySelector('[data-empty-hint]')) {
-    container.replaceChildren();
-  }
-  appendChatBubble('user', queryText, [], containerId);
-  setOrbState('processing');
-  const statusLabel = document.getElementById('voice-status-label');
-  if (statusLabel) statusLabel.textContent = t('status.processing');
-
+async function api(path, options = {}, timeoutMs = ASK_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(`${API_BASE}/api/v1/chat/query`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: queryText,
-        language: state.language,
-        document_id: state.activeDocumentId,
-      }),
-    });
-
-    if (!res.ok) throw new Error('RAG query failed');
-    const data = await res.json();
-    const answer = data.answer || data.response || 'No response returned.';
-    const citations = data.citations || data.sources || [];
-
-    appendChatBubble('ai', answer, citations, containerId);
-    saveToHistory(queryText, answer);
-    await playGnaniTTS(answer);
-    if (!state.currentAudio || state.currentAudio.ended) {
-      setOrbState('idle');
-      if (statusLabel) statusLabel.textContent = t('assistant.tap');
+    const res = await fetch(`${API_BASE}${path}`, { ...options, signal: controller.signal });
+    if (!res.ok) {
+      let detail = '';
+      try { detail = (await res.json()).detail; } catch (_) { /* not JSON */ }
+      throw new ApiError(res.status, typeof detail === 'string' ? detail : '');
     }
-  } catch (err) {
-    appendChatBubble('ai', t('status.chatError'), [], containerId);
-    setOrbState('error');
-    if (statusLabel) statusLabel.textContent = t('assistant.tap');
+    return res;
+  } catch (error) {
+    if (error.name === 'AbortError') throw new ApiError(0, t('status.timeout'));
+    throw error;
+  } finally {
+    clearTimeout(timer);
   }
 }
+
+function errorText(error) {
+  if (error instanceof ApiError && error.status === 429) return t('status.tooMany');
+  if (error instanceof ApiError && error.status === 0) return t('status.timeout');
+  // Messages the server writes for people (e.g. "Please remove Aadhaar numbers").
+  if (error instanceof ApiError && [400, 413, 422].includes(error.status) && error.message) return error.message;
+  return t('status.chatError');
+}
+
+const el = (tag, className, text) => {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined && text !== null) node.textContent = text;
+  return node;
+};
 
 /* ==========================================================================
-   5. DOCUMENT ASSISTANT (PYMUPDF + TESSERACT OCR)
+   4. VOICE: record (WAV, assets from recorder.js) -> /transcribe -> /ask -> /speak
    ========================================================================== */
-async function handleDocumentUpload(file) {
-  const statusBanner = document.getElementById('ocr-status-banner');
-  const summaryBox = document.getElementById('doc-summary-box');
-  const selectedFile = document.getElementById('selected-file');
-  const progress = document.getElementById('upload-progress');
-  const preview = document.getElementById('pdf-preview');
-  if (!file) return;
-  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-    statusBanner.textContent = t('documents.invalid');
-    return;
-  }
+let recording = null;
+let recordingTimer = null;
 
-  if (state.documentPreviewUrl) URL.revokeObjectURL(state.documentPreviewUrl);
-  state.documentPreviewUrl = URL.createObjectURL(file);
-  selectedFile.hidden = false;
-  selectedFile.textContent = `${t('documents.selected')}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-  preview.hidden = false;
-  preview.replaceChildren();
-  const frame = document.createElement('iframe');
-  frame.src = state.documentPreviewUrl;
-  frame.title = t('documents.preview');
-  preview.appendChild(frame);
-  statusBanner.textContent = t('documents.uploading');
-  summaryBox.textContent = '';
-  progress.hidden = false;
-  progress.value = 0;
+function setStatus(text) {
+  const label = document.getElementById('voice-status-label');
+  if (label) label.textContent = text;
+}
 
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('language', state.language);
+function showHeard(text) {
+  const preview = document.getElementById('live-transcript-preview');
+  if (preview) preview.textContent = text;
+}
 
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', `${API_BASE}/api/v1/documents/upload`);
-  xhr.upload.addEventListener('progress', (event) => {
-    if (event.lengthComputable) progress.value = Math.round((event.loaded / event.total) * 100);
+function setBars(level) {
+  document.querySelectorAll('.orb-waveform-assembly').forEach((assembly) => {
+    assembly.classList.add('audio-reactive');
+    assembly.querySelectorAll('.wave-bar').forEach((bar, index) => {
+      const shape = [0.38, 0.62, 0.9, 0.72, 0.48][index % 5];
+      bar.style.setProperty('--bar-level', String(0.3 + level * shape * 1.5));
+    });
   });
-  xhr.addEventListener('load', () => {
-    progress.hidden = true;
-    if (xhr.status < 200 || xhr.status >= 300) {
-      statusBanner.textContent = t('documents.error');
-      setOrbState('error');
+}
+
+async function toggleVoiceRecording() {
+  if (recording) { await finishRecording(); return; }
+  if (!window.PakkamRecorder || !navigator.mediaDevices?.getUserMedia) {
+    setOrbState('error');
+    setStatus(t('status.voiceError'));
+    return;
+  }
+  stopPlayback();
+  navigateTo('assistant');
+  try {
+    recording = await window.PakkamRecorder.start({
+      onLevel: setBars,
+      onSilence: () => finishRecording(),
+      noSpeechMs: 8000,
+    });
+  } catch (_) {
+    recording = null;
+    setOrbState('error');
+    setStatus(t('status.micError'));
+    return;
+  }
+  setOrbState('listening');
+  setStatus(t('status.listening'));
+  showHeard('');
+  recordingTimer = setTimeout(() => finishRecording(), MAX_VOICE_SECONDS * 1000);
+}
+
+async function finishRecording() {
+  if (!recording) return;
+  const current = recording;
+  recording = null;
+  clearTimeout(recordingTimer);
+  stopWaveformMeter();
+  setOrbState('processing');
+  setStatus(t('status.processing'));
+  let wav;
+  try { wav = await current.stop(); } catch (_) { wav = null; }
+  if (!wav || wav.size < 2000) {
+    setOrbState('idle');
+    setStatus(t('assistant.tap'));
+    showHeard(t('status.noSpeech'));
+    return;
+  }
+  const form = new FormData();
+  form.append('audio', wav, 'question.wav');
+  form.append('language', VOICE_LANG[state.language] || 'ta');
+  try {
+    const data = await (await api('/transcribe', { method: 'POST', body: form }, 60000)).json();
+    const heard = (data.transcript || '').trim();
+    if (!heard) {
+      setOrbState('idle');
+      setStatus(t('assistant.tap'));
+      showHeard(t('status.noSpeech'));
       return;
     }
-    try {
-      const data = JSON.parse(xhr.responseText);
-      state.activeDocumentId = data.document_id || data.id || null;
-      statusBanner.textContent = data.status || t('documents.ready');
-      summaryBox.textContent = data.summary || '';
-      setOrbState('idle');
-    } catch (_) {
-      statusBanner.textContent = t('documents.error');
-    }
-  });
-  xhr.addEventListener('error', () => {
-    progress.hidden = true;
-    statusBanner.textContent = t('documents.error');
+    showHeard(`"${heard}"`);
+    setStatus(t('assistant.tap'));
+    await submitChatQuery(heard, { voice: true });
+  } catch (error) {
     setOrbState('error');
-  });
-  xhr.send(formData);
+    setStatus(t('assistant.tap'));
+    showHeard(error instanceof ApiError && [400, 413, 415, 422].includes(error.status) && error.message
+      ? error.message : t('status.voiceError'));
+  }
+}
+
+function stopPlayback() {
+  if (state.currentAudio) {
+    state.currentAudio.pause();
+    URL.revokeObjectURL(state.currentAudio.src);
+  }
+  state.currentAudio = null;
+  const stopBtn = document.getElementById('stop-audio-btn');
+  if (stopBtn) stopBtn.style.display = 'none';
+}
+
+// The answer read aloud by Gnani Timbre (/speak returns the WAV itself).
+async function playGnaniTTS(text, language) {
+  if (!state.autoPlayTTS || !text) return;
+  const spoken = text.replace(CITATION_MARKER, '').trim();
+  if (!spoken) return;
+  try {
+    const res = await api('/speak', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: spoken.slice(0, 1200), language: language === 'unknown' ? 'en' : language }),
+    }, 60000);
+    const url = URL.createObjectURL(await res.blob());
+    stopPlayback();
+    const audio = new Audio(url);
+    state.currentAudio = audio;
+    const stopBtn = document.getElementById('stop-audio-btn');
+    if (stopBtn) stopBtn.style.display = 'inline-block';
+    audio.onended = () => { stopPlayback(); stopWaveformMeter(); setOrbState('idle'); };
+    await audio.play();
+    setOrbState('speaking');
+    try {
+      state.audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+      await state.audioContext.resume();
+      startWaveformMeter(state.audioContext.createMediaElementSource(audio), true);
+    } catch (_) { /* playback still works without the waveform */ }
+  } catch (_) {
+    // Speech is optional: the written answer is already on screen.
+    setOrbState('idle');
+  }
 }
 
 /* ==========================================================================
-   6. GOVERNMENT SCHEME EXPLORER & CONVERSATION HISTORY
+   5. ANSWERS WITH PROOF (/ask -> sentences + citations; the page image from /page)
    ========================================================================== */
-const INITIAL_SCHEMES = [
-  {
-    title: 'PM-KISAN Samman Nidhi',
-    category: 'agriculture',
-    eligibility: 'Small and marginal farmer families with cultivable land.',
-    benefits: '₹6,000 per year in three equal installments via Direct Benefit Transfer.',
-    docs: 'Aadhaar Card, Land Holding Papers, Bank Account Details.',
-  },
-  {
-    title: 'Ayushman Bharat (PM-JAY)',
-    category: 'healthcare',
-    eligibility: 'Low-income households listed in SECC database.',
-    benefits: 'Health insurance cover up to ₹5 Lakh per family per year for secondary and tertiary care.',
-    docs: 'Aadhaar Card, Ration Card / PM-JAY Family ID.',
-  },
-  {
-    title: 'Pradhan Mantri Awas Yojana (PMAY)',
-    category: 'housing',
-    eligibility: 'EWS, LIG, and MIG households without a pucca house.',
-    benefits: 'Interest subsidy on housing loans and direct financial assistance for construction.',
-    docs: 'Aadhaar, Income Certificate, Proof of No Pucca House.',
-  },
-  {
-    title: 'Pudhumai Penn / Higher Education Scholarship',
-    category: 'education',
-    eligibility: 'Students enrolled in undergraduate degree/diploma programs from government schools.',
-    benefits: '₹1,000 monthly financial assistance directly to student bank account.',
-    docs: 'School Transfer Certificate, College Bonafide, Aadhaar-linked Bank Passbook.',
-  },
-];
-
-function renderSchemes(filterCategory = 'all', searchQuery = '') {
-  const grid = document.getElementById('schemes-grid');
-  if (!grid) return;
-
-  const filtered = INITIAL_SCHEMES.filter((item) => {
-    const matchesCategory = filterCategory === 'all' || item.category === filterCategory;
-    const query = searchQuery.toLowerCase();
-    const matchesQuery = [item.title, item.benefits, item.eligibility, item.docs]
-      .some((value) => value.toLowerCase().includes(query));
-    return matchesCategory && matchesQuery;
-  });
-
-  if (!filtered.length) {
-    grid.innerHTML = `<p class="empty-state">${t('schemes.empty')}</p>`;
-    return;
-  }
-  const categoryNames = {
-    agriculture: t('category.agriculture'), education: t('category.education'),
-    healthcare: t('category.healthcare'), housing: t('category.housing'),
-  };
-  grid.innerHTML = filtered.map((scheme) => `
-    <article class="scheme-row">
-      <div class="scheme-main">
-        <p class="scheme-category">${categoryNames[scheme.category] || scheme.category}</p>
-        <h2>${scheme.title}</h2>
-        <p class="scheme-benefit"><span>${t('schemes.benefits')}</span> ${scheme.benefits}</p>
-      </div>
-      <details class="scheme-details">
-        <summary>${t('schemes.details')}</summary>
-        <dl>
-          <div><dt>${t('schemes.eligibility')}</dt><dd>${scheme.eligibility}</dd></div>
-          <div><dt>${t('schemes.documents')}</dt><dd>${scheme.docs}</dd></div>
-        </dl>
-      </details>
-    </article>
-  `).join('');
+function citationLabel(c) {
+  const pages = c.page_end && c.page_end !== c.page_start ? `${c.page_start}-${c.page_end}` : c.page_start;
+  return `${c.document} · ${t('proof.page')} ${pages}`;
 }
 
-function saveToHistory(question, answer) {
-  state.history.unshift({
-    id: Date.now(),
-    date: new Date().toLocaleDateString(),
-    question,
-    answer,
+function openProof(c) {
+  closeProof();
+  const overlay = el('div', 'proof-overlay');
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', t('proof.title'));
+  const box = el('div', 'proof-box glass-panel');
+  const close = el('button', 'icon-btn proof-close', '✕');
+  close.type = 'button';
+  close.setAttribute('aria-label', t('proof.close'));
+  close.addEventListener('click', closeProof);
+  box.append(close, el('p', 'hero-eyebrow', t('proof.title')), el('h2', 'proof-doc', c.document));
+  box.append(el('p', 'proof-meta', `${c.scheme} · ${t('proof.page')} ${c.page_start}${c.document_date ? ` · ${t('documents.dated')} ${c.document_date}` : ''}`));
+  box.append(c.checked_by
+    ? el('p', 'proof-checked', `✓ ${t('proof.checked')} ${c.checked_by}${c.checked_on ? ` (${c.checked_on})` : ''}`)
+    : el('p', 'proof-note', t('proof.unchecked')));
+  const pagePath = `/page?doc=${encodeURIComponent(c.doc_id)}&p=${c.page_start}&mark=${encodeURIComponent((c.excerpt || '').slice(0, 600))}`;
+  const zoom = el('a', 'proof-page');
+  zoom.href = `${API_BASE}${pagePath}`;
+  zoom.target = '_blank';
+  zoom.rel = 'noopener';
+  const img = el('img');
+  img.alt = `${c.document}, ${t('proof.page')} ${c.page_start}`;
+  img.src = `${API_BASE}${pagePath}`;
+  img.addEventListener('error', () => zoom.replaceWith(el('p', 'proof-note', t('proof.noImage'))));
+  zoom.append(img);
+  box.append(zoom);
+  if (c.excerpt) box.append(el('blockquote', 'proof-excerpt', c.excerpt.slice(0, 400)));
+  if (c.source_url) {
+    const link = el('a', 'chip-btn', t('proof.source'));
+    link.href = c.source_url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    box.append(link);
+  }
+  overlay.append(box);
+  overlay.addEventListener('click', (event) => { if (event.target === overlay) closeProof(); });
+  document.body.append(overlay);
+  close.focus();
+}
+
+function closeProof() {
+  document.querySelector('.proof-overlay')?.remove();
+}
+
+function appendChatBubble(role, text, extra = {}) {
+  const container = document.getElementById('chat-messages');
+  if (!container) return null;
+  const bubble = el('div', `chat-bubble ${role}`);
+  if (extra.refused) bubble.append(el('p', 'answer-flag', t('answer.refused')));
+  bubble.append(el('div', 'answer-text', text));
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+  return bubble;
+}
+
+function renderAnswer(data, question) {
+  const text = (data.sentences && data.sentences.length)
+    ? data.sentences.map((s) => s.text).join(' ')
+    : (data.answer || '').replace(CITATION_MARKER, '');
+  const bubble = appendChatBubble('ai', text, { refused: data.refused });
+  if (!bubble) return text;
+
+  // Proof: each cited page is a button that opens the page itself.
+  if (data.citations && data.citations.length) {
+    const wrap = el('div', 'citation-pills');
+    data.citations.forEach((c) => {
+      const pill = el('button', 'citation-tag', `📄 ${citationLabel(c)}${c.checked_by ? ' ✓' : ''}`);
+      pill.type = 'button';
+      pill.title = t('proof.open');
+      pill.addEventListener('click', () => openProof(c));
+      wrap.append(pill);
+    });
+    bubble.append(wrap);
+  }
+
+  // "What can I get?": signed amounts per scheme.
+  (data.scheme_facts || []).forEach((fact) => {
+    const row = el('p', 'answer-fact');
+    row.append(el('strong', '', fact.scheme));
+    if (fact.amount) row.append(document.createTextNode(` — ${fact.amount}`));
+    bubble.append(row);
   });
-  localStorage.setItem('pakkam_history', JSON.stringify(state.history.slice(0, 30)));
+
+  // Unclear question: let the person pick the scheme.
+  if (data.status === 'needs_clarification' && data.candidate_schemes?.length) {
+    bubble.append(el('p', 'answer-flag', t('answer.didYouMean')));
+    const chips = el('div', 'citation-pills');
+    data.candidate_schemes.slice(0, 4).forEach((scheme) => {
+      const chip = el('button', 'chip-btn', scheme);
+      chip.type = 'button';
+      chip.addEventListener('click', () => submitChatQuery(`${question} (${scheme})`));
+      chips.append(chip);
+    });
+    bubble.append(chips);
+  }
+
+  // Refused about a known scheme: its official helpline.
+  if (data.refused && data.contact?.helpline) {
+    const call = el('a', 'chip-btn', `📞 ${t('answer.call')}: ${data.contact.helpline}`);
+    call.href = `tel:${data.contact.helpline.replace(/[^\d+]/g, '')}`;
+    bubble.append(call);
+  }
+  return text;
+}
+
+async function submitChatQuery(queryText, options = {}) {
+  const question = queryText.trim();
+  if (!question) return;
+  navigateTo('assistant');
+  appendChatBubble('user', question);
+  setOrbState('processing');
+  setStatus(t('status.processing'));
+  try {
+    const res = await api('/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: question.slice(0, 500), voice_mode: Boolean(options.voice) }),
+    });
+    const data = await res.json();
+    const text = renderAnswer(data, question);
+    saveToHistory(question, text);
+    setStatus(t('assistant.tap'));
+    await playGnaniTTS(text, data.language);
+    if (!state.currentAudio) setOrbState('idle');
+  } catch (error) {
+    appendChatBubble('ai', errorText(error));
+    setOrbState('error');
+    setStatus(t('assistant.tap'));
+  }
+}
+
+/* ==========================================================================
+   6. SCHEMES AND OFFICIAL DOCUMENTS (both from GET /sources: nothing typed in by hand)
+   ========================================================================== */
+let sources = null;
+
+async function loadSources() {
+  if (sources) return sources;
+  try {
+    sources = await (await api('/sources', {}, 30000)).json();
+  } catch (_) {
+    sources = null;
+  }
+  return sources;
+}
+
+const QUICK_QUESTIONS = {
+  'en-IN': { amount: (s) => `How much money does ${s} give?`, who: (s) => `Who is eligible for ${s}?`, docs: (s) => `What documents are needed for ${s}?` },
+  'ta-IN': { amount: (s) => `${s} திட்டத்தில் எவ்வளவு பணம் கிடைக்கும்?`, who: (s) => `${s} திட்டத்திற்கு யார் தகுதியானவர்கள்?`, docs: (s) => `${s} திட்டத்திற்கு என்ன ஆவணங்கள் தேவை?` },
+  'hi-IN': { amount: (s) => `${s} में कितना पैसा मिलता है?`, who: (s) => `${s} के लिए कौन पात्र है?`, docs: (s) => `${s} के लिए कौन से दस्तावेज़ चाहिए?` },
+};
+
+function renderSchemes(_unused, searchQuery = '') {
+  const grid = document.getElementById('schemes-grid');
+  if (!grid) return;
+  grid.replaceChildren();
+  if (!sources) {
+    grid.append(el('p', 'empty-state', sources === null ? t('documents.offline') : t('documents.loading')));
+    return;
+  }
+  const byScheme = new Map();
+  sources.forEach((doc) => {
+    if (!byScheme.has(doc.scheme)) byScheme.set(doc.scheme, []);
+    byScheme.get(doc.scheme).push(doc);
+  });
+  const query = searchQuery.trim().toLowerCase();
+  const asks = QUICK_QUESTIONS[state.language] || QUICK_QUESTIONS['en-IN'];
+  const rows = [...byScheme.entries()]
+    .filter(([scheme, docs]) => !query || scheme.toLowerCase().includes(query)
+      || docs.some((d) => d.title.toLowerCase().includes(query)))
+    .map(([scheme, docs]) => {
+      const row = el('article', 'scheme-row');
+      const main = el('div', 'scheme-main');
+      main.append(el('p', 'scheme-category', `${docs.length} ${t('schemes.docCount')}`), el('h2', '', scheme));
+      const chips = el('div', 'citation-pills');
+      [['amount', 'schemes.askAmount'], ['who', 'schemes.askWho'], ['docs', 'schemes.askDocs']].forEach(([kind, label]) => {
+        const chip = el('button', 'chip-btn', t(label));
+        chip.type = 'button';
+        chip.addEventListener('click', () => submitChatQuery(asks[kind](scheme)));
+        chips.append(chip);
+      });
+      main.append(chips);
+      row.append(main);
+      return row;
+    });
+  if (!rows.length) grid.append(el('p', 'empty-state', t('schemes.empty')));
+  else grid.append(...rows);
+}
+
+function renderDocuments() {
+  const list = document.getElementById('documents-list');
+  if (!list) return;
+  list.replaceChildren();
+  if (!sources) {
+    list.append(el('p', 'empty-state', t('documents.offline')));
+    return;
+  }
+  sources.forEach((doc) => {
+    const row = el('article', 'scheme-row');
+    const main = el('div', 'scheme-main');
+    main.append(el('p', 'scheme-category', doc.scheme), el('h2', '', doc.title));
+    const meta = [doc.language.toUpperCase(), doc.doc_date ? `${t('documents.dated')} ${doc.doc_date}` : ''].filter(Boolean).join(' · ');
+    main.append(el('p', 'scheme-benefit', meta));
+    const link = el('a', 'chip-btn', t('documents.open'));
+    link.href = doc.source_url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    main.append(link);
+    row.append(main);
+    list.append(row);
+  });
+}
+
+/* ==========================================================================
+   7. CONVERSATION HISTORY (this browser only)
+   ========================================================================== */
+function saveToHistory(question, answer) {
+  state.history.unshift({ id: Date.now(), date: new Date().toLocaleDateString(), question, answer });
+  state.history = state.history.slice(0, 30);
+  try { localStorage.setItem('pakkam_history', JSON.stringify(state.history)); } catch (_) { /* private mode */ }
   renderHistory();
 }
 
 function renderHistory() {
   const list = document.getElementById('history-list');
   if (!list) return;
-  if (state.history.length === 0) {
-    list.replaceChildren();
-    const empty = document.createElement('p');
-    empty.className = 'empty-state';
-    empty.textContent = t('history.empty');
-    list.appendChild(empty);
+  if (!state.history.length) {
+    list.replaceChildren(el('p', 'empty-state', t('history.empty')));
     return;
   }
   list.replaceChildren(...state.history.map((item) => {
-    const article = document.createElement('article');
-    article.className = 'history-row';
-    const date = document.createElement('time');
-    date.className = 'history-date';
-    date.textContent = item.date;
-    const question = document.createElement('h2');
-    question.textContent = item.question;
-    const answer = document.createElement('p');
-    answer.textContent = item.answer;
-    article.append(date, question, answer);
+    const article = el('article', 'history-row');
+    article.append(el('time', 'history-date', item.date), el('h2', '', item.question), el('p', '', item.answer));
     return article;
   }));
 }
 
 /* ==========================================================================
-   7. INITIALIZATION & EVENT LISTENERS
+   8. START-UP AND EVENTS
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme(state.theme);
   applyLanguage(state.language);
-  renderSchemes();
   renderHistory();
+  sources = undefined;  // "loading"
+  renderSchemes();
+  loadSources().then(() => { renderSchemes(null, document.getElementById('scheme-search-input')?.value || ''); renderDocuments(); });
 
-  // Navbar page navigation
-  document.querySelectorAll('[data-nav]').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      navigateTo(el.dataset.nav);
+  document.querySelectorAll('[data-nav]').forEach((node) => {
+    node.addEventListener('click', (event) => {
+      event.preventDefault();
+      navigateTo(node.dataset.nav);
     });
   });
 
-  // Theme toggles
   document.getElementById('theme-toggle-btn')?.addEventListener('click', toggleTheme);
   document.getElementById('settings-theme-btn')?.addEventListener('click', toggleTheme);
+  document.getElementById('global-lang-select')?.addEventListener('change', (event) => {
+    applyLanguage(event.target.value);
+    renderDocuments();
+  });
 
-  // Language switcher
-  const langSelect = document.getElementById('global-lang-select');
-  if (langSelect) {
-    langSelect.addEventListener('change', (e) => applyLanguage(e.target.value));
+  const autoplay = document.getElementById('setting-autoplay-tts');
+  if (autoplay) {
+    autoplay.checked = state.autoPlayTTS;
+    autoplay.addEventListener('change', () => {
+      state.autoPlayTTS = autoplay.checked;
+      try { localStorage.setItem('pakkam_tts', String(autoplay.checked)); } catch (_) { /* private mode */ }
+    });
   }
 
-  // Homepage CTA & Orb triggers
   document.getElementById('cta-ask-pakkam')?.addEventListener('click', () => navigateTo('assistant'));
   document.getElementById('hero-orb-trigger')?.addEventListener('click', toggleVoiceRecording);
   document.getElementById('assistant-mic-orb')?.addEventListener('click', toggleVoiceRecording);
   document.getElementById('hero-orb-trigger')?.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      toggleVoiceRecording();
-    }
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleVoiceRecording(); }
   });
-  document.getElementById('nav-mic-btn')?.addEventListener('click', () => {
-    navigateTo('assistant');
-    toggleVoiceRecording();
-  });
+  document.getElementById('nav-mic-btn')?.addEventListener('click', () => { navigateTo('assistant'); toggleVoiceRecording(); });
 
-  // Chat submission
-  document.getElementById('chat-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  document.getElementById('chat-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
     const input = document.getElementById('chat-input');
     const query = input.value.trim();
     if (!query) return;
@@ -609,74 +744,19 @@ document.addEventListener('DOMContentLoaded', () => {
     await submitChatQuery(query);
   });
 
-  // Document upload & contextual Q&A
-  document.getElementById('pdf-upload-input')?.addEventListener('change', (e) => {
-    handleDocumentUpload(e.target.files[0]);
-  });
-  const dropzone = document.getElementById('pdf-dropzone');
-  const fileInput = document.getElementById('pdf-upload-input');
-  document.getElementById('browse-pdf-btn')?.addEventListener('click', () => fileInput?.click());
-  dropzone?.addEventListener('click', (event) => {
-    if (event.target.closest('#browse-pdf-btn')) return;
-    fileInput?.click();
-  });
-  dropzone?.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      fileInput?.click();
-    }
-  });
-  ['dragenter', 'dragover'].forEach((eventName) => dropzone?.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    dropzone.classList.add('is-dragging');
-  }));
-  ['dragleave', 'drop'].forEach((eventName) => dropzone?.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    dropzone.classList.remove('is-dragging');
-  }));
-  dropzone?.addEventListener('drop', (event) => handleDocumentUpload(event.dataTransfer.files[0]));
+  document.getElementById('scheme-search-input')?.addEventListener('input', (event) => renderSchemes(null, event.target.value));
 
-  document.getElementById('doc-qa-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const input = document.getElementById('doc-qa-input');
-    const query = input.value.trim();
-    if (!query) return;
-    if (!state.activeDocumentId) {
-      document.getElementById('ocr-status-banner').textContent = t('documents.askHint');
-      return;
-    }
-    input.value = '';
-    await submitChatQuery(query, 'doc-qa-thread');
-  });
-
-  // Scheme category filtering & search
-  document.querySelectorAll('#scheme-category-bar .filter-tab').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#scheme-category-bar .filter-tab').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeSchemeCategory = btn.dataset.category;
-      const q = document.getElementById('scheme-search-input')?.value || '';
-      renderSchemes(activeSchemeCategory, q);
-    });
-  });
-
-  document.getElementById('scheme-search-input')?.addEventListener('input', (e) => {
-    renderSchemes(activeCategory, e.target.value);
-  });
-
-  // Clear history
   document.getElementById('clear-history-btn')?.addEventListener('click', () => {
     if (!window.confirm(t('history.confirm'))) return;
     state.history = [];
-    localStorage.removeItem('pakkam_history');
+    try { localStorage.removeItem('pakkam_history'); } catch (_) { /* private mode */ }
     renderHistory();
   });
 
   document.getElementById('stop-audio-btn')?.addEventListener('click', () => {
-    state.currentAudio?.pause();
-    state.currentAudio = null;
+    stopPlayback();
     stopWaveformMeter();
     setOrbState('idle');
-    document.getElementById('stop-audio-btn').style.display = 'none';
   });
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeProof(); });
 });

@@ -50,5 +50,5 @@ done
 gcloud compute ssh "$NAME" --zone "$ZONE" --quiet --command "bash ~/pakkam/vm-setup.sh $SITE"
 
 echo
-echo "Pakkam:  https://$SITE/chat/"
+echo "Pakkam:  https://$SITE/"
 echo "Send this address to Claude: https://$SITE"
