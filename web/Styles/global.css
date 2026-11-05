@@ -888,3 +888,132 @@ button.citation-tag:hover, button.citation-tag:focus-visible { background: var(-
 .proof-page img { display: block; width: 100%; height: auto; }
 .proof-excerpt { margin: 0 0 14px; padding: 10px 14px; border-left: 3px solid var(--raw-teal); background: var(--glass-surface); border-radius: var(--radius-sm); font-size: 0.9rem; color: var(--text-secondary); }
 .proof-box a.chip-btn { display: inline-block; text-decoration: none; }
+
+/* ==========================================================================
+   Layout fixes (Nov 2026): logo, boxes around the orb, headline, Tamil/Hindi text
+   ========================================================================== */
+.brand-logo { gap: 8px; }
+.brand-logo__text { margin-left: 0; }
+
+/* The three boxes: 01 centred above the orb, 02 and 03 level on either side. */
+.callout-01 { max-width: 340px; margin-bottom: 14px; }
+.orb-showcase-grid { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 40px; align-items: center; }
+.callout-02, .callout-03 { align-self: center; margin-top: 0; max-width: 270px; width: 100%; }
+.callout-02 { justify-self: end; }
+.callout-03 { justify-self: start; }
+.feature-callout { padding: 12px 14px; border-radius: var(--radius-md); background: var(--glass-surface); border: 1px solid var(--glass-border); }
+
+.hero-title { font-size: clamp(2rem, 3.4vw, 3.1rem); line-height: 1.12; }
+.hero-subtitle { font-size: 1.1rem; margin-bottom: 18px; }
+.hero-stage { min-height: auto; padding-bottom: 24px; }
+:lang(ta) .hero-eyebrow, :lang(hi) .hero-eyebrow, :lang(ta) .answer-flag, :lang(hi) .answer-flag { letter-spacing: normal; text-transform: none; }
+:lang(ta) .hero-title, :lang(hi) .hero-title { letter-spacing: normal; line-height: 1.3; }
+
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center; }
+.hero-secondary { padding: 12px 20px; }
+.conv-toggle { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; }
+.conv-toggle input { width: 18px; height: 18px; accent-color: var(--raw-teal); }
+.home-convo { margin: 14px auto 0; max-width: 680px; text-align: center; }
+.home-status { font-size: 0.95rem; color: var(--text-secondary); min-height: 1.4em; }
+.home-heard { font-size: 0.95rem; color: var(--text-primary); font-weight: 600; min-height: 1.4em; margin-top: 4px; }
+.home-answer { margin-top: 12px; padding: 16px 18px; text-align: left; }
+.home-answer-text { margin: 0 0 10px; line-height: 1.55; }
+
+/* Language list: readable in both themes. */
+.lang-selector option { background: var(--bg-canvas); color: var(--text-primary); }
+.lang-select-wrap { padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid var(--glass-border); background: var(--glass-surface); }
+
+/* Assistant panel */
+.live-transcript { font-size: 0.9rem; color: var(--text-secondary); min-height: 40px; max-width: 240px; }
+.voice-lang-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.voice-lang-chips .chip-btn { padding: 6px 12px; font-size: 0.8rem; }
+.chip-btn.active { background: var(--cta-bg); border-color: var(--cta-border); color: #fff; }
+.chat-bubble { max-width: 88%; }
+.welcome-chips { margin-top: 12px; }
+.welcome-chips .chip-btn, .answer-row .chip-btn { font-size: 0.82rem; padding: 7px 14px; }
+
+/* Answers */
+.answer-section { margin: 6px 0 10px; }
+.answer-section h4 { margin: 0 0 2px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-highlight); }
+:lang(ta) .answer-section h4, :lang(hi) .answer-section h4 { text-transform: none; letter-spacing: normal; font-size: 0.85rem; }
+.answer-section p { margin: 0; }
+.answer-row { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.answer-row-label { font-size: 0.8rem; color: var(--text-muted); }
+.answer-confirm { font-style: italic; color: var(--text-secondary); }
+.answer-progress { margin: 0; color: var(--text-secondary); font-size: 0.9rem; }
+.chat-bubble.thinking .answer-progress::after { content: ' ●●●'; letter-spacing: 2px; animation: processPulse 1.2s infinite; }
+.answer-summary { margin: 6px 0 0; padding-left: 18px; }
+.answer-summary li { margin: 4px 0; }
+button.citation-tag.proof-btn { font-size: 0.85rem; padding: 7px 14px; font-weight: 600; }
+.facts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
+.fact-card { padding: 12px; border-radius: var(--radius-md); background: var(--glass-surface); border: 1px solid var(--glass-border); }
+.fact-card strong { display: block; margin-bottom: 4px; }
+.fact-card p { margin: 0 0 8px; font-size: 0.88rem; }
+.fact-who { color: var(--text-secondary); }
+.facts-total { margin: 10px 0 0; font-weight: 700; color: var(--text-highlight); }
+.history-row .chip-btn { margin-top: 8px; }
+
+/* Rumour Shield */
+.shield-panel { max-width: 860px; position: relative; z-index: 3; }
+.shield-form { display: flex; flex-direction: column; gap: 12px; }
+.shield-input { width: 100%; padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--glass-border); background: var(--glass-surface); color: var(--text-primary); font-family: var(--font-primary); font-size: 0.95rem; resize: vertical; }
+.shield-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.shield-result { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.shield-overall { margin: 0; font-size: 1.3rem; }
+.shield-claim { padding: 14px 16px; border-radius: var(--radius-md); background: var(--glass-surface); border: 1px solid var(--glass-border); }
+.shield-claim h3 { margin: 4px 0; font-size: 1rem; }
+.shield-claim p { margin: 0 0 8px; }
+.shield-verdict { font-weight: 700; }
+.shield-signs { padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid rgba(255, 181, 71, 0.5); background: rgba(255, 181, 71, 0.08); }
+.shield-signs h3 { margin: 0 0 6px; font-size: 1rem; }
+.shield-signs ul { margin: 0; padding-left: 18px; }
+.shield-share { align-self: flex-start; }
+
+/* Dialogs (officer, appeal) */
+.dialog-form { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.dialog-form .input-pill { width: 100%; }
+.appeal-note { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85rem; margin-top: 8px; }
+
+/* About: Pakkam explains itself */
+.about-listen { margin-top: 18px; }
+.about-listen-text { margin-top: 12px; max-width: 680px; color: var(--text-secondary); line-height: 1.6; }
+
+@media (max-width: 960px) {
+  .orb-showcase-grid { grid-template-columns: 1fr; gap: 14px; }
+  .callout-02, .callout-03 { justify-self: center; max-width: 420px; }
+  .callout-01 { max-width: 420px; }
+}
+@media (max-width: 640px) {
+  .hero-title { font-size: 1.85rem; }
+  .feature-callout { max-width: 100%; }
+  .chat-bubble { max-width: 100%; }
+  .chat-viewport { height: auto; min-height: 60vh; }
+  .assistant-layout { gap: 14px; }
+  .shield-actions { justify-content: stretch; }
+  .shield-actions > * { flex: 1; }
+  .facts-grid { grid-template-columns: 1fr; }
+}
+@media print {
+  .navbar-wrapper, .site-footer, .orb-dock, .chat-composer, .answer-row { display: none !important; }
+}
+
+/* Follow-up rows: label and buttons on one line. */
+.answer-row { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; }
+.answer-row .citation-pills { margin: 0; }
+/* Boxes never wider than the screen: padding inside the width. */
+.feature-callout { box-sizing: border-box; }
+@media (max-width: 640px) {
+  .callout-01, .callout-02, .callout-03 { width: 100%; max-width: 100%; justify-content: flex-start; text-align: left; }
+  .callout-01 .feature-text { text-align: left; }
+  .orb-showcase-grid { padding: 0 2px; }
+}
+@media (max-width: 640px) {
+  /* The orb row must fit the phone: one shrinkable column, smaller orb and waves. */
+  .orb-showcase-grid { grid-template-columns: minmax(0, 1fr); }
+  .orb-waveform-assembly { gap: 8px; max-width: 100%; }
+  .central-orb-container { width: 150px; height: 150px; }
+  .waveform-wing { gap: 5px; }
+  .wave-bar.b-lg { height: 72px; }
+  .wave-bar.b-md { height: 48px; }
+  .wave-bar.b-sm { height: 32px; }
+}

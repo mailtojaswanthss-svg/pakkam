@@ -1,10 +1,11 @@
-// frontend/js/app.js
+// web/js/app.js
+import { detectTalk, replyLanguage, TALK, EXAMPLES } from './talk.js';
 
 const API_BASE = window.PAKKAM_API_BASE || '';
 
 const ASSETS = {
-  darkOrb: './assets/images/Dark theme orb.png',
-  lightOrb: './assets/images/Light theme orb.png',
+  darkOrb: './assets/images/dark-orb.webp',
+  lightOrb: './assets/images/light-orb.webp',
 };
 
 const MESSAGES = {
@@ -191,16 +192,28 @@ function navigateTo(pageKey) {
   });
 }
 
+
 /* ==========================================================================
    Text for the parts connected to the Pakkam backend (merged into MESSAGES)
    ========================================================================== */
 Object.assign(MESSAGES['en-IN'], {
   'home.title': 'Government schemes, explained from the official page.',
+  'home.eyebrow': 'OFFICIAL DOCUMENTS. CLEAR ANSWERS.',
+  'home.shield': '🛡️ Check a WhatsApp forward', 'home.tapOrb': 'Tap the orb and ask your question',
+  'home.openChat': 'Open in chat', 'home.heard': 'You said',
+  'nav.shield': 'Check a forward',
+  'conv.mode': 'Conversation mode: keep listening after each answer', 'conv.short': 'Conversation mode',
+  'conv.paused': 'Conversation paused. Tap the orb to continue.',
+  'home.step1Body': 'Speak or type in Tamil, Tanglish, Hindi or English.',
   'home.step2Title': 'See the official page', 'home.step2Body': 'Every answer shows the government document and page it comes from.',
   'home.step3Title': 'No page, no answer', 'home.step3Body': 'When the documents do not say it, Pakkam says so instead of guessing.',
   'feature.01': 'See the Proof', 'feature.01body': 'Each answer opens the exact page of the official document.',
   'feature.02body': 'Ask in Tamil, Tanglish, Hindi or English.',
+  'feature.03': 'No Page, No Answer', 'feature.03body': 'If the documents do not say it, Pakkam tells you honestly.',
   'assistant.languages': 'Supports Tamil, Tanglish, Hindi & English',
+  'assistant.welcome': 'Vanakkam! Ask me about a Tamil Nadu or central welfare scheme, by voice or text. Every answer shows the official page it comes from. Try one of these:',
+  'assistant.placeholder': 'Ask in Tamil, Tanglish, Hindi or English...',
+  'assistant.stop': '⏹ Stop audio',
   'documents.eyebrow': 'OFFICIAL SOURCES', 'documents.title': 'The documents Pakkam reads',
   'documents.intro': 'Every answer comes from one of these official documents, with the page it is on.',
   'documents.note': 'Pakkam answers only from these documents, downloaded from official government websites. Open any of them to read it yourself.',
@@ -212,7 +225,25 @@ Object.assign(MESSAGES['en-IN'], {
   'proof.open': 'See the page', 'proof.title': 'Proof from the official document', 'proof.page': 'Page',
   'proof.checked': 'Checked against the printed page by', 'proof.unchecked': 'Taken from the document text by Pakkam; check the page yourself.',
   'proof.source': 'Open the official PDF', 'proof.close': 'Close', 'proof.noImage': 'The page image is not available right now.',
+  'proof.corrected': 'This line was corrected by hand from the printed page (the scan misread it).',
   'answer.refused': 'Not in the documents', 'answer.call': 'Helpline', 'answer.didYouMean': 'Which scheme do you mean?',
+  'section.amount': 'How much', 'section.eligibility': 'Who can apply', 'section.documents': 'Documents', 'section.apply': 'How to apply',
+  'answer.understood': 'Did you understand?', 'answer.yes': '✅ Yes', 'answer.notClear': '🤔 Not clear',
+  'answer.helpful': 'Was this helpful?', 'answer.again': '🔁 Explain again', 'answer.summary': '📝 Summary',
+  'answer.simpler': '🗣️ Simpler answer', 'answer.docs': '📋 Documents to carry', 'answer.share': '📤 Share on WhatsApp',
+  'answer.print': '🖨️ Print', 'answer.appeal': '📝 Rejected? Appeal', 'answer.officer': '👤 Ask an officer',
+  'answer.issue': 'Facing any issue? I can help:', 'answer.tips': '💡 Tips to ask',
+  'answer.tipsText': 'Tips: name the scheme (for example "Magalir Urimai"), ask one thing at a time (amount, who can apply, documents), and speak a little slower if using voice.',
+  'answer.feedbackThanks': 'Thank you for the feedback! 🙏',
+  'answer.heardCheck': 'Is that what you asked?', 'answer.yesRight': '👍 Yes', 'answer.sayAgain': '🎙️ Say again',
+  'facts.total': 'Up to {total} a year from these schemes (signed amounts).',
+  'progress.searching': 'Searching the official documents…', 'progress.found': 'Found in {doc}, page {page}. Writing the answer…',
+  'progress.slow': 'This is taking longer than usual. Still checking…',
+  'checklist.title': 'Documents to carry and how to apply', 'checklist.none': 'No signed checklist for this scheme yet. Ask: "What documents are needed for {scheme}?"',
+  'officer.title': 'Send your question to an officer', 'officer.intro': 'The documents did not answer this. An officer can follow up. Do not include Aadhaar or bank numbers.',
+  'officer.question': 'Your question', 'officer.contact': 'Phone or email (optional)', 'officer.send': 'Send', 'officer.sent': 'Sent. Your reference number: {ticket}', 'officer.failed': 'Could not send it now. Please try again.',
+  'about.listen': '🔊 Hear Pakkam explain itself', 'about.stop': '⏹ Stop',
+  'about.intro': 'Vanakkam! I am Pakkam. Pakkam means page in Tamil. Ask me about a welfare scheme in Tamil, Tanglish, Hindi or English, by voice or text. I answer only from official government documents, and I show you the exact page the answer comes from. If the documents do not say it, I tell you honestly instead of guessing. I can also check WhatsApp forwards for false claims and scam signs.',
   'status.tooMany': 'Pakkam is getting a lot of questions. Wait a minute, then ask again.',
   'status.timeout': 'Pakkam took too long to answer. Ask again in a moment.',
   'status.noSpeech': 'I did not hear anything. Tap the orb and try again.',
@@ -220,11 +251,22 @@ Object.assign(MESSAGES['en-IN'], {
 });
 Object.assign(MESSAGES['ta-IN'], {
   'home.title': 'அரசு திட்டங்கள், அதிகாரப்பூர்வ பக்கத்திலிருந்தே.',
+  'home.eyebrow': 'அதிகாரப்பூர்வ ஆவணங்கள். தெளிவான பதில்கள்.',
+  'home.shield': '🛡️ வாட்ஸ்அப் செய்தியைச் சரிபார்', 'home.tapOrb': 'உருண்டையைத் தொட்டு உங்கள் கேள்வியைக் கேளுங்கள்',
+  'home.openChat': 'அரட்டையில் திற', 'home.heard': 'நீங்கள் சொன்னது',
+  'nav.shield': 'செய்தியைச் சரிபார்',
+  'conv.mode': 'உரையாடல் முறை: ஒவ்வொரு பதிலுக்குப் பிறகும் கேட்டுக்கொண்டிருக்கும்', 'conv.short': 'உரையாடல் முறை',
+  'conv.paused': 'உரையாடல் நிறுத்தப்பட்டது. தொடர உருண்டையைத் தொடுங்கள்.',
+  'home.step1Body': 'தமிழ், Tanglish, இந்தி அல்லது ஆங்கிலத்தில் பேசுங்கள் அல்லது தட்டச்சு செய்யுங்கள்.',
   'home.step2Title': 'அரசு பக்கத்தைப் பாருங்கள்', 'home.step2Body': 'ஒவ்வொரு பதிலும் அது வந்த அரசு ஆவணத்தையும் பக்கத்தையும் காட்டும்.',
   'home.step3Title': 'பக்கம் இல்லையேல் பதில் இல்லை', 'home.step3Body': 'ஆவணங்களில் இல்லாததை ஊகிக்காமல், இல்லை என்று நேர்மையாகச் சொல்லும்.',
   'feature.01': 'ஆதாரத்தைப் பாருங்கள்', 'feature.01body': 'ஒவ்வொரு பதிலும் அதிகாரப்பூர்வ ஆவணத்தின் சரியான பக்கத்தைத் திறக்கும்.',
   'feature.02body': 'தமிழ், Tanglish, இந்தி அல்லது ஆங்கிலத்தில் கேளுங்கள்.',
+  'feature.03': 'பக்கம் இல்லையேல் பதில் இல்லை', 'feature.03body': 'ஆவணங்களில் இல்லையென்றால் நேர்மையாகச் சொல்லும்.',
   'assistant.languages': 'தமிழ், Tanglish, இந்தி, ஆங்கிலம்',
+  'assistant.welcome': 'வணக்கம்! தமிழ்நாடு அல்லது மத்திய அரசு நலத்திட்டம் பற்றி குரலிலோ எழுத்திலோ கேளுங்கள். ஒவ்வொரு பதிலும் வந்த அரசு பக்கத்தைக் காட்டும். இவற்றில் ஒன்றை முயற்சிக்கவும்:',
+  'assistant.placeholder': 'தமிழ், Tanglish, இந்தி அல்லது ஆங்கிலத்தில் கேளுங்கள்...',
+  'assistant.stop': '⏹ ஒலியை நிறுத்து',
   'documents.eyebrow': 'அதிகாரப்பூர்வ ஆதாரங்கள்', 'documents.title': 'பக்கம் படிக்கும் ஆவணங்கள்',
   'documents.intro': 'ஒவ்வொரு பதிலும் இந்த அதிகாரப்பூர்வ ஆவணங்களில் ஒன்றிலிருந்து, பக்க எண்ணுடன் வருகிறது.',
   'documents.note': 'அரசு இணையதளங்களிலிருந்து பதிவிறக்கிய இந்த ஆவணங்களிலிருந்து மட்டுமே பக்கம் பதில் சொல்லும். எதை வேண்டுமானாலும் திறந்து நீங்களே படிக்கலாம்.',
@@ -236,7 +278,25 @@ Object.assign(MESSAGES['ta-IN'], {
   'proof.open': 'பக்கத்தைப் பாருங்கள்', 'proof.title': 'அதிகாரப்பூர்வ ஆவணத்திலிருந்து ஆதாரம்', 'proof.page': 'பக்கம்',
   'proof.checked': 'அச்சுப் பக்கத்துடன் சரிபார்த்தவர்', 'proof.unchecked': 'ஆவண உரையிலிருந்து பக்கம் எடுத்தது; பக்கத்தை நீங்களே சரிபாருங்கள்.',
   'proof.source': 'அதிகாரப்பூர்வ PDF-ஐத் திற', 'proof.close': 'மூடு', 'proof.noImage': 'பக்கப் படம் இப்போது கிடைக்கவில்லை.',
+  'proof.corrected': 'இந்த வரி அச்சுப் பக்கத்திலிருந்து கையால் திருத்தப்பட்டது (ஸ்கேன் தவறாகப் படித்தது).',
   'answer.refused': 'ஆவணங்களில் இல்லை', 'answer.call': 'உதவி எண்', 'answer.didYouMean': 'எந்தத் திட்டத்தைக் கேட்கிறீர்கள்?',
+  'section.amount': 'எவ்வளவு', 'section.eligibility': 'யார் விண்ணப்பிக்கலாம்', 'section.documents': 'ஆவணங்கள்', 'section.apply': 'விண்ணப்பிக்கும் முறை',
+  'answer.understood': 'புரிந்ததா?', 'answer.yes': '✅ புரிந்தது', 'answer.notClear': '🤔 புரியவில்லை',
+  'answer.helpful': 'இது உதவியாக இருந்ததா?', 'answer.again': '🔁 மீண்டும் விளக்கு', 'answer.summary': '📝 சுருக்கம்',
+  'answer.simpler': '🗣️ எளிய பதில்', 'answer.docs': '📋 எடுத்துச் செல்ல வேண்டிய ஆவணங்கள்', 'answer.share': '📤 வாட்ஸ்அப்பில் பகிர்',
+  'answer.print': '🖨️ அச்சிடு', 'answer.appeal': '📝 நிராகரிக்கப்பட்டதா? மேல்முறையீடு', 'answer.officer': '👤 அதிகாரியிடம் கேள்',
+  'answer.issue': 'ஏதாவது சிரமமா? உதவுகிறேன்:', 'answer.tips': '💡 கேட்கும் வழிகள்',
+  'answer.tipsText': 'குறிப்பு: திட்டத்தின் பெயரைச் சொல்லுங்கள் (எ.கா. "மகளிர் உரிமை"), ஒரு நேரத்தில் ஒன்றைக் கேளுங்கள் (தொகை, தகுதி, ஆவணங்கள்), குரலில் கேட்டால் சற்று மெதுவாகப் பேசுங்கள்.',
+  'answer.feedbackThanks': 'உங்கள் கருத்துக்கு நன்றி! 🙏',
+  'answer.heardCheck': 'நீங்கள் கேட்டது இதுதானா?', 'answer.yesRight': '👍 ஆம்', 'answer.sayAgain': '🎙️ மீண்டும் சொல்',
+  'facts.total': 'இந்தத் திட்டங்களிலிருந்து ஆண்டுக்கு {total} வரை (கையொப்பமிட்ட தொகைகள்).',
+  'progress.searching': 'அதிகாரப்பூர்வ ஆவணங்களில் தேடுகிறது…', 'progress.found': '{doc}, பக்கம் {page}-ல் கிடைத்தது. பதில் எழுதப்படுகிறது…',
+  'progress.slow': 'வழக்கத்தைவிட நேரமாகிறது. இன்னும் சரிபார்க்கிறது…',
+  'checklist.title': 'எடுத்துச் செல்ல வேண்டிய ஆவணங்களும் விண்ணப்ப முறையும்', 'checklist.none': 'இந்தத் திட்டத்திற்கு இன்னும் சரிபார்த்த பட்டியல் இல்லை. "{scheme} திட்டத்திற்கு என்ன ஆவணங்கள் தேவை?" என்று கேளுங்கள்.',
+  'officer.title': 'உங்கள் கேள்வியை அதிகாரிக்கு அனுப்புங்கள்', 'officer.intro': 'ஆவணங்களில் இதற்குப் பதில் இல்லை. அதிகாரி தொடர்பு கொள்ளலாம். ஆதார் அல்லது வங்கி எண்களைச் சேர்க்க வேண்டாம்.',
+  'officer.question': 'உங்கள் கேள்வி', 'officer.contact': 'தொலைபேசி அல்லது மின்னஞ்சல் (விருப்பம்)', 'officer.send': 'அனுப்பு', 'officer.sent': 'அனுப்பப்பட்டது. உங்கள் குறிப்பு எண்: {ticket}', 'officer.failed': 'இப்போது அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+  'about.listen': '🔊 பக்கம் தன்னைப் பற்றிச் சொல்வதைக் கேளுங்கள்', 'about.stop': '⏹ நிறுத்து',
+  'about.intro': 'வணக்கம்! நான் பக்கம். பக்கம் என்றால் ஆவணத்தின் ஒரு பக்கம். தமிழ், Tanglish, இந்தி அல்லது ஆங்கிலத்தில், குரலிலோ எழுத்திலோ நலத்திட்டம் பற்றி கேளுங்கள். அதிகாரப்பூர்வ அரசு ஆவணங்களிலிருந்து மட்டுமே பதில் சொல்வேன்; பதில் வந்த சரியான பக்கத்தையும் காட்டுவேன். ஆவணத்தில் இல்லையென்றால் ஊகிக்காமல் நேர்மையாகச் சொல்வேன். வாட்ஸ்அப் செய்திகளில் உள்ள தவறான தகவல்களையும் மோசடி அறிகுறிகளையும் சரிபார்ப்பேன்.',
   'status.tooMany': 'நிறைய கேள்விகள் வருகின்றன. ஒரு நிமிடம் கழித்துக் கேளுங்கள்.',
   'status.timeout': 'பதில் வர நேரமாகிவிட்டது. மீண்டும் கேளுங்கள்.',
   'status.noSpeech': 'எதுவும் கேட்கவில்லை. உருண்டையைத் தொட்டு மீண்டும் பேசுங்கள்.',
@@ -244,11 +304,22 @@ Object.assign(MESSAGES['ta-IN'], {
 });
 Object.assign(MESSAGES['hi-IN'], {
   'home.title': 'सरकारी योजनाएँ, आधिकारिक पन्ने से समझें।',
+  'home.eyebrow': 'आधिकारिक दस्तावेज़। स्पष्ट जवाब।',
+  'home.shield': '🛡️ व्हाट्सऐप संदेश जाँचें', 'home.tapOrb': 'ऑर्ब दबाएँ और अपना सवाल पूछें',
+  'home.openChat': 'चैट में खोलें', 'home.heard': 'आपने कहा',
+  'nav.shield': 'संदेश जाँचें',
+  'conv.mode': 'बातचीत मोड: हर जवाब के बाद सुनता रहेगा', 'conv.short': 'बातचीत मोड',
+  'conv.paused': 'बातचीत रुकी। जारी रखने के लिए ऑर्ब दबाएँ।',
+  'home.step1Body': 'तमिल, Tanglish, हिंदी या अंग्रेज़ी में बोलें या लिखें।',
   'home.step2Title': 'आधिकारिक पन्ना देखें', 'home.step2Body': 'हर जवाब दिखाता है कि वह किस सरकारी दस्तावेज़ के किस पन्ने से है।',
   'home.step3Title': 'पन्ना नहीं, तो जवाब नहीं', 'home.step3Body': 'दस्तावेज़ों में न हो तो पक्कम अंदाज़ा नहीं लगाता, साफ़ बता देता है।',
   'feature.01': 'सबूत देखें', 'feature.01body': 'हर जवाब आधिकारिक दस्तावेज़ का सही पन्ना खोलता है।',
   'feature.02body': 'तमिल, Tanglish, हिंदी या अंग्रेज़ी में पूछें।',
+  'feature.03': 'पन्ना नहीं, तो जवाब नहीं', 'feature.03body': 'दस्तावेज़ों में न हो तो साफ़ बता देता है।',
   'assistant.languages': 'तमिल, Tanglish, हिंदी और अंग्रेज़ी',
+  'assistant.welcome': 'नमस्ते! तमिलनाडु या केंद्र सरकार की कल्याण योजना के बारे में बोलकर या लिखकर पूछें। हर जवाब उसका सरकारी पन्ना दिखाता है। इनमें से कुछ आज़माएँ:',
+  'assistant.placeholder': 'तमिल, Tanglish, हिंदी या अंग्रेज़ी में पूछें...',
+  'assistant.stop': '⏹ ऑडियो रोकें',
   'documents.eyebrow': 'आधिकारिक स्रोत', 'documents.title': 'पक्कम जो दस्तावेज़ पढ़ता है',
   'documents.intro': 'हर जवाब इन्हीं आधिकारिक दस्तावेज़ों में से किसी एक से, पन्ना संख्या के साथ आता है।',
   'documents.note': 'पक्कम सिर्फ़ इन्हीं दस्तावेज़ों से जवाब देता है, जो सरकारी वेबसाइटों से लिए गए हैं। कोई भी खोलकर ख़ुद पढ़ें।',
@@ -260,21 +331,127 @@ Object.assign(MESSAGES['hi-IN'], {
   'proof.open': 'पन्ना देखें', 'proof.title': 'आधिकारिक दस्तावेज़ से सबूत', 'proof.page': 'पन्ना',
   'proof.checked': 'छपे पन्ने से जाँचा', 'proof.unchecked': 'दस्तावेज़ के पाठ से लिया गया; पन्ना ख़ुद जाँच लें।',
   'proof.source': 'आधिकारिक PDF खोलें', 'proof.close': 'बंद करें', 'proof.noImage': 'पन्ने की तस्वीर अभी उपलब्ध नहीं है।',
+  'proof.corrected': 'यह पंक्ति छपे पन्ने से हाथ से सुधारी गई है (स्कैन ने गलत पढ़ा था)।',
   'answer.refused': 'दस्तावेज़ों में नहीं', 'answer.call': 'हेल्पलाइन', 'answer.didYouMean': 'आप किस योजना के बारे में पूछ रहे हैं?',
+  'section.amount': 'कितना', 'section.eligibility': 'कौन आवेदन कर सकता है', 'section.documents': 'दस्तावेज़', 'section.apply': 'आवेदन कैसे करें',
+  'answer.understood': 'क्या समझ आया?', 'answer.yes': '✅ हाँ', 'answer.notClear': '🤔 साफ़ नहीं',
+  'answer.helpful': 'क्या यह मददगार था?', 'answer.again': '🔁 फिर से समझाएँ', 'answer.summary': '📝 सारांश',
+  'answer.simpler': '🗣️ आसान जवाब', 'answer.docs': '📋 ज़रूरी दस्तावेज़', 'answer.share': '📤 व्हाट्सऐप पर भेजें',
+  'answer.print': '🖨️ प्रिंट', 'answer.appeal': '📝 अस्वीकृत? अपील', 'answer.officer': '👤 अधिकारी से पूछें',
+  'answer.issue': 'कोई परेशानी? मैं मदद कर सकता हूँ:', 'answer.tips': '💡 पूछने के तरीके',
+  'answer.tipsText': 'सुझाव: योजना का नाम बताएँ, एक बार में एक बात पूछें (राशि, पात्रता, दस्तावेज़), और आवाज़ से पूछें तो थोड़ा धीरे बोलें।',
+  'answer.feedbackThanks': 'आपकी राय के लिए धन्यवाद! 🙏',
+  'answer.heardCheck': 'क्या आपने यही पूछा?', 'answer.yesRight': '👍 हाँ', 'answer.sayAgain': '🎙️ फिर से बोलें',
+  'facts.total': 'इन योजनाओं से साल में {total} तक (जाँची गई राशि)।',
+  'progress.searching': 'आधिकारिक दस्तावेज़ों में खोज रहा है…', 'progress.found': '{doc}, पन्ना {page} में मिला। जवाब लिखा जा रहा है…',
+  'progress.slow': 'सामान्य से ज़्यादा समय लग रहा है। अभी जाँच रहा है…',
+  'checklist.title': 'ज़रूरी दस्तावेज़ और आवेदन का तरीका', 'checklist.none': 'इस योजना की जाँची गई सूची अभी नहीं है। पूछें: "{scheme} के लिए कौन से दस्तावेज़ चाहिए?"',
+  'officer.title': 'अपना सवाल अधिकारी को भेजें', 'officer.intro': 'दस्तावेज़ों में इसका जवाब नहीं मिला। अधिकारी संपर्क कर सकते हैं। आधार या बैंक नंबर न लिखें।',
+  'officer.question': 'आपका सवाल', 'officer.contact': 'फ़ोन या ईमेल (वैकल्पिक)', 'officer.send': 'भेजें', 'officer.sent': 'भेज दिया। आपका संदर्भ नंबर: {ticket}', 'officer.failed': 'अभी नहीं भेज सके। फिर कोशिश करें।',
+  'about.listen': '🔊 पक्कम से उसका परिचय सुनें', 'about.stop': '⏹ रोकें',
+  'about.intro': 'नमस्ते! मैं पक्कम हूँ। तमिल में पक्कम का मतलब है पन्ना। तमिल, Tanglish, हिंदी या अंग्रेज़ी में, बोलकर या लिखकर किसी कल्याण योजना के बारे में पूछें। मैं सिर्फ़ आधिकारिक सरकारी दस्तावेज़ों से जवाब देता हूँ और जवाब का सही पन्ना दिखाता हूँ। दस्तावेज़ों में न हो तो अंदाज़ा नहीं लगाता, साफ़ बता देता हूँ। मैं व्हाट्सऐप संदेशों में गलत दावे और धोखाधड़ी के संकेत भी जाँचता हूँ।',
   'status.tooMany': 'बहुत सवाल आ रहे हैं। एक मिनट बाद फिर पूछें।',
   'status.timeout': 'जवाब में देर हो गई। फिर से पूछें।',
   'status.noSpeech': 'कुछ सुनाई नहीं दिया। ऑर्ब टैप करके फिर बोलें।',
   'footer.line': 'यह एक छात्र प्रोजेक्ट है, सरकारी सेवा नहीं। फ़ैसले से पहले आधिकारिक स्रोत देखें।',
 });
 
+// Rumour Shield and appeal texts (from the earlier chat page, web-backup/assets/chat.js).
+const SHIELD = {
+  'en-IN': {
+    eyebrow: 'RUMOUR SHIELD', title: 'Is this WhatsApp forward true?', intro: 'Paste the message. Pakkam checks every claim against the official government documents and points out scam signs.',
+    placeholder: 'Paste the WhatsApp message here', example: 'Try an example', check: 'Check it',
+    checking: 'Checking each claim against the government orders…', failed: 'Pakkam could not check this now. Try again in a minute.',
+    overall: { wrong: '❌ This forward is wrong', partly_wrong: '⚠️ Partly wrong', looks_right: '✅ Matches the official documents',
+      not_in_documents: '⚠️ Not in any official document. Be careful.', no_claims: 'No scheme claim found in this message.' },
+    verdict: { supported: '✅ True', contradicted: '❌ Wrong', not_in_documents: '⚠️ Not in the documents' },
+    signs: { unofficial_link: 'The link is not a government website (.gov.in). Do not open it or enter details.',
+      official_link: 'The link is a government website (.gov.in).',
+      otp: 'It asks for an OTP. Government schemes never ask for your OTP. Never share it.',
+      payment: 'It asks for money. Applying for these schemes does not need payment to anyone in a message.',
+      personal_data: 'It asks for Aadhaar or bank details. Do not send them to unknown people.',
+      urgency: '"Today only" pressure is a common trick. Check first.' },
+    warnings: 'Warning signs', share: '📤 Send the correction on WhatsApp',
+    correction: 'Fact-check by Pakkam (from the official government documents):',
+  },
+  'ta-IN': {
+    eyebrow: 'வதந்தி கவசம்', title: 'இந்த வாட்ஸ்அப் செய்தி உண்மையா?', intro: 'செய்தியை ஒட்டுங்கள். ஒவ்வொரு கூற்றையும் அதிகாரப்பூர்வ அரசு ஆவணங்களுடன் சரிபார்த்து, மோசடி அறிகுறிகளையும் பக்கம் காட்டும்.',
+    placeholder: 'வாட்ஸ்அப் செய்தியை இங்கே ஒட்டுங்கள்', example: 'ஒரு எடுத்துக்காட்டு', check: 'சரிபார்',
+    checking: 'ஒவ்வொரு கூற்றும் அரசாணையுடன் சரிபார்க்கப்படுகிறது…', failed: 'இப்போது சரிபார்க்க முடியவில்லை. ஒரு நிமிடம் கழித்து முயற்சிக்கவும்.',
+    overall: { wrong: '❌ இந்தச் செய்தி தவறு', partly_wrong: '⚠️ ஓரளவு தவறு', looks_right: '✅ அதிகாரப்பூர்வ ஆவணங்களுடன் பொருந்துகிறது',
+      not_in_documents: '⚠️ எந்த அதிகாரப்பூர்வ ஆவணத்திலும் இல்லை. கவனம்.', no_claims: 'இந்தச் செய்தியில் திட்டம் பற்றிய கூற்று இல்லை.' },
+    verdict: { supported: '✅ உண்மை', contradicted: '❌ தவறு', not_in_documents: '⚠️ ஆவணங்களில் இல்லை' },
+    signs: { unofficial_link: 'இந்த இணைப்பு அரசு இணையதளம் (.gov.in) அல்ல. திறக்க வேண்டாம், விவரங்களைக் கொடுக்க வேண்டாம்.',
+      official_link: 'இந்த இணைப்பு அரசு இணையதளம் (.gov.in).',
+      otp: 'OTP கேட்கிறது. அரசுத் திட்டங்கள் ஒருபோதும் OTP கேட்பதில்லை. பகிர வேண்டாம்.',
+      payment: 'பணம் கேட்கிறது. இந்தத் திட்டங்களுக்கு செய்தி மூலம் யாருக்கும் பணம் கட்டத் தேவையில்லை.',
+      personal_data: 'ஆதார் அல்லது வங்கி விவரங்களைக் கேட்கிறது. தெரியாதவர்களுக்கு அனுப்ப வேண்டாம்.',
+      urgency: '"இன்று மட்டும்" என்ற அவசரம் ஒரு வழக்கமான ஏமாற்று. முதலில் சரிபாருங்கள்.' },
+    warnings: 'எச்சரிக்கை அறிகுறிகள்', share: '📤 திருத்தத்தை வாட்ஸ்அப்பில் அனுப்பு',
+    correction: 'பக்கம் சரிபார்ப்பு (அதிகாரப்பூர்வ அரசு ஆவணங்களிலிருந்து):',
+  },
+  'hi-IN': {
+    eyebrow: 'अफ़वाह कवच', title: 'क्या यह व्हाट्सऐप संदेश सच है?', intro: 'संदेश चिपकाएँ। पक्कम हर दावे को आधिकारिक सरकारी दस्तावेज़ों से जाँचता है और धोखाधड़ी के संकेत बताता है।',
+    placeholder: 'व्हाट्सऐप संदेश यहाँ चिपकाएँ', example: 'एक उदाहरण', check: 'जाँचें',
+    checking: 'हर दावे को सरकारी आदेश से जाँचा जा रहा है…', failed: 'अभी जाँच नहीं हो सकी। एक मिनट बाद कोशिश करें।',
+    overall: { wrong: '❌ यह संदेश गलत है', partly_wrong: '⚠️ आंशिक रूप से गलत', looks_right: '✅ आधिकारिक दस्तावेज़ों से मेल खाता है',
+      not_in_documents: '⚠️ किसी आधिकारिक दस्तावेज़ में नहीं। सावधान रहें।', no_claims: 'इस संदेश में योजना का कोई दावा नहीं मिला।' },
+    verdict: { supported: '✅ सही', contradicted: '❌ गलत', not_in_documents: '⚠️ दस्तावेज़ों में नहीं' },
+    signs: { unofficial_link: 'यह लिंक सरकारी वेबसाइट (.gov.in) नहीं है। इसे न खोलें।',
+      official_link: 'यह लिंक सरकारी वेबसाइट (.gov.in) है।',
+      otp: 'यह OTP माँगता है। सरकारी योजनाएँ कभी OTP नहीं माँगतीं। इसे साझा न करें।',
+      payment: 'यह पैसे माँगता है। इन योजनाओं के लिए संदेश से किसी को भुगतान नहीं करना होता।',
+      personal_data: 'यह आधार या बैंक विवरण माँगता है। अनजान लोगों को न भेजें।',
+      urgency: '"आज ही" का दबाव एक आम चाल है। पहले जाँचें।' },
+    warnings: 'चेतावनी के संकेत', share: '📤 सुधार व्हाट्सऐप पर भेजें',
+    correction: 'पक्कम द्वारा जाँच (आधिकारिक सरकारी दस्तावेज़ों से):',
+  },
+};
+const SHIELD_EXAMPLE = 'Magalir Urimai increased to Rs.2,000 a month! Register at bit.ly/kmut2000 today only and share OTP to confirm.';
+
+const APPEAL = {
+  'en-IN': { title: 'Application rejected?', scheme: 'Scheme', reason: 'Reason given in the rejection message',
+    situation: 'Your situation (optional), e.g. "we only have a two-wheeler"', go: 'Find the rule', working: 'Finding the rule in the government order…',
+    rule: 'What the rule says', note: 'Draft appeal note (edit before you use it)', copy: '📋 Copy', copied: 'Copied',
+    noRule: 'The official documents in Pakkam do not cover this reason. You can ask an officer.',
+    disclaimer: 'This is a draft to help you, not legal advice. Check every detail and ask at your e-Sevai centre how and by when to submit an appeal.',
+    ask: (scheme, reason) => `Under ${scheme}, is this a reason not to be eligible: ${reason}? What does the rule say?`,
+    template: (v) => `To\nThe officer concerned, ${v.scheme}\n\nSubject: Request to reconsider my application\n\nMy application under ${v.scheme} (Application No: __________) was rejected for this reason: "${v.reason}".\n${v.situation ? `My situation: ${v.situation}\n` : ''}\nThe government rule says (${v.document}, page ${v.page}):\n"${v.rule}"\n\nI request you to reconsider my application in the light of this rule.\n\nName: __________        Family card No: __________\nPhone: __________       Date: __________\nSignature: __________` },
+  'ta-IN': { title: 'விண்ணப்பம் நிராகரிக்கப்பட்டதா?', scheme: 'திட்டம்', reason: 'நிராகரிப்புச் செய்தியில் சொன்ன காரணம்',
+    situation: 'உங்கள் நிலைமை (விருப்பம்), எ.கா. "எங்களிடம் இரு சக்கர வாகனம் மட்டுமே உள்ளது"', go: 'விதியைக் கண்டுபிடி', working: 'அரசாணையில் விதி தேடப்படுகிறது…',
+    rule: 'விதி சொல்வது', note: 'மேல்முறையீட்டுக் கடித வரைவு (பயன்படுத்தும் முன் திருத்துங்கள்)', copy: '📋 நகலெடு', copied: 'நகலெடுக்கப்பட்டது',
+    noRule: 'இந்தக் காரணம் பக்கத்தில் உள்ள அதிகாரப்பூர்வ ஆவணங்களில் இல்லை. அதிகாரியிடம் கேட்கலாம்.',
+    disclaimer: 'இது உதவிக்கான வரைவு மட்டுமே, சட்ட ஆலோசனை அல்ல. ஒவ்வொரு விவரத்தையும் சரிபார்த்து, மேல்முறையீட்டை எப்படி, எப்போதுக்குள் தர வேண்டும் என்று இ-சேவை மையத்தில் கேளுங்கள்.',
+    ask: (scheme, reason) => `${scheme} திட்டத்தில், இது தகுதியின்மைக்கான காரணமா: ${reason}? விதி என்ன சொல்கிறது?`,
+    template: (v) => `பெறுநர்\nசம்பந்தப்பட்ட அலுவலர், ${v.scheme}\n\nபொருள்: எனது விண்ணப்பத்தை மறுபரிசீலனை செய்யக் கோருதல்\n\n${v.scheme} திட்டத்தின் கீழ் எனது விண்ணப்பம் (விண்ணப்ப எண்: __________) "${v.reason}" என்ற காரணத்தால் நிராகரிக்கப்பட்டது.\n${v.situation ? `எனது நிலைமை: ${v.situation}\n` : ''}\nஅரசு விதி (${v.document}, பக்கம் ${v.page}) கூறுவது:\n"${v.rule}"\n\nஇந்த விதியின் அடிப்படையில் எனது விண்ணப்பத்தை மறுபரிசீலனை செய்யுமாறு கேட்டுக்கொள்கிறேன்.\n\nபெயர்: __________        குடும்ப அட்டை எண்: __________\nதொலைபேசி: __________       தேதி: __________\nகையொப்பம்: __________` },
+};
+APPEAL['hi-IN'] = APPEAL['en-IN'];
+
+const SPOKEN_SOURCE = {
+  en: (c) => `Source: ${c.document}, page ${c.page_start}.`,
+  ta: (c) => `ஆதாரம்: ${c.document}, பக்கம் ${c.page_start}.`,
+  'ta-Latn': (c) => `ஆதாரம்: ${c.document}, பக்கம் ${c.page_start}.`,
+  hi: (c) => `स्रोत: ${c.document}, पेज ${c.page_start}.`,
+};
+// Said the moment a voice question is sent, so there is no silence while Pakkam reads.
+const FILLER = {
+  ta: 'ஒரு நிமிடம், அரசாணையில் பார்க்கிறேன்.',
+  hi: 'एक पल, सरकारी आदेश में देख रहा हूँ।',
+  en: 'One moment, checking the government order.',
+};
+
 /* ==========================================================================
-   3. TALKING TO THE PAKKAM BACKEND (FastAPI: /ask, /transcribe, /speak, /page, /sources)
+   3. TALKING TO THE PAKKAM BACKEND (FastAPI)
    ========================================================================== */
 const ASK_TIMEOUT_MS = 120000;
+const SLOW_MS = 20000;
 const MAX_VOICE_SECONDS = 30;
-// The site's language codes, and the codes the backend takes for speech.
 const VOICE_LANG = { 'en-IN': 'en', 'ta-IN': 'ta', 'hi-IN': 'hi' };
+const SPEECH_LANG = { 'en-IN': 'en', 'ta-IN': 'ta', 'hi-IN': 'hi' };
 const CITATION_MARKER = /\s*\[\d+(?:,\s*\d+)*\]/g;
+const SECTION_ORDER = ['amount', 'eligibility', 'documents', 'apply', 'other'];
+const fill = (text, values) => text.replace(/\{(\w+)\}/g, (_, key) => (values[key] ?? ''));
+const shieldWords = () => SHIELD[state.language] || SHIELD['en-IN'];
 
 class ApiError extends Error {
   constructor(status, detail) { super(detail || `HTTP ${status}`); this.status = status; }
@@ -299,10 +476,13 @@ async function api(path, options = {}, timeoutMs = ASK_TIMEOUT_MS) {
   }
 }
 
+const postJson = (path, body, timeoutMs) => api(path, {
+  method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+}, timeoutMs);
+
 function errorText(error) {
   if (error instanceof ApiError && error.status === 429) return t('status.tooMany');
   if (error instanceof ApiError && error.status === 0) return t('status.timeout');
-  // Messages the server writes for people (e.g. "Please remove Aadhaar numbers").
   if (error instanceof ApiError && [400, 413, 422].includes(error.status) && error.message) return error.message;
   return t('status.chatError');
 }
@@ -314,20 +494,45 @@ const el = (tag, className, text) => {
   return node;
 };
 
-/* ==========================================================================
-   4. VOICE: record (WAV, assets from recorder.js) -> /transcribe -> /ask -> /speak
-   ========================================================================== */
-let recording = null;
-let recordingTimer = null;
-
-function setStatus(text) {
-  const label = document.getElementById('voice-status-label');
-  if (label) label.textContent = text;
+function chip(label, onClick, className = 'chip-btn') {
+  const button = el('button', className, label);
+  button.type = 'button';
+  button.addEventListener('click', onClick);
+  return button;
 }
 
-function showHeard(text) {
+function linkChip(label, href) {
+  const link = el('a', 'chip-btn', label);
+  link.href = href;
+  link.target = '_blank';
+  link.rel = 'noopener';
+  return link;
+}
+
+/* ==========================================================================
+   4. ORB STATE, STATUS AND SPEECH
+   ========================================================================== */
+let orbErrorTimer = null;
+function orb(name) {
+  setOrbState(name);
+  clearTimeout(orbErrorTimer);
+  // An error ring never stays on: back to idle after 3 s.
+  if (name === 'error') orbErrorTimer = setTimeout(() => { setOrbState('idle'); }, 3000);
+}
+
+function setStatus(text) {
+  ['voice-status-label', 'home-status'].forEach((id) => {
+    const node = document.getElementById(id);
+    if (node) node.textContent = text;
+  });
+}
+
+/** What Pakkam heard (isTranscript) or a short voice message, under both orbs. */
+function showHeard(text, isTranscript = false) {
   const preview = document.getElementById('live-transcript-preview');
   if (preview) preview.textContent = text;
+  const home = document.getElementById('home-heard');
+  if (home) home.textContent = text && isTranscript ? `${t('home.heard')}: ${text}` : text;
 }
 
 function setBars(level) {
@@ -340,137 +545,279 @@ function setBars(level) {
   });
 }
 
-async function toggleVoiceRecording() {
-  if (recording) { await finishRecording(); return; }
-  if (!window.PakkamRecorder || !navigator.mediaDevices?.getUserMedia) {
-    setOrbState('error');
-    setStatus(t('status.voiceError'));
-    return;
-  }
-  stopPlayback();
-  navigateTo('assistant');
-  try {
-    recording = await window.PakkamRecorder.start({
-      onLevel: setBars,
-      onSilence: () => finishRecording(),
-      noSpeechMs: 8000,
-    });
-  } catch (_) {
-    recording = null;
-    setOrbState('error');
-    setStatus(t('status.micError'));
-    return;
-  }
-  setOrbState('listening');
-  setStatus(t('status.listening'));
-  showHeard('');
-  recordingTimer = setTimeout(() => finishRecording(), MAX_VOICE_SECONDS * 1000);
-}
-
-async function finishRecording() {
-  if (!recording) return;
-  const current = recording;
-  recording = null;
-  clearTimeout(recordingTimer);
-  stopWaveformMeter();
-  setOrbState('processing');
-  setStatus(t('status.processing'));
-  let wav;
-  try { wav = await current.stop(); } catch (_) { wav = null; }
-  if (!wav || wav.size < 2000) {
-    setOrbState('idle');
-    setStatus(t('assistant.tap'));
-    showHeard(t('status.noSpeech'));
-    return;
-  }
-  const form = new FormData();
-  form.append('audio', wav, 'question.wav');
-  form.append('language', VOICE_LANG[state.language] || 'ta');
-  try {
-    const data = await (await api('/transcribe', { method: 'POST', body: form }, 60000)).json();
-    const heard = (data.transcript || '').trim();
-    if (!heard) {
-      setOrbState('idle');
-      setStatus(t('assistant.tap'));
-      showHeard(t('status.noSpeech'));
-      return;
-    }
-    showHeard(`"${heard}"`);
-    setStatus(t('assistant.tap'));
-    await submitChatQuery(heard, { voice: true });
-  } catch (error) {
-    setOrbState('error');
-    setStatus(t('assistant.tap'));
-    showHeard(error instanceof ApiError && [400, 413, 415, 422].includes(error.status) && error.message
-      ? error.message : t('status.voiceError'));
-  }
-}
-
 function stopPlayback() {
   if (state.currentAudio) {
+    state.currentAudio.onended = null;
     state.currentAudio.pause();
-    URL.revokeObjectURL(state.currentAudio.src);
+    if (state.currentAudio.src.startsWith('blob:') && !state.currentAudio.keepUrl) URL.revokeObjectURL(state.currentAudio.src);
   }
   state.currentAudio = null;
   const stopBtn = document.getElementById('stop-audio-btn');
   if (stopBtn) stopBtn.style.display = 'none';
 }
 
-// The answer read aloud by Gnani Timbre (/speak returns the WAV itself).
-async function playGnaniTTS(text, language) {
-  if (!state.autoPlayTTS || !text) return;
-  const spoken = text.replace(CITATION_MARKER, '').trim();
-  if (!spoken) return;
-  try {
-    const res = await api('/speak', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: spoken.slice(0, 1200), language: language === 'unknown' ? 'en' : language }),
-    }, 60000);
-    const url = URL.createObjectURL(await res.blob());
+async function speechUrl(text, language) {
+  const res = await postJson('/speak', { text: text.slice(0, 1200), language: language === 'unknown' ? 'en' : language }, 60000);
+  return URL.createObjectURL(await res.blob());
+}
+
+/** Play a WAV url; resolves when it ends (or fails). */
+function playUrl(url, { rate = 1, keepUrl = false } = {}) {
+  return new Promise((resolve) => {
     stopPlayback();
     const audio = new Audio(url);
+    audio.keepUrl = keepUrl;
+    audio.playbackRate = rate;
     state.currentAudio = audio;
     const stopBtn = document.getElementById('stop-audio-btn');
     if (stopBtn) stopBtn.style.display = 'inline-block';
-    audio.onended = () => { stopPlayback(); stopWaveformMeter(); setOrbState('idle'); };
-    await audio.play();
-    setOrbState('speaking');
-    try {
-      state.audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
-      await state.audioContext.resume();
-      startWaveformMeter(state.audioContext.createMediaElementSource(audio), true);
-    } catch (_) { /* playback still works without the waveform */ }
+    const done = () => {
+      if (state.currentAudio === audio) { stopPlayback(); stopWaveformMeter(); orb('idle'); }
+      resolve();
+    };
+    audio.onended = done;
+    audio.onerror = done;
+    audio.play().then(() => {
+      orb('speaking');
+      try {
+        state.audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+        state.audioContext.resume();
+        startWaveformMeter(state.audioContext.createMediaElementSource(audio), true);
+      } catch (_) { /* playback works without the waveform */ }
+    }).catch(done);
+  });
+}
+
+async function speak(text, language, options = {}) {
+  const spoken = (text || '').replace(CITATION_MARKER, '').trim();
+  if (!spoken) return;
+  try {
+    await playUrl(await speechUrl(spoken, language), options);
   } catch (_) {
-    // Speech is optional: the written answer is already on screen.
-    setOrbState('idle');
+    orb('idle');  // speech is optional: the written answer is on screen
   }
 }
 
+const fillerUrls = {};
+function prefetchFiller(language) {
+  if (fillerUrls[language] || !FILLER[language]) return;
+  fillerUrls[language] = speechUrl(FILLER[language], language).catch(() => { delete fillerUrls[language]; return null; });
+}
+
 /* ==========================================================================
-   5. ANSWERS WITH PROOF (/ask -> sentences + citations; the page image from /page)
+   5. CONVERSATION STATE AND CHAT BUBBLES
+   ========================================================================== */
+const convo = {
+  last: null,          // { question, data, text }
+  refusals: 0,
+  mode: (() => { try { return localStorage.getItem('pakkam_conv') === '1'; } catch (_) { return false; } })(),
+  surface: 'chat',     // where the latest voice turn started: 'home' or 'chat'
+  voiceLang: null,     // voice language chip ('ta-Latn' for Tanglish), else from the site language
+};
+
+const voiceLanguage = () => convo.voiceLang || VOICE_LANG[state.language] || 'ta';
+
+function setConversationMode(on) {
+  convo.mode = on;
+  try { localStorage.setItem('pakkam_conv', on ? '1' : '0'); } catch (_) { /* private mode */ }
+  document.querySelectorAll('.conv-mode-input').forEach((box) => { box.checked = on; });
+}
+
+function chatBox() { return document.getElementById('chat-messages'); }
+
+function scrollChat() {
+  const box = chatBox();
+  if (box) box.scrollTop = box.scrollHeight;
+}
+
+function addBubble(role, text) {
+  const bubble = el('div', `chat-bubble ${role}`);
+  if (text) bubble.append(el('div', 'answer-text', text));
+  chatBox()?.appendChild(bubble);
+  scrollChat();
+  return bubble;
+}
+
+function chipRow(chips, label) {
+  const wrap = el('div', 'answer-row');
+  if (label) wrap.append(el('span', 'answer-row-label', label));
+  const pills = el('div', 'citation-pills');
+  pills.append(...chips);
+  wrap.append(pills);
+  return wrap;
+}
+
+function exampleChips(language = state.language) {
+  const chips = (EXAMPLES[language] || EXAMPLES['en-IN']).map((q) => chip(q, () => submitChatQuery(q)));
+  chips.push(chip((MESSAGES[language] || MESSAGES['en-IN'])['home.shield'], () => navigateTo('shield')));
+  return chips;
+}
+
+function renderWelcomeChips() {
+  const box = document.getElementById('welcome-chips');
+  if (box) box.replaceChildren(...exampleChips());
+}
+
+/** Mirror a short reply on the home page, under the orb. */
+function showOnHome(text, citations = []) {
+  const card = document.getElementById('home-answer');
+  if (!card) return;
+  card.replaceChildren(el('p', 'home-answer-text', text));
+  const actions = el('div', 'citation-pills');
+  citations.slice(0, 2).forEach((c) => actions.append(proofButton(c)));
+  actions.append(chip(`${t('home.openChat')} →`, () => navigateTo('assistant')));
+  card.append(actions);
+  card.hidden = false;
+}
+
+/* ==========================================================================
+   6. SMALL TALK (talk.js): instant, no server call
+   ========================================================================== */
+function handleTalk(intent, question, options) {
+  const language = replyLanguage(question, state.language);
+  const words = TALK[language] || TALK['en-IN'];
+  const bubble = addBubble('ai');
+  let text = words[intent] || '';
+  const say = (extra) => { bubble.append(extra); scrollChat(); };
+
+  if (intent === 'again') return explainAgain(bubble, words, options);
+  if (intent === 'summary') return summarize(bubble, words, options);
+
+  bubble.append(el('div', 'answer-text', text));
+  if (['greeting', 'howAreYou', 'offTopic'].includes(intent)) say(chipRow(exampleChips(language)));
+  if (intent === 'goodbye') setConversationMode(false);
+  if (intent === 'thanks' || intent === 'ack') say(chipRow(nextStepChips()));
+  if (intent === 'schemes') say(chipRow(schemeChips()));
+  if (intent === 'notClear') say(chipRow(notClearChips()));
+  if (intent === 'complaint' || intent === 'issue') say(chipRow(issueChips()));
+  showOnHome(text);
+  finishTurn(text, SPEECH_LANG[language], options);
+}
+
+function nextStepChips() {
+  const scheme = convo.last?.data?.scheme;
+  if (!scheme) return exampleChips().slice(0, 3);
+  const asks = QUICK_QUESTIONS[state.language] || QUICK_QUESTIONS['en-IN'];
+  return [
+    chip(t('answer.docs'), () => showChecklist(scheme)),
+    chip(t('schemes.askWho'), () => submitChatQuery(asks.who(scheme))),
+    chip(t('schemes.askAmount'), () => submitChatQuery(asks.amount(scheme))),
+  ];
+}
+
+function schemeChips() {
+  const asks = QUICK_QUESTIONS[state.language] || QUICK_QUESTIONS['en-IN'];
+  return schemeNames().map((name) => chip(name, () => submitChatQuery(asks.amount(name))));
+}
+
+function notClearChips() {
+  const chips = [chip(t('answer.again'), () => explainAgain(addBubble('ai'), TALK[state.language], {})),
+    chip(t('answer.summary'), () => summarize(addBubble('ai'), TALK[state.language], {}))];
+  const cite = convo.last?.data?.citations?.[0];
+  if (cite) chips.push(proofButton(cite));
+  if (convo.last) chips.push(chip(t('answer.simpler'), () => submitChatQuery(convo.last.question, { voice: true, quiet: true })));
+  return chips;
+}
+
+function issueChips() {
+  const chips = [];
+  const helpline = convo.last?.data?.contact?.helpline;
+  if (helpline) {
+    const call = el('a', 'chip-btn', `📞 ${t('answer.call')}: ${helpline}`);
+    call.href = `tel:${helpline.replace(/[^\d+]/g, '')}`;
+    chips.push(call);
+  }
+  chips.push(chip(t('answer.officer'), () => openOfficer(convo.last?.question || '', convo.last?.data?.scheme)));
+  chips.push(chip(t('answer.tips'), () => { addBubble('ai', t('answer.tipsText')); }));
+  const cite = convo.last?.data?.citations?.[0];
+  if (cite) chips.push(proofButton(cite));
+  return chips;
+}
+
+function sectionsOf(data) {
+  const groups = new Map();
+  (data.sentences || []).forEach((s) => {
+    const key = SECTION_ORDER.includes(s.section) ? s.section : 'other';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(s);
+  });
+  return SECTION_ORDER.filter((key) => groups.has(key)).map((key) => [key, groups.get(key)]);
+}
+
+function explainAgain(bubble, words, options) {
+  if (!convo.last || convo.last.data.refused) { bubble.append(el('div', 'answer-text', words.noLast)); return; }
+  bubble.append(el('div', 'answer-flag', words.againTitle));
+  renderSections(bubble, convo.last.data);
+  bubble.append(citationRow(convo.last.data.citations));
+  scrollChat();
+  finishTurn(convo.last.text, convo.last.data.language, { ...options, rate: 0.85, force: true });
+}
+
+function summarize(bubble, words, options) {
+  if (!convo.last || convo.last.data.refused) { bubble.append(el('div', 'answer-text', words.noLast)); return; }
+  bubble.append(el('div', 'answer-flag', words.summaryTitle));
+  const list = el('ul', 'answer-summary');
+  const lines = [];
+  sectionsOf(convo.last.data).forEach(([key, sentences]) => {
+    const line = sentences[0].text;
+    lines.push(line);
+    const item = el('li');
+    if (key !== 'other') item.append(el('strong', '', `${t(`section.${key}`)}: `));
+    item.append(document.createTextNode(line));
+    list.append(item);
+  });
+  bubble.append(list, citationRow(convo.last.data.citations));
+  scrollChat();
+  finishTurn(lines.join(' '), convo.last.data.language, options);
+}
+
+/* ==========================================================================
+   7. ANSWERS WITH PROOF
    ========================================================================== */
 function citationLabel(c) {
   const pages = c.page_end && c.page_end !== c.page_start ? `${c.page_start}-${c.page_end}` : c.page_start;
   return `${c.document} · ${t('proof.page')} ${pages}`;
 }
 
-function openProof(c) {
-  closeProof();
-  const overlay = el('div', 'proof-overlay');
-  overlay.setAttribute('role', 'dialog');
-  overlay.setAttribute('aria-modal', 'true');
-  overlay.setAttribute('aria-label', t('proof.title'));
+function proofButton(c) {
+  const button = chip(`📄 ${t('proof.open')} · ${citationLabel(c)}${c.checked_by ? ' ✓' : ''}`, () => openProof(c), 'citation-tag proof-btn');
+  button.title = t('proof.open');
+  return button;
+}
+
+function citationRow(citations = []) {
+  const wrap = el('div', 'citation-pills');
+  citations.forEach((c) => wrap.append(proofButton(c)));
+  return wrap;
+}
+
+function overlay(titleText) {
+  closeOverlay();
+  const shade = el('div', 'proof-overlay');
+  shade.setAttribute('role', 'dialog');
+  shade.setAttribute('aria-modal', 'true');
+  shade.setAttribute('aria-label', titleText);
   const box = el('div', 'proof-box glass-panel');
-  const close = el('button', 'icon-btn proof-close', '✕');
-  close.type = 'button';
+  const close = chip('✕', closeOverlay, 'icon-btn proof-close');
   close.setAttribute('aria-label', t('proof.close'));
-  close.addEventListener('click', closeProof);
-  box.append(close, el('p', 'hero-eyebrow', t('proof.title')), el('h2', 'proof-doc', c.document));
+  box.append(close);
+  shade.append(box);
+  shade.addEventListener('click', (event) => { if (event.target === shade) closeOverlay(); });
+  document.body.append(shade);
+  close.focus();
+  return box;
+}
+
+function closeOverlay() { document.querySelector('.proof-overlay')?.remove(); }
+
+function openProof(c) {
+  const box = overlay(t('proof.title'));
+  box.append(el('p', 'hero-eyebrow', t('proof.title')), el('h2', 'proof-doc', c.document));
   box.append(el('p', 'proof-meta', `${c.scheme} · ${t('proof.page')} ${c.page_start}${c.document_date ? ` · ${t('documents.dated')} ${c.document_date}` : ''}`));
   box.append(c.checked_by
     ? el('p', 'proof-checked', `✓ ${t('proof.checked')} ${c.checked_by}${c.checked_on ? ` (${c.checked_on})` : ''}`)
     : el('p', 'proof-note', t('proof.unchecked')));
+  if (c.ocr_corrected) box.append(el('p', 'proof-note', t('proof.corrected')));
   const pagePath = `/page?doc=${encodeURIComponent(c.doc_id)}&p=${c.page_start}&mark=${encodeURIComponent((c.excerpt || '').slice(0, 600))}`;
   const zoom = el('a', 'proof-page');
   zoom.href = `${API_BASE}${pagePath}`;
@@ -483,124 +830,481 @@ function openProof(c) {
   zoom.append(img);
   box.append(zoom);
   if (c.excerpt) box.append(el('blockquote', 'proof-excerpt', c.excerpt.slice(0, 400)));
-  if (c.source_url) {
-    const link = el('a', 'chip-btn', t('proof.source'));
-    link.href = c.source_url;
-    link.target = '_blank';
-    link.rel = 'noopener';
-    box.append(link);
+  if (c.source_url) box.append(linkChip(t('proof.source'), c.source_url));
+}
+
+function renderSections(bubble, data) {
+  const sections = sectionsOf(data);
+  const named = sections.filter(([key]) => key !== 'other');
+  if (named.length < 2) {
+    bubble.append(el('div', 'answer-text', data.sentences.map((s) => s.text).join(' ')));
+    return;
   }
-  overlay.append(box);
-  overlay.addEventListener('click', (event) => { if (event.target === overlay) closeProof(); });
-  document.body.append(overlay);
-  close.focus();
+  sections.forEach(([key, sentences]) => {
+    const block = el('div', 'answer-section');
+    if (key !== 'other') block.append(el('h4', '', t(`section.${key}`)));
+    block.append(el('p', '', sentences.map((s) => s.text).join(' ')));
+    bubble.append(block);
+  });
 }
 
-function closeProof() {
-  document.querySelector('.proof-overlay')?.remove();
-}
-
-function appendChatBubble(role, text, extra = {}) {
-  const container = document.getElementById('chat-messages');
-  if (!container) return null;
-  const bubble = el('div', `chat-bubble ${role}`);
-  if (extra.refused) bubble.append(el('p', 'answer-flag', t('answer.refused')));
-  bubble.append(el('div', 'answer-text', text));
-  container.appendChild(bubble);
-  container.scrollTop = container.scrollHeight;
-  return bubble;
-}
-
-function renderAnswer(data, question) {
-  const text = (data.sentences && data.sentences.length)
+function answerText(data) {
+  return (data.sentences && data.sentences.length)
     ? data.sentences.map((s) => s.text).join(' ')
     : (data.answer || '').replace(CITATION_MARKER, '');
-  const bubble = appendChatBubble('ai', text, { refused: data.refused });
-  if (!bubble) return text;
+}
 
-  // Proof: each cited page is a button that opens the page itself.
-  if (data.citations && data.citations.length) {
-    const wrap = el('div', 'citation-pills');
-    data.citations.forEach((c) => {
-      const pill = el('button', 'citation-tag', `📄 ${citationLabel(c)}${c.checked_by ? ' ✓' : ''}`);
-      pill.type = 'button';
-      pill.title = t('proof.open');
-      pill.addEventListener('click', () => openProof(c));
-      wrap.append(pill);
-    });
-    bubble.append(wrap);
+function renderAnswer(bubble, data, question) {
+  bubble.replaceChildren();
+  const text = answerText(data);
+  if (data.refused) bubble.append(el('p', 'answer-flag', t('answer.refused')));
+
+  if (data.confirmation_text) {
+    bubble.append(el('p', 'answer-confirm', data.confirmation_text));
+    bubble.append(chipRow([
+      chip(t('answer.yesRight'), (event) => event.currentTarget.closest('.answer-row')?.remove()),
+      chip(t('answer.sayAgain'), () => toggleVoiceRecording(convo.surface)),
+    ], t('answer.heardCheck')));
   }
 
-  // "What can I get?": signed amounts per scheme.
-  (data.scheme_facts || []).forEach((fact) => {
-    const row = el('p', 'answer-fact');
-    row.append(el('strong', '', fact.scheme));
-    if (fact.amount) row.append(document.createTextNode(` — ${fact.amount}`));
-    bubble.append(row);
-  });
+  if (data.sentences && data.sentences.length) renderSections(bubble, data);
+  else bubble.append(el('div', 'answer-text', text));
 
-  // Unclear question: let the person pick the scheme.
+  if (data.citations && data.citations.length) bubble.append(citationRow(data.citations));
+
+  // "What can I get?": a card per scheme with its signed amount, plus the yearly total.
+  const facts = (data.scheme_facts || []).filter((f) => f.amount || f.who);
+  if (facts.length) {
+    const cards = el('div', 'facts-grid');
+    let total = 0;
+    facts.forEach((fact) => {
+      const card = el('div', 'fact-card');
+      card.append(el('strong', '', fact.scheme));
+      if (fact.amount) card.append(el('p', '', fact.amount));
+      if (fact.who) card.append(el('p', 'fact-who', fact.who));
+      const cite = fact.amount_citation || fact.who_citation;
+      if (cite) card.append(proofButton(cite));
+      total += fact.yearly_amount || 0;
+      cards.append(card);
+    });
+    bubble.append(cards);
+    if (total) bubble.append(el('p', 'facts-total', fill(t('facts.total'), { total: `₹${total.toLocaleString('en-IN')}` })));
+  }
+
   if (data.status === 'needs_clarification' && data.candidate_schemes?.length) {
-    bubble.append(el('p', 'answer-flag', t('answer.didYouMean')));
-    const chips = el('div', 'citation-pills');
-    data.candidate_schemes.slice(0, 4).forEach((scheme) => {
-      const chip = el('button', 'chip-btn', scheme);
-      chip.type = 'button';
-      chip.addEventListener('click', () => submitChatQuery(`${question} (${scheme})`));
-      chips.append(chip);
-    });
-    bubble.append(chips);
+    bubble.append(chipRow(data.candidate_schemes.slice(0, 4).map((scheme) => chip(scheme, () => submitChatQuery(`${question} (${scheme})`))), t('answer.didYouMean')));
   }
 
-  // Refused about a known scheme: its official helpline.
-  if (data.refused && data.contact?.helpline) {
-    const call = el('a', 'chip-btn', `📞 ${t('answer.call')}: ${data.contact.helpline}`);
-    call.href = `tel:${data.contact.helpline.replace(/[^\d+]/g, '')}`;
-    bubble.append(call);
+  if (data.refused) {
+    const chips = [];
+    if (data.contact?.helpline) {
+      const call = el('a', 'chip-btn', `📞 ${t('answer.call')}: ${data.contact.helpline}`);
+      call.href = `tel:${data.contact.helpline.replace(/[^\d+]/g, '')}`;
+      chips.push(call);
+    }
+    if (data.refusal_reason !== 'pii_detected') chips.push(chip(t('answer.officer'), () => openOfficer(question, data.scheme)));
+    bubble.append(chipRow(chips));
+    bubble.append(chipRow(exampleChips().slice(0, 3)));
+    return text;
+  }
+
+  // Next steps and the conversation check-in.
+  if (data.sentences && data.sentences.length) {
+    const actions = [];
+    if (data.scheme) actions.push(chip(t('answer.docs'), () => showChecklist(data.scheme)));
+    actions.push(chip(t('answer.share'), () => shareAnswer(question, text, data.citations?.[0])));
+    actions.push(chip(t('answer.print'), () => printAnswer(question, data)));
+    if (data.scheme && schemeNames().includes(data.scheme)) actions.push(chip(t('answer.appeal'), () => openAppeal(data.scheme)));
+    bubble.append(chipRow(actions));
+    const check = chipRow([
+      chip(t('answer.yes'), (event) => { event.currentTarget.closest('.answer-row')?.remove(); handleTalk('ack', 'ok', {}); }),
+      chip(t('answer.notClear'), (event) => { event.currentTarget.closest('.answer-row')?.remove(); handleTalk('notClear', 'puriyala', {}); }),
+    ], t('answer.understood'));
+    const feedback = chipRow([
+      chip('👍', (event) => sendFeedback(event, data, 'up')),
+      chip('👎', (event) => sendFeedback(event, data, 'down')),
+    ], t('answer.helpful'));
+    bubble.append(check, feedback);
   }
   return text;
 }
 
-async function submitChatQuery(queryText, options = {}) {
-  const question = queryText.trim();
-  if (!question) return;
-  navigateTo('assistant');
-  appendChatBubble('user', question);
-  setOrbState('processing');
-  setStatus(t('status.processing'));
+function spokenText(data) {
+  const parts = [];
+  if (data.confirmation_text) parts.push(data.confirmation_text);
+  parts.push(answerText(data));
+  const cited = !data.refused && data.citations?.find((c) => data.sentences?.some((s) => s.citations.includes(c.number)));
+  if (cited) parts.push((SPOKEN_SOURCE[data.language] || SPOKEN_SOURCE.en)(cited));
+  return parts.join(' ');
+}
+
+async function sendFeedback(event, data, thumbs) {
+  const row = event.currentTarget.closest('.answer-row');
+  if (row) row.replaceChildren(el('span', 'answer-row-label', t('answer.feedbackThanks')));
+  try { await postJson('/feedback', { status: data.status, thumbs, language: data.language }, 20000); } catch (_) { /* best effort */ }
+  if (thumbs === 'down') { const bubble = addBubble('ai', t('answer.issue')); bubble.append(chipRow(issueChips())); }
+}
+
+function shareAnswer(question, text, cite) {
+  const lines = [`❓ ${question}`, `✅ ${text}`];
+  if (cite) lines.push(`📄 ${cite.document}, ${t('proof.page')} ${cite.page_start}`, cite.source_url);
+  lines.push('— Pakkam (பக்கம்)');
+  window.open(`https://wa.me/?text=${encodeURIComponent(lines.filter(Boolean).join('\n'))}`, '_blank', 'noopener');
+}
+
+function printAnswer(question, data) {
+  const win = window.open('', '_blank');
+  if (!win) return;
+  const doc = win.document;
+  doc.title = 'Pakkam';
+  const body = doc.body;
+  body.style.fontFamily = 'system-ui, sans-serif';
+  body.style.padding = '24px';
+  body.append(Object.assign(doc.createElement('h2'), { textContent: question }));
+  sectionsOf(data).forEach(([key, sentences]) => {
+    if (key !== 'other') body.append(Object.assign(doc.createElement('h3'), { textContent: t(`section.${key}`) }));
+    body.append(Object.assign(doc.createElement('p'), { textContent: sentences.map((s) => s.text).join(' ') }));
+  });
+  (data.citations || []).forEach((c) => body.append(Object.assign(doc.createElement('p'), { textContent: `📄 ${c.document}, ${t('proof.page')} ${c.page_start} — ${c.source_url}` })));
+  body.append(Object.assign(doc.createElement('p'), { textContent: t('footer.line') }));
+  win.focus();
+  win.print();
+}
+
+async function showChecklist(scheme) {
+  const bubble = addBubble('ai');
+  bubble.append(el('p', 'answer-flag', `${t('checklist.title')} · ${scheme}`));
   try {
-    const res = await api('/ask', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: question.slice(0, 500), voice_mode: Boolean(options.voice) }),
+    const lang = state.language === 'ta-IN' ? 'ta' : 'en';
+    const data = await (await api(`/checklist?scheme=${encodeURIComponent(scheme)}&lang=${lang}`, {}, 30000)).json();
+    if (!data.items?.length) { bubble.append(el('p', '', fill(t('checklist.none'), { scheme }))); return; }
+    const list = el('ul', 'answer-summary');
+    data.items.forEach((item) => {
+      const li = el('li', '', item.text);
+      li.append(document.createTextNode(' '), proofButton(item.citation));
+      list.append(li);
     });
-    const data = await res.json();
-    const text = renderAnswer(data, question);
-    saveToHistory(question, text);
-    setStatus(t('assistant.tap'));
-    await playGnaniTTS(text, data.language);
-    if (!state.currentAudio) setOrbState('idle');
+    bubble.append(list);
   } catch (error) {
-    appendChatBubble('ai', errorText(error));
-    setOrbState('error');
+    bubble.append(el('p', '', errorText(error)));
+  }
+  scrollChat();
+}
+
+/* ==========================================================================
+   8. ASKING: small talk first, then /ask/sources (progress) + /ask (answer)
+   ========================================================================== */
+async function submitChatQuery(queryText, options = {}) {
+  let question = queryText.trim();
+  if (!question) return;
+  if (!options.voice) convo.surface = 'chat';
+  if (convo.surface === 'chat' || !options.voice) navigateTo('assistant');
+  if (!options.quiet) addBubble('user', question);
+
+  const talk = detectTalk(question);
+  if (talk && !talk.rest) { handleTalk(talk.intent, question, options); return; }
+  if (talk?.rest) {
+    const language = replyLanguage(question, state.language);
+    addBubble('ai', (TALK[language] || TALK['en-IN']).greeting.split('!')[0] + '! 🙏');
+    question = talk.rest;
+  }
+
+  const bubble = addBubble('ai');
+  bubble.classList.add('thinking');
+  const progress = el('p', 'answer-progress', t('progress.searching'));
+  bubble.append(progress);
+  orb('processing');
+  setStatus(t('status.processing'));
+
+  const body = { question: question.slice(0, 500), voice_mode: Boolean(options.voice) };
+  if (convo.last?.data?.scheme) body.follow_up = { question: convo.last.question.slice(0, 500), scheme: convo.last.data.scheme };
+  if (options.voice && fillerUrls[voiceSpeech()]) {
+    fillerUrls[voiceSpeech()].then((url) => { if (url && bubble.classList.contains('thinking')) playUrl(url, { keepUrl: true }); });
+  }
+  postJson('/ask/sources', body, 15000).then((res) => res.json()).then((found) => {
+    const top = found.passages?.[0];
+    if (top && bubble.classList.contains('thinking')) progress.textContent = fill(t('progress.found'), { doc: top.document, page: top.page });
+  }).catch(() => {});
+  const slow = setTimeout(() => { if (bubble.classList.contains('thinking')) bubble.append(el('p', 'answer-progress', t('progress.slow'))); }, SLOW_MS);
+
+  try {
+    const data = await (await postJson('/ask', body)).json();
+    clearTimeout(slow);
+    bubble.classList.remove('thinking');
+    const text = renderAnswer(bubble, data, question);
+    scrollChat();
+    convo.last = { question, data, text };
+    convo.refusals = data.refused ? convo.refusals + 1 : 0;
+    if (convo.refusals >= 2) { const help = addBubble('ai', t('answer.issue')); help.append(chipRow(issueChips())); }
+    saveToHistory(question, text);
+    showOnHome(text, data.citations || []);
     setStatus(t('assistant.tap'));
+    await finishTurn(spokenText(data), data.language, options);
+  } catch (error) {
+    clearTimeout(slow);
+    bubble.classList.remove('thinking');
+    bubble.replaceChildren(el('div', 'answer-text', errorText(error)));
+    showOnHome(errorText(error));
+    orb('error');
+    setStatus(t('assistant.tap'));
+  }
+}
+
+const voiceSpeech = () => ({ 'ta-Latn': 'ta' }[voiceLanguage()] || voiceLanguage());
+
+/** Speak the reply (voice questions always; typed ones when auto-play is on), then keep
+ *  listening in conversation mode. */
+async function finishTurn(text, language, options = {}) {
+  if (options.voice || options.force || state.autoPlayTTS) await speak(text, language, { rate: options.rate || 1 });
+  else orb('idle');
+  if (convo.mode && options.voice && !recording) setTimeout(() => toggleVoiceRecording(convo.surface, { again: true }), 500);
+}
+
+/* ==========================================================================
+   9. VOICE: record (WAV, recorder.js) -> /transcribe -> ask
+   ========================================================================== */
+let recording = null;
+let recordingTimer = null;
+
+async function toggleVoiceRecording(surface = 'chat', { again = false } = {}) {
+  if (recording) { await finishRecording(true); return; }
+  if (!window.PakkamRecorder || !navigator.mediaDevices?.getUserMedia) {
+    orb('error');
+    setStatus(t('status.voiceError'));
+    return;
+  }
+  convo.surface = surface;
+  stopPlayback();
+  if (surface === 'chat') navigateTo('assistant');
+  prefetchFiller(voiceSpeech());
+  try {
+    recording = await window.PakkamRecorder.start({
+      onLevel: setBars,
+      onSilence: (heardSpeech) => finishRecording(heardSpeech),
+      noSpeechMs: again ? 7000 : 9000,
+    });
+  } catch (_) {
+    recording = null;
+    orb('error');
+    setStatus(t('status.micError'));
+    return;
+  }
+  orb('listening');
+  setStatus(t('status.listening'));
+  showHeard('');
+  recordingTimer = setTimeout(() => finishRecording(true), MAX_VOICE_SECONDS * 1000);
+}
+
+async function finishRecording(heardSpeech) {
+  if (!recording) return;
+  const current = recording;
+  recording = null;
+  clearTimeout(recordingTimer);
+  stopWaveformMeter();
+  if (!heardSpeech) {
+    current.cancel();
+    orb('idle');
+    setStatus(convo.mode ? t('conv.paused') : t('assistant.tap'));
+    if (!convo.mode) showHeard(t('status.noSpeech'));
+    return;
+  }
+  orb('processing');
+  setStatus(t('status.processing'));
+  let wav;
+  try { wav = await current.stop(); } catch (_) { wav = null; }
+  if (!wav || wav.size < 2000) {
+    orb('idle');
+    setStatus(t('assistant.tap'));
+    showHeard(t('status.noSpeech'));
+    return;
+  }
+  const form = new FormData();
+  form.append('audio', wav, 'question.wav');
+  form.append('language', voiceLanguage());
+  try {
+    const data = await (await api('/transcribe', { method: 'POST', body: form }, 60000)).json();
+    const heard = (data.transcript || '').trim();
+    if (!heard) {
+      orb('idle');
+      setStatus(t('assistant.tap'));
+      showHeard(t('status.noSpeech'));
+      return;
+    }
+    showHeard(`"${heard}"`, true);
+    await submitChatQuery(heard, { voice: true });
+  } catch (error) {
+    orb('error');
+    setStatus(t('assistant.tap'));
+    showHeard(error instanceof ApiError && [400, 413, 415, 422].includes(error.status) && error.message ? error.message : t('status.voiceError'));
+  }
+}
+
+function renderVoiceChips() {
+  const box = document.getElementById('voice-lang-chips');
+  if (!box) return;
+  const options = [['ta', 'தமிழ்'], ['ta-Latn', 'Tanglish'], ['hi', 'हिन्दी'], ['en', 'English']];
+  box.replaceChildren(...options.map(([code, label]) => {
+    const button = chip(label, () => {
+      convo.voiceLang = code;
+      try { localStorage.setItem('pakkam_voice', code); } catch (_) { /* private mode */ }
+      renderVoiceChips();
+    }, `chip-btn${voiceLanguage() === code ? ' active' : ''}`);
+    button.setAttribute('aria-pressed', String(voiceLanguage() === code));
+    return button;
+  }));
+}
+
+/* ==========================================================================
+   10. RUMOUR SHIELD (POST /check-forward)
+   ========================================================================== */
+function applyShieldText() {
+  const w = shieldWords();
+  const set = (selector, text, attr) => { const node = document.querySelector(selector); if (node) { if (attr) node.setAttribute(attr, text); else node.textContent = text; } };
+  set('#page-shield .hero-eyebrow', w.eyebrow);
+  set('#page-shield h1', w.title);
+  set('#page-shield .page-intro', w.intro);
+  set('#shield-input', w.placeholder, 'placeholder');
+  set('#shield-example', w.example);
+  set('#shield-check', w.check);
+}
+
+async function checkForward(message) {
+  const w = shieldWords();
+  const status = document.getElementById('shield-status');
+  const result = document.getElementById('shield-result');
+  const button = document.getElementById('shield-check');
+  result.replaceChildren();
+  status.textContent = w.checking;
+  button.disabled = true;
+  try {
+    const data = await (await postJson('/check-forward', { message: message.slice(0, 1500) }, 180000)).json();
+    status.textContent = '';
+    result.append(el('h2', `shield-overall shield-${data.overall}`, w.overall[data.overall] || data.overall));
+    const correction = [w.correction];
+    data.claims.forEach((claim) => {
+      const card = el('article', 'shield-claim');
+      card.append(el('p', 'shield-verdict', w.verdict[claim.verdict] || claim.verdict), el('h3', '', claim.claim), el('p', '', claim.explanation));
+      const cite = claim.answer?.citations?.[0];
+      if (cite) card.append(proofButton(cite));
+      result.append(card);
+      correction.push(`${w.verdict[claim.verdict] || ''} ${claim.claim}: ${claim.explanation}${cite ? ` (${cite.document}, ${t('proof.page')} ${cite.page_start})` : ''}`);
+    });
+    const signs = data.scam_signs.filter((sign) => sign !== 'official_link');
+    if (signs.length) {
+      const box = el('div', 'shield-signs');
+      box.append(el('h3', '', `⚠️ ${w.warnings}`));
+      const list = el('ul');
+      signs.forEach((sign) => { list.append(el('li', '', w.signs[sign] || sign)); correction.push(`⚠️ ${w.signs[sign] || sign}`); });
+      box.append(list);
+      result.append(box);
+    }
+    if (data.scam_signs.includes('official_link')) result.append(el('p', 'proof-note', w.signs.official_link));
+    correction.push('— Pakkam (பக்கம்)');
+    result.append(chip(w.share, () => window.open(`https://wa.me/?text=${encodeURIComponent(correction.join('\n'))}`, '_blank', 'noopener'), 'cta-button shield-share'));
+  } catch (error) {
+    status.textContent = error instanceof ApiError && error.status === 422 && error.message ? error.message : w.failed;
+  } finally {
+    button.disabled = false;
   }
 }
 
 /* ==========================================================================
-   6. SCHEMES AND OFFICIAL DOCUMENTS (both from GET /sources: nothing typed in by hand)
+   11. ASK AN OFFICER and APPEAL NOTE (dialogs)
    ========================================================================== */
-let sources = null;
+function openOfficer(question, scheme) {
+  const box = overlay(t('officer.title'));
+  box.append(el('h2', 'proof-doc', t('officer.title')), el('p', 'proof-note', t('officer.intro')));
+  const form = el('form', 'dialog-form');
+  const text = el('textarea', 'shield-input');
+  text.rows = 3; text.maxLength = 500; text.required = true; text.value = question || '';
+  text.setAttribute('aria-label', t('officer.question'));
+  const contact = el('input', 'input-pill');
+  contact.maxLength = 40; contact.placeholder = t('officer.contact');
+  const send = el('button', 'cta-button', t('officer.send'));
+  send.type = 'submit';
+  const status = el('p', 'document-status');
+  status.setAttribute('aria-live', 'polite');
+  form.append(el('label', 'answer-row-label', t('officer.question')), text, contact, send, status);
+  box.append(form);
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    send.disabled = true;
+    try {
+      const data = await (await postJson('/officer-request', {
+        question: text.value.trim(), scheme: scheme || null, language: VOICE_LANG[state.language] || 'en', contact: contact.value.trim() || null,
+      }, 30000)).json();
+      status.textContent = fill(t('officer.sent'), { ticket: data.ticket });
+    } catch (error) {
+      status.textContent = error instanceof ApiError && error.status === 422 && error.message ? error.message : t('officer.failed');
+      send.disabled = false;
+    }
+  });
+}
+
+function openAppeal(schemeName) {
+  const words = APPEAL[state.language] || APPEAL['en-IN'];
+  const box = overlay(words.title);
+  box.append(el('h2', 'proof-doc', `📝 ${words.title}`));
+  const form = el('form', 'dialog-form');
+  const scheme = el('select', 'input-pill');
+  schemeNames().forEach((name) => { const option = el('option', '', name); option.value = name; scheme.append(option); });
+  if (schemeName) scheme.value = schemeName;
+  const reason = el('textarea', 'shield-input');
+  reason.rows = 2; reason.maxLength = 300; reason.required = true; reason.placeholder = words.reason;
+  const situation = el('textarea', 'shield-input');
+  situation.rows = 2; situation.maxLength = 300; situation.placeholder = words.situation;
+  const go = el('button', 'cta-button', words.go);
+  go.type = 'submit';
+  const status = el('p', 'document-status');
+  status.setAttribute('aria-live', 'polite');
+  const result = el('div');
+  form.append(el('label', 'answer-row-label', words.scheme), scheme, reason, situation, go, status);
+  box.append(form, result);
+  reason.focus();
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const why = reason.value.trim();
+    if (why.length < 3) return;
+    go.disabled = true;
+    status.textContent = words.working;
+    result.replaceChildren();
+    try {
+      const data = await (await postJson('/ask', { question: words.ask(scheme.value, why).slice(0, 500), follow_up: { question: why, scheme: scheme.value } })).json();
+      status.textContent = '';
+      const cite = data.citations?.find((c) => data.sentences?.some((s) => s.citations.includes(c.number)));
+      if (data.refused || !data.sentences?.length || !cite) {
+        result.append(el('p', '', words.noRule), chip(t('answer.officer'), () => openOfficer(why, scheme.value)));
+        return;
+      }
+      const rule = data.sentences.map((s) => s.text).join(' ');
+      result.append(el('h3', '', words.rule), el('p', '', rule), proofButton(cite), el('h3', '', words.note));
+      const note = el('textarea', 'shield-input appeal-note');
+      note.rows = 14;
+      note.value = words.template({ scheme: scheme.value, reason: why, situation: situation.value.trim(), document: cite.document, page: cite.page_start, rule });
+      const copy = chip(words.copy, async () => { try { await navigator.clipboard.writeText(note.value); copy.textContent = words.copied; } catch (_) { note.select(); } });
+      const share = chip(t('answer.share'), () => window.open(`https://wa.me/?text=${encodeURIComponent(note.value)}`, '_blank', 'noopener'));
+      const actions = el('div', 'citation-pills');
+      actions.append(copy, share);
+      result.append(note, actions, el('p', 'proof-note', words.disclaimer));
+    } catch (error) {
+      status.textContent = errorText(error);
+    } finally {
+      go.disabled = false;
+    }
+  });
+}
+
+/* ==========================================================================
+   12. SCHEMES AND OFFICIAL DOCUMENTS (GET /sources)
+   ========================================================================== */
+let sources;  // undefined = loading, null = offline
 
 async function loadSources() {
-  if (sources) return sources;
-  try {
-    sources = await (await api('/sources', {}, 30000)).json();
-  } catch (_) {
-    sources = null;
-  }
+  try { sources = await (await api('/sources', {}, 30000)).json(); } catch (_) { sources = null; }
   return sources;
 }
+
+const schemeNames = () => [...new Set((sources || []).map((d) => d.scheme))];
 
 const QUICK_QUESTIONS = {
   'en-IN': { amount: (s) => `How much money does ${s} give?`, who: (s) => `Who is eligible for ${s}?`, docs: (s) => `What documents are needed for ${s}?` },
@@ -624,20 +1328,16 @@ function renderSchemes(_unused, searchQuery = '') {
   const query = searchQuery.trim().toLowerCase();
   const asks = QUICK_QUESTIONS[state.language] || QUICK_QUESTIONS['en-IN'];
   const rows = [...byScheme.entries()]
-    .filter(([scheme, docs]) => !query || scheme.toLowerCase().includes(query)
-      || docs.some((d) => d.title.toLowerCase().includes(query)))
+    .filter(([scheme, docs]) => !query || scheme.toLowerCase().includes(query) || docs.some((d) => d.title.toLowerCase().includes(query)))
     .map(([scheme, docs]) => {
       const row = el('article', 'scheme-row');
       const main = el('div', 'scheme-main');
       main.append(el('p', 'scheme-category', `${docs.length} ${t('schemes.docCount')}`), el('h2', '', scheme));
-      const chips = el('div', 'citation-pills');
-      [['amount', 'schemes.askAmount'], ['who', 'schemes.askWho'], ['docs', 'schemes.askDocs']].forEach(([kind, label]) => {
-        const chip = el('button', 'chip-btn', t(label));
-        chip.type = 'button';
-        chip.addEventListener('click', () => submitChatQuery(asks[kind](scheme)));
-        chips.append(chip);
-      });
-      main.append(chips);
+      main.append(chipRow([
+        chip(t('schemes.askAmount'), () => submitChatQuery(asks.amount(scheme))),
+        chip(t('schemes.askWho'), () => submitChatQuery(asks.who(scheme))),
+        chip(t('schemes.askDocs'), () => submitChatQuery(asks.docs(scheme))),
+      ]));
       row.append(main);
       return row;
     });
@@ -650,27 +1350,22 @@ function renderDocuments() {
   if (!list) return;
   list.replaceChildren();
   if (!sources) {
-    list.append(el('p', 'empty-state', t('documents.offline')));
+    list.append(el('p', 'empty-state', sources === null ? t('documents.offline') : t('documents.loading')));
     return;
   }
   sources.forEach((doc) => {
     const row = el('article', 'scheme-row');
     const main = el('div', 'scheme-main');
     main.append(el('p', 'scheme-category', doc.scheme), el('h2', '', doc.title));
-    const meta = [doc.language.toUpperCase(), doc.doc_date ? `${t('documents.dated')} ${doc.doc_date}` : ''].filter(Boolean).join(' · ');
-    main.append(el('p', 'scheme-benefit', meta));
-    const link = el('a', 'chip-btn', t('documents.open'));
-    link.href = doc.source_url;
-    link.target = '_blank';
-    link.rel = 'noopener';
-    main.append(link);
+    main.append(el('p', 'scheme-benefit', [doc.language.toUpperCase(), doc.doc_date ? `${t('documents.dated')} ${doc.doc_date}` : ''].filter(Boolean).join(' · ')));
+    main.append(linkChip(t('documents.open'), doc.source_url));
     row.append(main);
     list.append(row);
   });
 }
 
 /* ==========================================================================
-   7. CONVERSATION HISTORY (this browser only)
+   13. HISTORY (this browser only)
    ========================================================================== */
 function saveToHistory(question, answer) {
   state.history.unshift({ id: Date.now(), date: new Date().toLocaleDateString(), question, answer });
@@ -682,40 +1377,67 @@ function saveToHistory(question, answer) {
 function renderHistory() {
   const list = document.getElementById('history-list');
   if (!list) return;
-  if (!state.history.length) {
-    list.replaceChildren(el('p', 'empty-state', t('history.empty')));
-    return;
-  }
+  if (!state.history.length) { list.replaceChildren(el('p', 'empty-state', t('history.empty'))); return; }
   list.replaceChildren(...state.history.map((item) => {
     const article = el('article', 'history-row');
     article.append(el('time', 'history-date', item.date), el('h2', '', item.question), el('p', '', item.answer));
+    article.append(chip(`↻ ${t('common.ask')}`, () => submitChatQuery(item.question)));
     return article;
   }));
 }
 
 /* ==========================================================================
-   8. START-UP AND EVENTS
+   14. ABOUT: Pakkam explains itself, out loud
    ========================================================================== */
+async function aboutListen() {
+  const button = document.getElementById('about-listen');
+  const text = document.getElementById('about-listen-text');
+  if (state.currentAudio && button.dataset.playing === '1') {
+    stopPlayback();
+    button.dataset.playing = '0';
+    button.firstElementChild.textContent = t('about.listen');
+    return;
+  }
+  const intro = t('about.intro');
+  text.textContent = intro;
+  text.hidden = false;
+  button.dataset.playing = '1';
+  button.firstElementChild.textContent = t('about.stop');
+  await speak(intro, SPEECH_LANG[state.language] || 'en');
+  button.dataset.playing = '0';
+  button.firstElementChild.textContent = t('about.listen');
+}
+
+/* ==========================================================================
+   15. START-UP AND EVENTS
+   ========================================================================== */
+function refreshLanguageParts() {
+  showHeard('');
+  renderWelcomeChips();
+  renderVoiceChips();
+  renderDocuments();
+  applyShieldText();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  try { convo.voiceLang = localStorage.getItem('pakkam_voice'); } catch (_) { /* private mode */ }
   applyTheme(state.theme);
   applyLanguage(state.language);
   renderHistory();
-  sources = undefined;  // "loading"
-  renderSchemes();
+  refreshLanguageParts();
+  setConversationMode(convo.mode);
   loadSources().then(() => { renderSchemes(null, document.getElementById('scheme-search-input')?.value || ''); renderDocuments(); });
 
   document.querySelectorAll('[data-nav]').forEach((node) => {
-    node.addEventListener('click', (event) => {
-      event.preventDefault();
-      navigateTo(node.dataset.nav);
-    });
+    node.addEventListener('click', (event) => { event.preventDefault(); navigateTo(node.dataset.nav); });
   });
-
   document.getElementById('theme-toggle-btn')?.addEventListener('click', toggleTheme);
   document.getElementById('settings-theme-btn')?.addEventListener('click', toggleTheme);
   document.getElementById('global-lang-select')?.addEventListener('change', (event) => {
+    convo.voiceLang = null;
+    try { localStorage.removeItem('pakkam_voice'); } catch (_) { /* private mode */ }
     applyLanguage(event.target.value);
-    renderDocuments();
+    refreshLanguageParts();
   });
 
   const autoplay = document.getElementById('setting-autoplay-tts');
@@ -726,14 +1448,16 @@ document.addEventListener('DOMContentLoaded', () => {
       try { localStorage.setItem('pakkam_tts', String(autoplay.checked)); } catch (_) { /* private mode */ }
     });
   }
+  document.querySelectorAll('.conv-mode-input').forEach((box) => box.addEventListener('change', () => setConversationMode(box.checked)));
 
   document.getElementById('cta-ask-pakkam')?.addEventListener('click', () => navigateTo('assistant'));
-  document.getElementById('hero-orb-trigger')?.addEventListener('click', toggleVoiceRecording);
-  document.getElementById('assistant-mic-orb')?.addEventListener('click', toggleVoiceRecording);
-  document.getElementById('hero-orb-trigger')?.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleVoiceRecording(); }
+  const heroOrb = document.getElementById('hero-orb-trigger');
+  heroOrb?.addEventListener('click', () => toggleVoiceRecording('home'));
+  heroOrb?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleVoiceRecording('home'); }
   });
-  document.getElementById('nav-mic-btn')?.addEventListener('click', () => { navigateTo('assistant'); toggleVoiceRecording(); });
+  document.getElementById('assistant-mic-orb')?.addEventListener('click', () => toggleVoiceRecording('chat'));
+  document.getElementById('nav-mic-btn')?.addEventListener('click', () => toggleVoiceRecording('chat'));
 
   document.getElementById('chat-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -743,20 +1467,22 @@ document.addEventListener('DOMContentLoaded', () => {
     input.value = '';
     await submitChatQuery(query);
   });
-
   document.getElementById('scheme-search-input')?.addEventListener('input', (event) => renderSchemes(null, event.target.value));
-
   document.getElementById('clear-history-btn')?.addEventListener('click', () => {
     if (!window.confirm(t('history.confirm'))) return;
     state.history = [];
     try { localStorage.removeItem('pakkam_history'); } catch (_) { /* private mode */ }
     renderHistory();
   });
+  document.getElementById('stop-audio-btn')?.addEventListener('click', () => { stopPlayback(); stopWaveformMeter(); orb('idle'); });
+  document.getElementById('about-listen')?.addEventListener('click', aboutListen);
 
-  document.getElementById('stop-audio-btn')?.addEventListener('click', () => {
-    stopPlayback();
-    stopWaveformMeter();
-    setOrbState('idle');
+  document.getElementById('shield-form')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const message = document.getElementById('shield-input').value.trim();
+    if (message.length >= 10) checkForward(message);
   });
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeProof(); });
+  document.getElementById('shield-example')?.addEventListener('click', () => { document.getElementById('shield-input').value = SHIELD_EXAMPLE; });
+
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeOverlay(); });
 });
