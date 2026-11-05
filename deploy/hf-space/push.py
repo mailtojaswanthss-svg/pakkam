@@ -195,7 +195,7 @@ def main() -> int:
     host = f"{user}-{args.space}".lower().replace("_", "-").replace(".", "-")
     print(f"\nUploaded: https://huggingface.co/spaces/{repo_id}")
     print("The Space is building now (watch the Logs tab; about 20-30 minutes the first time).")
-    print(f"Site (once built): https://{host}.hf.space  (chat: /chat/)")
+    print(f"Site (once built): https://{host}.hf.space")
     print("Tell Claude when it shows 'Running'.")
     return 0
 
