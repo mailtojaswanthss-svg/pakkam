@@ -40,6 +40,7 @@ from schemebot.api.schemas import (
     HealthResponse,
     OfficerRequest,
     OfficerRequestResponse,
+    SchemeFactOut,
     SourceOut,
     SpeakRequest,
     TranscribeResponse,
@@ -631,6 +632,27 @@ def create_app(
                 if (out := citation_out(citation, state.titles, state.doc_dates)) is not None
             ],
         )
+
+    @app.get("/scheme-facts", dependencies=[Depends(limit_sources)])
+    def scheme_facts(state: StateDep, lang: str = "en") -> list[SchemeFactOut]:
+        """Every scheme's signed amount and who-can-apply card (signed fact cards only, no
+        model), for the Schemes page. Schemes without a signed card come with no facts."""
+        from schemebot.api.schemas import citation_out
+
+        get = getattr(state.service, "scheme_facts", None)
+        schemes = list(dict.fromkeys(d.scheme for d in load_sources()))
+        facts = get(schemes, "ta" if lang[:2] == "ta" else "en") if get is not None else []
+        return [
+            SchemeFactOut(
+                scheme=f.scheme,
+                amount=f.amount,
+                amount_citation=citation_out(f.amount_citation, state.titles, state.doc_dates),
+                who=f.who,
+                who_citation=citation_out(f.who_citation, state.titles, state.doc_dates),
+                yearly_amount=f.yearly_amount,
+            )
+            for f in facts
+        ]
 
     @app.post("/officer-request", dependencies=[Depends(limit_feedback)])
     def officer_request(body: OfficerRequest) -> OfficerRequestResponse:

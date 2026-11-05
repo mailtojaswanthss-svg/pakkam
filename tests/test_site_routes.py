@@ -23,7 +23,7 @@ def backend_routes() -> set[str]:
 def test_the_page_calls_the_real_backend() -> None:
     called = called_paths()
     expected = {"/ask", "/ask/sources", "/transcribe", "/speak", "/page", "/sources"}
-    expected |= {"/check-forward", "/checklist", "/feedback", "/officer-request"}
+    expected |= {"/check-forward", "/checklist", "/feedback", "/officer-request", "/scheme-facts"}
     assert expected <= called, f"not called: {sorted(expected - called)}"
     missing = sorted(called - backend_routes())
     assert not missing, f"the page calls paths the backend does not have: {missing}"

@@ -356,6 +356,104 @@ Object.assign(MESSAGES['hi-IN'], {
   'footer.line': 'यह एक छात्र प्रोजेक्ट है, सरकारी सेवा नहीं। फ़ैसले से पहले आधिकारिक स्रोत देखें।',
 });
 
+Object.assign(MESSAGES['en-IN'], {
+  'home.tryLabel': 'TRY ASKING', 'home.tryTitle': 'Ask the way you speak at home',
+  'home.doesLabel': 'WHAT PAKKAM DOES', 'home.doesTitle': 'Answers you can check, not just believe',
+  'home.tile3Title': 'Stop the rumour', 'home.tile3Body': 'Paste a WhatsApp forward and see which claims are false, with scam warnings.',
+  'status.speaking': 'Speaking… tap the orb to stop', 'status.listening': 'Listening… tap the orb when you finish', 'status.processing': 'Thinking…',
+  'schemes.eyebrow': 'SCHEMES & OFFICIAL SOURCES', 'schemes.title': 'Schemes Pakkam knows',
+  'schemes.intro': 'Each scheme with its signed key facts, the official documents Pakkam reads, and questions people ask.',
+  'schemes.summary': '{schemes} schemes · {docs} official documents', 'schemes.ask': 'Ask:',
+  'set.voiceTitle': 'Voice & speech', 'set.speed': 'Speaking speed', 'set.normal': 'Normal', 'set.slow': 'Slow',
+  'set.voiceLang': 'Language you speak in', 'set.easyTitle': 'Easy mode for elders',
+  'set.easyHelp': 'Bigger text and buttons, slower voice, and a simpler home page.', 'set.easy': 'Easy mode',
+  'set.lookTitle': 'Look', 'set.dark': 'Dark', 'set.light': 'Light', 'set.textSize': 'Text size', 'set.calm': 'Reduce animations',
+  'set.privacyTitle': 'Privacy & data', 'set.privacyHelp': 'Pakkam does not store your questions or voice on the server. Your history below stays only in this browser.',
+  'set.phone': 'Phone-call voice test (8 kHz phone audio)', 'set.clearConfirm': 'Tap again to clear everything',
+  'ab.title1': 'Pakkam means', 'ab.title2': 'page.',
+  'ab.lede': 'A voice assistant that answers questions about welfare schemes from the official government documents, and shows you the exact page.',
+  'ab.whyTitle': 'Why we built it',
+  'ab.problem': "The real rules for schemes like Magalir Urimai Thogai or PM-KISAN are written in long Government Orders that few people read. So families rely on WhatsApp forwards, middlemen or chatbots that sound sure but can be wrong. For someone's ₹1,000 a month, a confident wrong answer is worse than no answer.",
+  'ab.canTitle': 'What Pakkam can do',
+  'ab.f1t': 'Listens in your language', 'ab.f1': 'Tamil, Tanglish, Hindi or English, by voice or text, and answers out loud.',
+  'ab.f2t': 'Shows the proof', 'ab.f2': 'Every answer opens the page of the official document, with the line highlighted.',
+  'ab.f3t': 'Says "I don\'t know"', 'ab.f3': 'If the documents do not say it, Pakkam tells you instead of guessing.',
+  'ab.f4t': 'Checks WhatsApp forwards', 'ab.f4': 'Finds false claims and scam signs like fake links and OTP requests.',
+  'ab.f5t': 'Helps you prepare', 'ab.f5': 'Documents to carry, and a draft appeal note if an application was rejected.',
+  'ab.f6t': 'Connects you to people', 'ab.f6': 'Scheme helplines, and a way to send your question to an officer.',
+  'ab.howTitle': 'How it answers',
+  'ab.h1t': 'You ask', 'ab.h1': 'Gnani Prisma turns your voice into text, even mixed Tamil and English.',
+  'ab.h2t': 'Pakkam finds the page', 'ab.h2': 'It searches 18 official government documents, never the open internet.',
+  'ab.h3t': 'It checks before it speaks', 'ab.h3': 'Every sentence must point to a page and every number must be on it. Then Gnani Timbre reads the answer aloud.',
+  'ab.numTitle': 'Tested, honestly', 'ab.n1': 'test questions in 4 languages', 'ab.n2': 'of answers cite the correct page', 'ab.n3': 'out-of-scope questions honestly refused',
+  'ab.credit': 'Built for the Gnani.ai Great Indian AI Internship Challenge 2026, with Gnani Prisma and Timbre for voice. A student project, not a government service.',
+});
+Object.assign(MESSAGES['ta-IN'], {
+  'home.tryLabel': 'இப்படிக் கேளுங்கள்', 'home.tryTitle': 'வீட்டில் பேசுவது போலவே கேளுங்கள்',
+  'home.doesLabel': 'பக்கம் என்ன செய்யும்', 'home.doesTitle': 'நம்பினால் போதாது, சரிபார்க்கலாம்',
+  'home.tile3Title': 'வதந்தியை நிறுத்துங்கள்', 'home.tile3Body': 'வாட்ஸ்அப் செய்தியை ஒட்டுங்கள்; எது தவறு, மோசடி அறிகுறிகள் என்ன என்று காட்டும்.',
+  'status.speaking': 'பேசுகிறது… நிறுத்த உருண்டையைத் தொடுங்கள்', 'status.listening': 'கேட்கிறது… முடிந்ததும் உருண்டையைத் தொடுங்கள்', 'status.processing': 'யோசிக்கிறது…',
+  'schemes.eyebrow': 'திட்டங்களும் அதிகாரப்பூர்வ ஆதாரங்களும்', 'schemes.title': 'பக்கம் அறிந்த திட்டங்கள்',
+  'schemes.intro': 'ஒவ்வொரு திட்டமும் அதன் சரிபார்த்த முக்கியத் தகவல்கள், பக்கம் படிக்கும் அதிகாரப்பூர்வ ஆவணங்கள், மக்கள் கேட்கும் கேள்விகளுடன்.',
+  'schemes.summary': '{schemes} திட்டங்கள் · {docs} அதிகாரப்பூர்வ ஆவணங்கள்', 'schemes.ask': 'கேளுங்கள்:',
+  'set.voiceTitle': 'குரல்', 'set.speed': 'பேச்சு வேகம்', 'set.normal': 'சாதாரண', 'set.slow': 'மெதுவாக',
+  'set.voiceLang': 'நீங்கள் பேசும் மொழி', 'set.easyTitle': 'முதியோருக்கான எளிய முறை',
+  'set.easyHelp': 'பெரிய எழுத்து, பெரிய பொத்தான்கள், மெதுவான குரல், எளிய முகப்பு.', 'set.easy': 'எளிய முறை',
+  'set.lookTitle': 'தோற்றம்', 'set.dark': 'இருண்ட', 'set.light': 'ஒளி', 'set.textSize': 'எழுத்து அளவு', 'set.calm': 'அசைவுகளைக் குறை',
+  'set.privacyTitle': 'தனியுரிமை', 'set.privacyHelp': 'உங்கள் கேள்விகளையோ குரலையோ பக்கம் சர்வரில் சேமிப்பதில்லை. கீழே உள்ள வரலாறு இந்த உலாவியில் மட்டுமே இருக்கும்.',
+  'set.phone': 'தொலைபேசி அழைப்புக் குரல் சோதனை (8 kHz)', 'set.clearConfirm': 'எல்லாவற்றையும் அழிக்க மீண்டும் தொடுங்கள்',
+  'ab.title1': 'பக்கம் என்றால்', 'ab.title2': 'ஆவணத்தின் பக்கம்.',
+  'ab.lede': 'நலத்திட்டங்கள் பற்றிய கேள்விகளுக்கு அதிகாரப்பூர்வ அரசு ஆவணங்களிலிருந்து பதில் சொல்லி, சரியான பக்கத்தைக் காட்டும் குரல் உதவியாளர்.',
+  'ab.whyTitle': 'ஏன் உருவாக்கினோம்',
+  'about.story': 'என் தாத்தா பாட்டியை நான் மிகவும் நேசிக்கிறேன். ஒரு நாள், கடன் பெறுவது, அரசு செய்திகளைப் படிப்பது, கைப்பேசியில் சிக்கலான இணையதளங்களைப் பயன்படுத்துவது எவ்வளவு கடினம் என்று தாத்தா கூறினார். அந்த உரையாடல் என் மனதில் நிலைத்தது.',
+  'ab.problem': 'மகளிர் உரிமைத் தொகை, PM-KISAN போன்ற திட்டங்களின் உண்மையான விதிகள் நீளமான அரசாணைகளில் உள்ளன; அவற்றைப் படிப்பவர்கள் குறைவு. அதனால் குடும்பங்கள் வாட்ஸ்அப் செய்திகள், இடைத்தரகர்கள், உறுதியாகப் பேசினாலும் தவறக்கூடிய சாட்பாட்களை நம்புகின்றன. ஒருவரின் மாதம் ₹1,000-க்கு, உறுதியான தவறான பதில் பதிலே இல்லாததைவிட மோசம்.',
+  'ab.canTitle': 'பக்கம் என்ன செய்யும்',
+  'ab.f1t': 'உங்கள் மொழியில் கேட்கும்', 'ab.f1': 'தமிழ், Tanglish, இந்தி அல்லது ஆங்கிலத்தில், குரலிலோ எழுத்திலோ; பதிலைப் பேசிக் காட்டும்.',
+  'ab.f2t': 'ஆதாரம் காட்டும்', 'ab.f2': 'ஒவ்வொரு பதிலும் அதிகாரப்பூர்வ ஆவணத்தின் பக்கத்தை, வரியைச் சிறப்பித்துத் திறக்கும்.',
+  'ab.f3t': '"தெரியாது" என்று சொல்லும்', 'ab.f3': 'ஆவணங்களில் இல்லையென்றால் ஊகிக்காமல் சொல்லும்.',
+  'ab.f4t': 'வாட்ஸ்அப் செய்திகளைச் சரிபார்க்கும்', 'ab.f4': 'தவறான கூற்றுகள், போலி இணைப்பு, OTP கேட்பது போன்ற மோசடி அறிகுறிகளைக் கண்டுபிடிக்கும்.',
+  'ab.f5t': 'தயாராக உதவும்', 'ab.f5': 'எடுத்துச் செல்ல வேண்டிய ஆவணங்கள், விண்ணப்பம் நிராகரிக்கப்பட்டால் மேல்முறையீட்டுக் கடித வரைவு.',
+  'ab.f6t': 'மனிதர்களுடன் இணைக்கும்', 'ab.f6': 'திட்ட உதவி எண்கள், உங்கள் கேள்வியை அதிகாரிக்கு அனுப்பும் வசதி.',
+  'ab.howTitle': 'எப்படிப் பதில் சொல்கிறது',
+  'ab.h1t': 'நீங்கள் கேட்கிறீர்கள்', 'ab.h1': 'Gnani Prisma உங்கள் குரலை எழுத்தாக மாற்றும், தமிழும் ஆங்கிலமும் கலந்தாலும்.',
+  'ab.h2t': 'பக்கம் பக்கத்தைக் கண்டுபிடிக்கிறது', 'ab.h2': '18 அதிகாரப்பூர்வ அரசு ஆவணங்களில் மட்டுமே தேடும், இணையத்தில் அல்ல.',
+  'ab.h3t': 'பேசும் முன் சரிபார்க்கும்', 'ab.h3': 'ஒவ்வொரு வாக்கியமும் ஒரு பக்கத்தைக் காட்ட வேண்டும், ஒவ்வொரு எண்ணும் அதில் இருக்க வேண்டும். பிறகு Gnani Timbre பதிலைப் படிக்கும்.',
+  'ab.numTitle': 'நேர்மையாகச் சோதித்தோம்', 'ab.n1': '4 மொழிகளில் சோதனைக் கேள்விகள்', 'ab.n2': 'பதில்கள் சரியான பக்கத்தைக் காட்டுகின்றன', 'ab.n3': 'ஆவணங்களில் இல்லாத கேள்விகள் நேர்மையாக மறுக்கப்பட்டன',
+  'ab.credit': 'Gnani.ai Great Indian AI Internship Challenge 2026-க்காக, குரலுக்கு Gnani Prisma, Timbre பயன்படுத்தி உருவாக்கப்பட்டது. இது ஒரு மாணவர் திட்டம், அரசு சேவை அல்ல.',
+});
+Object.assign(MESSAGES['hi-IN'], {
+  'home.tryLabel': 'ऐसे पूछें', 'home.tryTitle': 'जैसे घर पर बोलते हैं, वैसे ही पूछें',
+  'home.doesLabel': 'पक्कम क्या करता है', 'home.doesTitle': 'सिर्फ़ भरोसा नहीं, जाँच भी करें',
+  'home.tile3Title': 'अफ़वाह रोकें', 'home.tile3Body': 'व्हाट्सऐप संदेश चिपकाएँ और देखें कौन से दावे गलत हैं, धोखाधड़ी के संकेतों के साथ।',
+  'status.speaking': 'बोल रहा है… रोकने के लिए ऑर्ब दबाएँ', 'status.listening': 'सुन रहा है… बोलकर ऑर्ब दबाएँ', 'status.processing': 'सोच रहा है…',
+  'schemes.eyebrow': 'योजनाएँ और आधिकारिक स्रोत', 'schemes.title': 'पक्कम जिन योजनाओं को जानता है',
+  'schemes.intro': 'हर योजना अपनी जाँची गई मुख्य जानकारी, पक्कम के पढ़े आधिकारिक दस्तावेज़ों और लोगों के सवालों के साथ।',
+  'schemes.summary': '{schemes} योजनाएँ · {docs} आधिकारिक दस्तावेज़', 'schemes.ask': 'पूछें:',
+  'set.voiceTitle': 'आवाज़', 'set.speed': 'बोलने की गति', 'set.normal': 'सामान्य', 'set.slow': 'धीमी',
+  'set.voiceLang': 'आप जिस भाषा में बोलते हैं', 'set.easyTitle': 'बुज़ुर्गों के लिए आसान मोड',
+  'set.easyHelp': 'बड़े अक्षर और बटन, धीमी आवाज़, आसान होम पेज।', 'set.easy': 'आसान मोड',
+  'set.lookTitle': 'रूप', 'set.dark': 'डार्क', 'set.light': 'लाइट', 'set.textSize': 'अक्षर का आकार', 'set.calm': 'एनिमेशन कम करें',
+  'set.privacyTitle': 'गोपनीयता', 'set.privacyHelp': 'पक्कम आपके सवाल या आवाज़ सर्वर पर सेव नहीं करता। नीचे का इतिहास सिर्फ़ इस ब्राउज़र में रहता है।',
+  'set.phone': 'फ़ोन कॉल आवाज़ परीक्षण (8 kHz)', 'set.clearConfirm': 'सब मिटाने के लिए फिर दबाएँ',
+  'ab.title1': 'पक्कम का मतलब है', 'ab.title2': 'पन्ना।',
+  'ab.lede': 'एक आवाज़ सहायक जो कल्याण योजनाओं के सवालों का जवाब आधिकारिक सरकारी दस्तावेज़ों से देता है और सही पन्ना दिखाता है।',
+  'ab.whyTitle': 'हमने इसे क्यों बनाया',
+  'ab.problem': 'मगलिर उरिमै या PM-KISAN जैसी योजनाओं के असली नियम लंबे सरकारी आदेशों में लिखे हैं, जिन्हें कम लोग पढ़ते हैं। इसलिए परिवार व्हाट्सऐप संदेशों, बिचौलियों या ऐसे चैटबॉट पर भरोसा करते हैं जो पक्के लगते हैं पर गलत हो सकते हैं। किसी के ₹1,000 महीने के लिए, पक्का गलत जवाब, जवाब न होने से बुरा है।',
+  'ab.canTitle': 'पक्कम क्या कर सकता है',
+  'ab.f1t': 'आपकी भाषा में सुनता है', 'ab.f1': 'तमिल, Tanglish, हिंदी या अंग्रेज़ी में, बोलकर या लिखकर, और जवाब बोलकर सुनाता है।',
+  'ab.f2t': 'सबूत दिखाता है', 'ab.f2': 'हर जवाब आधिकारिक दस्तावेज़ का पन्ना पंक्ति हाइलाइट करके खोलता है।',
+  'ab.f3t': '"मुझे नहीं पता" कहता है', 'ab.f3': 'दस्तावेज़ों में न हो तो अंदाज़ा नहीं लगाता, बता देता है।',
+  'ab.f4t': 'व्हाट्सऐप संदेश जाँचता है', 'ab.f4': 'गलत दावे और नकली लिंक, OTP माँगने जैसे धोखाधड़ी संकेत पकड़ता है।',
+  'ab.f5t': 'तैयारी में मदद', 'ab.f5': 'ज़रूरी दस्तावेज़, और आवेदन अस्वीकार होने पर अपील पत्र का मसौदा।',
+  'ab.f6t': 'लोगों से जोड़ता है', 'ab.f6': 'योजना हेल्पलाइन, और सवाल अधिकारी को भेजने का तरीका।',
+  'ab.howTitle': 'यह जवाब कैसे देता है',
+  'ab.h1t': 'आप पूछते हैं', 'ab.h1': 'Gnani Prisma आपकी आवाज़ को लिखित में बदलता है, मिली-जुली तमिल-अंग्रेज़ी भी।',
+  'ab.h2t': 'पक्कम पन्ना ढूँढता है', 'ab.h2': 'यह सिर्फ़ 18 आधिकारिक सरकारी दस्तावेज़ों में खोजता है, इंटरनेट पर नहीं।',
+  'ab.h3t': 'बोलने से पहले जाँचता है', 'ab.h3': 'हर वाक्य किसी पन्ने से जुड़ा हो और हर संख्या उसी पर हो। फिर Gnani Timbre जवाब पढ़कर सुनाता है।',
+  'ab.numTitle': 'ईमानदारी से जाँचा', 'ab.n1': '4 भाषाओं में परीक्षण सवाल', 'ab.n2': 'जवाब सही पन्ना बताते हैं', 'ab.n3': 'दायरे से बाहर के सवाल ईमानदारी से मना किए',
+  'ab.credit': 'Gnani.ai Great Indian AI Internship Challenge 2026 के लिए, आवाज़ के लिए Gnani Prisma और Timbre के साथ बनाया गया। यह एक छात्र प्रोजेक्ट है, सरकारी सेवा नहीं।',
+});
+
 // Rumour Shield and appeal texts (from the earlier chat page, web-backup/assets/chat.js).
 const SHIELD = {
   'en-IN': {
@@ -538,6 +636,7 @@ function showHeard(text, isTranscript = false) {
 function setBars(level) {
   document.querySelectorAll('.orb-waveform-assembly').forEach((assembly) => {
     assembly.classList.add('audio-reactive');
+    assembly.style.setProperty('--level', String(Math.min(1, level).toFixed(2)));
     assembly.querySelectorAll('.wave-bar').forEach((bar, index) => {
       const shape = [0.38, 0.62, 0.9, 0.72, 0.48][index % 5];
       bar.style.setProperty('--bar-level', String(0.3 + level * shape * 1.5));
@@ -572,13 +671,14 @@ function playUrl(url, { rate = 1, keepUrl = false } = {}) {
     const stopBtn = document.getElementById('stop-audio-btn');
     if (stopBtn) stopBtn.style.display = 'inline-block';
     const done = () => {
-      if (state.currentAudio === audio) { stopPlayback(); stopWaveformMeter(); orb('idle'); }
+      if (state.currentAudio === audio) { stopPlayback(); stopWaveformMeter(); orb('idle'); setStatus(t('assistant.tap')); }
       resolve();
     };
     audio.onended = done;
     audio.onerror = done;
     audio.play().then(() => {
       orb('speaking');
+      setStatus(t('status.speaking'));
       try {
         state.audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
         state.audioContext.resume();
@@ -592,7 +692,7 @@ async function speak(text, language, options = {}) {
   const spoken = (text || '').replace(CITATION_MARKER, '').trim();
   if (!spoken) return;
   try {
-    await playUrl(await speechUrl(spoken, language), options);
+    await playUrl(await speechUrl(spoken, language), { ...options, rate: options.rate || prefs.speed });
   } catch (_) {
     orb('idle');  // speech is optional: the written answer is on screen
   }
@@ -1055,7 +1155,7 @@ const voiceSpeech = () => ({ 'ta-Latn': 'ta' }[voiceLanguage()] || voiceLanguage
 /** Speak the reply (voice questions always; typed ones when auto-play is on), then keep
  *  listening in conversation mode. */
 async function finishTurn(text, language, options = {}) {
-  if (options.voice || options.force || state.autoPlayTTS) await speak(text, language, { rate: options.rate || 1 });
+  if (options.voice || options.force || state.autoPlayTTS) await speak(text, language, { rate: options.rate });
   else orb('idle');
   if (convo.mode && options.voice && !recording) setTimeout(() => toggleVoiceRecording(convo.surface, { again: true }), 500);
 }
@@ -1140,8 +1240,10 @@ async function finishRecording(heardSpeech) {
 }
 
 function renderVoiceChips() {
-  const box = document.getElementById('voice-lang-chips');
-  if (!box) return;
+  document.querySelectorAll('#voice-lang-chips, .settings-voice-chips').forEach((box) => renderVoiceChipsInto(box));
+}
+
+function renderVoiceChipsInto(box) {
   const options = [['ta', 'தமிழ்'], ['ta-Latn', 'Tanglish'], ['hi', 'हिन्दी'], ['en', 'English']];
   box.replaceChildren(...options.map(([code, label]) => {
     const button = chip(label, () => {
@@ -1312,8 +1414,41 @@ const QUICK_QUESTIONS = {
   'hi-IN': { amount: (s) => `${s} में कितना पैसा मिलता है?`, who: (s) => `${s} के लिए कौन पात्र है?`, docs: (s) => `${s} के लिए कौन से दस्तावेज़ चाहिए?` },
 };
 
+let schemeFacts = {};  // scheme -> signed facts from GET /scheme-facts
+
+async function loadSchemeFacts() {
+  try {
+    const lang = state.language === 'ta-IN' ? 'ta' : 'en';
+    const list = await (await api(`/scheme-facts?lang=${lang}`, {}, 30000)).json();
+    schemeFacts = Object.fromEntries(list.map((f) => [f.scheme, f]));
+  } catch (_) {
+    schemeFacts = {};
+  }
+}
+
+// Questions people actually ask about each scheme (English); other languages use the
+// translated amount / who / documents questions.
+const SCHEME_QUESTIONS = [
+  [/magalir|urimai/i, ['How much is Magalir Urimai Thogai?', "Can government employees' families get Magalir Urimai?", 'Is an income certificate needed for Magalir Urimai?']],
+  [/kisan/i, ['How much does PM-KISAN give in a year?', 'How do I complete e-KYC for PM-KISAN?', 'Who is not eligible for PM-KISAN?']],
+  [/atal|pension/i, ['How much pension does Atal Pension Yojana give?', 'What is the age limit to join Atal Pension Yojana?', 'Can income tax payers join Atal Pension Yojana?']],
+  [/ujjwala/i, ['Who can get an Ujjwala gas connection?', 'What documents are needed for Ujjwala?', 'Is the Ujjwala connection free?']],
+  [/breakfast/i, ["Which classes get the Chief Minister's Breakfast?", "Which schools have the Chief Minister's Breakfast Scheme?"]],
+  [/pudhumai/i, ['How much does Pudhumai Penn give?', 'Who is eligible for Pudhumai Penn?']],
+  [/maruthuva|insurance|cmchis|health/i, ['What is the income limit for the CM health insurance scheme?', 'How much cover does the CM health insurance give?']],
+];
+const SCHEME_ICONS = [[/magalir|urimai|pudhumai|penn/i, '👩'], [/kisan|farm/i, '🌾'], [/pension|atal/i, '🧓'], [/ujjwala|gas/i, '🔥'],
+  [/breakfast|food|meal/i, '🍲'], [/health|maruthuva|insurance|cmchis/i, '🏥'], [/education|student|scholar|graduate|hostel/i, '🎓']];
+
+function schemeQuestions(scheme) {
+  const asks = QUICK_QUESTIONS[state.language] || QUICK_QUESTIONS['en-IN'];
+  const own = state.language === 'en-IN' ? SCHEME_QUESTIONS.find(([re]) => re.test(scheme))?.[1] : null;
+  return own || [asks.amount(scheme), asks.who(scheme), asks.docs(scheme)];
+}
+
 function renderSchemes(_unused, searchQuery = '') {
   const grid = document.getElementById('schemes-grid');
+  const summary = document.getElementById('schemes-summary');
   if (!grid) return;
   grid.replaceChildren();
   if (!sources) {
@@ -1325,42 +1460,123 @@ function renderSchemes(_unused, searchQuery = '') {
     if (!byScheme.has(doc.scheme)) byScheme.set(doc.scheme, []);
     byScheme.get(doc.scheme).push(doc);
   });
+  if (summary) summary.textContent = fill(t('schemes.summary'), { schemes: byScheme.size, docs: sources.length });
   const query = searchQuery.trim().toLowerCase();
-  const asks = QUICK_QUESTIONS[state.language] || QUICK_QUESTIONS['en-IN'];
-  const rows = [...byScheme.entries()]
+  const cards = [...byScheme.entries()]
     .filter(([scheme, docs]) => !query || scheme.toLowerCase().includes(query) || docs.some((d) => d.title.toLowerCase().includes(query)))
-    .map(([scheme, docs]) => {
-      const row = el('article', 'scheme-row');
-      const main = el('div', 'scheme-main');
-      main.append(el('p', 'scheme-category', `${docs.length} ${t('schemes.docCount')}`), el('h2', '', scheme));
-      main.append(chipRow([
-        chip(t('schemes.askAmount'), () => submitChatQuery(asks.amount(scheme))),
-        chip(t('schemes.askWho'), () => submitChatQuery(asks.who(scheme))),
-        chip(t('schemes.askDocs'), () => submitChatQuery(asks.docs(scheme))),
-      ]));
-      row.append(main);
-      return row;
+    .map(([scheme, docs], index) => {
+      const card = el('article', 'scheme-card glass-panel');
+      card.style.setProperty('--i', String(index));
+      const head = el('div', 'scheme-card-head');
+      head.append(el('span', 'scheme-icon', SCHEME_ICONS.find(([re]) => re.test(scheme))?.[1] || '📜'));
+      const titles = el('div');
+      titles.append(el('h2', '', scheme), el('p', 'scheme-category', `${docs.length} ${t('schemes.docCount')}`));
+      head.append(titles);
+      card.append(head);
+
+      const facts = schemeFacts[scheme];
+      if (facts && (facts.amount || facts.who)) {
+        const box = el('div', 'scheme-facts');
+        if (facts.amount) { const row = el('p', 'fact-line'); row.append(el('span', 'fact-key', t('section.amount')), el('span', '', facts.amount)); box.append(row); }
+        if (facts.who) { const row = el('p', 'fact-line'); row.append(el('span', 'fact-key', t('section.eligibility')), el('span', '', facts.who)); box.append(row); }
+        const cite = facts.amount_citation || facts.who_citation;
+        if (cite) {
+          const foot = el('div', 'fact-foot');
+          const checker = facts.amount_citation?.checked_by || facts.who_citation?.checked_by;
+          if (checker) foot.append(el('span', 'checked-tag', `✓ ${t('proof.checked')} ${checker}`));
+          foot.append(proofButton(cite));
+          box.append(foot);
+        }
+        card.append(box);
+      }
+
+      const list = el('ul', 'doc-list');
+      docs.forEach((doc) => {
+        const li = el('li');
+        const meta = [doc.language.toUpperCase(), doc.doc_date ? `${t('documents.dated')} ${doc.doc_date}` : ''].filter(Boolean).join(' · ');
+        li.append(el('span', 'doc-title', `📄 ${doc.title}`), el('span', 'doc-meta', meta), linkChip(t('documents.open'), doc.source_url));
+        list.append(li);
+      });
+      card.append(list);
+      card.append(chipRow(schemeQuestions(scheme).map((q) => chip(q, () => submitChatQuery(q))), t('schemes.ask')));
+      return card;
     });
-  if (!rows.length) grid.append(el('p', 'empty-state', t('schemes.empty')));
-  else grid.append(...rows);
+  if (!cards.length) grid.append(el('p', 'empty-state', t('schemes.empty')));
+  else grid.append(...cards);
 }
 
-function renderDocuments() {
-  const list = document.getElementById('documents-list');
-  if (!list) return;
-  list.replaceChildren();
-  if (!sources) {
-    list.append(el('p', 'empty-state', sources === null ? t('documents.offline') : t('documents.loading')));
-    return;
-  }
-  sources.forEach((doc) => {
-    const row = el('article', 'scheme-row');
-    const main = el('div', 'scheme-main');
-    main.append(el('p', 'scheme-category', doc.scheme), el('h2', '', doc.title));
-    main.append(el('p', 'scheme-benefit', [doc.language.toUpperCase(), doc.doc_date ? `${t('documents.dated')} ${doc.doc_date}` : ''].filter(Boolean).join(' · ')));
-    main.append(linkChip(t('documents.open'), doc.source_url));
-    row.append(main);
-    list.append(row);
+function renderHomeExamples() {
+  const box = document.getElementById('home-examples');
+  if (!box) return;
+  const icons = ['💰', '🗣️', '🌾', '🔥'];
+  box.replaceChildren(...(EXAMPLES[state.language] || EXAMPLES['en-IN']).map((q, index) => {
+    const card = el('button', 'example-card');
+    card.type = 'button';
+    card.style.setProperty('--i', String(index));
+    card.append(el('span', 'example-icon', icons[index % icons.length]), el('span', 'example-text', q), el('span', 'example-go', '→'));
+    card.addEventListener('click', () => submitChatQuery(q));
+    return card;
+  }));
+}
+
+/* ==========================================================================
+   SETTINGS (this browser only)
+   ========================================================================== */
+const prefs = (() => {
+  const read = (key, fallback) => { try { return localStorage.getItem(key) ?? fallback; } catch (_) { return fallback; } };
+  return { speed: Number(read('pakkam_speed', '1')) || 1, easy: read('pakkam_easy', '0') === '1', size: Number(read('pakkam_size', '100')) || 100,
+    calm: read('pakkam_calm', '0') === '1', phone: read('pakkam_phone', '0') === '1' };
+})();
+
+function savePref(key, value) { try { localStorage.setItem(key, String(value)); } catch (_) { /* private mode */ } }
+
+function applyPrefs() {
+  const root = document.documentElement;
+  root.classList.toggle('easy', prefs.easy);
+  root.classList.toggle('calm', prefs.calm);
+  root.style.fontSize = `${prefs.easy ? Math.max(prefs.size, 118) : prefs.size}%`;
+  if (window.PakkamRecorder) window.PakkamRecorder.phoneMode = prefs.phone;
+  const mark = (selector, attr, value) => document.querySelectorAll(`${selector} [${attr}]`).forEach((b) => {
+    const on = b.getAttribute(attr) === String(value);
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+  mark('#setting-speed', 'data-speed', prefs.easy ? 0.85 : prefs.speed);
+  mark('#setting-size', 'data-size', prefs.size);
+  mark('#setting-theme', 'data-theme-choice', state.theme);
+  const set = (id, value) => { const box = document.getElementById(id); if (box) box.checked = value; };
+  set('setting-easy', prefs.easy);
+  set('setting-calm', prefs.calm);
+  set('setting-phone', prefs.phone);
+  set('setting-autoplay-tts', state.autoPlayTTS);
+}
+
+function bindSettings() {
+  document.querySelectorAll('#setting-speed [data-speed]').forEach((b) => b.addEventListener('click', () => { prefs.speed = Number(b.dataset.speed); savePref('pakkam_speed', prefs.speed); applyPrefs(); }));
+  document.querySelectorAll('#setting-size [data-size]').forEach((b) => b.addEventListener('click', () => { prefs.size = Number(b.dataset.size); savePref('pakkam_size', prefs.size); applyPrefs(); }));
+  document.querySelectorAll('#setting-theme [data-theme-choice]').forEach((b) => b.addEventListener('click', () => { applyTheme(b.dataset.themeChoice); applyPrefs(); }));
+  const toggle = (id, key, onChange) => document.getElementById(id)?.addEventListener('change', (event) => { onChange(event.target.checked); savePref(key, event.target.checked ? '1' : '0'); applyPrefs(); });
+  toggle('setting-easy', 'pakkam_easy', (on) => { prefs.easy = on; if (on) prefs.speed = 0.85; });
+  toggle('setting-calm', 'pakkam_calm', (on) => { prefs.calm = on; });
+  toggle('setting-phone', 'pakkam_phone', (on) => { prefs.phone = on; });
+  document.getElementById('setting-autoplay-tts')?.addEventListener('change', (event) => {
+    state.autoPlayTTS = event.target.checked;
+    savePref('pakkam_tts', event.target.checked);
+  });
+  // Clear history: a second tap confirms (pop-up confirms are blocked in some browsers).
+  const clear = document.getElementById('clear-history-btn');
+  clear?.addEventListener('click', () => {
+    if (clear.dataset.armed !== '1') {
+      clear.dataset.armed = '1';
+      clear.textContent = t('set.clearConfirm');
+      setTimeout(() => { clear.dataset.armed = '0'; clear.textContent = t('history.clear'); }, 4000);
+      return;
+    }
+    clear.dataset.armed = '0';
+    clear.textContent = t('history.clear');
+    state.history = [];
+    try { localStorage.removeItem('pakkam_history'); } catch (_) { /* private mode */ }
+    renderHistory();
   });
 }
 
@@ -1415,8 +1631,10 @@ function refreshLanguageParts() {
   showHeard('');
   renderWelcomeChips();
   renderVoiceChips();
-  renderDocuments();
+  renderHomeExamples();
   applyShieldText();
+  applyPrefs();
+  loadSchemeFacts().then(() => renderSchemes(null, document.getElementById('scheme-search-input')?.value || ''));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1426,12 +1644,14 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHistory();
   refreshLanguageParts();
   setConversationMode(convo.mode);
-  loadSources().then(() => { renderSchemes(null, document.getElementById('scheme-search-input')?.value || ''); renderDocuments(); });
+  bindSettings();
+  applyPrefs();
+  loadSources().then(() => renderSchemes(null, document.getElementById('scheme-search-input')?.value || ''));
 
   document.querySelectorAll('[data-nav]').forEach((node) => {
     node.addEventListener('click', (event) => { event.preventDefault(); navigateTo(node.dataset.nav); });
   });
-  document.getElementById('theme-toggle-btn')?.addEventListener('click', toggleTheme);
+  document.getElementById('theme-toggle-btn')?.addEventListener('click', () => { toggleTheme(); applyPrefs(); });
   document.getElementById('settings-theme-btn')?.addEventListener('click', toggleTheme);
   document.getElementById('global-lang-select')?.addEventListener('change', (event) => {
     convo.voiceLang = null;
@@ -1440,14 +1660,6 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshLanguageParts();
   });
 
-  const autoplay = document.getElementById('setting-autoplay-tts');
-  if (autoplay) {
-    autoplay.checked = state.autoPlayTTS;
-    autoplay.addEventListener('change', () => {
-      state.autoPlayTTS = autoplay.checked;
-      try { localStorage.setItem('pakkam_tts', String(autoplay.checked)); } catch (_) { /* private mode */ }
-    });
-  }
   document.querySelectorAll('.conv-mode-input').forEach((box) => box.addEventListener('change', () => setConversationMode(box.checked)));
 
   document.getElementById('cta-ask-pakkam')?.addEventListener('click', () => navigateTo('assistant'));
@@ -1468,12 +1680,6 @@ document.addEventListener('DOMContentLoaded', () => {
     await submitChatQuery(query);
   });
   document.getElementById('scheme-search-input')?.addEventListener('input', (event) => renderSchemes(null, event.target.value));
-  document.getElementById('clear-history-btn')?.addEventListener('click', () => {
-    if (!window.confirm(t('history.confirm'))) return;
-    state.history = [];
-    try { localStorage.removeItem('pakkam_history'); } catch (_) { /* private mode */ }
-    renderHistory();
-  });
   document.getElementById('stop-audio-btn')?.addEventListener('click', () => { stopPlayback(); stopWaveformMeter(); orb('idle'); });
   document.getElementById('about-listen')?.addEventListener('click', aboutListen);
 
