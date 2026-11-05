@@ -80,7 +80,13 @@ function applyLanguage(language) {
 
 const state = {
   theme: localStorage.getItem('pakkam_theme') || 'dark',
-  language: localStorage.getItem('pakkam_lang') || 'en-IN',
+  language: (() => {
+    let saved = null;
+    try { saved = localStorage.getItem('pakkam_lang'); } catch (_) { /* private mode */ }
+    if (saved) return saved;
+    const browser = (navigator.language || '').toLowerCase();
+    return browser.startsWith('ta') ? 'ta-IN' : browser.startsWith('hi') ? 'hi-IN' : 'en-IN';
+  })(),
   autoPlayTTS: localStorage.getItem('pakkam_tts') !== 'false',
   isRecording: false,
   mediaRecorder: null,
@@ -454,6 +460,31 @@ Object.assign(MESSAGES['hi-IN'], {
   'ab.credit': 'Gnani.ai Great Indian AI Internship Challenge 2026 के लिए, आवाज़ के लिए Gnani Prisma और Timbre के साथ बनाया गया। यह एक छात्र प्रोजेक्ट है, सरकारी सेवा नहीं।',
 });
 
+Object.assign(MESSAGES['en-IN'], {
+  'nav.menu': 'Menu', 'set.readTitle': 'Reading & accessibility', 'set.langTitle': 'Language & theme', 'set.siteLang': 'Language of the site',
+  'set.easy': 'Easy mode for elders',
+  'cat.women': 'Women', 'cat.farmers': 'Farmers', 'cat.pension': 'Pension', 'cat.gas': 'Cooking gas', 'cat.children': 'Children',
+  'cat.health': 'Health', 'cat.education': 'Education', 'cat.welfare': 'Welfare', 'issuer.tn': 'Tamil Nadu', 'issuer.central': 'Central',
+  'schemes.all': 'All', 'schemes.details': 'Details', 'schemes.verified': 'Verified', 'schemes.noAmount': 'Amount: see the official document',
+  'schemes.documents': 'Official documents', 'schemes.questions': 'Ask Pakkam',
+});
+Object.assign(MESSAGES['ta-IN'], {
+  'nav.menu': 'பட்டி', 'set.readTitle': 'வாசிப்பு & அணுகல்', 'set.langTitle': 'மொழி & தீம்', 'set.siteLang': 'தளத்தின் மொழி',
+  'set.easy': 'முதியோருக்கான எளிய முறை',
+  'cat.women': 'பெண்கள்', 'cat.farmers': 'விவசாயிகள்', 'cat.pension': 'ஓய்வூதியம்', 'cat.gas': 'சமையல் எரிவாயு', 'cat.children': 'குழந்தைகள்',
+  'cat.health': 'சுகாதாரம்', 'cat.education': 'கல்வி', 'cat.welfare': 'நலன்', 'issuer.tn': 'தமிழ்நாடு', 'issuer.central': 'மத்திய அரசு',
+  'schemes.all': 'அனைத்தும்', 'schemes.details': 'விவரம்', 'schemes.verified': 'சரிபார்த்தது', 'schemes.noAmount': 'தொகை: அதிகாரப்பூர்வ ஆவணத்தைப் பாருங்கள்',
+  'schemes.documents': 'அதிகாரப்பூர்வ ஆவணங்கள்', 'schemes.questions': 'பக்கத்திடம் கேளுங்கள்',
+});
+Object.assign(MESSAGES['hi-IN'], {
+  'nav.menu': 'मेन्यू', 'set.readTitle': 'पढ़ना और सुलभता', 'set.langTitle': 'भाषा और थीम', 'set.siteLang': 'साइट की भाषा',
+  'set.easy': 'बुज़ुर्गों के लिए आसान मोड',
+  'cat.women': 'महिलाएँ', 'cat.farmers': 'किसान', 'cat.pension': 'पेंशन', 'cat.gas': 'रसोई गैस', 'cat.children': 'बच्चे',
+  'cat.health': 'स्वास्थ्य', 'cat.education': 'शिक्षा', 'cat.welfare': 'कल्याण', 'issuer.tn': 'तमिलनाडु', 'issuer.central': 'केंद्र',
+  'schemes.all': 'सभी', 'schemes.details': 'विवरण', 'schemes.verified': 'जाँचा गया', 'schemes.noAmount': 'राशि: आधिकारिक दस्तावेज़ देखें',
+  'schemes.documents': 'आधिकारिक दस्तावेज़', 'schemes.questions': 'पक्कम से पूछें',
+});
+
 // Rumour Shield and appeal texts (from the earlier chat page, web-backup/assets/chat.js).
 const SHIELD = {
   'en-IN': {
@@ -644,6 +675,23 @@ function setBars(level) {
   });
 }
 
+// Every stop bumps this; speech that was still loading checks it and is dropped.
+let speechGen = 0;
+let relistenTimer = null;
+let replyLoading = false;
+
+/** Silence Pakkam completely: current audio, speech still loading, the "checking…" line and
+ *  a conversation-mode re-listen that was about to start. */
+function stopSpeaking() {
+  speechGen += 1;
+  clearTimeout(relistenTimer);
+  relistenTimer = null;
+  stopPlayback();
+  stopWaveformMeter();
+  orb('idle');
+  setStatus(t('assistant.tap'));
+}
+
 function stopPlayback() {
   if (state.currentAudio) {
     state.currentAudio.onended = null;
@@ -691,8 +739,11 @@ function playUrl(url, { rate = 1, keepUrl = false } = {}) {
 async function speak(text, language, options = {}) {
   const spoken = (text || '').replace(CITATION_MARKER, '').trim();
   if (!spoken) return;
+  const gen = speechGen;
   try {
-    await playUrl(await speechUrl(spoken, language), { ...options, rate: options.rate || prefs.speed });
+    const url = await speechUrl(spoken, language);
+    if (gen !== speechGen) { URL.revokeObjectURL(url); return; }  // stopped while loading
+    await playUrl(url, { ...options, rate: options.rate || prefs.speed });
   } catch (_) {
     orb('idle');  // speech is optional: the written answer is on screen
   }
@@ -1118,8 +1169,9 @@ async function submitChatQuery(queryText, options = {}) {
 
   const body = { question: question.slice(0, 500), voice_mode: Boolean(options.voice) };
   if (convo.last?.data?.scheme) body.follow_up = { question: convo.last.question.slice(0, 500), scheme: convo.last.data.scheme };
+  const fillerGen = speechGen;
   if (options.voice && fillerUrls[voiceSpeech()]) {
-    fillerUrls[voiceSpeech()].then((url) => { if (url && bubble.classList.contains('thinking')) playUrl(url, { keepUrl: true }); });
+    fillerUrls[voiceSpeech()].then((url) => { if (url && fillerGen === speechGen && bubble.classList.contains('thinking')) playUrl(url, { keepUrl: true }); });
   }
   postJson('/ask/sources', body, 15000).then((res) => res.json()).then((found) => {
     const top = found.passages?.[0];
@@ -1127,8 +1179,11 @@ async function submitChatQuery(queryText, options = {}) {
   }).catch(() => {});
   const slow = setTimeout(() => { if (bubble.classList.contains('thinking')) bubble.append(el('p', 'answer-progress', t('progress.slow'))); }, SLOW_MS);
 
+  replyLoading = true;
+  const turnGen = speechGen;  // a stop while the answer loads cancels its speech
   try {
     const data = await (await postJson('/ask', body)).json();
+    replyLoading = false;
     clearTimeout(slow);
     bubble.classList.remove('thinking');
     const text = renderAnswer(bubble, data, question);
@@ -1139,8 +1194,9 @@ async function submitChatQuery(queryText, options = {}) {
     saveToHistory(question, text);
     showOnHome(text, data.citations || []);
     setStatus(t('assistant.tap'));
-    await finishTurn(spokenText(data), data.language, options);
+    await finishTurn(spokenText(data), data.language, { ...options, gen: turnGen });
   } catch (error) {
+    replyLoading = false;
     clearTimeout(slow);
     bubble.classList.remove('thinking');
     bubble.replaceChildren(el('div', 'answer-text', errorText(error)));
@@ -1155,9 +1211,14 @@ const voiceSpeech = () => ({ 'ta-Latn': 'ta' }[voiceLanguage()] || voiceLanguage
 /** Speak the reply (voice questions always; typed ones when auto-play is on), then keep
  *  listening in conversation mode. */
 async function finishTurn(text, language, options = {}) {
+  if (options.gen !== undefined && options.gen !== speechGen) { orb('idle'); return; }  // stopped meanwhile
+  const gen = speechGen;
   if (options.voice || options.force || state.autoPlayTTS) await speak(text, language, { rate: options.rate });
   else orb('idle');
-  if (convo.mode && options.voice && !recording) setTimeout(() => toggleVoiceRecording(convo.surface, { again: true }), 500);
+  // Keep listening in conversation mode, unless the person stopped Pakkam meanwhile.
+  if (convo.mode && options.voice && !recording && gen === speechGen) {
+    relistenTimer = setTimeout(() => { relistenTimer = null; toggleVoiceRecording(convo.surface, { again: true }); }, 500);
+  }
 }
 
 /* ==========================================================================
@@ -1165,6 +1226,13 @@ async function finishTurn(text, language, options = {}) {
    ========================================================================== */
 let recording = null;
 let recordingTimer = null;
+
+/** Orb tap: listening -> send; speaking or still answering -> stop and stay quiet; idle -> listen. */
+function orbTap(surface) {
+  if (recording) { finishRecording(true); return; }
+  if (state.currentAudio || replyLoading || relistenTimer) { stopSpeaking(); return; }
+  toggleVoiceRecording(surface);
+}
 
 async function toggleVoiceRecording(surface = 'chat', { again = false } = {}) {
   if (recording) { await finishRecording(true); return; }
@@ -1221,9 +1289,13 @@ async function finishRecording(heardSpeech) {
   const form = new FormData();
   form.append('audio', wav, 'question.wav');
   form.append('language', voiceLanguage());
+  const gen = speechGen;
+  replyLoading = true;  // a tap now means "stop", not "listen again"
   try {
     const data = await (await api('/transcribe', { method: 'POST', body: form }, 60000)).json();
+    replyLoading = false;
     const heard = (data.transcript || '').trim();
+    if (gen !== speechGen) { if (heard) showHeard(`"${heard}"`, true); return; }  // stopped while transcribing
     if (!heard) {
       orb('idle');
       setStatus(t('assistant.tap'));
@@ -1233,6 +1305,7 @@ async function finishRecording(heardSpeech) {
     showHeard(`"${heard}"`, true);
     await submitChatQuery(heard, { voice: true });
   } catch (error) {
+    replyLoading = false;
     orb('error');
     setStatus(t('assistant.tap'));
     showHeard(error instanceof ApiError && [400, 413, 415, 422].includes(error.status) && error.message ? error.message : t('status.voiceError'));
@@ -1437,13 +1510,66 @@ const SCHEME_QUESTIONS = [
   [/pudhumai/i, ['How much does Pudhumai Penn give?', 'Who is eligible for Pudhumai Penn?']],
   [/maruthuva|insurance|cmchis|health/i, ['What is the income limit for the CM health insurance scheme?', 'How much cover does the CM health insurance give?']],
 ];
-const SCHEME_ICONS = [[/magalir|urimai|pudhumai|penn/i, '👩'], [/kisan|farm/i, '🌾'], [/pension|atal/i, '🧓'], [/ujjwala|gas/i, '🔥'],
-  [/breakfast|food|meal/i, '🍲'], [/health|maruthuva|insurance|cmchis/i, '🏥'], [/education|student|scholar|graduate|hostel/i, '🎓']];
+// Category and issuer for each scheme in sources.json (shown as a quiet label on the card).
+const SCHEME_META = [
+  [/magalir|urimai/i, 'women', 'tn'], [/pudhumai/i, 'education', 'tn'], [/kisan/i, 'farmers', 'central'],
+  [/atal|apy|pension/i, 'pension', 'central'], [/ujjwala/i, 'gas', 'central'], [/breakfast/i, 'children', 'tn'],
+  [/maruthuva|insurance|cmchis|health/i, 'health', 'tn'], [/hostel|backward|bc|mbc|scholar|graduate|student/i, 'education', 'tn'],
+];
+const CATEGORY_ORDER = ['women', 'farmers', 'pension', 'gas', 'children', 'health', 'education', 'welfare'];
+// Thin line icons (24px grid), drawn with currentColor.
+const CATEGORY_ICON = {
+  women: '<circle cx="12" cy="7" r="3.5"/><path d="M5 21c.8-4 3.6-6.5 7-6.5s6.2 2.5 7 6.5"/>',
+  farmers: '<path d="M12 21V10"/><path d="M12 13c-4 0-6-2.5-6-6 3.5 0 6 2 6 6Z"/><path d="M12 11c0-4 2.5-6.5 6-6.5 0 3.8-2.4 6.5-6 6.5Z"/>',
+  pension: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  gas: '<path d="M12 21c-3.6 0-6-2.4-6-5.6 0-3.4 2.6-5 3.6-8.4 1.6 1.4 2.4 3 2.4 4.6 1-.8 1.6-2 1.8-3.4 2.2 1.8 4.2 4.2 4.2 7.2C18 18.6 15.6 21 12 21Z"/>',
+  children: '<path d="M4 12h16a8 8 0 0 1-16 0Z"/><path d="M9 4c0 1.5 1 1.5 1 3M13 4c0 1.5 1 1.5 1 3"/>',
+  health: '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/>',
+  education: '<path d="M2.5 9 12 4.5 21.5 9 12 13.5Z"/><path d="M6.5 11v4.5c1.5 1.3 3.4 2 5.5 2s4-.7 5.5-2V11"/>',
+  welfare: '<path d="M7 3.5h7l4 4v13H7Z"/><path d="M14 3.5v4h4M9.5 12h6M9.5 15.5h4"/>',
+};
+let activeCategory = 'all';
+
+function schemeMeta(scheme, docs) {
+  const hit = SCHEME_META.find(([re]) => re.test(scheme));
+  const issuer = hit ? hit[2] : (docs.some((d) => d.language === 'ta') ? 'tn' : '');
+  return { category: hit ? hit[1] : 'welfare', issuer };
+}
+
+function categoryIcon(category) {
+  const span = el('span', 'cat-icon');
+  span.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CATEGORY_ICON[category] || CATEGORY_ICON.welfare}</svg>`;
+  return span;
+}
 
 function schemeQuestions(scheme) {
   const asks = QUICK_QUESTIONS[state.language] || QUICK_QUESTIONS['en-IN'];
   const own = state.language === 'en-IN' ? SCHEME_QUESTIONS.find(([re]) => re.test(scheme))?.[1] : null;
   return own || [asks.amount(scheme), asks.who(scheme), asks.docs(scheme)];
+}
+
+function groupedSchemes() {
+  const byScheme = new Map();
+  (sources || []).forEach((doc) => {
+    if (!byScheme.has(doc.scheme)) byScheme.set(doc.scheme, []);
+    byScheme.get(doc.scheme).push(doc);
+  });
+  return [...byScheme.entries()].map(([scheme, docs]) => ({ scheme, docs, ...schemeMeta(scheme, docs), facts: schemeFacts[scheme] }));
+}
+
+function renderSchemeFilters(items) {
+  const box = document.getElementById('scheme-filters');
+  if (!box) return;
+  const present = CATEGORY_ORDER.filter((c) => items.some((i) => i.category === c));
+  box.replaceChildren(...['all', ...present].map((cat) => {
+    const count = cat === 'all' ? items.length : items.filter((i) => i.category === cat).length;
+    const button = chip(`${t(cat === 'all' ? 'schemes.all' : `cat.${cat}`)} · ${count}`, () => {
+      activeCategory = cat;
+      renderSchemes(null, document.getElementById('scheme-search-input')?.value || '');
+    }, `chip-btn filter-chip${activeCategory === cat ? ' active' : ''}`);
+    button.setAttribute('aria-pressed', String(activeCategory === cat));
+    return button;
+  }));
 }
 
 function renderSchemes(_unused, searchQuery = '') {
@@ -1455,54 +1581,88 @@ function renderSchemes(_unused, searchQuery = '') {
     grid.append(el('p', 'empty-state', sources === null ? t('documents.offline') : t('documents.loading')));
     return;
   }
-  const byScheme = new Map();
-  sources.forEach((doc) => {
-    if (!byScheme.has(doc.scheme)) byScheme.set(doc.scheme, []);
-    byScheme.get(doc.scheme).push(doc);
-  });
-  if (summary) summary.textContent = fill(t('schemes.summary'), { schemes: byScheme.size, docs: sources.length });
+  const items = groupedSchemes();
+  if (summary) summary.textContent = fill(t('schemes.summary'), { schemes: items.length, docs: sources.length });
+  renderSchemeFilters(items);
   const query = searchQuery.trim().toLowerCase();
-  const cards = [...byScheme.entries()]
-    .filter(([scheme, docs]) => !query || scheme.toLowerCase().includes(query) || docs.some((d) => d.title.toLowerCase().includes(query)))
-    .map(([scheme, docs], index) => {
-      const card = el('article', 'scheme-card glass-panel');
-      card.style.setProperty('--i', String(index));
-      const head = el('div', 'scheme-card-head');
-      head.append(el('span', 'scheme-icon', SCHEME_ICONS.find(([re]) => re.test(scheme))?.[1] || '📜'));
-      const titles = el('div');
-      titles.append(el('h2', '', scheme), el('p', 'scheme-category', `${docs.length} ${t('schemes.docCount')}`));
-      head.append(titles);
-      card.append(head);
+  const shown = items
+    .filter((i) => activeCategory === 'all' || i.category === activeCategory)
+    .filter((i) => !query || i.scheme.toLowerCase().includes(query) || i.docs.some((d) => d.title.toLowerCase().includes(query)));
+  if (!shown.length) { grid.append(el('p', 'empty-state', t('schemes.empty'))); return; }
+  grid.append(...shown.map((item, index) => {
+    const card = el('button', 'scheme-tile');
+    card.type = 'button';
+    card.style.setProperty('--i', String(index));
+    const top = el('div', 'tile-top');
+    top.append(categoryIcon(item.category), el('span', 'tile-cat', [t(`cat.${item.category}`), item.issuer ? t(`issuer.${item.issuer}`) : ''].filter(Boolean).join(' · ')));
+    card.append(top, el('h2', 'tile-name', item.scheme));
+    card.append(el('p', item.facts?.amount ? 'tile-amount' : 'tile-amount muted', item.facts?.amount || t('schemes.noAmount')));
+    if (item.facts?.who) card.append(el('p', 'tile-who', item.facts.who));
+    const signed = item.facts?.amount_citation?.checked_by || item.facts?.who_citation?.checked_by;
+    const foot = el('div', 'tile-foot');
+    foot.append(el('span', '', [signed ? `✓ ${t('schemes.verified')}` : '', `${item.docs.length} ${t('schemes.docCount')}`].filter(Boolean).join(' · ')), el('span', 'tile-more', `${t('schemes.details')} →`));
+    card.append(foot);
+    card.addEventListener('click', () => openSchemeDrawer(item));
+    return card;
+  }));
+}
 
-      const facts = schemeFacts[scheme];
-      if (facts && (facts.amount || facts.who)) {
-        const box = el('div', 'scheme-facts');
-        if (facts.amount) { const row = el('p', 'fact-line'); row.append(el('span', 'fact-key', t('section.amount')), el('span', '', facts.amount)); box.append(row); }
-        if (facts.who) { const row = el('p', 'fact-line'); row.append(el('span', 'fact-key', t('section.eligibility')), el('span', '', facts.who)); box.append(row); }
-        const cite = facts.amount_citation || facts.who_citation;
-        if (cite) {
-          const foot = el('div', 'fact-foot');
-          const checker = facts.amount_citation?.checked_by || facts.who_citation?.checked_by;
-          if (checker) foot.append(el('span', 'checked-tag', `✓ ${t('proof.checked')} ${checker}`));
-          foot.append(proofButton(cite));
-          box.append(foot);
-        }
-        card.append(box);
-      }
+function closeSchemeDrawer() { document.querySelector('.scheme-drawer')?.remove(); }
 
-      const list = el('ul', 'doc-list');
-      docs.forEach((doc) => {
-        const li = el('li');
-        const meta = [doc.language.toUpperCase(), doc.doc_date ? `${t('documents.dated')} ${doc.doc_date}` : ''].filter(Boolean).join(' · ');
-        li.append(el('span', 'doc-title', `📄 ${doc.title}`), el('span', 'doc-meta', meta), linkChip(t('documents.open'), doc.source_url));
-        list.append(li);
-      });
-      card.append(list);
-      card.append(chipRow(schemeQuestions(scheme).map((q) => chip(q, () => submitChatQuery(q))), t('schemes.ask')));
-      return card;
-    });
-  if (!cards.length) grid.append(el('p', 'empty-state', t('schemes.empty')));
-  else grid.append(...cards);
+/** Everything about one scheme, in a side panel (bottom sheet on phones). */
+function openSchemeDrawer(item) {
+  closeSchemeDrawer();
+  const shade = el('div', 'scheme-drawer');
+  shade.setAttribute('role', 'dialog');
+  shade.setAttribute('aria-modal', 'true');
+  shade.setAttribute('aria-label', item.scheme);
+  const panel = el('div', 'drawer-panel');
+  const close = chip('✕', closeSchemeDrawer, 'icon-btn drawer-close');
+  close.setAttribute('aria-label', t('proof.close'));
+  const head = el('div', 'drawer-head');
+  head.append(categoryIcon(item.category));
+  const titles = el('div');
+  titles.append(el('p', 'tile-cat', [t(`cat.${item.category}`), item.issuer ? t(`issuer.${item.issuer}`) : ''].filter(Boolean).join(' · ')), el('h2', '', item.scheme));
+  head.append(titles);
+  panel.append(close, head);
+
+  const facts = item.facts;
+  if (facts && (facts.amount || facts.who)) {
+    const box = el('dl', 'drawer-facts');
+    if (facts.amount) box.append(el('dt', '', t('section.amount')), el('dd', '', facts.amount));
+    if (facts.who) box.append(el('dt', '', t('section.eligibility')), el('dd', '', facts.who));
+    panel.append(box);
+    const checker = facts.amount_citation?.checked_by || facts.who_citation?.checked_by;
+    const proofs = el('div', 'citation-pills');
+    [facts.amount_citation, facts.who_citation].filter(Boolean)
+      .filter((c, i, all) => all.findIndex((o) => o.doc_id === c.doc_id && o.page_start === c.page_start) === i)
+      .forEach((c) => proofs.append(proofButton(c)));
+    if (checker) panel.append(el('p', 'checked-tag', `✓ ${t('proof.checked')} ${checker}`));
+    panel.append(proofs);
+  } else {
+    panel.append(el('p', 'setting-help', t('schemes.noAmount')));
+  }
+
+  panel.append(el('h3', 'drawer-label', t('schemes.documents')));
+  const list = el('ul', 'doc-list');
+  item.docs.forEach((doc) => {
+    const li = el('li');
+    const meta = [doc.language.toUpperCase(), doc.doc_date ? `${t('documents.dated')} ${doc.doc_date}` : ''].filter(Boolean).join(' · ');
+    li.append(el('span', 'doc-title', doc.title), el('span', 'doc-meta', meta), linkChip(t('documents.open'), doc.source_url));
+    list.append(li);
+  });
+  panel.append(list);
+
+  panel.append(el('h3', 'drawer-label', t('schemes.questions')));
+  const asks = el('div', 'ask-list');
+  schemeQuestions(item.scheme).forEach((q) => asks.append(chip(`${q}  →`, () => { closeSchemeDrawer(); submitChatQuery(q); }, 'ask-row')));
+  panel.append(asks);
+
+  shade.append(panel);
+  shade.addEventListener('click', (event) => { if (event.target === shade) closeSchemeDrawer(); });
+  document.body.append(shade);
+  requestAnimationFrame(() => shade.classList.add('open'));
+  close.focus();
 }
 
 function renderHomeExamples() {
@@ -1544,6 +1704,7 @@ function applyPrefs() {
   mark('#setting-speed', 'data-speed', prefs.easy ? 0.85 : prefs.speed);
   mark('#setting-size', 'data-size', prefs.size);
   mark('#setting-theme', 'data-theme-choice', state.theme);
+  mark('#setting-lang', 'data-lang', state.language);
   const set = (id, value) => { const box = document.getElementById(id); if (box) box.checked = value; };
   set('setting-easy', prefs.easy);
   set('setting-calm', prefs.calm);
@@ -1609,7 +1770,7 @@ async function aboutListen() {
   const button = document.getElementById('about-listen');
   const text = document.getElementById('about-listen-text');
   if (state.currentAudio && button.dataset.playing === '1') {
-    stopPlayback();
+    stopSpeaking();
     button.dataset.playing = '0';
     button.firstElementChild.textContent = t('about.listen');
     return;
@@ -1653,23 +1814,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('theme-toggle-btn')?.addEventListener('click', () => { toggleTheme(); applyPrefs(); });
   document.getElementById('settings-theme-btn')?.addEventListener('click', toggleTheme);
-  document.getElementById('global-lang-select')?.addEventListener('change', (event) => {
+  document.querySelectorAll('#setting-lang [data-lang]').forEach((button) => button.addEventListener('click', () => {
     convo.voiceLang = null;
     try { localStorage.removeItem('pakkam_voice'); } catch (_) { /* private mode */ }
-    applyLanguage(event.target.value);
+    applyLanguage(button.dataset.lang);
     refreshLanguageParts();
-  });
+  }));
+
+  // Phones and tablets: the menu opens from the ☰ button.
+  const capsule = document.querySelector('.navbar-capsule');
+  const burger = document.getElementById('nav-toggle');
+  const setMenu = (open) => { capsule?.classList.toggle('nav-open', open); burger?.setAttribute('aria-expanded', String(open)); };
+  burger?.addEventListener('click', (event) => { event.stopPropagation(); setMenu(!capsule.classList.contains('nav-open')); });
+  document.querySelectorAll('.nav-links [data-nav]').forEach((item) => item.addEventListener('click', () => setMenu(false)));
+  document.addEventListener('click', (event) => { if (capsule && !capsule.contains(event.target)) setMenu(false); });
 
   document.querySelectorAll('.conv-mode-input').forEach((box) => box.addEventListener('change', () => setConversationMode(box.checked)));
 
   document.getElementById('cta-ask-pakkam')?.addEventListener('click', () => navigateTo('assistant'));
   const heroOrb = document.getElementById('hero-orb-trigger');
-  heroOrb?.addEventListener('click', () => toggleVoiceRecording('home'));
+  heroOrb?.addEventListener('click', () => orbTap('home'));
   heroOrb?.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleVoiceRecording('home'); }
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); orbTap('home'); }
   });
-  document.getElementById('assistant-mic-orb')?.addEventListener('click', () => toggleVoiceRecording('chat'));
-  document.getElementById('nav-mic-btn')?.addEventListener('click', () => toggleVoiceRecording('chat'));
+  document.getElementById('assistant-mic-orb')?.addEventListener('click', () => orbTap('chat'));
+  document.getElementById('nav-mic-btn')?.addEventListener('click', () => orbTap('chat'));
 
   document.getElementById('chat-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -1680,7 +1849,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await submitChatQuery(query);
   });
   document.getElementById('scheme-search-input')?.addEventListener('input', (event) => renderSchemes(null, event.target.value));
-  document.getElementById('stop-audio-btn')?.addEventListener('click', () => { stopPlayback(); stopWaveformMeter(); orb('idle'); });
+  document.getElementById('stop-audio-btn')?.addEventListener('click', stopSpeaking);
   document.getElementById('about-listen')?.addEventListener('click', aboutListen);
 
   document.getElementById('shield-form')?.addEventListener('submit', (event) => {
@@ -1690,5 +1859,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('shield-example')?.addEventListener('click', () => { document.getElementById('shield-input').value = SHIELD_EXAMPLE; });
 
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeOverlay(); });
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    if (document.querySelector('.proof-overlay, .scheme-drawer')) { closeOverlay(); closeSchemeDrawer(); return; }
+    stopSpeaking();
+  });
 });

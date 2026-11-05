@@ -27,20 +27,11 @@
       </a>
 
       <!-- Center: Navigation Items + Language Dropdown -->
-      <ul class="nav-links">
+      <ul class="nav-links" id="nav-links">
         <li><button class="nav-item active" data-nav="home" data-i18n="nav.home">Home</button></li>
         <li><button class="nav-item" data-nav="schemes" data-i18n="nav.schemes">Schemes</button></li>
         <li><button class="nav-item" data-nav="shield" data-i18n="nav.shield">Check a forward</button></li>
         <li><button class="nav-item" data-nav="about" data-i18n="nav.about">About</button></li>
-        <li>
-          <span class="lang-select-wrap">
-          <select id="global-lang-select" class="lang-selector" aria-label="Select Language" data-i18n-aria="language.aria">
-              <option value="en-IN">English</option>
-              <option value="ta-IN">தமிழ் (Tamil)</option>
-              <option value="hi-IN">हिन्दी (Hindi)</option>
-            </select>
-          </span>
-        </li>
       </ul>
 
       <!-- Right: Voice Trigger & Theme Toggle -->
@@ -54,6 +45,9 @@
           <svg id="theme-icon-svg" viewBox="0 0 24 24">
             <path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 16a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zm9-7h-2a1 1 0 1 1 0-2h2a1 1 0 1 1 0 2zM5 12H3a1 1 0 1 1 0-2h2a1 1 0 1 1 0 2zm13.36-6.36a1 1 0 0 1 0 1.41l-1.41 1.41a1 1 0 1 1-1.41-1.41l1.41-1.41a1 1 0 0 1 1.41 0zM8.46 16.95a1 1 0 0 1 0 1.41l-1.41 1.41a1 1 0 1 1-1.41-1.41l1.41-1.41a1 1 0 0 1 1.41 0zm9.9 1.41a1 1 0 0 1-1.41 0l-1.41-1.41a1 1 0 1 1 1.41-1.41l1.41 1.41a1 1 0 0 1 0 1.41zM8.46 7.05a1 1 0 0 1-1.41 0L5.64 5.64a1 1 0 0 1 1.41-1.41l1.41 1.41a1 1 0 0 1 0 1.41z"/>
           </svg>
+        </button>
+        <button id="nav-toggle" class="icon-btn nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu" data-i18n-aria="nav.menu">
+          <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
         </button>
         <button class="icon-btn" data-nav="settings" title="Settings" aria-label="Settings" data-i18n-title="settings.title" data-i18n-aria="settings.title">
           <svg viewBox="0 0 24 24">
@@ -136,6 +130,11 @@
             <span aria-hidden="true">→</span>
           </button>
           <button class="chip-btn hero-secondary" type="button" data-nav="shield" data-i18n="home.shield">🛡️ Check a WhatsApp forward</button>
+        </div>
+        <div class="hero-chips" aria-hidden="true">
+          <span class="hero-chip">📄 <span data-i18n="feature.01">See the Proof</span></span>
+          <span class="hero-chip">🗣️ <span data-i18n="feature.02">Speak Naturally</span></span>
+          <span class="hero-chip">🙅 <span data-i18n="feature.03">No Page, No Answer</span></span>
         </div>
         <label class="switch"><input type="checkbox" class="conv-mode-input" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="conv.mode">Conversation mode: keep listening after each answer</span></label>
         <div id="home-convo" class="home-convo" aria-live="polite">
@@ -254,6 +253,7 @@
       </div>
     </div>
 
+    <div id="scheme-filters" class="scheme-filters" role="group" aria-label="Filter schemes"></div>
     <div id="schemes-grid" class="scheme-card-grid"></div>
   </section>
 
@@ -271,6 +271,13 @@
     </div>
     <div class="settings-grid">
       <article class="glass-panel settings-card">
+        <h2><span aria-hidden="true">🌐</span> <span data-i18n="set.langTitle">Language & theme</span></h2>
+        <div class="setting-row setting-col"><span class="setting-name" data-i18n="set.siteLang">Language of the site</span>
+          <div class="segmented lang-buttons" id="setting-lang" role="group"><button type="button" class="chip-btn" data-lang="en-IN">English</button><button type="button" class="chip-btn" data-lang="ta-IN">தமிழ்</button><button type="button" class="chip-btn" data-lang="hi-IN">हिन्दी</button></div></div>
+        <div class="setting-row"><span class="setting-name" data-i18n="settings.theme">Appearance theme</span>
+          <div class="segmented" id="setting-theme" role="group"><button type="button" class="chip-btn" data-theme-choice="dark" data-i18n="set.dark">Dark</button><button type="button" class="chip-btn" data-theme-choice="light" data-i18n="set.light">Light</button></div></div>
+      </article>
+      <article class="glass-panel settings-card">
         <h2><span aria-hidden="true">🔊</span> <span data-i18n="set.voiceTitle">Voice & speech</span></h2>
         <label class="switch"><input type="checkbox" id="setting-autoplay-tts" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="settings.autoplay">Auto-play voice responses</span></label>
         <div class="setting-row"><span class="setting-name" data-i18n="set.speed">Speaking speed</span>
@@ -279,14 +286,9 @@
         <label class="switch"><input type="checkbox" class="conv-mode-input" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="conv.mode">Conversation mode: keep listening after each answer</span></label>
       </article>
       <article class="glass-panel settings-card">
-        <h2><span aria-hidden="true">👵</span> <span data-i18n="set.easyTitle">Easy mode for elders</span></h2>
+        <h2><span aria-hidden="true">👓</span> <span data-i18n="set.readTitle">Reading & accessibility</span></h2>
         <p class="setting-help" data-i18n="set.easyHelp">Bigger text and buttons, slower voice, and a simpler home page.</p>
-        <label class="switch"><input type="checkbox" id="setting-easy" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.easy">Easy mode</span></label>
-      </article>
-      <article class="glass-panel settings-card">
-        <h2><span aria-hidden="true">🎨</span> <span data-i18n="set.lookTitle">Look</span></h2>
-        <div class="setting-row"><span class="setting-name" data-i18n="settings.theme">Appearance theme</span>
-          <div class="segmented" id="setting-theme" role="group"><button type="button" class="chip-btn" data-theme-choice="dark" data-i18n="set.dark">Dark</button><button type="button" class="chip-btn" data-theme-choice="light" data-i18n="set.light">Light</button></div></div>
+        <label class="switch"><input type="checkbox" id="setting-easy" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.easy">Easy mode for elders</span></label>
         <div class="setting-row"><span class="setting-name" data-i18n="set.textSize">Text size</span>
           <div class="segmented" id="setting-size" role="group"><button type="button" class="chip-btn" data-size="100">A</button><button type="button" class="chip-btn" data-size="112">A+</button><button type="button" class="chip-btn" data-size="125">A++</button></div></div>
         <label class="switch"><input type="checkbox" id="setting-calm" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.calm">Reduce animations</span></label>
