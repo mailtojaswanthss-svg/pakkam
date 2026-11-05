@@ -122,7 +122,7 @@
       <div class="hero-copy">
         <p class="hero-eyebrow" data-i18n="home.eyebrow">OFFICIAL SERVICES. CLEAR ANSWERS.</p>
         <h1 class="hero-title">
-          <span data-i18n="home.title">Government services, simplified for everyone.</span>
+          <span data-i18n="home.title">Government schemes, explained from the official page.</span>
         </h1>
         <p class="hero-subtitle" data-i18n="home.subtitle">Your language. Your rights. Your access.</p>
         <button id="cta-ask-pakkam" class="cta-button">
@@ -210,64 +210,23 @@
       </div>
     </div>
 
-    <div class="scheme-controls" id="scheme-category-bar">
-      <button class="filter-tab active" data-category="all" data-i18n="schemes.all">All schemes</button>
-      <button class="filter-tab" data-category="agriculture" data-i18n="category.agriculture">Agriculture</button>
-      <button class="filter-tab" data-category="education" data-i18n="category.education">Education</button>
-      <button class="filter-tab" data-category="healthcare" data-i18n="category.healthcare">Healthcare</button>
-      <button class="filter-tab" data-category="housing" data-i18n="category.housing">Housing</button>
-    </div>
-
     <div id="schemes-grid" class="schemes-grid"></div>
   </section>
 
   <!-- ========================================================================
-       PAGE 04: DOCUMENT ASSISTANT (PYMUPDF + TESSERACT OCR + QDRANT RAG)
+       PAGE 04: OFFICIAL DOCUMENTS (from GET /sources)
        ======================================================================== -->
   <section id="page-documents" class="page-section">
     <div class="page-header">
       <div>
-        <p class="hero-eyebrow" data-i18n="documents.eyebrow">DOCUMENT WORKSPACE</p>
-        <h1 data-i18n="documents.title">Document Assistant</h1>
-        <p class="page-intro" data-i18n="documents.intro">Upload a PDF to review it and ask questions about its contents.</p>
+        <p class="hero-eyebrow" data-i18n="documents.eyebrow">OFFICIAL SOURCES</p>
+        <h1 data-i18n="documents.title">The documents Pakkam reads</h1>
+        <p class="page-intro" data-i18n="documents.intro">Every answer comes from one of these official documents, with the page it is on.</p>
       </div>
     </div>
 
-    <div class="doc-split-grid">
-      <!-- Upload & Preview Column -->
-      <div class="document-panel">
-        <div class="upload-dropzone" id="pdf-dropzone" role="button" tabindex="0" aria-controls="pdf-upload-input">
-          <span class="upload-mark" aria-hidden="true">↑</span>
-          <h2 data-i18n="documents.uploadTitle">Choose a PDF to get started</h2>
-          <p data-i18n="documents.uploadBody">Drop a government letter, form or notice here, or browse your files.</p>
-          <button class="chip-btn" type="button" id="browse-pdf-btn" data-i18n="documents.browse">Browse files</button>
-          <small data-i18n="documents.format">PDF documents only</small>
-          <input type="file" id="pdf-upload-input" accept="application/pdf,.pdf" hidden />
-        </div>
-        <div id="selected-file" class="selected-file" hidden></div>
-        <div id="ocr-status-banner" class="document-status" role="status" aria-live="polite"></div>
-        <progress id="upload-progress" max="100" value="0" hidden aria-label="Upload progress" data-i18n-aria="documents.uploading"></progress>
-        <div id="pdf-preview" class="pdf-preview" hidden></div>
-        <div id="doc-summary-box" class="document-summary"></div>
-        <p class="privacy-note" data-i18n="documents.privacy">Your document is sent to the connected Pakkam service for processing.</p>
-      </div>
-
-      <!-- Contextual Document Q&A Column -->
-      <div class="glass-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <h2 data-i18n="documents.askTitle">Ask about this document</h2>
-          <div id="doc-qa-thread" class="chat-messages" style="max-height: 360px;">
-            <p data-empty-hint style="color: var(--text-muted); font-size: 0.9rem;">
-              <span data-i18n="documents.askHint">Upload a document to ask questions about its contents.</span>
-            </p>
-          </div>
-        </div>
-        <form id="doc-qa-form" class="chat-composer">
-          <input type="text" id="doc-qa-input" class="input-pill" placeholder="Ask about this PDF..." data-i18n-placeholder="documents.questionPlaceholder" />
-          <button type="submit" class="cta-button" style="padding: 12px 24px;" data-i18n="common.ask">Ask</button>
-        </form>
-      </div>
-    </div>
+    <div id="documents-list" class="schemes-grid" aria-live="polite"></div>
+    <p class="privacy-note" data-i18n="documents.note">Pakkam answers only from these documents, downloaded from official government websites. Open any of them to read it yourself.</p>
   </section>
 
   <!-- ========================================================================
@@ -325,12 +284,12 @@
       <section><p class="story-index">03 / <span data-i18n="about.nameLabel">A name with a meaning</span></p><h2 data-i18n="about.nameIntro">Pakkam means a page or side in Tamil.</h2><p data-i18n="about.nameBody">It reflects our original idea: helping people read and understand important documents, one page at a time. Information should not be out of reach because reading or navigating a digital system is difficult.</p></section>
       <section class="vision-note"><p class="story-index" data-i18n="about.visionLabel">OUR VISION</p><h2 data-i18n="about.vision">Make essential public information understandable and accessible to everyone.</h2></section>
     </article>
-    <figure class="parliament-anchor" aria-hidden="true"><img src="./assets/images/Parliament svg.svg" alt="" /></figure>
     <p class="about-close" data-i18n="about.close">Technology should make public services feel closer, clearer and more human.</p>
   </section>
 
   <footer class="site-footer"><span>PAKKAM</span><p data-i18n="footer.line">Public information, made easier to understand.</p><button class="text-link" data-nav="about" data-i18n="nav.about">About</button></footer>
 
+  <script src="./js/recorder.js"></script>
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

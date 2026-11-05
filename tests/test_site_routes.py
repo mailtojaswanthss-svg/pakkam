@@ -1,5 +1,5 @@
-"""Every server path the web pages use must be forwarded by the start script's Vercel rewrites,
-or the feature silently 404s on the live site."""
+"""Every server path the web page calls must exist in the backend and be forwarded by the
+start script's Vercel rewrites, or the feature silently fails on the live site."""
 
 import re
 from pathlib import Path
@@ -8,30 +8,33 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def called_paths() -> set[str]:
-    pages = (ROOT / "web/assets/chat.js").read_text(encoding="utf-8") + (
-        ROOT / "web/dashboard/index.html"
-    ).read_text(encoding="utf-8")
-    called = set(re.findall(r"fetch\(\s*[`'\"](/[a-z\-/]+)", pages))
-    called |= set(re.findall(r"(?:src|Path) = `(/[a-z\-/]+)\?", pages))  # the page image
+    app = (ROOT / "web/js/app.js").read_text(encoding="utf-8")
+    called = set(re.findall(r"\bapi\(\s*'(/[a-z\-/]+)", app))  # api('/ask', ...)
+    called |= set(re.findall(r"`\$\{API_BASE\}(/[a-z\-/]+)", app))  # `${API_BASE}/page...`
+    called |= set(re.findall(r"`(/[a-z\-/]+)\?", app))  # `/page?doc=...`
     return called
 
 
-def test_every_path_the_pages_call_is_routed_to_the_laptop() -> None:
+def backend_routes() -> set[str]:
+    main = (ROOT / "src/schemebot/api/main.py").read_text(encoding="utf-8")
+    return set(re.findall(r'@app\.(?:get|post)\("(/[^"]*)"', main))
+
+
+def test_the_page_calls_the_real_backend() -> None:
     called = called_paths()
+    assert {"/ask", "/transcribe", "/speak", "/page", "/sources"} <= called
+    missing = sorted(called - backend_routes())
+    assert not missing, f"the page calls paths the backend does not have: {missing}"
+
+
+def test_every_path_the_page_calls_is_routed_to_the_laptop() -> None:
     script = (ROOT / "scripts/start_pakkam.ps1").read_text(encoding="utf-8")
     line = next(row for row in script.splitlines() if row.startswith("$paths ="))
     routed = set(re.findall(r'"(/[a-z\-/]+)"', line))
-    assert "/page" in called
+    called = called_paths()
     assert called <= routed, f"not routed: {sorted(called - routed)}"
 
 
-def test_every_path_falls_back_to_the_backup_server() -> None:
-    backup = (ROOT / "web/assets/backup.js").read_text(encoding="utf-8")
-    pattern = re.search(r"const API = /(.+)/;", backup)
-    assert pattern
-    api = re.compile(pattern.group(1).replace("\\/", "/"))
-    missing = sorted(p for p in called_paths() if not api.match(p))
-    assert not missing, f"no backup for: {missing}"
-    for page in ("web/chat/index.html", "web/dashboard/index.html"):
-        html = (ROOT / page).read_text(encoding="utf-8")
-        assert html.index("backup.js") < html.index("<script", html.index("backup.js") + 1)
+def test_the_recorder_loads_before_the_app() -> None:
+    html = (ROOT / "web/index.html").read_text(encoding="utf-8")
+    assert html.index("js/recorder.js") < html.index("js/app.js")

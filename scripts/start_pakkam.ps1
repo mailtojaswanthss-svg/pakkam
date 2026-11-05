@@ -73,7 +73,7 @@ $json = @{ rewrites = @($rewrites) } | ConvertTo-Json -Depth 4
 [System.IO.File]::WriteAllText((Join-Path (Get-Location) "web\vercel.json"), $json, (New-Object System.Text.UTF8Encoding $false))
 try {
     npx vercel deploy --prod --yes
-    Write-Host "Done. Open https://pakkam-alpha.vercel.app/chat/" -ForegroundColor Green
+    Write-Host "Done. Open https://pakkam-alpha.vercel.app/" -ForegroundColor Green
 } catch {
     Write-Host "Vercel deploy failed (run 'npx vercel login' and 'npx vercel link --project pakkam' once)." -ForegroundColor Yellow
     Write-Host "Send this link to Claude instead: $url"

@@ -7,7 +7,7 @@ Internship Challenge). Target submission: 8 Nov.
 
 | Area | State |
 |---|---|
-| Live site | https://pakkam-alpha.vercel.app (chat at `/chat/`, Pakkam Desk at `/dashboard/`); backend on the developer's laptop through a Cloudflare tunnel, started with `scripts/start_pakkam.ps1` |
+| Live site | https://pakkam-alpha.vercel.app (new design, 5 Nov: voice orb, answers with proof cards, schemes and official documents from `/sources`); backend on the developer's laptop through a Cloudflare tunnel, started with `scripts/start_pakkam.ps1` |
 | Tests | 634 passing; ruff, format and mypy clean; CI on every push |
 | Live feature check | **11/11** through the website on 3 Nov (`scripts/live_feature_check.py`) |
 | Live benchmark | 3 Nov, **all 194 questions**: 88% answered, **98% cite a correct page**, 98% correct refusals, median 4.8 s, no errors ([LIVE_BENCHMARK.md](docs/review/LIVE_BENCHMARK.md)) |

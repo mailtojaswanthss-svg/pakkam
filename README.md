@@ -13,7 +13,7 @@ Tamil · Hindi · English · Tanglish &nbsp;|&nbsp; text or voice (Gnani Prisma 
 ![License](https://img.shields.io/badge/code-MIT-5A36A3)
 ![Status](https://img.shields.io/badge/status-research%20prototype-E3A33B)
 
-[**Live site**](https://pakkam-alpha.vercel.app) · [**Chat**](https://pakkam-alpha.vercel.app/chat/) · [Pakkam Desk](https://pakkam-alpha.vercel.app/dashboard/) · [How it works](#how-it-works) · [Results](#results) · [Quickstart](#quickstart) · [Status](STATUS.md)
+[**Live site**](https://pakkam-alpha.vercel.app) · [How it works](#how-it-works) · [Results](#results) · [Quickstart](#quickstart) · [Status](STATUS.md)
 
 </div>
 
@@ -234,7 +234,7 @@ uv run python -m schemebot.index      # chunks -> Qdrant index in data/index/
 uv run fastapi run                    # site + API on http://localhost:8000
 ```
 
-Open http://localhost:8000/chat/ (API docs at `/docs`). To use the Chitrapathak OCR
+Open http://localhost:8000/ (API docs at `/docs`). To use the Chitrapathak OCR
 collection, set `SCHEMEBOT_QDRANT_COLLECTION=pakkam_chitra`. Every setting is listed in
 [.env.example](.env.example).
 
@@ -284,7 +284,7 @@ own, larger limits, and a spoken sentence is cached so replaying it costs no new
 
 | Part | Where | Notes |
 |---|---|---|
-| Website (`web/`) | Vercel, free | Plain HTML/CSS/JS, no build step; chat at `/chat/`, Pakkam Desk at `/dashboard/` |
+| Website (`web/`) | Vercel, free | Plain HTML/CSS/JS, no build step (`web/index.html`, `web/js/app.js`) |
 | Backend (FastAPI + models + index) | Developer's laptop, reached through a Cloudflare quick tunnel | `scripts/start_pakkam.ps1` starts it, opens the tunnel and points every API path at it (a test checks that each path the pages use is routed); the tunnel URL changes on every restart |
 | Planned | Google Cloud Run (CPU) | [deploy/cloudrun/](deploy/cloudrun/README.md); the script asks for a GPU today |
 

@@ -21,7 +21,7 @@ for _ in $(seq 1 60); do
   if sudo docker compose exec -T pakkam python -c \
       "import urllib.request; urllib.request.urlopen('http://127.0.0.1:7860/health', timeout=4)" \
       >/dev/null 2>&1; then
-    echo "Pakkam is up: https://$SITE/chat/"
+    echo "Pakkam is up: https://$SITE/"
     exit 0
   fi
   sleep 10
