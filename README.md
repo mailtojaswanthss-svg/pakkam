@@ -234,7 +234,7 @@ uv run python -m schemebot.index      # chunks -> Qdrant index in data/index/
 uv run fastapi run                    # site + API on http://localhost:8000
 ```
 
-Open http://localhost:8000/ (API docs at `/docs`). To use the Chitrapathak OCR
+Open http://localhost:8000/ in the browser, not the `0.0.0.0` address the server prints (browsers reject it). API docs at `/docs`. To use the Chitrapathak OCR
 collection, set `SCHEMEBOT_QDRANT_COLLECTION=pakkam_chitra`. Every setting is listed in
 [.env.example](.env.example).
 
