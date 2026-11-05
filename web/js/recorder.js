@@ -81,8 +81,12 @@
 
   // Speech detection for hands-free use: loud enough counts as speech; after speech, this
   // long below the quiet level ends the recording.
-  const SPEECH_RMS = 0.035;
-  const QUIET_RMS = 0.015;
+  // Laptop microphones with noise suppression are quiet: speech often peaks near 0.02-0.03.
+  const SPEECH_RMS = 0.022;
+  const QUIET_RMS = 0.010;
+  // Below this peak the whole recording was silence; above it, send it even if it never
+  // crossed SPEECH_RMS (better a short transcript than "I did not hear anything").
+  const NOISE_FLOOR_RMS = 0.006;
   const SILENCE_AFTER_SPEECH_MS = 1400;
 
   // options.onLevel(0..1) for a level meter; options.onSilence(heardSpeech) when the speaker
@@ -96,6 +100,7 @@
     const chunks = [];
     const startedAt = performance.now();
     let heardSpeech = false;
+    let peak = 0;
     let quietSince = null;
     let silenceSent = false;
     processor.onaudioprocess = (event) => {
@@ -104,6 +109,7 @@
       let sum = 0;
       for (let i = 0; i < data.length; i += 1) sum += data[i] * data[i];
       const rms = Math.sqrt(sum / data.length);
+      peak = Math.max(peak, rms);
       if (options.onLevel) options.onLevel(Math.min(1, rms * 8));
       if (!options.onSilence || silenceSent) return;
       const now = performance.now();
@@ -113,7 +119,7 @@
         if (now - quietSince >= SILENCE_AFTER_SPEECH_MS) { silenceSent = true; options.onSilence(true); }
       } else if (!heardSpeech && options.noSpeechMs && now - startedAt >= options.noSpeechMs) {
         silenceSent = true;
-        options.onSilence(false);
+        options.onSilence(peak >= NOISE_FLOOR_RMS);
       }
     };
     source.connect(processor);
