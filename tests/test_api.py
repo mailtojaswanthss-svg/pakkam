@@ -732,3 +732,47 @@ def test_rejected_drafts_only_with_the_debug_header(tmp_path: Path) -> None:
         ).json()
     assert plain["rejected_drafts"] is None
     assert debug["rejected_drafts"] == ["It is Rs.25 lakh."]
+
+
+class FactsService(FakeService):
+    def __init__(self) -> None:
+        super().__init__()
+        self.asked: list[tuple[list[str], str]] = []
+
+    def scheme_facts(self, schemes: list[str], language: str) -> list[Any]:
+        from schemebot.generate.answer import SchemeFact
+
+        self.asked.append((schemes, language))
+        cite = CITED.citations[0]
+        return [
+            SchemeFact(
+                s,
+                "Rs.1,000 a month" if i == 0 else None,
+                cite if i == 0 else None,
+                None,
+                None,
+                12000 if i == 0 else None,
+            )
+            for i, s in enumerate(schemes)
+        ]
+
+
+def test_scheme_facts_lists_signed_facts_for_every_scheme(tmp_path: Path) -> None:
+    service = FactsService()
+    app = create_app(lambda: service, log_dir=tmp_path)
+    with TestClient(app) as test_client:
+        response = test_client.get("/scheme-facts?lang=ta")
+    assert response.status_code == 200
+    facts = response.json()
+    assert service.asked and service.asked[0][1] == "ta"
+    assert len(facts) == len(service.asked[0][0]) and len(set(service.asked[0][0])) == len(facts)
+    first = facts[0]
+    assert first["amount"] == "Rs.1,000 a month" and first["yearly_amount"] == 12000
+    assert first["amount_citation"]["page_start"] == 1
+    assert all(f["amount"] is None for f in facts[1:])
+
+
+def test_scheme_facts_without_cards_is_an_empty_list(client: TestClient) -> None:
+    response = client.get("/scheme-facts")
+    assert response.status_code == 200
+    assert response.json() == []

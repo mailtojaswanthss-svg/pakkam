@@ -12,6 +12,12 @@
   <!-- ========================================================================
        COMPACT GLASSMORPHIC CAPSULE NAVBAR
        ======================================================================== -->
+  <div class="bg-layer" aria-hidden="true">
+    <span class="bg-glow bg-glow--a"></span>
+    <span class="bg-glow bg-glow--b"></span>
+    <canvas id="bg-pages"></canvas>
+  </div>
+
   <header class="navbar-wrapper">
     <nav class="navbar-capsule" aria-label="Primary Navigation" data-i18n-aria="nav.aria">
       <!-- Left: Provided Ribbon P PNG + Bold Arial PAKKAM -->
@@ -25,8 +31,6 @@
         <li><button class="nav-item active" data-nav="home" data-i18n="nav.home">Home</button></li>
         <li><button class="nav-item" data-nav="schemes" data-i18n="nav.schemes">Schemes</button></li>
         <li><button class="nav-item" data-nav="shield" data-i18n="nav.shield">Check a forward</button></li>
-        <li><button class="nav-item" data-nav="documents" data-i18n="nav.documents">Documents</button></li>
-        <li><button class="nav-item" data-nav="history" data-i18n="nav.history">History</button></li>
         <li><button class="nav-item" data-nav="about" data-i18n="nav.about">About</button></li>
         <li>
           <span class="lang-select-wrap">
@@ -133,30 +137,32 @@
           </button>
           <button class="chip-btn hero-secondary" type="button" data-nav="shield" data-i18n="home.shield">🛡️ Check a WhatsApp forward</button>
         </div>
-        <label class="conv-toggle"><input type="checkbox" class="conv-mode-input" /> <span data-i18n="conv.mode">Conversation mode: keep listening after each answer</span></label>
+        <label class="switch"><input type="checkbox" class="conv-mode-input" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="conv.mode">Conversation mode: keep listening after each answer</span></label>
         <div id="home-convo" class="home-convo" aria-live="polite">
-          <p id="home-status" class="home-status" data-i18n="home.tapOrb">Tap the orb and ask your question</p>
+          <p id="home-status" class="home-status status-pill" data-i18n="home.tapOrb">Tap the orb and ask your question</p>
           <p id="home-heard" class="home-heard"></p>
           <div id="home-answer" class="home-answer glass-panel" hidden></div>
         </div>
       </div>
 
     </div>
-    <section class="home-editorial" aria-labelledby="how-title">
-      <div class="editorial-heading">
-        <p class="hero-eyebrow" data-i18n="home.howLabel">A CLEARER WAY TO GET STARTED</p>
-        <h2 id="how-title" data-i18n="home.howTitle">A little help, one step at a time.</h2>
+    <section class="home-band" aria-labelledby="try-title">
+      <div class="band-head">
+        <p class="hero-eyebrow" data-i18n="home.tryLabel">TRY ASKING</p>
+        <h2 id="try-title" data-i18n="home.tryTitle">Ask the way you speak at home</h2>
       </div>
-      <div class="editorial-steps">
-        <article><span>01</span><h3 data-i18n="home.step1Title">Ask in your own words</h3><p data-i18n="home.step1Body">Speak or type in Tamil, Hindi or English.</p></article>
-        <article><span>02</span><h3 data-i18n="home.step2Title">Bring a document</h3><p data-i18n="home.step2Body">Get a plain-language explanation of the pages you share.</p></article>
-        <article><span>03</span><h3 data-i18n="home.step3Title">Check the sources</h3><p data-i18n="home.step3Body">Review the references that support an answer.</p></article>
-      </div>
+      <div id="home-examples" class="example-grid"></div>
     </section>
-    <section class="trust-note" aria-labelledby="trust-title">
-      <p class="hero-eyebrow" data-i18n="home.trustLabel">BUILT AROUND CLARITY</p>
-      <h2 id="trust-title" data-i18n="home.trustTitle">Public information should be easier to understand.</h2>
-      <p data-i18n="home.trustBody">Pakkam helps make complex services and documents more approachable. Check official sources for decisions and current requirements.</p>
+    <section class="home-band" aria-labelledby="does-title">
+      <div class="band-head">
+        <p class="hero-eyebrow" data-i18n="home.doesLabel">WHAT PAKKAM DOES</p>
+        <h2 id="does-title" data-i18n="home.doesTitle">Answers you can check, not just believe</h2>
+      </div>
+      <div class="tile-grid">
+        <article class="tile"><span class="tile-icon" aria-hidden="true">🎙️</span><h3 data-i18n="home.step1Title">Ask in your own words</h3><p data-i18n="home.step1Body">Speak or type in Tamil, Tanglish, Hindi or English.</p></article>
+        <article class="tile"><span class="tile-icon" aria-hidden="true">📄</span><h3 data-i18n="home.step2Title">See the official page</h3><p data-i18n="home.step2Body">Every answer shows the government document and page it comes from.</p></article>
+        <article class="tile"><span class="tile-icon" aria-hidden="true">🛡️</span><h3 data-i18n="home.tile3Title">Stop the rumour</h3><p data-i18n="home.tile3Body">Paste a WhatsApp forward and see which claims are false, with scam warnings.</p></article>
+      </div>
       <button class="text-link" data-nav="about" data-i18n="home.aboutLink">The story behind Pakkam →</button>
     </section>
   </main>
@@ -173,12 +179,12 @@
           <img class="central-orb-img theme-bound-orb" src="./assets/images/dark-orb.webp" alt="Voice Assistant Orb" />
           </div>
         </div>
-          <h2 id="voice-status-label" style="font-size: 1.1rem;" data-i18n="assistant.tap">Tap Orb to Speak</h2>
+          <p id="voice-status-label" class="status-pill" data-i18n="assistant.tap">Tap Orb to Speak</p>
         <p id="live-transcript-preview" class="live-transcript">
           <span data-i18n="assistant.languages">Supports Tamil, Hindi & English</span>
         </p>
         <div id="voice-lang-chips" class="voice-lang-chips" role="group" data-i18n-aria="language.aria"></div>
-        <label class="conv-toggle"><input type="checkbox" class="conv-mode-input" /> <span data-i18n="conv.short">Conversation mode</span></label>
+        <label class="switch"><input type="checkbox" class="conv-mode-input" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="conv.short">Conversation mode</span></label>
         <button id="stop-audio-btn" class="chip-btn" style="display: none;" data-i18n="assistant.stop">⏹ Stop Audio Playback</button>
       </aside>
 
@@ -241,44 +247,17 @@
         <p class="hero-eyebrow" data-i18n="schemes.eyebrow">PUBLIC INFORMATION DIRECTORY</p>
         <h1 data-i18n="schemes.title">Government Scheme Explorer</h1>
         <p class="page-intro" data-i18n="schemes.intro">Search available scheme information and review eligibility details.</p>
+        <p id="schemes-summary" class="schemes-summary"></p>
       </div>
       <div style="width: 340px;">
         <input type="search" id="scheme-search-input" class="input-pill" placeholder="Search schemes..." data-i18n-placeholder="schemes.search" />
       </div>
     </div>
 
-    <div id="schemes-grid" class="schemes-grid"></div>
+    <div id="schemes-grid" class="scheme-card-grid"></div>
   </section>
 
-  <!-- ========================================================================
-       PAGE 04: OFFICIAL DOCUMENTS (from GET /sources)
-       ======================================================================== -->
-  <section id="page-documents" class="page-section">
-    <div class="page-header">
-      <div>
-        <p class="hero-eyebrow" data-i18n="documents.eyebrow">OFFICIAL SOURCES</p>
-        <h1 data-i18n="documents.title">The documents Pakkam reads</h1>
-        <p class="page-intro" data-i18n="documents.intro">Every answer comes from one of these official documents, with the page it is on.</p>
-      </div>
-    </div>
 
-    <div id="documents-list" class="schemes-grid" aria-live="polite"></div>
-    <p class="privacy-note" data-i18n="documents.note">Pakkam answers only from these documents, downloaded from official government websites. Open any of them to read it yourself.</p>
-  </section>
-
-  <!-- ========================================================================
-       PAGE 05: CONVERSATION HISTORY
-       ======================================================================== -->
-  <section id="page-history" class="page-section">
-    <div class="page-header">
-      <div>
-        <p class="hero-eyebrow" data-i18n="history.eyebrow">YOUR ARCHIVE</p>
-        <h1 data-i18n="history.title">Conversation History</h1>
-      </div>
-      <button id="clear-history-btn" class="chip-btn" data-i18n="history.clear">Clear All History</button>
-    </div>
-    <div id="history-list" class="schemes-grid"></div>
-  </section>
 
   <!-- ========================================================================
        PAGE 06: SETTINGS
@@ -290,45 +269,94 @@
         <h1 data-i18n="settings.title">Application Settings</h1>
       </div>
     </div>
-    <div class="glass-panel" style="max-width: 680px; display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 3;">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3 data-i18n="settings.autoplay">Auto-play voice responses</h3>
-          <p style="font-size: 0.85rem; color: var(--text-secondary);" data-i18n="settings.autoplayHelp">Automatically read AI answers aloud in your selected language.</p>
-        </div>
-        <input type="checkbox" id="setting-autoplay-tts" checked style="width: 20px; height: 20px;" />
-      </div>
-      <hr style="border: none; border-top: 1px solid var(--glass-border);" />
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3 data-i18n="settings.theme">Appearance theme</h3>
-          <p style="font-size: 0.85rem; color: var(--text-secondary);" data-i18n="settings.themeHelp">Switch between dark and light themes.</p>
-        </div>
-        <button id="settings-theme-btn" class="chip-btn" data-i18n="settings.switchTheme">Switch Theme</button>
-      </div>
+    <div class="settings-grid">
+      <article class="glass-panel settings-card">
+        <h2><span aria-hidden="true">🔊</span> <span data-i18n="set.voiceTitle">Voice & speech</span></h2>
+        <label class="switch"><input type="checkbox" id="setting-autoplay-tts" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="settings.autoplay">Auto-play voice responses</span></label>
+        <div class="setting-row"><span class="setting-name" data-i18n="set.speed">Speaking speed</span>
+          <div class="segmented" id="setting-speed" role="group"><button type="button" class="chip-btn" data-speed="1" data-i18n="set.normal">Normal</button><button type="button" class="chip-btn" data-speed="0.85" data-i18n="set.slow">Slow</button></div></div>
+        <div class="setting-row setting-col"><span class="setting-name" data-i18n="set.voiceLang">Language you speak in</span><div class="voice-lang-chips settings-voice-chips"></div></div>
+        <label class="switch"><input type="checkbox" class="conv-mode-input" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="conv.mode">Conversation mode: keep listening after each answer</span></label>
+      </article>
+      <article class="glass-panel settings-card">
+        <h2><span aria-hidden="true">👵</span> <span data-i18n="set.easyTitle">Easy mode for elders</span></h2>
+        <p class="setting-help" data-i18n="set.easyHelp">Bigger text and buttons, slower voice, and a simpler home page.</p>
+        <label class="switch"><input type="checkbox" id="setting-easy" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.easy">Easy mode</span></label>
+      </article>
+      <article class="glass-panel settings-card">
+        <h2><span aria-hidden="true">🎨</span> <span data-i18n="set.lookTitle">Look</span></h2>
+        <div class="setting-row"><span class="setting-name" data-i18n="settings.theme">Appearance theme</span>
+          <div class="segmented" id="setting-theme" role="group"><button type="button" class="chip-btn" data-theme-choice="dark" data-i18n="set.dark">Dark</button><button type="button" class="chip-btn" data-theme-choice="light" data-i18n="set.light">Light</button></div></div>
+        <div class="setting-row"><span class="setting-name" data-i18n="set.textSize">Text size</span>
+          <div class="segmented" id="setting-size" role="group"><button type="button" class="chip-btn" data-size="100">A</button><button type="button" class="chip-btn" data-size="112">A+</button><button type="button" class="chip-btn" data-size="125">A++</button></div></div>
+        <label class="switch"><input type="checkbox" id="setting-calm" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.calm">Reduce animations</span></label>
+      </article>
+      <article class="glass-panel settings-card">
+        <h2><span aria-hidden="true">🔒</span> <span data-i18n="set.privacyTitle">Privacy & data</span></h2>
+        <p class="setting-help" data-i18n="set.privacyHelp">Pakkam does not store your questions or voice on the server. Your history below stays only in this browser.</p>
+        <label class="switch"><input type="checkbox" id="setting-phone" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.phone">Phone-call voice test (8 kHz phone audio)</span></label>
+        <button id="clear-history-btn" class="chip-btn danger" type="button" data-i18n="history.clear">Clear All History</button>
+      </article>
+      <article class="glass-panel settings-card settings-wide">
+        <h2><span aria-hidden="true">🕘</span> <span data-i18n="history.title">Conversation History</span></h2>
+        <div id="history-list" class="history-list"></div>
+      </article>
     </div>
   </section>
 
   <section id="page-about" class="page-section about-page">
     <header class="about-opening">
       <p class="hero-eyebrow" data-i18n="about.eyebrow">THE STORY BEHIND PAKKAM</p>
-      <h1 data-i18n="about.title">It started with a conversation.</h1>
-      <p data-i18n="about.lede">A conversation with a grandfather about the everyday difficulty of reaching public services.</p>
+      <h1><span data-i18n="ab.title1">Pakkam means</span> <span class="grad" data-i18n="ab.title2">page.</span></h1>
+      <p class="about-lede" data-i18n="ab.lede">A voice assistant that answers questions about welfare schemes from the official government documents, and shows you the exact page.</p>
       <button id="about-listen" class="cta-button about-listen" type="button"><span data-i18n="about.listen">🔊 Hear Pakkam explain itself</span></button>
       <p id="about-listen-text" class="about-listen-text" hidden></p>
     </header>
-    <article class="about-story">
-      <section><p class="story-index">01 / <span data-i18n="about.storyLabel">A family conversation</span></p><p data-i18n="about.story">I love my grandparents very much. One day, my grandfather told me how hard it was to access loans, read government messages and find his way through complicated portals on a mobile phone. That conversation stayed with me.</p></section>
-      <section><p class="story-index">02 / <span data-i18n="about.problemLabel">A question we kept asking</span></p><h2 data-i18n="about.problem">Why should essential information be so difficult to reach?</h2><p data-i18n="about.problemBody">My friend and I began imagining an assistant that could speak in a person's language, read documents aloud and make complicated information easier to understand.</p></section>
-      <section><p class="story-index">03 / <span data-i18n="about.nameLabel">A name with a meaning</span></p><h2 data-i18n="about.nameIntro">Pakkam means a page or side in Tamil.</h2><p data-i18n="about.nameBody">It reflects our original idea: helping people read and understand important documents, one page at a time. Information should not be out of reach because reading or navigating a digital system is difficult.</p></section>
-      <section class="vision-note"><p class="story-index" data-i18n="about.visionLabel">OUR VISION</p><h2 data-i18n="about.vision">Make essential public information understandable and accessible to everyone.</h2></section>
-    </article>
-    <p class="about-close" data-i18n="about.close">Technology should make public services feel closer, clearer and more human.</p>
+
+    <section class="about-block">
+      <h2 data-i18n="ab.whyTitle">Why we built it</h2>
+      <div class="about-two">
+        <p data-i18n="about.story">I love my grandparents very much. One day, my grandfather told me how hard it was to access loans, read government messages and find his way through complicated portals on a mobile phone. That conversation stayed with me.</p>
+        <p data-i18n="ab.problem">The real rules for schemes like Magalir Urimai Thogai or PM-KISAN are written in long Government Orders that few people read. So families rely on WhatsApp forwards, middlemen or chatbots that sound sure but can be wrong. For someone's ₹1,000 a month, a confident wrong answer is worse than no answer.</p>
+      </div>
+    </section>
+
+    <section class="about-block">
+      <h2 data-i18n="ab.canTitle">What Pakkam can do</h2>
+      <div class="tile-grid tile-grid--six">
+        <article class="tile"><span class="tile-icon" aria-hidden="true">🎙️</span><h3 data-i18n="ab.f1t">Listens in your language</h3><p data-i18n="ab.f1">Tamil, Tanglish, Hindi or English, by voice or text, and answers out loud.</p></article>
+        <article class="tile"><span class="tile-icon" aria-hidden="true">📄</span><h3 data-i18n="ab.f2t">Shows the proof</h3><p data-i18n="ab.f2">Every answer opens the page of the official document, with the line highlighted.</p></article>
+        <article class="tile"><span class="tile-icon" aria-hidden="true">🙅</span><h3 data-i18n="ab.f3t">Says "I don't know"</h3><p data-i18n="ab.f3">If the documents do not say it, Pakkam tells you instead of guessing.</p></article>
+        <article class="tile"><span class="tile-icon" aria-hidden="true">🛡️</span><h3 data-i18n="ab.f4t">Checks WhatsApp forwards</h3><p data-i18n="ab.f4">Finds false claims and scam signs like fake links and OTP requests.</p></article>
+        <article class="tile"><span class="tile-icon" aria-hidden="true">📋</span><h3 data-i18n="ab.f5t">Helps you prepare</h3><p data-i18n="ab.f5">Documents to carry, and a draft appeal note if an application was rejected.</p></article>
+        <article class="tile"><span class="tile-icon" aria-hidden="true">👤</span><h3 data-i18n="ab.f6t">Connects you to people</h3><p data-i18n="ab.f6">Scheme helplines, and a way to send your question to an officer.</p></article>
+      </div>
+    </section>
+
+    <section class="about-block">
+      <h2 data-i18n="ab.howTitle">How it answers</h2>
+      <ol class="flow">
+        <li><span class="flow-n">1</span><div><h3 data-i18n="ab.h1t">You ask</h3><p data-i18n="ab.h1">Gnani Prisma turns your voice into text, even mixed Tamil and English.</p></div></li>
+        <li><span class="flow-n">2</span><div><h3 data-i18n="ab.h2t">Pakkam finds the page</h3><p data-i18n="ab.h2">It searches 18 official government documents, never the open internet.</p></div></li>
+        <li><span class="flow-n">3</span><div><h3 data-i18n="ab.h3t">It checks before it speaks</h3><p data-i18n="ab.h3">Every sentence must point to a page and every number must be on it. Then Gnani Timbre reads the answer aloud.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="about-block">
+      <h2 data-i18n="ab.numTitle">Tested, honestly</h2>
+      <div class="stat-row">
+        <div class="stat"><b>194</b><span data-i18n="ab.n1">test questions in 4 languages</span></div>
+        <div class="stat"><b>98%</b><span data-i18n="ab.n2">of answers cite the correct page</span></div>
+        <div class="stat"><b>39 / 40</b><span data-i18n="ab.n3">out-of-scope questions honestly refused</span></div>
+      </div>
+      <p class="setting-help" data-i18n="ab.credit">Built for the Gnani.ai Great Indian AI Internship Challenge 2026, with Gnani Prisma and Timbre for voice. A student project, not a government service.</p>
+    </section>
   </section>
 
   <footer class="site-footer"><span>PAKKAM</span><p data-i18n="footer.line">Public information, made easier to understand.</p><button class="text-link" data-nav="about" data-i18n="nav.about">About</button></footer>
 
   <script src="./js/recorder.js"></script>
+  <script src="./js/background.js"></script>
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

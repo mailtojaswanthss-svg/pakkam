@@ -183,6 +183,10 @@ class CachedAnswerer:
         checklist = getattr(self._service, "checklist", None)
         return checklist(scheme, language) if checklist is not None else []
 
+    def scheme_facts(self, schemes: list[str], language: str) -> object:
+        facts = getattr(self._service, "scheme_facts", None)
+        return facts(schemes, language) if facts is not None else []
+
     def sources(self, question: str, follow_up: FollowUp | None = None) -> object:
         sources = getattr(self._service, "sources", None)
         if sources is None:
