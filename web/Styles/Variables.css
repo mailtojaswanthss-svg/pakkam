@@ -42,25 +42,27 @@
    ========================================================================== */
 :root,
 [data-theme="dark"] {
-  --bg-canvas: #0D1730;
-  --bg-atmosphere: 
-    radial-gradient(circle at 12% 45%, rgba(10, 228, 233, 0.42) 0%, rgba(13, 147, 157, 0.28) 28%, transparent 62%),
-    radial-gradient(circle at 50% 42%, rgba(90, 56, 111, 0.55) 0%, rgba(21, 38, 76, 0.85) 55%, transparent 80%),
-    linear-gradient(135deg, #0D939D 0%, #15264C 48%, #5A386F 100%);
+  --bg-canvas: #0A1024;
+  --accent-2: #C4A5FF;
+  --bg-atmosphere:
+    radial-gradient(ellipse at 8% 18%, rgba(10, 228, 233, 0.20) 0%, transparent 46%),
+    radial-gradient(ellipse at 92% 82%, rgba(167, 120, 255, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 40%, rgba(37, 56, 120, 0.55) 0%, transparent 70%),
+    linear-gradient(160deg, #0B1530 0%, #0A1024 55%, #140E2E 100%);
 
   /* Glassmorphism Navbar & Surfaces */
   --glass-bg: rgba(21, 38, 76, 0.52);
-  --glass-surface: rgba(255, 255, 255, 0.07);
-  --glass-surface-hover: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.22);
+  --glass-surface: rgba(255, 255, 255, 0.08);
+  --glass-surface-hover: rgba(255, 255, 255, 0.13);
+  --glass-border: rgba(255, 255, 255, 0.20);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
   --glass-blur: blur(16px);
 
   /* Text Hierarchy */
   --text-primary: #FFFFFF;
-  --text-secondary: #DCECF0;
-  --text-muted: rgba(220, 236, 240, 0.72);
-  --text-highlight: #0AE4E9;
+  --text-secondary: #E3EEF3;
+  --text-muted: #B8C7D6;
+  --text-highlight: #3DE8EE;
 
   /* Interactive & Accents */
   --nav-active-text: #0AE4E9;
@@ -80,36 +82,37 @@
    LIGHT THEME (Secondary Reference)
    ========================================================================== */
 [data-theme="light"] {
-  --bg-canvas: #DCECF0;
-  --bg-atmosphere: 
-    radial-gradient(circle at 15% 45%, rgba(10, 228, 233, 0.22) 0%, rgba(220, 236, 240, 0.6) 40%, transparent 70%),
-    radial-gradient(circle at 78% 35%, rgba(90, 56, 111, 0.18) 0%, transparent 60%),
-    linear-gradient(135deg, #E3F6F8 0%, #DCECF0 50%, #E8DFF0 100%);
+  --bg-canvas: #E6F0F3;
+  --accent-2: #6D28D9;
+  --bg-atmosphere:
+    radial-gradient(circle at 15% 45%, rgba(10, 228, 233, 0.16) 0%, transparent 60%),
+    radial-gradient(circle at 78% 35%, rgba(120, 80, 200, 0.12) 0%, transparent 60%),
+    linear-gradient(135deg, #EAF6F8 0%, #E2EEF2 50%, #ECE6F4 100%);
 
   /* Glassmorphism Navbar & Surfaces */
   --glass-bg: rgba(195, 206, 216, 0.65);
-  --glass-surface: rgba(255, 255, 255, 0.65);
-  --glass-surface-hover: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-surface: rgba(255, 255, 255, 0.78);
+  --glass-surface-hover: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(21, 38, 76, 0.16);
   --glass-shadow: 0 6px 24px rgba(21, 38, 76, 0.08);
   --glass-blur: blur(16px);
 
   /* Text Hierarchy */
   --text-primary: #15264C;
   --text-secondary: #23365E;
-  --text-muted: rgba(21, 38, 76, 0.72);
-  --text-highlight: #0D939D;
+  --text-muted: #3B4A6B;
+  --text-highlight: #B91C1C;
 
   /* Interactive & Accents */
-  --nav-active-text: #D32F2F;
-  --nav-active-bar: #D32F2F;
-  --badge-border: rgba(13, 147, 157, 0.35);
-  --badge-text: #0D939D;
-  --badge-bg: rgba(5, 220, 210, 0.13);
-  --waveform-color: #FFFFFF;
+  --nav-active-text: #B91C1C;
+  --nav-active-bar: #B91C1C;
+  --badge-border: rgba(185, 28, 28, 0.35);
+  --badge-text: #B91C1C;
+  --badge-bg: rgba(185, 28, 28, 0.08);
+  --waveform-color: #15264C;
 
   /* CTA Button */
-  --cta-bg: linear-gradient(90deg, #8A2BE2 0%, #B829FF 100%);
+  --cta-bg: linear-gradient(90deg, #7C22D6 0%, #A021E8 100%);
   --cta-border: rgba(255, 255, 255, 0.6);
   --cta-shadow: 0 8px 24px rgba(157, 42, 232, 0.45);
 }
