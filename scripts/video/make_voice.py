@@ -2,7 +2,7 @@
 
     python scripts/video/make_voice.py OUT_DIR
 
-Writes one WAV per scene (and a short version where the script has one), the Tamil question
+Writes one WAV per scene (narration lowered in pitch so it differs from Pakkam's voice) (and a short version where the script has one), the Tamil question
 used as the fake microphone input, and durations.json."""
 import json
 import subprocess
@@ -32,6 +32,14 @@ def speak(text: str, language: str, path: Path) -> None:
     raise SystemExit(f"could not voice {path.name}")
 
 
+def narrator(raw: Path, out: Path) -> None:
+    """The narrator: the same Timbre voice, lowered and slowed slightly, so it is clearly not Pakkam."""
+    if not out.exists():
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(raw), "-af",
+                        "rubberband=pitch=0.82:formant=preserved:tempo=0.97,equalizer=f=180:t=q:w=1:g=3",
+                        str(out)], check=True)
+
+
 def duration(path: Path) -> float:
     out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
                          capture_output=True, text=True, check=True)
@@ -40,10 +48,12 @@ def duration(path: Path) -> float:
 
 durations = {}
 for scene in SCRIPT["scenes"]:
-    for key, suffix in (("vo", ""), ("short_vo", "_short"), ("vo_b", "_b")):
+    for key, suffix in (("vo", ""), ("short_vo", "_short"), ("vo_b", "_b"), ("vo_c", "_c")):
         if key in scene:
             wav = OUT / f"{scene['id']}{suffix}.wav"
-            speak(scene[key], "en", wav)
+            raw = OUT / f"raw_{wav.name}"
+            speak(scene[key], "en", raw)
+            narrator(raw, wav)
             durations[wav.stem] = duration(wav)
             time.sleep(2)
 for name in ("tamil_question", "tamil_answer"):  # Pakkam's own voice (the default Tamil voice)

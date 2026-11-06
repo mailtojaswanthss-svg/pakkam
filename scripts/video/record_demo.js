@@ -110,107 +110,77 @@ const CURSOR = () => {
   await navTo('settings');
   await click(page.locator('.settings-voice-chips button', { hasText: 'தமிழ்' }));
   await navTo('home');
+  await sleep(1500);
   mark('ready');
 
-  // s02: Rumour Shield
-  await navTo('shield');
-  mark('s02');
-  await sleep(500);
-  await click(page.locator('#shield-input'));
-  await page.locator('#shield-input').fill(SCRIPT.forward);
-  await sleep(1000);
-  await click(page.locator('#shield-check'));
-  await page.waitForSelector('.shield-verdict-card', { timeout: 120000 });
-  mark('s02_verdict');
-  await sleep(1300);
-  await smoothTo('.shield-claim');
-  await sleep(1800);
-  mark('s02_signs');
-  await smoothTo('.shield-signs');
-  await sleep(4000);
-  mark('s02_end');
+  // Lakshmi story. l3: Pakkam's home page (the reveal)
+  mark('l3');
+  await sleep(1000 * (D.l3_intro + 1.5));
+  mark('l3_end');
 
-  // s03: home
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  await sleep(500);
-  await navTo('home');
-  mark('s03');
-  await holdUntil(marks.s03, Math.max(D.s03_home + 1.0, 5));
-  mark('s03_end');
-
-  // s04: ask by voice on the home orb, in Tamil
-  mark('s04');
-  await holdUntil(marks.s04, D.s04_voice + 0.4);
+  // l4: she taps the orb and asks in Tamil; the answer comes with the order and page; she opens it
+  mark('l4');
+  await holdUntil(marks.l4, D.l4_ask + 0.4);
   await click(page.locator('#hero-orb-trigger'));
-  mark('s04_mic');
+  mark('l4_mic');
   await page.waitForFunction(() => { const c = document.getElementById('home-answer'); return c && !c.hidden && c.querySelector('.proof-btn'); }, null, { timeout: 120000 });
-  mark('s04_answer');
+  mark('l4_answer');
   await sleep(600);
   await smoothTo('#home-convo', 'center');
-  await sleep(1000 * (D.s04_voice_b + D.tamil_answer + 1.6));
-  mark('s04_end');
-
-  // s05: open the proof from the home answer
-  mark('s05');
+  await sleep(1000 * (D.l4_ask_b + D.tamil_answer + 1.0));
+  mark('l4_proof');
   await click(page.locator('#home-answer .proof-btn').first());
-  await sleep(2200);
-  await holdUntil(marks.s05, D.s05_proof + 1.4);
+  await sleep(1000 * (D.l4_ask_c + 2.4));
   await page.keyboard.press('Escape');
   await sleep(500);
-  mark('s05_end');
+  mark('l4_end');
 
-  // s06: schemes
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  await sleep(400);
-  await navTo('schemes');
-  mark('s06');
-  await sleep(1500);
-  await smoothTo('#scheme-filters', 'start');
-  await sleep(1200);
-  await moveTo(page.locator('.scheme-row').first());
-  await sleep(800);
-  await click(page.locator('.scheme-row').first());
-  await holdUntil(marks.s06, D.s06_schemes + 1.2);
-  await page.keyboard.press('Escape');
-  await sleep(400);
-  mark('s06_end');
-
-  // s07: honest refusal, typed on the Ask page
+  // l5: the honest refusal, typed on the Ask page
   await page.evaluate(() => window.scrollTo({ top: 0 }));
-  await navTo('home');
   await click(page.locator('#cta-ask-pakkam'));
   await sleep(900);
-  mark('s07');
+  mark('l5');
   await ask('When will the next PM-KISAN installment come?', 'refusal');
-  await sleep(1000 * (D.s07_refusal + 1.2));
-  mark('s07_end');
+  await sleep(1000 * (D.l5_refusal_short + 2.0));
+  mark('l5_end');
 
-  // s08: under the hood
+  // l5b: the honest test numbers on About > Tested
   await navTo('about');
-  await click(page.locator('#tab-how'));
-  await sleep(400);
-  await smoothTo('.pipeline');
-  await sleep(1100);
-  mark('s08');
-  await holdUntil(marks.s08, D.s08_how + 1.0);
-  mark('s08_end');
-
-  // s09: tested, honestly
-  await smoothTo('.about-tablist', 'start');
-  await sleep(800);
   await click(page.locator('#tab-tested'));
-  mark('s09');
-  await sleep(1600);
-  await holdUntil(marks.s09, D.s09_numbers + 1.2);
-  mark('s09_end');
+  mark('l5b');
+  await sleep(6000);
+  mark('l5b_end');
 
-  // s09b: the story (the grandfather chapter in the story player)
-  await smoothTo('.story-player', 'center');
-  await sleep(900);
-  await click(page.locator('.player-dot[data-go="0"]'));
-  mark('s09b');
-  await holdUntil(marks.s09b, D.s09b_story + 1.2);
-  mark('s09b_end');
+  // l6: the bigger picture: Rumour Shield, schemes, languages
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await navTo('shield');
+  mark('l6_shield');
+  await click(page.locator('#shield-input'));
+  await page.locator('#shield-input').fill(SCRIPT.forward);
+  await sleep(600);
+  await click(page.locator('#shield-check'));
+  await page.waitForSelector('.shield-verdict-card', { timeout: 120000 });
+  mark('l6_verdict');
+  await sleep(800);
+  await smoothTo('.shield-signs');
+  await sleep(2600);
+  mark('l6_verdict_end');
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await navTo('schemes');
+  mark('l6_schemes');
+  await sleep(1200);
+  await smoothTo('#scheme-filters', 'start');
+  await sleep(2400);
+  mark('l6_schemes_end');
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await navTo('settings');
+  mark('l6_lang');
+  await sleep(800);
+  for (const label of ['English', 'हिन्दी', 'தமிழ்']) {
+    const chip = page.locator('.settings-voice-chips button', { hasText: label }).first();
+    if (await chip.count()) { await click(chip); await sleep(700); }
+  }
+  mark('l6_lang_end');
 
   const video = page.video();
   await context.close();

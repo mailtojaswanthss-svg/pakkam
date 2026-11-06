@@ -1,9 +1,9 @@
 {
   "site": "https://pakkam-alpha.vercel.app",
-  "narrator_voice_note": "Narration is Gnani Timbre with a male English voice (SCHEMEBOT_TTS_VOICE_EN=Pranav on the backend while recording); Pakkam's own answers keep the default voice, so the two never sound alike.",
+  "narrator_voice_note": "Narration is Gnani Timbre's English voice, lowered in pitch (ffmpeg rubberband, formants kept) so it never sounds like Pakkam's own Tamil answers.",
   "forward": "Magalir Urimai increased to Rs.2,000 a month! Register at bit.ly/kmut2000 today only and share OTP to confirm.",
   "tamil_question": "மகளிர் உரிமைத் தொகைக்கு வருமான வரம்பு எவ்வளவு?",
-  "tamil_answer": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் தகுதியான குடும்பத் தலைவிகளுக்கு மாதம் ரூ.1,000 (ஆண்டுக்கு ரூ.12,000) வழங்கப்படுகிறது.",
+  "tamil_answer": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன்பெற குடும்பத்தின் ஆண்டு வருமானம் ரூ.2.5 இலட்சத்திற்குக் கீழ் இருக்க வேண்டும்.",
   "scenes": [
     {
       "id": "l1_day",

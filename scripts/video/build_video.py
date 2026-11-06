@@ -1,10 +1,11 @@
-"""Builds the three demo cuts (full, 90 s, 60 s) from the recording and the Timbre narration.
+"""Builds the three Lakshmi-story cuts (full, 90 s, 60 s) from the recording, the art and the narration.
 
-    python scripts/video/build_video.py WORK_DIR OUT_DIR
+    python scripts/video/build_video.py WORK_DIR OUT_DIR [cut ...]
 
 WORK_DIR holds main.webm + marks.json (record_demo.js), hook.webm / end.webm + *.lead.txt
-(record_cards.js) and the WAVs + durations.json (make_voice.py, plus tamil_answer.wav).
-Writes OUT_DIR/pakkam-{full,90s,60s}.mp4 (no subtitles; the narrator explains each scene)."""
+(record_cards.js), the WAVs + durations.json (make_voice.py) and go/p1,p2,p3,p10.png (pages of
+the real G.O.(Ms) No.15 from the site's /page endpoint). The illustrations are scripts/video/art.
+Writes OUT_DIR/pakkam-{full,90s,60s}.mp4, with no subtitles."""
 import json
 import subprocess
 import sys
@@ -16,122 +17,153 @@ OUT = Path(sys.argv[2])
 OUT.mkdir(parents=True, exist_ok=True)
 TMP = WORK / "build"
 TMP.mkdir(exist_ok=True)
-SCRIPT = {s["id"]: s for s in json.loads((HERE / "script.json").read_text(encoding="utf-8"))["scenes"]}
 M = json.loads((WORK / "marks.json").read_text())
 D = json.loads((WORK / "durations.json").read_text())
 LEAD = {n: float((WORK / f"{n}.lead.txt").read_text()) for n in ("hook", "end")}
-SRC = {"main": WORK / "main.webm", "hook": WORK / "hook.webm", "end": WORK / "end.webm"}
 W, H, FPS = 1920, 1080, 30
+FONT = "/usr/share/fonts/opentype/inter/Inter-Regular.otf"
+NOTE = "Lakshmi is a fictional character. Everything shown on screen is real."
 
 
-def wav_len(name: str) -> float:
-    if name in D:
-        return D[name]
-    out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(WORK / f"{name}.wav")],
-                         capture_output=True, text=True, check=True)
-    D[name] = float(out.stdout)
-    return D[name]
+def ffmpeg(*args: str) -> None:
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", *args], check=True)
 
 
-def scene(sid: str, clips: list, audio: list, tail: float = 0.7) -> dict:
+def still(name: str, image: Path, seconds: float, zoom_in: bool = True, note: str = "") -> Path:
+    """A slow Ken Burns move over one illustration."""
+    out = TMP / f"{name}.mp4"
+    frames = int(seconds * FPS)
+    z = f"1+0.08*on/{frames}" if zoom_in else f"1.08-0.08*on/{frames}"
+    vf = (f"scale=3840:-2,zoompan=z='{z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={FPS},"
+          "format=yuv420p")
+    if note:
+        vf += (f",drawtext=fontfile={FONT}:text='{note}':fontsize=30:fontcolor=white@0.92:x=(w-text_w)/2:y=h-80"
+               ":box=1:boxcolor=black@0.45:boxborderw=14")
+    ffmpeg("-loop", "1", "-i", str(image), "-vf", vf, "-t", f"{seconds:.3f}", "-c:v", "libx264", "-crf", "18", str(out))
+    return out
+
+
+def go_scroll(seconds: float) -> Path:
+    """The real Government Order pages scrolling past, too long to read."""
+    out = TMP / "go_scroll.mp4"
+    pages = [WORK / "go" / f"p{n}.png" for n in (1, 2, 3, 10)]
+    ins = sum((["-i", str(p)] for p in pages), [])
+    stack = "".join(f"[{i}:v]scale=1100:-2,pad=1160:ih+40:30:20:color=0x0b1020[p{i}];" for i in range(len(pages)))
+    stack += "".join(f"[p{i}]" for i in range(len(pages))) + f"vstack=inputs={len(pages)}[s];"
+    vf = (stack + f"color=c=0x0b1020:s={W}x{H}:r={FPS}:d={seconds:.3f}[bg];"
+          f"[bg][s]overlay=x=(W-w)/2:y='-(h-H)*t/{seconds:.3f}':shortest=0,format=yuv420p[v]")
+    ffmpeg(*ins, "-filter_complex", vf, "-map", "[v]", "-t", f"{seconds:.3f}", "-r", str(FPS), "-c:v", "libx264", "-crf", "18", str(out))
+    return out
+
+
+def prepare() -> dict:
+    art = HERE / "art"
+    return {
+        "main": WORK / "main.webm", "hook": WORK / "hook.webm", "end": WORK / "end.webm",
+        "art1": still("art1", art / "lakshmi-1.png", 6.0, note=NOTE),
+        "art2": still("art2", art / "lakshmi-2.png", 5.5, zoom_in=False),
+        "art3": still("art3", art / "lakshmi-3.png", 3.2),
+        "art4": still("art4", art / "lakshmi-4.png", 4.0, zoom_in=False),
+        "go": go_scroll(7.5),
+    }
+
+
+def scene(sid: str, clips: list, audio: list, tail: float = 0.6) -> dict:
     """clips: (source, start, end, speed); audio: (wav name, at seconds)."""
     return {"id": sid, "clips": clips, "audio": audio, "tail": tail}
 
 
 def build_scenes() -> dict:
     s = {}
-    hook0, end0 = LEAD["hook"], LEAD["end"]
-    s["hook"] = scene("hook", [("hook", hook0, hook0 + 6.6, 1)], [("s01_hook", 0.4)])
+    h0, e0 = LEAD["hook"], LEAD["end"]
+    s["day"] = scene("day", [("art1", 0, 6.0, 1), ("hook", h0, h0 + 4.6, 1)], [("l1_day", 0.5)])
+    s["struggle"] = scene("struggle", [("art2", 0, 5.5, 1), ("go", 0, 7.5, 1)], [("l2_struggle", 0.4)])
+    s["intro"] = scene("intro", [("art3", 0, 3.2, 1), ("main", M["l3"], M["l3_end"], 1)], [("l3_intro", 0.4)])
 
-    a, v, sg, e = M["s02"], M["s02_verdict"], M["s02_signs"], M["s02_end"]
-    s["shield"] = scene("shield", [("main", a, a + 4.6, 1), ("main", v - 0.5, e, 1)], [("s02_shield", 0.3)])
-    s["shield_short"] = scene("shield_short", [("main", a + 0.6, a + 3.8, 1), ("main", v - 0.4, v + 1.6, 1), ("main", sg, sg + 2.6, 1)],
-                              [("s02_shield_short", 0.3)])
-
-    s["home"] = scene("home", [("main", M["s03"], M["s03_end"], 1)], [("s03_home", 0.3)])
-
-    a, mic, ans = M["s04"], M["s04_mic"], M["s04_answer"]
+    a, mic, ans, pr, e = M["l4"], M["l4_mic"], M["l4_answer"], M["l4_proof"], M["l4_end"]
     len1 = mic + 3.6 - a
-    q_at = mic + 0.55 - a
-    b_at = len1 + 1.0
-    ta_at = b_at + D["s04_voice_b"] + 0.3
-    s["voice"] = scene("voice", [("main", a, mic + 3.6, 1), ("main", ans - 0.8, M["s04_end"], 1)],
-                       [("s04_voice", 0.2), ("tamil_question", q_at), ("s04_voice_b", b_at), ("tamil_answer", ta_at)])
-    s["voice_short"] = scene("voice_short", [("main", a, mic + 3.6, 1), ("main", ans - 0.8, ans + D["s04_voice_b"] + 1.6, 1)],
-                             [("s04_voice", 0.2), ("tamil_question", q_at), ("s04_voice_b", b_at)])
+    len2 = pr - (ans - 0.8)
+    s["ask"] = scene("ask", [("main", a, mic + 3.6, 1), ("main", ans - 0.8, pr, 1), ("main", pr, e, 1)],
+                     [("l4_ask", 0.2), ("tamil_question", mic + 0.55 - a), ("l4_ask_b", len1 + 0.6),
+                      ("tamil_answer", len1 + 0.9 + D["l4_ask_b"]), ("l4_ask_c", len1 + len2 + 0.5)])
 
-    s["proof"] = scene("proof", [("main", M["s05"], M["s05_end"] - 0.3, 1)], [("s05_proof", 0.5)])
-    s["schemes"] = scene("schemes", [("main", M["s06"], M["s06_end"], 1)], [("s06_schemes", 0.5)])
-
-    a, sent, ans = M["s07"], M["refusal_sent"], M["refusal_answer"]
+    a, sent, ans = M["l5"], M["refusal_sent"], M["refusal_answer"]
     len1 = (sent + 0.2 - a) / 2
-    s["refusal"] = scene("refusal", [("main", a, sent + 0.2, 2), ("main", ans - 0.5, M["s07_end"], 1)], [("s07_refusal", len1 + 0.8)])
-    s["refusal_short"] = scene("refusal_short", [("main", a, sent + 0.2, 2), ("main", ans - 0.5, ans + D["s07_refusal_short"] + 1.2, 1)],
-                               [("s07_refusal_short", len1 + 0.8)])
+    s["refusal"] = scene("refusal", [("main", a, sent + 0.2, 2), ("main", ans - 0.5, M["l5_end"], 1),
+                                     ("main", M["l5b"], M["l5b_end"], 1)], [("l5_refusal", 0.4)])
+    s["refusal_short"] = scene("refusal_short", [("main", a, sent + 0.2, 2), ("main", ans - 0.5, M["l5_end"], 1)],
+                               [("l5_refusal_short", len1 + 0.6)])
 
-    s["how"] = scene("how", [("main", M["s08"], M["s08_end"], 1)], [("s08_how", 0.4)])
-    s["numbers"] = scene("numbers", [("main", M["s09"], M["s09_end"], 1)], [("s09_numbers", 0.5)])
-    s["story"] = scene("story", [("main", M["s09b"], M["s09b_end"], 1)], [("s09b_story", 0.4)])
-    s["end"] = scene("end", [("end", end0, end0 + 6.0, 1)], [("s10_end", 1.0)], tail=0.3)
+    s["bigger"] = scene("bigger", [("main", M["l6_verdict"] - 0.4, M["l6_verdict_end"], 1),
+                                   ("main", M["l6_schemes"] + 0.8, M["l6_schemes_end"], 1),
+                                   ("main", M["l6_lang"] + 0.6, M["l6_lang_end"], 1)], [("l6_bigger", 0.4)])
+    s["end"] = scene("end", [("art4", 0, 4.0, 1), ("end", e0, e0 + 5.0, 1)], [("l7_end", 0.6)], tail=0.4)
     return s
 
 
 CUTS = {
-    "full": ["hook", "shield", "home", "voice", "proof", "schemes", "refusal", "how", "numbers", "story", "end"],
-    "90s": ["hook", "shield_short", "home", "voice", "proof", "refusal_short", "numbers", "story", "end"],
-    "60s": ["hook", "shield_short", "voice_short", "proof", "refusal_short", "end"],
+    "full": ["day", "struggle", "intro", "ask", "refusal", "bigger", "end"],
+    "90s": ["day", "struggle", "intro", "ask", "refusal_short", "bigger", "end"],
+    "60s": ["day", "intro", "ask", "refusal_short", "end"],
 }
 
 
-def render_scene(sc: dict) -> tuple[Path, float]:
+def wav_len(name: str) -> float:
+    if name not in D:
+        out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
+                              str(WORK / f"{name}.wav")], capture_output=True, text=True, check=True)
+        D[name] = float(out.stdout)
+    return D[name]
+
+
+def render_scene(sc: dict, src: dict) -> tuple[Path, float]:
     """One scene as an MP4 with its own audio; returns the file and its length."""
     vlen = sum((b - a) / sp for _, a, b, sp in sc["clips"])
-    aend = max(at + wav_len(n) for n, at in sc["audio"])
-    length = max(vlen, aend + sc["tail"])
+    length = max(vlen, max(at + wav_len(n) for n, at in sc["audio"]) + sc["tail"])
     out = TMP / f"{sc['id']}.mp4"
-    cmd = ["ffmpeg", "-loglevel", "error", "-y"]
-    for src in sorted({c[0] for c in sc["clips"]}):
-        cmd += ["-i", str(SRC[src])]
     order = sorted({c[0] for c in sc["clips"]})
+    cmd = []
+    for name in order:
+        cmd += ["-i", str(src[name])]
     for n, _ in sc["audio"]:
         cmd += ["-i", str(WORK / f"{n}.wav")]
     parts, labels = [], []
-    for i, (src, a, b, sp) in enumerate(sc["clips"]):
-        k = order.index(src)
-        parts.append(f"[{k}:v]trim=start={a:.3f}:end={b:.3f},setpts=(PTS-STARTPTS)/{sp},fps={FPS},scale={W}:{H}:flags=lanczos,setsar=1[v{i}]")
+    for i, (name, a, b, sp) in enumerate(sc["clips"]):
+        parts.append(f"[{order.index(name)}:v]trim=start={a:.3f}:end={b:.3f},setpts=(PTS-STARTPTS)/{sp},fps={FPS},"
+                     f"scale={W}:{H}:flags=lanczos,setsar=1,format=yuv420p[v{i}]")
         labels.append(f"[v{i}]")
-    vf = ";".join(parts) + f";{''.join(labels)}concat=n={len(labels)}:v=1:a=0[vc];[vc]tpad=stop_mode=clone:stop_duration={max(0, length - vlen) + 0.1:.3f},trim=duration={length:.3f}[v]"
+    pad = max(0, length - vlen) + 0.1
+    vf = (";".join(parts) + f";{''.join(labels)}concat=n={len(labels)}:v=1:a=0[vc];"
+          f"[vc]tpad=stop_mode=clone:stop_duration={pad:.3f},trim=duration={length:.3f}[v]")
     aparts, alabels = [], []
-    for j, (n, at) in enumerate(sc["audio"]):
-        idx = len(order) + j
-        vol = 1.0 if n.startswith("s") else 0.95
-        aparts.append(f"[{idx}:a]aresample=48000,aformat=channel_layouts=stereo,volume={vol},adelay={int(at * 1000)}|{int(at * 1000)}[a{j}]")
+    for j, (_n, at) in enumerate(sc["audio"]):
+        ms = int(at * 1000)
+        aparts.append(f"[{len(order) + j}:a]aresample=48000,aformat=channel_layouts=stereo,adelay={ms}|{ms}[a{j}]")
         alabels.append(f"[a{j}]")
     af = ";".join(aparts) + f";{''.join(alabels)}amix=inputs={len(alabels)}:normalize=0,apad,atrim=duration={length:.3f}[a]"
-    cmd += ["-filter_complex", vf + ";" + af, "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-            "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", str(out)]
-    subprocess.run(cmd, check=True)
+    ffmpeg(*cmd, "-filter_complex", vf + ";" + af, "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "medium",
+           "-crf", "18", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", str(out))
     return out, length
 
 
-def build_cut(name: str, scenes: dict) -> None:
+def build_cut(name: str, scenes: dict, src: dict) -> None:
     files, t = [], 0.0
     for sid in CUTS[name]:
-        f, length = render_scene(scenes[sid])
+        f, length = render_scene(scenes[sid], src)
         files.append(f)
         t += length
     lst = TMP / f"{name}.txt"
     lst.write_text("".join(f"file '{f}'\n" for f in files))
     joined = TMP / f"{name}_joined.mp4"
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(joined)], check=True)
+    ffmpeg("-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(joined))
     final = OUT / f"pakkam-{name}.mp4"
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(joined), "-c:v", "copy",
-                    "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-c:a", "aac", "-b:a", "160k", "-ar", "48000",
-                    "-movflags", "+faststart", str(final)], check=True)
+    ffmpeg("-i", str(joined), "-c:v", "copy", "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-c:a", "aac", "-b:a", "160k",
+           "-ar", "48000", "-movflags", "+faststart", str(final))
     print(name, f"{t:.1f}s", final)
 
 
 if __name__ == "__main__":
+    sources = prepare()
     sc = build_scenes()
     for cut in (sys.argv[3:] or CUTS):
-        build_cut(cut, sc)
+        build_cut(cut, sc, sources)
