@@ -724,11 +724,11 @@ button.citation-tag:hover, button.citation-tag:focus-visible { background: var(-
 .proof-close { position: absolute; top: 12px; right: 12px; }
 .proof-doc { margin: 4px 40px 4px 0; font-size: var(--text-h2); }
 .proof-meta { margin: 0 0 8px; color: var(--text-secondary); font-size: 0.9rem; }
-.proof-checked { margin: 0 0 12px; color: var(--raw-teal); font-weight: 600; font-size: 0.9rem; }
+.proof-checked { margin: 0 0 12px; color: var(--text-highlight); font-weight: 600; font-size: 0.9rem; }
 .proof-note { margin: 0 0 12px; color: var(--text-muted); font-size: 0.85rem; }
 .proof-page { display: block; margin: 0 0 12px; border-radius: var(--radius-md); overflow: hidden; background: #fff; border: 1px solid var(--glass-border); }
 .proof-page img { display: block; width: 100%; height: auto; }
-.proof-excerpt { margin: 0 0 14px; padding: 10px 14px; border-left: 3px solid var(--raw-teal); background: var(--glass-surface); border-radius: var(--radius-sm); font-size: 0.9rem; color: var(--text-secondary); }
+.proof-excerpt { margin: 0 0 14px; padding: 10px 14px; border-left: 3px solid var(--text-highlight); background: var(--glass-surface); border-radius: var(--radius-sm); font-size: 0.9rem; color: var(--text-secondary); }
 .proof-box a.chip-btn { display: inline-block; text-decoration: none; }
 
 /* ==========================================================================
@@ -863,7 +863,7 @@ button.citation-tag.proof-btn { font-size: 0.85rem; padding: 7px 14px; font-weig
 .bg-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .bg-layer canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bg-glow { position: absolute; width: 46vmax; height: 46vmax; border-radius: 50%; filter: blur(80px); opacity: 0.22; }
-.bg-glow--a { background: var(--raw-teal, #14b8c4); top: -14vmax; left: -10vmax; animation: glowDrift 26s ease-in-out infinite alternate; }
+.bg-glow--a { background: var(--glow-a); top: -14vmax; left: -10vmax; animation: glowDrift 26s ease-in-out infinite alternate; }
 .bg-glow--b { background: var(--accent-2); bottom: -18vmax; right: -12vmax; animation: glowDrift 32s ease-in-out infinite alternate-reverse; }
 [data-theme="light"] .bg-glow { opacity: 0.16; }
 @keyframes glowDrift { from { transform: translate(0, 0) scale(1); } to { transform: translate(8vmax, 6vmax) scale(1.12); } }
@@ -1566,3 +1566,80 @@ body.touring { overflow: hidden; }
 .footer-links { align-items: center; }
 .footer-links .text-link { display: inline-flex; align-items: center; }
 @media (max-width: 640px) { .thought-bubble { display: none; } }
+
+/* ==========================================================================
+   V2: atmosphere, glass depth, theme consistency
+   ========================================================================== */
+body { background: var(--bg-canvas) var(--bg-atmosphere) fixed; }
+.bg-layer, .bg-layer * , #bg-pages { pointer-events: none; }
+/* Layer 1: four slow glows (cyan top-left, purple top-right, blue behind the orb, violet bottom-right) */
+.bg-glow { filter: blur(90px); opacity: 1; will-change: transform; }
+.bg-glow--a { width: 52vmax; height: 52vmax; top: -18vmax; left: -14vmax; background: radial-gradient(circle, var(--glow-a), transparent 68%); }
+.bg-glow--b { width: 48vmax; height: 48vmax; top: -16vmax; right: -14vmax; bottom: auto; background: radial-gradient(circle, var(--glow-b), transparent 68%); animation: glowDrift 34s ease-in-out infinite alternate-reverse; }
+.bg-glow--c { width: 46vmax; height: 34vmax; top: 6vh; left: 50%; margin-left: -23vmax; background: radial-gradient(ellipse, var(--glow-c), transparent 70%); animation: glowDrift 40s ease-in-out infinite alternate; }
+.bg-glow--d { width: 50vmax; height: 50vmax; bottom: -22vmax; right: -12vmax; background: radial-gradient(circle, var(--glow-d), transparent 68%); animation: glowDrift 30s ease-in-out infinite alternate; }
+[data-theme="light"] .bg-glow { opacity: 1; }
+/* Faint grid that fades out towards the edges */
+.bg-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px); background-size: 56px 56px; -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 30%, transparent 85%); mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 30%, transparent 85%); }
+html[data-bg="minimal"] .bg-grid, html[data-bg="minimal"] #bg-pages { display: none; }
+html[data-bg="ambient"] .bg-grid { opacity: 1.4; }
+
+/* Glass cards lift off the page */
+.glass-panel, .feature-callout, .example-card, .scheme-list, .settings-card, .cap-card, .num, .credit-card, .name-figure, .story-sign, .chat-bubble.ai, .chat-composer, .drawer-panel, .proof-box, .tour-card, .shield-claim, .about-close-cta, .home-convo .home-answer {
+  box-shadow: var(--card-shadow);
+}
+.glass-panel { background: var(--glass-surface); border-color: var(--glass-border); }
+/* A soft cyan-purple tint on a few hero cards only */
+.feature-callout, .story-sign, .about-close-cta { background: var(--card-gradient), var(--glass-surface); }
+.example-card:hover, .cap-card:hover, .credit-card:hover, .feature-callout:hover { background: var(--card-gradient), var(--glass-surface-hover); border-color: color-mix(in srgb, var(--text-highlight) 45%, var(--glass-border)); }
+
+/* Navbar: a floating glass capsule */
+.navbar-capsule { background: var(--glass-bg); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow), var(--glass-highlight); }
+
+/* Ask button: same purple, richer lift */
+.cta-button { box-shadow: var(--cta-shadow); }
+.cta-button:hover { box-shadow: var(--cta-shadow-hover); transform: translateY(-1px); }
+.cta-button:active { transform: translateY(0) scale(0.97); }
+
+/* Inputs, drawers and overlays follow the theme */
+.input-pill, .shield-input { background: var(--glass-surface); color: var(--text-primary); }
+.drawer-panel, .tour-card { background: var(--bg-secondary); }
+.proof-box { background: var(--bg-secondary); border: 1px solid var(--glass-border); }
+
+/* Scrollbars */
+html { scrollbar-color: var(--scrollbar) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Theme switch: colours ease over 250ms (never layout) */
+html.theme-fading body, html.theme-fading body *:not(.reveal):not(canvas) { transition: color 250ms ease, background-color 250ms ease, border-color 250ms ease, box-shadow 250ms ease !important; }
+html.calm.theme-fading body * { transition: none !important; }
+
+/* V2: the three home boxes are links to their pages */
+a.feature-callout { color: inherit; text-decoration: none; cursor: pointer; transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) ease, border-color var(--dur) ease, background var(--dur) ease; position: relative; }
+a.feature-callout:hover { transform: translateY(-3px); }
+.feature-icon { display: inline-grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 10px; color: var(--text-highlight); background: color-mix(in srgb, var(--text-highlight) 12%, transparent); font-size: 1rem; }
+.feature-callout .feature-badge { position: absolute; top: -10px; left: -10px; width: 24px; height: 24px; min-width: 24px; font-size: 0.66rem; background: var(--bg-secondary); }
+.feature-go { margin-left: auto; color: var(--text-highlight); opacity: 0; transform: translateX(-6px); transition: opacity var(--dur) ease, transform var(--dur) var(--ease-out); }
+a.feature-callout:hover .feature-go, a.feature-callout:focus-visible .feature-go { opacity: 1; transform: none; }
+button.hero-chip { font: inherit; cursor: pointer; }
+
+/* V2: orb surroundings — halo plus two slow orbit rings, quiet unless idle */
+.orb-halo, .orb-ring { position: absolute; border-radius: 50%; pointer-events: none; }
+.orb-halo { inset: -22%; z-index: -1; background: radial-gradient(circle, color-mix(in srgb, var(--accent-cyan) 22%, transparent) 0%, color-mix(in srgb, var(--accent-2) 14%, transparent) 45%, transparent 70%); }
+.orb-ring { inset: -9%; border: 1px solid color-mix(in srgb, var(--accent-cyan) 38%, transparent); transition: opacity var(--dur) ease; }
+.orb-ring--a { transform: rotateX(68deg) rotateZ(18deg); border-color: color-mix(in srgb, var(--accent-2) 45%, transparent); animation: orbitA 60s linear infinite; }
+.orb-ring--b { inset: -15%; border-style: dashed; border-color: color-mix(in srgb, var(--accent-cyan) 26%, transparent); animation: orbitB 90s linear infinite; }
+@keyframes orbitA { from { transform: rotateX(68deg) rotateZ(18deg); } to { transform: rotateX(68deg) rotateZ(378deg); } }
+@keyframes orbitB { to { transform: rotate(-360deg); } }
+/* State priority: error > listening > speaking > processing > idle. Only idle shows the rings. */
+.orb-waveform-assembly[data-state]:not([data-state="idle"]) .orb-ring { opacity: 0; }
+.orb-waveform-assembly[data-state="listening"] .orb-halo { background: radial-gradient(circle, color-mix(in srgb, var(--accent-cyan) 32%, transparent), transparent 70%); }
+.orb-waveform-assembly[data-state="error"] .central-orb-container { outline: 2px solid rgba(220, 38, 38, 0.7); outline-offset: 10px; }
+.orb-waveform-assembly[data-state="error"] .central-orb-container::before, .orb-waveform-assembly[data-state="error"] .central-orb-container::after { opacity: 0 !important; animation: none !important; }
+.orb-waveform-assembly[data-state="error"] .central-orb-container { animation: none; }
+@media (prefers-reduced-motion: reduce) { .orb-ring { animation: none; } }
+.feature-callout, .callout-01, .callout-02, .callout-03 { width: 320px; max-width: 320px; }
+/* The glows are already soft radial gradients: no blur filter (much cheaper to paint and to snapshot) */
+.bg-glow { filter: none; }
