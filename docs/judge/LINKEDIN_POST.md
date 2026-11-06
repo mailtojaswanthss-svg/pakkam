@@ -3,13 +3,13 @@
 ## Which video to post
 | File | Length | Use it for |
 |---|---|---|
-| `pakkam-90s.mp4` | 1:35 | **The main LinkedIn post.** Lakshmi's story: the forward, the 40-page order, asking Pakkam in Tamil, the page as proof, the honest refusal, the wider features. |
-| `pakkam-60s.mp4` | 1:06 | Short sharing: Reels, X, WhatsApp status. |
-| `pakkam-full.mp4` | 1:44 | For judges: adds the test results (39 of 40 refused, the one failure). |
+| `pakkam-90s.mp4` | 1:15 | **The main LinkedIn post.** Opens on the forward ("Is it true?"), then Lakshmi's story: the forward, the 40-page order, asking Pakkam in Tamil, the page as proof, the honest refusal, the wider features. |
+| `pakkam-60s.mp4` | 0:55 | Short sharing: Reels, X, WhatsApp status. |
+| `pakkam-full.mp4` | 1:24 | For judges: adds the test results (39 of 40 refused, the one failure). |
 
-Thumbnail: `linkedin-thumbnail.jpg`. No subtitles: the narrator explains each scene.
+Thumbnail: `linkedin-thumbnail.jpg`. No subtitles or captions: the narrator explains each scene, over soft original background music (generated, royalty-free).
 
-Lakshmi is a fictional, illustrative character (the video says so on screen). Everything else is the real live site, recorded on 6 Nov 2026:
+Lakshmi is a fictional, illustrative character (the post text says so). Everything else is the real live site, recorded on 6 Nov 2026:
 - the Tamil question is real speech, transcribed live by Gnani Prisma
 - the answer (Rs.2.5 lakh income limit, G.O.(Ms) No.15, page 10) and the page shown are real
 - the narration and Pakkam's Tamil answer are both Gnani Timbre; the narrator is pitched lower so the two are easy to tell apart
@@ -60,13 +60,14 @@ Best time: a weekday, 8–10 AM IST.
 ## Video script (90 s cut)
 | Time | On screen | Narration |
 |---|---|---|
-| 0:00 | Lakshmi at home (illustration, "fictional character" note), then the family-group forward | This is Lakshmi. A mother in Tamil Nadu. One evening, a forward arrives… |
-| 0:11 | Lakshmi among long documents, then the real G.O.15 pages scrolling | …buried in a forty page Government Order… She shouldn't need to understand a forty page document to understand her rights. |
-| 0:24 | Lakshmi speaking to the orb, then Pakkam's home page | What if she could simply ask? That's why we built Pakkam. |
-| 0:31 | Tap the orb, the Tamil question, the answer (Rs.2.5 lakh, G.O.15 page 10) spoken aloud, the original page opened | She taps the orb, and asks in her own words… |
-| 0:58 | "When will the next PM-KISAN instalment come?" → Not in the documents | And when the documents don't say it, Pakkam won't guess. |
-| 1:09 | Rumour Shield verdict, the scheme list, the language chips | Tamil, Tanglish, Hindi or English… |
-| 1:21 | Lakshmi and her daughter, then the end card | Pakkam. Speak. Hear. See the proof. Because everyone deserves to know. |
+| 0:00 | The family-group forward | Two thousand rupees a month? Share your OTP? Is it true? |
+| 0:04 | Lakshmi at home with her phone | This is Lakshmi, a mother in Tamil Nadu. And this forward just landed in her family group. |
+| 0:10 | Lakshmi among papers, then the real G.O.15 pages scrolling | …buried in a forty page Government Order… She shouldn't need to understand a forty page document to understand her rights. |
+| 0:21 | Lakshmi speaking to the orb, then Pakkam's home ("Speak. Hear. See the proof.") | What if she could simply ask? That's why we built Pakkam. |
+| 0:25 | Tap the orb, the Tamil question, the answer (Rs.2.5 lakh, G.O.15 page 10) spoken aloud, the original page opened | She taps the orb, and asks in her own words… |
+| 0:48 | "When will the next PM-KISAN instalment come?" → Not in the documents | And when the documents don't say it, Pakkam won't guess. |
+| 0:55 | Rumour Shield verdict, the scheme list, the language chips | Tamil, Tanglish, Hindi or English… |
+| 1:03 | Lakshmi and her daughter, then the end card | Pakkam. Speak. Hear. See the proof. Because everyone deserves to know. |
 
 The full cut replaces the short refusal line with: "We tested forty questions outside the documents. Pakkam correctly refused thirty nine. The one failure showed us where to improve. Lakshmi doesn't need an assistant with an answer for everything. She needs one that knows when it doesn't have one."
 
