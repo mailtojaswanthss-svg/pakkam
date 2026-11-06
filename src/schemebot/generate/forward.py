@@ -7,14 +7,19 @@ supported, contradicted, or not in the documents. The verdict never adds facts o
 it can only point at what the cited answer says.
 """
 
+import contextlib
+import json
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Literal, Protocol
+from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ValidationError
 
+from schemebot.config import PROJECT_ROOT
 from schemebot.generate.answer import Answer
 from schemebot.generate.llm import JsonLlm, LlmDeclinedError, LlmUnavailableError
 
@@ -68,12 +73,53 @@ VERDICT_SCHEMA: dict[str, object] = {
 # Scam signs in a forward, found by fixed rules (no model): a link that is not a government
 # site, a request for an OTP, money or ID numbers, and "today only" pressure. Fake scheme
 # messages (PM-KISAN "bonus" SMS, fake registration links) use exactly these.
-ScamSign = Literal["unofficial_link", "official_link", "otp", "payment", "personal_data", "urgency"]
+ScamSign = Literal[
+    "unofficial_link",
+    "official_link",
+    "insecure_link",
+    "otp",
+    "payment",
+    "personal_data",
+    "urgency",
+]
 _LINK = re.compile(
     r"(https?://|www\.)\S+|\b[\w-]+\.(?:com|in|org|net|xyz|online|site|info|ly|me|apk)\b\S*",
     re.I,
 )
-_OFFICIAL_HOST = re.compile(r"(^|\.)(gov\.in|nic\.in)$", re.I)
+OFFICIAL_DOMAINS_FILE = PROJECT_ROOT / "data" / "official_domains.json"
+
+
+@lru_cache(maxsize=1)
+def _official_rules() -> tuple[tuple[str, ...], dict[str, bool]]:
+    """(suffix domains, {exact host: subdomains allowed}) from data/official_domains.json."""
+    data = json.loads(OFFICIAL_DOMAINS_FILE.read_text(encoding="utf-8"))
+    suffixes = tuple(entry["domain"].lower() for entry in data.get("suffix", []))
+    exact = {e["host"].lower(): bool(e.get("subdomains")) for e in data.get("exact", [])}
+    return suffixes, exact
+
+
+def link_host(link: str) -> tuple[str, str]:
+    """(scheme, normalised host) of a link found in a message. Bare 'bit.ly/x' counts as https."""
+    text = link.strip().rstrip(".,;:!?)\"'")
+    parts = urlsplit(text if re.match(r"^[a-z][a-z0-9+.-]*://", text, re.I) else f"https://{text}")
+    host = (parts.hostname or "").rstrip(".").lower()
+    with contextlib.suppress(UnicodeError):
+        host = host.encode("idna").decode("ascii")
+    if host.startswith("www."):
+        host = host[4:]
+    return parts.scheme.lower(), host
+
+
+def is_official_host(host: str) -> bool:
+    """True only for an approved government host: a suffix rule at a dot boundary, or an exact
+    approved host. Never substring matching (gov.in.fakewebsite.com is not official)."""
+    suffixes, exact = _official_rules()
+    if any(host == s or host.endswith("." + s) for s in suffixes):
+        return True
+    for approved, subdomains in exact.items():
+        if host == approved or (subdomains and host.endswith("." + approved)):
+            return True
+    return False
 _SIGNS: dict[ScamSign, re.Pattern[str]] = {
     "otp": re.compile(r"\botp\b|ஓடிபி|ओटीपी|one.?time.?password|verification code", re.I),
     "payment": re.compile(
@@ -98,10 +144,13 @@ def scam_signs(message: str) -> list[ScamSign]:
     """Warning signs in a forwarded message, in a fixed order."""
     found: list[ScamSign] = []
     for match in _LINK.finditer(message):
-        host = re.sub(r"^(https?://)?(www\.)?", "", match.group(0), flags=re.I).split("/")[0]
-        sign: ScamSign = "official_link" if _OFFICIAL_HOST.search(host) else "unofficial_link"
-        if sign not in found:
-            found.append(sign)
+        scheme, host = link_host(match.group(0))
+        signs: list[ScamSign] = ["official_link"] if is_official_host(host) else ["unofficial_link"]
+        if signs == ["official_link"] and scheme == "http":
+            signs.append("insecure_link")  # a recognised site, but not over a secure link
+        for sign in signs:
+            if sign not in found:
+                found.append(sign)
     found += [name for name, pattern in _SIGNS.items() if pattern.search(message)]
     return found
 

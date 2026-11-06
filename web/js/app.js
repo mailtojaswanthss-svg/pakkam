@@ -201,6 +201,7 @@ function navigateTo(pageKey) {
     btn.classList.toggle('active', btn.dataset.nav === pageKey);
     if (btn.classList.contains('tab-item')) btn.setAttribute('aria-current', btn.dataset.nav === pageKey ? 'page' : 'false');
   });
+  document.dispatchEvent(new CustomEvent('pakkam:page', { detail: pageKey }));
 }
 
 
@@ -611,6 +612,18 @@ Object.assign(MESSAGES['en-IN'], {
   'ab.teamEyebrow': 'THE PEOPLE BEHIND PAKKAM', 'ab.teamTitle': 'Made by', 'ab.ctaTitle': 'Have a question about a scheme?',
   'credit.role1': 'Idea, AI and backend', 'credit.role2': 'Design and frontend',
   'answer.helpfulYes': 'Yes, helpful', 'answer.helpfulNo': 'Not helpful',
+  'shield.yourMessage': 'Your message, with warning signs marked', 'shield.markTitle': 'Warning sign: check before trusting',
+  'shield.signsNote': 'Warning signs mean: be careful. On their own they do not prove the message is false. The verdict above comes only from the official documents.',
+  'proof.pdfAt': 'Open the official PDF (page {page})', 'proof.pdfNote': 'If the PDF opens at page 1, go to page {page}. The page image above always shows the right page.',
+  'answer.checkedBy': 'Checked against the printed page by {names}', 'answer.fromDoc': 'From the official document. Open a page to check it yourself.',
+  'sc.1t': 'The problem', 'sc.1': 'The rules are in long official papers that are hard to find and harder to read.',
+  'sc.2t': 'Ask Pakkam', 'sc.2': 'Ask in your own language, by voice or by typing.',
+  'sc.3t': 'See the proof', 'sc.3': 'The answer points to the exact line on the official page.',
+  'easy.readAloud': 'Read answers aloud', 'composer.stop': 'Stop speaking', 'chat.latest': 'Jump to latest', 'answer.more': 'Show more', 'answer.less': 'Show less',
+  'orb.idle': 'Tap the orb to speak', 'orb.listening': 'Listening… tap the orb when you finish', 'orb.busy': 'Finding the answer… tap to stop',
+  'orb.speaking': 'Speaking… tap the orb to stop', 'orb.error': 'Something went wrong. Tap the orb to try again',
+  'mic.title': "Pakkam can't hear you yet", 'mic.type': 'Type instead',
+  'mic.body': 'Your browser has blocked the microphone. Tap the lock or (i) icon next to the web address, choose Allow for Microphone, then reload the page. You can also type your question.',
   'set.bg': 'Background', 'set.bgMinimal': 'Minimal', 'set.bgBalanced': 'Balanced', 'set.bgAmbient': 'Ambient',
   'feature.03': 'Check a Forward', 'feature.03body': 'Paste a WhatsApp message and see which claims are false.',
   'tour.start': 'Take the 60-second tour', 'tour.next': 'Next', 'tour.back': 'Back', 'tour.skip': 'Skip tour', 'tour.done': 'Finish', 'tour.count': 'Step {n} of {total}',
@@ -633,6 +646,18 @@ Object.assign(MESSAGES['ta-IN'], {
   'ab.teamEyebrow': 'பக்கத்தின் பின்னால் உள்ளவர்கள்', 'ab.teamTitle': 'உருவாக்கியவர்கள்', 'ab.ctaTitle': 'ஒரு திட்டத்தைப் பற்றிக் கேள்வி உள்ளதா?',
   'credit.role1': 'யோசனை, AI மற்றும் பின்தளம்', 'credit.role2': 'வடிவமைப்பு மற்றும் முன்தளம்',
   'answer.helpfulYes': 'ஆம், உதவியாக இருந்தது', 'answer.helpfulNo': 'உதவவில்லை',
+  'shield.yourMessage': 'உங்கள் செய்தி, எச்சரிக்கை அறிகுறிகள் குறிக்கப்பட்டு', 'shield.markTitle': 'எச்சரிக்கை அறிகுறி: நம்பும் முன் சரிபாருங்கள்',
+  'shield.signsNote': 'எச்சரிக்கை அறிகுறிகள் என்றால் கவனம் தேவை. அவை மட்டுமே செய்தி தவறு என்று நிரூபிக்காது. மேலே உள்ள முடிவு அதிகாரப்பூர்வ ஆவணங்களிலிருந்து மட்டுமே.',
+  'proof.pdfAt': 'அதிகாரப்பூர்வ PDF-ஐத் திற (பக்கம் {page})', 'proof.pdfNote': 'PDF முதல் பக்கத்தில் திறந்தால், பக்கம் {page}-க்குச் செல்லுங்கள். மேலே உள்ள பக்கப் படம் எப்போதும் சரியான பக்கத்தைக் காட்டும்.',
+  'answer.checkedBy': 'அச்சுப் பக்கத்துடன் சரிபார்த்தவர்: {names}', 'answer.fromDoc': 'அதிகாரப்பூர்வ ஆவணத்திலிருந்து. பக்கத்தைத் திறந்து நீங்களே சரிபாருங்கள்.',
+  'sc.1t': 'சிக்கல்', 'sc.1': 'விதிகள் நீண்ட அதிகாரப்பூர்வ ஆவணங்களில் உள்ளன; கண்டுபிடிப்பது கடினம், படிப்பது இன்னும் கடினம்.',
+  'sc.2t': 'பக்கத்திடம் கேளுங்கள்', 'sc.2': 'உங்கள் மொழியில், குரலிலோ தட்டச்சிலோ கேளுங்கள்.',
+  'sc.3t': 'ஆதாரத்தைப் பாருங்கள்', 'sc.3': 'பதில் அதிகாரப்பூர்வப் பக்கத்தின் சரியான வரியைக் காட்டும்.',
+  'easy.readAloud': 'பதில்களை வாசித்துக் காட்டு', 'composer.stop': 'பேச்சை நிறுத்து', 'chat.latest': 'சமீபத்தியதுக்குச் செல்', 'answer.more': 'மேலும் காட்டு', 'answer.less': 'குறைவாகக் காட்டு',
+  'orb.idle': 'பேச உருண்டையைத் தொடுங்கள்', 'orb.listening': 'கேட்கிறேன்… முடித்ததும் உருண்டையைத் தொடுங்கள்', 'orb.busy': 'பதிலைத் தேடுகிறேன்… நிறுத்தத் தொடுங்கள்',
+  'orb.speaking': 'பேசுகிறேன்… நிறுத்த உருண்டையைத் தொடுங்கள்', 'orb.error': 'ஏதோ தவறு நடந்தது. மீண்டும் முயல உருண்டையைத் தொடுங்கள்',
+  'mic.title': 'பக்கத்துக்கு உங்கள் குரல் இன்னும் கேட்கவில்லை', 'mic.type': 'தட்டச்சு செய்யுங்கள்',
+  'mic.body': 'உங்கள் உலாவி ஒலிவாங்கியைத் தடுத்துள்ளது. இணைய முகவரிக்கு அருகிலுள்ள பூட்டு அல்லது (i) குறியைத் தொட்டு, ஒலிவாங்கிக்கு அனுமதி கொடுத்து, பக்கத்தை மீண்டும் ஏற்றுங்கள். கேள்வியைத் தட்டச்சும் செய்யலாம்.',
   'set.bg': 'பின்னணி', 'set.bgMinimal': 'குறைவு', 'set.bgBalanced': 'சீரானது', 'set.bgAmbient': 'அதிகம்',
   'feature.03': 'செய்தியைச் சரிபாருங்கள்', 'feature.03body': 'வாட்ஸ்அப் செய்தியை ஒட்டி, எந்தக் கூற்றுகள் தவறு என்று பாருங்கள்.',
   'tour.start': '60 வினாடி அறிமுகச் சுற்று', 'tour.next': 'அடுத்து', 'tour.back': 'பின்', 'tour.skip': 'சுற்றைத் தவிர்', 'tour.done': 'முடி', 'tour.count': 'படி {n} / {total}',
@@ -655,6 +680,18 @@ Object.assign(MESSAGES['hi-IN'], {
   'ab.teamEyebrow': 'पक्कम के पीछे के लोग', 'ab.teamTitle': 'बनाने वाले', 'ab.ctaTitle': 'किसी योजना के बारे में सवाल है?',
   'credit.role1': 'विचार, AI और बैकएंड', 'credit.role2': 'डिज़ाइन और फ्रंटएंड',
   'answer.helpfulYes': 'हाँ, मददगार', 'answer.helpfulNo': 'मददगार नहीं',
+  'shield.yourMessage': 'आपका संदेश, चेतावनी के संकेत चिह्नित', 'shield.markTitle': 'चेतावनी का संकेत: भरोसा करने से पहले जाँचें',
+  'shield.signsNote': 'चेतावनी के संकेत का मतलब है: सावधान रहें। अकेले ये साबित नहीं करते कि संदेश गलत है। ऊपर का फ़ैसला सिर्फ़ आधिकारिक दस्तावेज़ों से है।',
+  'proof.pdfAt': 'आधिकारिक PDF खोलें (पन्ना {page})', 'proof.pdfNote': 'अगर PDF पहले पन्ने पर खुले, तो पन्ना {page} पर जाएँ। ऊपर की पन्ने की तस्वीर हमेशा सही पन्ना दिखाती है।',
+  'answer.checkedBy': 'छपे पन्ने से जाँचा: {names}', 'answer.fromDoc': 'आधिकारिक दस्तावेज़ से। पन्ना खोलकर ख़ुद जाँचें।',
+  'sc.1t': 'समस्या', 'sc.1': 'नियम लंबे सरकारी काग़ज़ों में हैं; ढूँढना मुश्किल, पढ़ना और भी मुश्किल।',
+  'sc.2t': 'पक्कम से पूछें', 'sc.2': 'अपनी भाषा में, बोलकर या लिखकर पूछें।',
+  'sc.3t': 'सबूत देखें', 'sc.3': 'जवाब आधिकारिक पन्ने की सही पंक्ति दिखाता है।',
+  'easy.readAloud': 'जवाब पढ़कर सुनाएँ', 'composer.stop': 'बोलना रोकें', 'chat.latest': 'नए संदेश पर जाएँ', 'answer.more': 'और दिखाएँ', 'answer.less': 'कम दिखाएँ',
+  'orb.idle': 'बोलने के लिए ऑर्ब दबाएँ', 'orb.listening': 'सुन रहा हूँ… बोल लें तो ऑर्ब दबाएँ', 'orb.busy': 'जवाब ढूँढ रहा हूँ… रोकने के लिए दबाएँ',
+  'orb.speaking': 'बोल रहा हूँ… रोकने के लिए ऑर्ब दबाएँ', 'orb.error': 'कुछ गड़बड़ हुई। फिर से ऑर्ब दबाएँ',
+  'mic.title': 'पक्कम अभी आपकी आवाज़ नहीं सुन पा रहा', 'mic.type': 'टाइप करें',
+  'mic.body': 'आपके ब्राउज़र ने माइक्रोफ़ोन रोक दिया है। वेब पते के पास ताले या (i) निशान को दबाएँ, माइक्रोफ़ोन के लिए अनुमति दें, फिर पेज दोबारा खोलें। आप सवाल टाइप भी कर सकते हैं।',
   'set.bg': 'पृष्ठभूमि', 'set.bgMinimal': 'कम', 'set.bgBalanced': 'संतुलित', 'set.bgAmbient': 'ज़्यादा',
   'feature.03': 'फ़ॉरवर्ड जाँचें', 'feature.03body': 'व्हाट्सऐप संदेश चिपकाएँ और देखें कौन-से दावे गलत हैं।',
   'tour.start': '60 सेकंड का परिचय देखें', 'tour.next': 'आगे', 'tour.back': 'पीछे', 'tour.skip': 'परिचय छोड़ें', 'tour.done': 'पूरा', 'tour.count': 'चरण {n} / {total}',
@@ -678,11 +715,12 @@ const SHIELD = {
     overall: { wrong: '❌ This forward is wrong', partly_wrong: '⚠️ Partly wrong', looks_right: '✅ Matches the official documents',
       not_in_documents: '⚠️ Not in any official document. Be careful.', no_claims: 'No scheme claim found in this message.' },
     verdict: { supported: '✅ True', contradicted: '❌ Wrong', not_in_documents: '⚠️ Not in the documents' },
-    signs: { unofficial_link: 'The link is not a government website (.gov.in). Do not open it or enter details.',
-      official_link: 'The link is a government website (.gov.in).',
+    signs: { unofficial_link: 'The link is not a recognised official government website. Do not open it or enter your details.',
+      official_link: 'The link is a recognised official website. That tells you who runs the site; it does not by itself make the message true.',
       otp: 'It asks for an OTP. Government schemes never ask for your OTP. Never share it.',
       payment: 'It asks for money. Applying for these schemes does not need payment to anyone in a message.',
       personal_data: 'It asks for Aadhaar or bank details. Do not send them to unknown people.',
+      insecure_link: 'This is a government website, but the link is not secure (http, not https). Type the address yourself instead.',
       urgency: '"Today only" pressure is a common trick. Check first.' },
     warnings: 'Warning signs', share: '📤 Send the correction on WhatsApp',
     correction: 'Fact-check by Pakkam (from the official government documents):',
@@ -694,11 +732,12 @@ const SHIELD = {
     overall: { wrong: '❌ இந்தச் செய்தி தவறு', partly_wrong: '⚠️ ஓரளவு தவறு', looks_right: '✅ அதிகாரப்பூர்வ ஆவணங்களுடன் பொருந்துகிறது',
       not_in_documents: '⚠️ எந்த அதிகாரப்பூர்வ ஆவணத்திலும் இல்லை. கவனம்.', no_claims: 'இந்தச் செய்தியில் திட்டம் பற்றிய கூற்று இல்லை.' },
     verdict: { supported: '✅ உண்மை', contradicted: '❌ தவறு', not_in_documents: '⚠️ ஆவணங்களில் இல்லை' },
-    signs: { unofficial_link: 'இந்த இணைப்பு அரசு இணையதளம் (.gov.in) அல்ல. திறக்க வேண்டாம், விவரங்களைக் கொடுக்க வேண்டாம்.',
-      official_link: 'இந்த இணைப்பு அரசு இணையதளம் (.gov.in).',
+    signs: { unofficial_link: 'இந்த இணைப்பு அங்கீகரிக்கப்பட்ட அதிகாரப்பூர்வ அரசு இணையதளம் அல்ல. திறக்க வேண்டாம், விவரங்களைக் கொடுக்க வேண்டாம்.',
+      official_link: 'இந்த இணைப்பு அங்கீகரிக்கப்பட்ட அதிகாரப்பூர்வ இணையதளம். தளத்தை நடத்துவது யார் என்பதை இது காட்டும்; அதனால் மட்டும் செய்தி உண்மை ஆகாது.',
       otp: 'OTP கேட்கிறது. அரசுத் திட்டங்கள் ஒருபோதும் OTP கேட்பதில்லை. பகிர வேண்டாம்.',
       payment: 'பணம் கேட்கிறது. இந்தத் திட்டங்களுக்கு செய்தி மூலம் யாருக்கும் பணம் கட்டத் தேவையில்லை.',
       personal_data: 'ஆதார் அல்லது வங்கி விவரங்களைக் கேட்கிறது. தெரியாதவர்களுக்கு அனுப்ப வேண்டாம்.',
+      insecure_link: 'இது அரசு இணையதளம், ஆனால் இணைப்பு பாதுகாப்பானது அல்ல (https இல்லை). முகவரியை நீங்களே தட்டச்சு செய்யுங்கள்.',
       urgency: '"இன்று மட்டும்" என்ற அவசரம் ஒரு வழக்கமான ஏமாற்று. முதலில் சரிபாருங்கள்.' },
     warnings: 'எச்சரிக்கை அறிகுறிகள்', share: '📤 திருத்தத்தை வாட்ஸ்அப்பில் அனுப்பு',
     correction: 'பக்கம் சரிபார்ப்பு (அதிகாரப்பூர்வ அரசு ஆவணங்களிலிருந்து):',
@@ -710,11 +749,12 @@ const SHIELD = {
     overall: { wrong: '❌ यह संदेश गलत है', partly_wrong: '⚠️ आंशिक रूप से गलत', looks_right: '✅ आधिकारिक दस्तावेज़ों से मेल खाता है',
       not_in_documents: '⚠️ किसी आधिकारिक दस्तावेज़ में नहीं। सावधान रहें।', no_claims: 'इस संदेश में योजना का कोई दावा नहीं मिला।' },
     verdict: { supported: '✅ सही', contradicted: '❌ गलत', not_in_documents: '⚠️ दस्तावेज़ों में नहीं' },
-    signs: { unofficial_link: 'यह लिंक सरकारी वेबसाइट (.gov.in) नहीं है। इसे न खोलें।',
-      official_link: 'यह लिंक सरकारी वेबसाइट (.gov.in) है।',
+    signs: { unofficial_link: 'यह लिंक किसी मान्य आधिकारिक सरकारी वेबसाइट का नहीं है। इसे न खोलें।',
+      official_link: 'यह लिंक मान्य आधिकारिक वेबसाइट का है। इससे पता चलता है कि साइट कौन चलाता है; सिर्फ़ इससे संदेश सच नहीं हो जाता।',
       otp: 'यह OTP माँगता है। सरकारी योजनाएँ कभी OTP नहीं माँगतीं। इसे साझा न करें।',
       payment: 'यह पैसे माँगता है। इन योजनाओं के लिए संदेश से किसी को भुगतान नहीं करना होता।',
       personal_data: 'यह आधार या बैंक विवरण माँगता है। अनजान लोगों को न भेजें।',
+      insecure_link: 'यह सरकारी वेबसाइट है, पर लिंक सुरक्षित नहीं है (https नहीं)। पता ख़ुद टाइप करें।',
       urgency: '"आज ही" का दबाव एक आम चाल है। पहले जाँचें।' },
     warnings: 'चेतावनी के संकेत', share: '📤 सुधार व्हाट्सऐप पर भेजें',
     correction: 'पक्कम द्वारा जाँच (आधिकारिक सरकारी दस्तावेज़ों से):',
@@ -831,13 +871,43 @@ function linkChip(label, href) {
    ========================================================================== */
 let orbErrorTimer = null;
 const ORB_STEP = { listening: 'th.listen', processing: 'th.search', speaking: 'th.speak' };
+const ORB_LABEL = { idle: 'orb.idle', listening: 'orb.listening', processing: 'orb.busy', speaking: 'orb.speaking', error: 'orb.error' };
+let lastOrbState = 'idle';
+/** The visible label under the home orb, and one short screen-reader message per state change. */
+function orbLabel(name) {
+  const key = ORB_LABEL[name] || 'orb.idle';
+  document.querySelectorAll('[data-orb-label]').forEach((node) => { node.dataset.i18n = key; node.textContent = t(key); node.dataset.state = name; });
+  if (name !== lastOrbState) {
+    lastOrbState = name;
+    const live = document.getElementById('orb-live');
+    if (live) live.textContent = t(key);
+  }
+}
+
 function orb(name) {
   setOrbState(name);
+  orbLabel(name);
   if (ORB_STEP[name]) thought(t(ORB_STEP[name]));
   else thought(null);
   clearTimeout(orbErrorTimer);
   // An error ring never stays on: back to idle after 3 s.
-  if (name === 'error') orbErrorTimer = setTimeout(() => { setOrbState('idle'); }, 3000);
+  if (name === 'error') orbErrorTimer = setTimeout(() => { setOrbState('idle'); orbLabel('idle'); }, 3000);
+}
+
+/** The browser blocked the microphone: say so plainly, and how to fix it, under each orb. */
+function showMicHelp(show) {
+  document.querySelectorAll('.mic-help').forEach((n) => n.remove());
+  if (!show) return;
+  ['#home-convo .orb-label', '#voice-status-label'].forEach((selector) => {
+    const anchor = document.querySelector(selector);
+    if (!anchor) return;
+    const card = el('div', 'mic-help');
+    card.setAttribute('role', 'alert');
+    const head = el('p', 'mic-help-title');
+    decorate(head, `🎙️ ${t('mic.title')}`);
+    card.append(head, el('p', '', t('mic.body')), chip(t('mic.type'), () => { showMicHelp(false); showPage('assistant'); setTimeout(() => document.getElementById('chat-input')?.focus(), 450); }, 'cta-button mic-help-type'));
+    anchor.after(card);
+  });
 }
 
 /* The orb's thought: a bubble beside it and a line under it while Pakkam works; when idle the
@@ -926,6 +996,17 @@ function stopPlayback() {
   state.currentAudio = null;
   const stopBtn = document.getElementById('stop-audio-btn');
   if (stopBtn) stopBtn.style.display = 'none';
+  document.body.classList.remove('audio-playing');
+}
+
+/** Read typed answers aloud? The person's own choice when they made one; otherwise yes, except in
+ *  Easy mode, where nothing starts speaking until they turn on "Read answers aloud".
+ *  (Spoken questions are always answered by voice.) */
+function readAloud() {
+  let saved = null;
+  try { saved = localStorage.getItem('pakkam_tts'); } catch (_) { /* private mode */ }
+  if (saved !== null) return saved !== 'false';
+  return !prefs.easy;
 }
 
 async function speechUrl(text, language) {
@@ -943,6 +1024,7 @@ function playUrl(url, { rate = 1, keepUrl = false } = {}) {
     state.currentAudio = audio;
     const stopBtn = document.getElementById('stop-audio-btn');
     if (stopBtn) stopBtn.style.display = 'inline-block';
+    document.body.classList.add('audio-playing');
     const done = () => {
       if (state.currentAudio === audio) { stopPlayback(); stopWaveformMeter(); orb('idle'); setStatus(t('assistant.tap')); }
       resolve();
@@ -1000,6 +1082,22 @@ function setConversationMode(on) {
 }
 
 function chatBox() { return document.getElementById('chat-messages'); }
+
+/** Long answers fold after about 8 lines, with Show more / Show less. */
+function foldLongAnswer(body) {
+  requestAnimationFrame(() => {
+    const lineHeight = parseFloat(getComputedStyle(body).lineHeight) || 26;
+    if (body.scrollHeight <= lineHeight * 9) return;
+    body.classList.add('folded');
+    const toggle = chip(t('answer.more'), () => {
+      const open = body.classList.toggle('folded') === false;
+      toggle.textContent = open ? t('answer.less') : t('answer.more');
+      toggle.setAttribute('aria-expanded', String(open));
+    }, 'text-link fold-toggle');
+    toggle.setAttribute('aria-expanded', 'false');
+    body.after(toggle);
+  });
+}
 
 function scrollChat() {
   const box = chatBox();
@@ -1207,7 +1305,22 @@ function openProof(c) {
   zoom.append(img);
   box.append(zoom);
   if (c.excerpt) box.append(el('blockquote', 'proof-excerpt', c.excerpt.slice(0, 400)));
-  if (c.source_url) box.append(linkChip(t('proof.source'), c.source_url));
+  if (c.source_url) {
+    // Open the official PDF at the page. Some PDF viewers ignore #page, so say what to do then;
+    // the page image above always works.
+    const isPdf = /\.pdf($|[?#])/i.test(c.source_url);
+    const href = isPdf && !c.source_url.includes('#') ? `${c.source_url}#page=${c.page_start}` : c.source_url;
+    box.append(linkChip(isPdf ? `📄 ${fill(t('proof.pdfAt'), { page: c.page_start })}` : t('proof.source'), href));
+    if (isPdf) box.append(el('p', 'proof-note pdf-note', fill(t('proof.pdfNote'), { page: c.page_start })));
+  }
+}
+
+/** Who stands behind the sources: a named person only when one really checked the page. */
+function attributionLine(citations) {
+  const names = [...new Set(citations.map((c) => c.checked_by).filter(Boolean))];
+  const line = el('p', names.length ? 'attribution checked' : 'attribution');
+  decorate(line, names.length ? `✓ ${fill(t('answer.checkedBy'), { names: names.join(', ') })}` : `📄 ${t('answer.fromDoc')}`);
+  return line;
 }
 
 /** Sentences as text with small numbered citation marks; each mark opens its page. */
@@ -1282,9 +1395,12 @@ function renderAnswer(bubble, data, question) {
     ], t('answer.heardCheck')));
   }
 
-  if (data.citations && data.citations.length && !data.refused) bubble.append(sourcesRow(data.citations));
-  if (data.sentences && data.sentences.length) renderSections(bubble, data);
-  else bubble.append(el('div', 'answer-text', text));
+  if (data.citations && data.citations.length && !data.refused) bubble.append(sourcesRow(data.citations), attributionLine(data.citations));
+  const answerBody = el('div', 'answer-body');
+  if (data.sentences && data.sentences.length) renderSections(answerBody, data);
+  else answerBody.append(el('div', 'answer-text', text));
+  bubble.append(answerBody);
+  foldLongAnswer(answerBody);
 
   // "What can I get?": a card per scheme with its signed amount, plus the yearly total.
   const facts = (data.scheme_facts || []).filter((f) => f.amount || f.who);
@@ -1499,7 +1615,7 @@ const voiceSpeech = () => ({ 'ta-Latn': 'ta' }[voiceLanguage()] || voiceLanguage
 async function finishTurn(text, language, options = {}) {
   if (options.gen !== undefined && options.gen !== speechGen) { orb('idle'); return; }  // stopped meanwhile
   const gen = speechGen;
-  if (options.voice || options.force || state.autoPlayTTS) await speak(text, language, { rate: options.rate });
+  if (options.voice || options.force || readAloud()) await speak(text, language, { rate: options.rate });
   else orb('idle');
   // Keep listening in conversation mode, unless the person stopped Pakkam meanwhile.
   if (convo.mode && options.voice && !recording && gen === speechGen) {
@@ -1541,8 +1657,10 @@ async function toggleVoiceRecording(surface = 'chat', { again = false } = {}) {
     recording = null;
     orb('error');
     setStatus(t('status.micError'));
+    showMicHelp(true);
     return;
   }
+  showMicHelp(false);
   orb('listening');
   setStatus(t('status.listening'));
   showHeard('');
@@ -1630,6 +1748,61 @@ function applyShieldText() {
   set('#shield-check', w.check);
 }
 
+// Same rules as src/schemebot/generate/forward.py and data/official_domains.json (keep in sync;
+// a test checks the exact hosts match). Recognising a host never makes a claim true.
+const OFFICIAL_SUFFIX = ['gov.in', 'nic.in'];
+const OFFICIAL_EXACT = ['tncdw.org', 'pfrda.org.in', 'npstrust.org.in', 'enps.nsdl.com', 'npscra.nsdl.co.in'];
+const LINK_RE = /(https?:\/\/|www\.)\S+|\b[\w-]+\.(?:com|in|org|net|xyz|online|site|info|ly|me|apk)\b\S*/gi;
+const SIGN_RE = {
+  otp: /\botp\b|ஓடிபி|ओटीपी|one.?time.?password|verification code/gi,
+  payment: /\b(pay|fee|fees|charges?|deposit|processing|registration amount|upi|gpay|phonepe|paytm)\b|கட்டணம்|செலுத்த|शुल्क|फीस|भुगतान/gi,
+  personal_data: /\b(aadhaar|aadhar|pan|bank account|account number|atm|card number|cvv|pin)\b|ஆதார்|आधार/gi,
+  urgency: /\b(today only|last date today|hurry|urgent|immediately|before midnight|limited)\b|இன்று மட்டும்|உடனே|அவசர|आज ही|तुरंत|जल्दी/gi,
+};
+
+function linkSign(link) {
+  let url;
+  try { url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(link) ? link : `https://${link}`); } catch (_) { return 'unofficial_link'; }
+  const host = url.hostname.replace(/\.$/, '').toLowerCase().replace(/^www\./, '');
+  const official = OFFICIAL_SUFFIX.some((s) => host === s || host.endsWith(`.${s}`)) || OFFICIAL_EXACT.includes(host);
+  if (!official) return 'unofficial_link';
+  return url.protocol === 'http:' ? 'insecure_link' : null;
+}
+
+/** The pasted message shown back with its warning signs marked. Built from text nodes only,
+ *  so nothing in the message can run as HTML. Each mark jumps to its warning explanation. */
+function echoMessage(message, signs = []) {
+  const box = el('div', 'shield-echo');
+  box.append(el('p', 'shield-echo-label', t('shield.yourMessage')));
+  const ranges = [];
+  for (const m of message.matchAll(LINK_RE)) {
+    const sign = linkSign(m[0].replace(/[.,;:!?)"']+$/, ''));
+    if (sign && signs.includes(sign)) ranges.push([m.index, m.index + m[0].length, sign]);
+  }
+  Object.entries(SIGN_RE).forEach(([sign, re]) => {
+    if (!signs.includes(sign)) return;
+    for (const m of message.matchAll(re)) ranges.push([m.index, m.index + m[0].length, sign]);
+  });
+  ranges.sort((a, b) => a[0] - b[0]);
+  const text = el('p', 'shield-echo-text');
+  let at = 0;
+  ranges.forEach(([start, end, sign]) => {
+    if (start < at) return;  // overlapping marks: keep the first
+    text.append(document.createTextNode(message.slice(at, start)));
+    const jump = el('a', `sign-mark sign-${sign}`);
+    jump.href = `#sign-${sign}`;
+    jump.title = t('shield.markTitle');
+    jump.addEventListener('click', (event) => { event.preventDefault(); const row = document.getElementById(`sign-${sign}`); row?.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' }); row?.focus({ preventScroll: true }); });
+    const mark = el('mark', '', message.slice(start, end));
+    jump.append(mark);
+    text.append(jump);
+    at = end;
+  });
+  text.append(document.createTextNode(message.slice(at)));
+  box.append(text);
+  return box;
+}
+
 async function checkForward(message) {
   const w = shieldWords();
   const status = document.getElementById('shield-status');
@@ -1642,18 +1815,19 @@ async function checkForward(message) {
     const data = await (await postJson('/check-forward', { message: message.slice(0, 1500) }, 180000)).json();
     status.textContent = '';
     // Verdict first: a big, coloured badge (red wrong, amber partly or unknown, green right).
-    const tone = { wrong: 'bad', partly_wrong: 'warn', looks_right: 'good', not_in_documents: 'warn' }[data.overall] || 'neutral';
+    const tone = { wrong: 'bad', partly_wrong: 'bad', looks_right: 'good', not_in_documents: 'neutral', no_claims: 'neutral' }[data.overall] || 'neutral';
     const verdict = el('div', `shield-verdict-card tone-${tone}`);
     const badge = el('span', 'verdict-badge');
-    badge.innerHTML = iconSvg({ bad: 'x', warn: 'warn', good: 'check' }[tone] || 'help');
+    badge.innerHTML = iconSvg({ bad: 'x', good: 'check' }[tone] || 'help');
     const [, overallText] = splitIcon(w.overall[data.overall] || data.overall);
     verdict.append(badge, el('h2', `shield-overall shield-${data.overall}`, overallText));
     result.append(verdict);
+    result.append(echoMessage(message, data.scam_signs));
     const correction = [w.correction];
     if (data.claims.length) {
       const list = el('div', 'claim-list');
       data.claims.forEach((claim) => {
-        const claimTone = { supported: 'good', contradicted: 'bad' }[claim.verdict] || 'warn';
+        const claimTone = { supported: 'good', contradicted: 'bad' }[claim.verdict] || 'neutral';
         const card = el('article', `shield-claim tone-${claimTone}`);
         const pill = el('span', 'shield-verdict');
         decorate(pill, w.verdict[claim.verdict] || claim.verdict);
@@ -1670,10 +1844,12 @@ async function checkForward(message) {
       const box = el('div', 'shield-signs');
       const head = el('h3');
       decorate(head, `⚠️ ${w.warnings}`);
-      box.append(head);
+      box.append(head, el('p', 'signs-note', t('shield.signsNote')));
       const list = el('ul');
       signs.forEach((sign) => {
         const li = el('li');
+        li.id = `sign-${sign}`;
+        li.tabIndex = -1;
         decorate(li, `⚠️ ${w.signs[sign] || sign}`);
         list.append(li);
         correction.push(`⚠️ ${w.signs[sign] || sign}`);
@@ -1984,8 +2160,10 @@ function renderHomeExamples() {
     mark.innerHTML = iconSvg(icons[index % icons.length]);
     card.append(mark, el('span', 'example-text', q), el('span', 'example-go', '→'));
     card.addEventListener('click', () => submitChatQuery(q));
+    card.classList.add('reveal');
     return card;
   }));
+  watchReveals(box);
 }
 
 /* ==========================================================================
@@ -2021,7 +2199,9 @@ function applyPrefs() {
   set('setting-easy', prefs.easy);
   set('setting-calm', prefs.calm);
   set('setting-phone', prefs.phone);
+  state.autoPlayTTS = readAloud();
   set('setting-autoplay-tts', state.autoPlayTTS);
+  set('read-aloud-toggle', state.autoPlayTTS);
 }
 
 function bindSettings() {
@@ -2033,10 +2213,12 @@ function bindSettings() {
   toggle('setting-easy', 'pakkam_easy', (on) => { prefs.easy = on; if (on) prefs.speed = 0.85; });
   toggle('setting-calm', 'pakkam_calm', (on) => { prefs.calm = on; });
   toggle('setting-phone', 'pakkam_phone', (on) => { prefs.phone = on; });
-  document.getElementById('setting-autoplay-tts')?.addEventListener('change', (event) => {
+  ['setting-autoplay-tts', 'read-aloud-toggle'].forEach((id) => document.getElementById(id)?.addEventListener('change', (event) => {
     state.autoPlayTTS = event.target.checked;
     savePref('pakkam_tts', event.target.checked);
-  });
+    applyPrefs();
+  }));
+  document.getElementById('composer-stop')?.addEventListener('click', stopSpeaking);
   // Clear history: a second tap confirms (pop-up confirms are blocked in some browsers).
   const clear = document.getElementById('clear-history-btn');
   clear?.addEventListener('click', () => {
@@ -2312,7 +2494,7 @@ function heroEntrance() {
   try { seen = sessionStorage.getItem('pakkam_intro') === '1'; sessionStorage.setItem('pakkam_intro', '1'); } catch (_) { /* private mode */ }
   if (seen || reduceMotion()) return;
   document.body.classList.add('intro');
-  setTimeout(() => document.body.classList.remove('intro'), 2200);
+  setTimeout(() => { document.body.classList.remove('intro'); document.dispatchEvent(new CustomEvent('pakkam:page', { detail: 'home' })); }, 2200);
 }
 
 /* ==========================================================================
@@ -2360,6 +2542,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tour-start')?.addEventListener('click', startTour);
   if (new URLSearchParams(window.location.search).get('tour') === '1') setTimeout(startTour, 700);
   document.getElementById('composer-mic')?.addEventListener('click', () => orbTap('chat'));
+  const messages = chatBox();
+  const jump = document.getElementById('jump-latest');
+  if (messages && jump) {
+    messages.addEventListener('scroll', () => { jump.hidden = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 220; }, { passive: true });
+    jump.addEventListener('click', () => { messages.scrollTo({ top: messages.scrollHeight, behavior: reduceMotion() ? 'auto' : 'smooth' }); });
+  }
   document.querySelectorAll('#setting-lang [data-lang]').forEach((button) => button.addEventListener('click', () => {
     convo.voiceLang = null;
     try { localStorage.removeItem('pakkam_voice'); } catch (_) { /* private mode */ }

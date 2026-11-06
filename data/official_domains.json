@@ -1,0 +1,14 @@
+{
+  "_about": "Web hosts Rumour Shield recognises as official. Recognising a host only means the website belongs to a government body or its official agency; it never makes a claim in a message true (claims are checked against the documents separately). Match rules: 'suffix' entries match the domain itself and its subdomains at a dot boundary; 'exact' entries match only that host unless subdomains is true. Add a host only after checking who runs it, and record the date.",
+  "suffix": [
+    {"domain": "gov.in", "owner": "Government of India and state government websites", "checked_on": "2026-11-06"},
+    {"domain": "nic.in", "owner": "National Informatics Centre (government websites)", "checked_on": "2026-11-06"}
+  ],
+  "exact": [
+    {"host": "tncdw.org", "subdomains": false, "owner": "Tamil Nadu Corporation for Development of Women (Government of Tamil Nadu)", "checked_on": "2026-11-06"},
+    {"host": "pfrda.org.in", "subdomains": false, "owner": "Pension Fund Regulatory and Development Authority (Atal Pension Yojana regulator)", "checked_on": "2026-11-06"},
+    {"host": "npstrust.org.in", "subdomains": false, "owner": "NPS Trust, set up by PFRDA", "checked_on": "2026-11-06"},
+    {"host": "enps.nsdl.com", "subdomains": false, "owner": "Protean (NSDL) e-NPS, central record-keeping agency appointed by PFRDA", "checked_on": "2026-11-06"},
+    {"host": "npscra.nsdl.co.in", "subdomains": false, "owner": "Protean (NSDL) NPS central record-keeping agency appointed by PFRDA", "checked_on": "2026-11-06"}
+  ]
+}

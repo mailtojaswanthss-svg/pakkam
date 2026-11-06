@@ -113,3 +113,49 @@ def test_no_claims_still_reports_scam_signs() -> None:
     result = ForwardChecker(Service(), NoClaims()).check("Click bit.ly/x and share your OTP now")
     assert result.overall == "no_claims"
     assert result.scam_signs == ["unofficial_link", "otp"]
+
+
+# Official hosts come from data/official_domains.json: suffix rules at a dot boundary and exact
+# hosts, never substring matching.
+@pytest.mark.parametrize(
+    ("message", "signs"),
+    [
+        ("Order at https://tncdw.org/frontend/gos/x.pdf", ["official_link"]),
+        ("See https://x.tn.gov.in/page", ["official_link"]),
+        ("See www.pmkisan.gov.in", ["official_link"]),
+        ("Old link http://tncdw.org/x.pdf", ["official_link", "insecure_link"]),
+        ("Claim at https://fake-gov.in/x", ["unofficial_link"]),
+        ("Claim at https://gov.in.fakewebsite.com/x", ["unofficial_link"]),
+        ("Claim at https://tncdw.org.evil.com/x", ["unofficial_link"]),
+        ("Claim at https://sub.tncdw.org/x", ["unofficial_link"]),  # subdomains not approved
+        ("Short link bit.ly/abc", ["unofficial_link"]),
+    ],
+)
+def test_official_hosts_are_matched_exactly(message: str, signs: list[str]) -> None:
+    assert scam_signs(message) == signs
+
+
+class SupportingLlm(Llm):
+    """Same claims, but the documents support the first one."""
+
+    def complete_json(self, system: str, user: str, schema: dict[str, object]) -> dict[str, Any]:
+        if "forwarded on WhatsApp" in system:
+            claim = {"claim": "Rs.1,000 a month", "question": "How much does Magalir Urimai pay?"}
+            return {"claims": [claim]}
+        return {"verdict": "supported", "explanation": "The order says Rs.1,000 a month."}
+
+
+def test_warning_signs_never_change_the_verdict() -> None:
+    result = ForwardChecker(Service(), SupportingLlm()).check(
+        "Rs.1,000 a month! Share your OTP at bit.ly/x today only"
+    )
+    assert result.overall == "looks_right"
+    assert {"unofficial_link", "otp", "urgency"} <= set(result.scam_signs)
+
+
+def test_an_official_link_does_not_make_a_wrong_claim_right() -> None:
+    result = ForwardChecker(Service(), Llm()).check(
+        "Rs.4,000 every month for women, see https://tncdw.org/order.pdf"
+    )
+    assert result.overall == "wrong"
+    assert "official_link" in result.scam_signs

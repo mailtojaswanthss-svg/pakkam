@@ -864,7 +864,6 @@ button.citation-tag.proof-btn { font-size: 0.85rem; padding: 7px 14px; font-weig
 .bg-layer canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bg-glow { position: absolute; width: 46vmax; height: 46vmax; border-radius: 50%; filter: blur(80px); opacity: 0.22; }
 .bg-glow--a { background: var(--glow-a); top: -14vmax; left: -10vmax; animation: glowDrift 26s ease-in-out infinite alternate; }
-.bg-glow--b { background: var(--accent-2); bottom: -18vmax; right: -12vmax; animation: glowDrift 32s ease-in-out infinite alternate-reverse; }
 [data-theme="light"] .bg-glow { opacity: 0.16; }
 @keyframes glowDrift { from { transform: translate(0, 0) scale(1); } to { transform: translate(8vmax, 6vmax) scale(1.12); } }
 .page-section, .site-footer { position: relative; z-index: 2; }
@@ -1643,3 +1642,157 @@ button.hero-chip { font: inherit; cursor: pointer; }
 .feature-callout, .callout-01, .callout-02, .callout-03 { width: 320px; max-width: 320px; }
 /* The glows are already soft radial gradients: no blur filter (much cheaper to paint and to snapshot) */
 .bg-glow { filter: none; }
+
+/* ==========================================================================
+   V3: two surface levels, used the same way in both themes
+   ========================================================================== */
+/* surface-1: cards and lists */
+.feature-callout, .example-card, .scheme-list, .settings-card, .cap-card, .num, .credit-card, .name-figure, .story-sign, .shield-claim, .glass-panel:not(.proof-box):not(.drawer-panel) {
+  background-color: var(--surface-1);
+  border-color: var(--border-1);
+}
+.glass-panel:not(.proof-box) { background: var(--glass-surface); }
+/* surface-2: elevated panels (answers, drawer, proof card, tour, Shield verdict) */
+.chat-bubble.ai, .drawer-panel, .proof-box, .tour-card, .shield-verdict-card, .chat-composer {
+  background-color: var(--surface-2);
+  border-color: var(--border-2);
+  box-shadow: var(--shadow-2);
+}
+.shield-verdict-card { background-image: linear-gradient(color-mix(in srgb, var(--tone) 12%, transparent), color-mix(in srgb, var(--tone) 12%, transparent)); }
+/* light mode: navbar and inputs sit on the tinted surface, so not everything is white */
+[data-theme="light"] .input-pill, [data-theme="light"] .shield-input { background: var(--bg-secondary); }
+[data-theme="light"] .chat-composer .input-pill { background: none; }
+/* the old second glow rule (accent colour) is replaced by --glow-b */
+.bg-glow--d { display: none; }
+
+/* ==========================================================================
+   V3: orb-first home, orb label, mic help
+   ========================================================================== */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+@media (min-width: 961px) {
+  #hero-orb-assembly .central-orb-container { width: 280px; height: 280px; }
+  .feature-callout, .callout-01, .callout-02, .callout-03 { min-height: 0; padding: 12px 14px; }
+  .feature-text p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .callout-01 { margin-bottom: 6px; }
+}
+.orb-halo { inset: -26%; }
+.orb-label { margin: 4px auto 0; text-align: center; font-size: 1.05rem; font-weight: 700; color: var(--text-primary); }
+.orb-label::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--text-highlight); vertical-align: 0.12em; }
+.orb-label[data-state="listening"]::before { animation: dotPulse 0.9s ease-in-out infinite; }
+.orb-label[data-state="error"] { color: #dc2626; }
+html[data-theme="dark"] .orb-label[data-state="error"] { color: #f87171; }
+.orb-label[data-state="error"]::before { background: currentColor; }
+.mic-help { max-width: 460px; margin: 12px auto 0; padding: 14px 16px; border-radius: var(--radius-card); text-align: left; background: color-mix(in srgb, #d97706 10%, var(--surface-2)); border: 1px solid color-mix(in srgb, #d97706 45%, transparent); color: var(--text-primary); }
+.mic-help p { margin: 0 0 8px; line-height: 1.5; color: var(--text-secondary); font-size: 0.92rem; }
+.mic-help .mic-help-title { display: flex; align-items: center; gap: 8px; color: var(--text-primary); font-weight: 700; font-size: 1rem; }
+.mic-help-type { padding: 9px 18px; }
+
+/* V3: Shield outcomes (colour plus icon plus words), echoed message, attribution */
+.tone-neutral { --tone: #64748b; }
+html[data-theme="dark"] .tone-neutral { --tone: #94a3b8; }
+.shield-echo { padding: 14px 16px; border-radius: var(--radius-card); background: var(--surface-1); border: 1px solid var(--border-1); }
+.shield-echo-label { margin: 0 0 6px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); }
+.shield-echo-text { margin: 0; white-space: pre-wrap; word-break: break-word; line-height: 1.7; color: var(--text-primary); }
+.sign-mark { text-decoration: none; color: inherit; }
+.sign-mark mark { padding: 1px 4px; border-radius: 5px; background: color-mix(in srgb, #d97706 24%, transparent); color: inherit; border-bottom: 2px solid #d97706; }
+.sign-mark:hover mark, .sign-mark:focus-visible mark { background: color-mix(in srgb, #d97706 38%, transparent); }
+.signs-note { margin: 0 0 10px; color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; }
+.shield-signs li:focus { outline: 2px solid #d97706; outline-offset: 3px; border-radius: 6px; }
+.attribution { display: flex; align-items: center; gap: 6px; margin: -4px 0 12px; font-size: 0.84rem; color: var(--text-secondary); }
+.attribution.checked { color: #15803d; }
+html[data-theme="dark"] .attribution.checked { color: #4ade80; }
+.pdf-note { font-size: 0.82rem; }
+
+/* ==========================================================================
+   V3: chat space, Easy mode, read-aloud, stop, fold
+   ========================================================================== */
+.chat-viewport { position: relative; }
+.chat-messages { padding-inline: max(4px, calc((100% - 760px) / 2)); gap: 20px; padding-bottom: 16px; }
+.chat-messages .chat-bubble.ai { max-width: 100%; }
+.chat-messages .chat-bubble.user { max-width: 82%; }
+.chat-composer { width: 100%; max-width: 760px; margin-inline: auto; flex: none; }
+.answer-body.folded { max-height: calc(1.65em * 8); overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+.fold-toggle { display: inline-flex; margin: 6px 0 0; color: var(--text-highlight); font-weight: 600; min-height: 32px; }
+.jump-latest { position: absolute; left: 50%; bottom: 84px; z-index: 5; transform: translateX(-50%); padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border-2); background: var(--surface-2); color: var(--text-primary); font: 600 0.86rem var(--font-primary); box-shadow: var(--shadow-2); cursor: pointer; }
+.jump-latest[hidden] { display: none; }
+.composer-stop { display: none; place-items: center; width: 44px; height: 44px; flex: none; border: 0; border-radius: 50%; background: color-mix(in srgb, #dc2626 16%, transparent); color: #dc2626; cursor: pointer; }
+html[data-theme="dark"] .composer-stop { color: #f87171; }
+body.audio-playing .composer-stop { display: inline-grid; }
+.read-aloud { display: none; align-self: flex-end; margin: 0 0 10px; }
+html.easy .read-aloud { display: inline-flex; }
+
+/* Easy mode: bigger, fewer choices, nothing surprising */
+html.easy .tour-link, html.easy .hero-chips, html.easy .feature-callout { display: none !important; }
+html.easy .cta-button, html.easy .chip-btn, html.easy .composer-mic, html.easy .composer-stop, html.easy .tab-item, html.easy .filter-tab { min-height: 52px; }
+html.easy .composer-mic, html.easy .composer-stop { width: 52px; height: 52px; }
+html.easy .orb-label { font-size: 1.25rem; }
+html.easy .chat-bubble { font-size: 1.08rem; }
+
+/* Touch targets: at least 44px for the controls people tap most */
+@media (pointer: coarse) {
+  .chip-btn, .cta-button, .source-pill, .filter-tab, .scheme-row, .icon-btn, .text-link, .hero-chip { min-height: 44px; }
+  .cite-num { min-width: 28px; height: 28px; }
+}
+
+/* ==========================================================================
+   V3: About story scenes, feature drawings, page-change stagger
+   ========================================================================== */
+.story-scenes { max-width: 1000px; margin: 0 auto 64px; }
+.scene-row { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin: 0; padding: 0; list-style: none; }
+.scene-row::before { content: ''; position: absolute; top: 72px; left: 16%; right: 16%; height: 2px; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-2)); transform: scaleX(0); transform-origin: left; transition: transform 1.2s var(--ease-out) 0.25s; }
+.story-scenes:has(.scene.in) .scene-row::before { transform: scaleX(1); }
+.scene { position: relative; text-align: center; }
+.scene:nth-child(2) { transition-delay: 140ms; } .scene:nth-child(3) { transition-delay: 280ms; }
+.scene-frame { position: relative; z-index: 1; display: grid; place-items: center; height: 150px; margin-bottom: 12px; border-radius: var(--radius-card); background: var(--surface-1); border: 1px solid var(--border-1); box-shadow: var(--card-shadow); }
+.scene h3 { margin: 0 0 6px; font-size: 1.08rem; }
+.scene p { margin: 0 auto; max-width: 280px; color: var(--text-secondary); line-height: 1.55; font-size: 0.95rem; }
+.scene-art { width: 190px; height: 133px; overflow: visible; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.scene-art .sc-line, .scene-art .sc-line * { stroke: var(--text-secondary); }
+.scene-art .sc-soft, .scene-art .sc-soft * { stroke: var(--text-muted); stroke-width: 1.6; opacity: 0.8; }
+.scene-art .sc-fill { fill: color-mix(in srgb, var(--surface-2) 90%, transparent); }
+.scene-art .sc-fill2 { fill: color-mix(in srgb, var(--accent-2) 12%, transparent); }
+.scene-art .sc-accent { stroke: var(--accent-2); }
+.scene-art .sc-cyan, .scene-art .sc-cyan * { stroke: var(--accent-cyan); }
+.scene-art .sc-dash { stroke-dasharray: 4 6; opacity: 0.7; }
+.scene-art .sc-orb { stroke: none; }
+.scene-art .sc-mark { fill: color-mix(in srgb, var(--accent-cyan) 35%, transparent); stroke: none; }
+.scene-art .sc-good { fill: #16a34a; stroke: none; }
+.scene-art .sc-good-tick { stroke: #fff; stroke-width: 2.4; }
+/* scenes draw themselves in a little as they appear */
+.scene .sc-cyan path, .scene .sc-arrow { stroke-dasharray: 80; stroke-dashoffset: 80; transition: stroke-dashoffset 1s var(--ease-out) 0.3s; }
+.scene.in .sc-cyan path, .scene.in .sc-arrow { stroke-dashoffset: 0; }
+html.calm .scene .sc-cyan path, html.calm .scene .sc-arrow { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: reduce) { .scene .sc-cyan path, .scene .sc-arrow { stroke-dashoffset: 0; transition: none; } .scene-row::before { transform: scaleX(1); transition: none; } }
+@media (max-width: 720px) {
+  .scene-row { grid-template-columns: 1fr; gap: 26px; }
+  .scene-row::before { top: 0; bottom: 0; left: 50%; right: auto; width: 2px; height: auto; transform: scaleY(0); transform-origin: top; }
+  .story-scenes:has(.scene.in) .scene-row::before { transform: scaleY(1); }
+  .scene-frame { height: 140px; max-width: 320px; margin-inline: auto; }
+}
+/* the same drawings, small, on the home feature cards */
+.feature-icon:has(.scene-mini) { width: 52px; height: 40px; padding: 2px; border-radius: 10px; }
+.scene-mini { width: 48px; height: 34px; stroke-width: 3.2; }
+.scene-mini .sc-soft { display: none; }
+
+/* Page change: header, then the first panel, slide up gently (≤ 400ms) */
+.page-section.active > .page-header > div > *, .page-section.active > .page-header + * { animation: rise 0.38s var(--ease-out) both; }
+.page-section.active > .page-header > div > :nth-child(2) { animation-delay: 50ms; }
+.page-section.active > .page-header > div > :nth-child(n+3) { animation-delay: 100ms; }
+.page-section.active > .page-header + * { animation-delay: 140ms; }
+
+/* V3: long Tamil and Hindi words may break at large text sizes instead of being cut off */
+h1, h2, h3, .hero-title, .hero-subtitle, .cta-button, .chip-btn, .scene p, .orb-label, .feature-text { overflow-wrap: break-word; }
+@media (max-width: 640px) {
+  .tab-item span { font-size: clamp(9px, 0.7rem, 13px); overflow-wrap: break-word; text-align: center; line-height: 1.1; }
+  .tab-item .ui-icon { width: clamp(20px, 1.5rem, 28px); height: clamp(20px, 1.5rem, 28px); }
+}
+@media (max-width: 720px) { .scene-row::before { display: none; } }
+/* The hero is a centred flex column: its children must not grow past the screen at large text */
+.hero-stage > * { max-width: 100%; min-width: 0; box-sizing: border-box; }
+.hero-copy { width: 100%; }
+.hero-chip { white-space: normal; text-align: left; }
+.thought-line { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.example-card, .example-text { min-width: 0; overflow-wrap: break-word; }
+.hero-chip { flex: 0 1 auto; max-width: 100%; min-width: 0; }
+.hero-chip > span, .thought-line { min-width: 0; overflow-wrap: break-word; }
+.thought-line { padding-inline-end: 8px; box-sizing: border-box; }
