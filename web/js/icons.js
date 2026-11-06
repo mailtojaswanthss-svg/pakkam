@@ -29,6 +29,10 @@ export const ICONS = {
   mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4 7 8 6 8-6"/>',
   lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>',
   search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+  warn: '<path d="M12 4 21 19.5H3z"/><path d="M12 10v4.5M12 17.2v.01"/>',
+  x: '<path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/>',
+  help: '<circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.5a2.4 2.4 0 0 1 4.6.9c0 1.6-2.3 2-2.3 3.4M12 16.8v.01"/>',
+  bulb: '<path d="M9 17.5h6M10 20.5h4M12 3.5a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V17.5h5.2v-1.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3.5Z"/>',
   sparkle: '<path d="M12 3.5 13.8 10 20.5 12l-6.7 2L12 20.5 10.2 14 3.5 12l6.7-2z"/>',
 };
 
@@ -36,7 +40,8 @@ const EMOJI = {
   '🎙️': 'mic', '🎙': 'mic', '🎤': 'mic', '🔊': 'speaker', '⏹': 'stop', '⏹️': 'stop', '📄': 'page', '📋': 'clipboard',
   '📤': 'share', '🔁': 'repeat', '📝': 'note', '🗣️': 'simple', '🗣': 'simple', '🖨️': 'print', '🖨': 'print',
   '👤': 'person', '👍': 'thumbUp', '👎': 'thumbDown', '📞': 'phone', '🛡️': 'shield', '🛡': 'shield', '💰': 'rupee',
-  '🌾': 'leaf', '🔥': 'flame', '🙅': 'ban', '✓': 'check',
+  '🌾': 'leaf', '🔥': 'flame', '🙅': 'ban', '✓': 'check', '✅': 'check', '❌': 'x', '⚠️': 'warn', '⚠': 'warn',
+  '🤔': 'help', '❓': 'help', '💡': 'bulb',
 };
 const LEADING = /^(\p{Extended_Pictographic}️?|⏹️?)\s*/u;
 
