@@ -1,0 +1,73 @@
+"""Build web/js/art.js (site: classes, themed by CSS) and figma/*.svg (resolved colours for the
+Figma file "Pakkam Illustrations").
+
+Usage: python scripts/art/build.py web/js/art.js
+"""
+import json
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+from art_src import CATEGORY, CHAPTERS, EMPTY, FIGMA_COLORS, STEPS  # noqa: E402
+
+OUT_JS = Path(sys.argv[1])
+FIG_DIR = Path(__file__).parent / 'figma'  # not committed; import these SVGs into Figma
+FIG_DIR.mkdir(exist_ok=True)
+
+ALL = {**{f'cat-{k}': v for k, v in CATEGORY.items()}, **STEPS, 'empty': EMPTY, **CHAPTERS}
+
+
+def tidy(svg: str) -> str:
+    svg = re.sub(r'\s*\n\s*', '', svg)
+    svg = re.sub(r'(\d+\.\d{2})\d+', r'\1', svg)
+    return svg
+
+
+def site_svg(name: str, svg: str) -> str:
+    # unique gradient ids per drawing, decorative for screen readers, themed via CSS
+    svg = svg.replace('ART_ORB3', f'art-orb-{name}').replace('ART_ORB', f'art-orb-{name}')
+    return tidy(svg.replace('<svg ', f'<svg class="art art-{name}" aria-hidden="true" focusable="false" ', 1))
+
+
+def figma_svg(svg: str) -> str:
+    vb = re.search(r'viewBox="0 0 (\d+) (\d+)"', svg)
+    w, h = int(vb.group(1)) * 4, int(vb.group(2)) * 4
+    svg = svg.replace('<svg ', f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" ', 1)
+    svg = svg.replace('var(--accent-cyan)', '#079EAC').replace('var(--accent-2)', '#6D28D9')
+    svg = svg.replace(' fill="url(#ART_ORB)"', '').replace(' fill="url(#ART_ORB3)"', '')
+
+    def resolve(match):
+        tag, cls = match.group(1), match.group(2).split()
+        fill = next((FIGMA_COLORS[c][0] for c in cls if c in FIGMA_COLORS and FIGMA_COLORS[c][0] != 'none'), 'none')
+        stroke = next((FIGMA_COLORS[c][1] for c in cls if c in FIGMA_COLORS and FIGMA_COLORS[c][1] != 'none'), 'none')
+        width = '3.5' if 'wide' in cls else '1.4' if 'line-thin' in cls else '2'
+        extra = f' fill="{fill}" stroke="{stroke}" stroke-width="{width}" stroke-linecap="round" stroke-linejoin="round"'
+        if 'dash' in cls or 'road' in cls:
+            extra += ' stroke-dasharray="6 7"'
+        if tag == 'text':
+            extra = f' fill="{fill}" font-family="Noto Sans Tamil" font-weight="700" font-size="{30 if "tamil-word" in cls else 16}"'
+        return f'<{tag} data-name="{" ".join(cls)}"{extra}'
+
+    svg = re.sub(r'<(path|circle|rect|ellipse|text) class="([^"]+)"', resolve, svg)
+    svg = re.sub(r'<g class="([^"]+)"', r'<g id="\1"', svg)
+    return tidy(svg)
+
+
+site = {name: site_svg(name, svg) for name, svg in ALL.items()}
+OUT_JS.write_text(
+    '/* Pakkam illustrations: flat drawings in the site palette, themed and animated by CSS\n'
+    '   (classes such as .skin, .paper, .anim-sway). The same drawings are in the Figma file\n'
+    '   "Pakkam Illustrations" for editing. Generated; edit the source drawings, not this file. */\n\n'
+    f'export const ART = {json.dumps(site, ensure_ascii=False, indent=2)};\n\n'
+    "/** Drop the named drawing into every [data-art] slot that asks for it. */\n"
+    "export function fillArt(root = document) {\n"
+    "  root.querySelectorAll('[data-art]').forEach((slot) => {\n"
+    "    if (!slot.firstElementChild && ART[slot.dataset.art]) slot.innerHTML = ART[slot.dataset.art];\n"
+    "  });\n"
+    "}\n",
+    encoding='utf-8',
+)
+for name, svg in ALL.items():
+    (FIG_DIR / f'{name}.svg').write_text(figma_svg(svg), encoding='utf-8')
+print(len(site), 'drawings,', OUT_JS.stat().st_size, 'bytes')
