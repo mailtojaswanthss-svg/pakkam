@@ -101,99 +101,116 @@ const CURSOR = () => {
     mark(`${key}_answer`);
   };
 
-  // Load once and let the home intro finish off camera time (cut in the edit).
+  const navTo = async (key) => { await click(page.locator(`[data-nav="${key}"]`).filter({ visible: true }).first()); await sleep(900); };
+  const smoothTo = (selector, block = 'center') => page.evaluate(([sel, blk]) => document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth', block: blk }), [selector, block]);
+
+  // Set up off camera: Tamil as the spoken language, then back to Home (cut in the edit).
   await page.goto(SITE, { waitUntil: 'networkidle' });
-  await sleep(3500);
+  await sleep(2500);
+  await navTo('settings');
+  await click(page.locator('.settings-voice-chips button', { hasText: 'தமிழ்' }));
+  await navTo('home');
   mark('ready');
 
   // s02: Rumour Shield
-  await click(page.locator('.nav-item[data-nav="shield"]'));
-  await sleep(900);
+  await navTo('shield');
   mark('s02');
   await sleep(500);
   await click(page.locator('#shield-input'));
   await page.locator('#shield-input').fill(SCRIPT.forward);
-  await sleep(1200);
+  await sleep(1000);
   await click(page.locator('#shield-check'));
   await page.waitForSelector('.shield-verdict-card', { timeout: 120000 });
   mark('s02_verdict');
-  await sleep(1500);
-  await page.mouse.wheel(0, 380);
+  await sleep(1300);
+  await smoothTo('.shield-claim');
   await sleep(1800);
-  await page.mouse.wheel(0, 320);
-  await holdUntil(marks.s02, D.s02_shield + 1.2);
+  mark('s02_signs');
+  await smoothTo('.shield-signs');
+  await sleep(4000);
   mark('s02_end');
 
   // s03: home
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  await sleep(400);
-  await click(page.locator('.nav-item[data-nav="home"]'));
-  await sleep(600);
+  await sleep(500);
+  await navTo('home');
   mark('s03');
-  await holdUntil(marks.s03, Math.max(D.s03_home + 1.2, 5));
+  await holdUntil(marks.s03, Math.max(D.s03_home + 1.0, 5));
   mark('s03_end');
 
-  // s04: voice question in Tamil, on the Ask page
-  await click(page.locator('#cta-ask-pakkam'));
-  await sleep(1000);
+  // s04: ask by voice on the home orb, in Tamil
   mark('s04');
-  await click(page.locator('#voice-lang-chips button', { hasText: 'தமிழ்' }));
-  await holdUntil(marks.s04, D.s04_voice + 0.3);
-  const before = await aiCount();
-  await click(page.locator('#assistant-mic-orb'));
+  await holdUntil(marks.s04, D.s04_voice + 0.4);
+  await click(page.locator('#hero-orb-trigger'));
   mark('s04_mic');
-  answers.s04 = await waitAnswer(before, 120000);
+  await page.waitForFunction(() => { const c = document.getElementById('home-answer'); return c && !c.hidden && c.querySelector('.proof-btn'); }, null, { timeout: 120000 });
   mark('s04_answer');
-  await sleep(1000 * (D.s04_voice_b + 9));
+  await sleep(600);
+  await smoothTo('#home-convo', 'center');
+  await sleep(1000 * (D.s04_voice_b + D.tamil_answer + 1.6));
   mark('s04_end');
 
-  // s05: open the proof
+  // s05: open the proof from the home answer
   mark('s05');
-  const pill = page.locator('#chat-messages .chat-bubble.ai').last().locator('.source-pill').first();
-  await click(pill);
-  await sleep(2500);
-  await holdUntil(marks.s05, D.s05_proof + 1.5);
+  await click(page.locator('#home-answer .proof-btn').first());
+  await sleep(2200);
+  await holdUntil(marks.s05, D.s05_proof + 1.4);
   await page.keyboard.press('Escape');
-  await sleep(600);
+  await sleep(500);
   mark('s05_end');
 
-  // s06: three more languages, typed
-  await click(page.locator('#voice-lang-chips button', { hasText: 'English' }));
+  // s06: schemes
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  await sleep(400);
+  await navTo('schemes');
   mark('s06');
-  await ask('PM Kisan la varushathuku evlo?', 'tanglish');
-  await sleep(2500);
-  await ask('अटल पेंशन किसे मिलती है?', 'hindi');
-  await sleep(2500);
-  await ask('Who gets free breakfast at school?', 'english');
-  await sleep(2500);
+  await sleep(1500);
+  await smoothTo('#scheme-filters', 'start');
+  await sleep(1200);
+  await moveTo(page.locator('.scheme-row').first());
+  await sleep(800);
+  await click(page.locator('.scheme-row').first());
+  await holdUntil(marks.s06, D.s06_schemes + 1.2);
+  await page.keyboard.press('Escape');
+  await sleep(400);
   mark('s06_end');
 
-  // s07: honest refusal
+  // s07: honest refusal, typed on the Ask page
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await navTo('home');
+  await click(page.locator('#cta-ask-pakkam'));
+  await sleep(900);
   mark('s07');
   await ask('When will the next PM-KISAN installment come?', 'refusal');
-  await sleep(1000 * (D.s07_refusal + 1.5));
+  await sleep(1000 * (D.s07_refusal + 1.2));
   mark('s07_end');
 
   // s08: under the hood
-  await click(page.locator('.nav-item[data-nav="about"]'));
-  await sleep(900);
+  await navTo('about');
   await click(page.locator('#tab-how'));
-  await sleep(500);
-  await page.evaluate(() => document.querySelector('.pipeline').scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  await sleep(400);
+  await smoothTo('.pipeline');
   await sleep(1100);
   mark('s08');
-  await holdUntil(marks.s08, D.s08_how + 1.2);
+  await holdUntil(marks.s08, D.s08_how + 1.0);
   mark('s08_end');
 
   // s09: tested, honestly
-  await page.evaluate(() => document.querySelector('.about-tablist').scrollIntoView({ behavior: 'smooth', block: 'start' }));
-  await sleep(900);
+  await smoothTo('.about-tablist', 'start');
+  await sleep(800);
   await click(page.locator('#tab-tested'));
   mark('s09');
-  await sleep(1800);
-  await page.evaluate(() => document.querySelector('.test-method').scrollIntoView({ behavior: 'smooth', block: 'center' }));
-  await holdUntil(marks.s09, D.s09_numbers + 1.5);
+  await sleep(1600);
+  await holdUntil(marks.s09, D.s09_numbers + 1.2);
   mark('s09_end');
+
+  // s09b: the story (the grandfather chapter in the story player)
+  await smoothTo('.story-player', 'center');
+  await sleep(900);
+  await click(page.locator('.player-dot[data-go="0"]'));
+  mark('s09b');
+  await holdUntil(marks.s09b, D.s09b_story + 1.2);
+  mark('s09b_end');
 
   const video = page.video();
   await context.close();

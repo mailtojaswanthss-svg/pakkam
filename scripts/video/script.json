@@ -1,106 +1,23 @@
 {
   "site": "https://pakkam-alpha.vercel.app",
+  "narrator_voice_note": "Narration is Gnani Timbre with a male English voice (SCHEMEBOT_TTS_VOICE_EN=Pranav on the backend while recording); Pakkam's own answers keep the default voice, so the two never sound alike.",
   "forward": "Magalir Urimai increased to Rs.2,000 a month! Register at bit.ly/kmut2000 today only and share OTP to confirm.",
   "tamil_question": "மகளிர் உரிமைத் தொகை எவ்வளவு?",
+  "tamil_answer": "கலைஞர் மகளிர் உரிமைத் திட்டத்தின் கீழ் தகுதியான குடும்பத் தலைவிகளுக்கு மாதம் ரூ.1,000 (ஆண்டுக்கு ரூ.12,000) வழங்கப்படுகிறது.",
   "scenes": [
-    {
-      "id": "s01_hook",
-      "cuts": [
-        "full",
-        "90",
-        "60"
-      ],
-      "vo": "Forwards like this reach families across Tamil Nadu every day. But is it true?",
-      "sub": "Forwards like this reach families across Tamil Nadu every day. But is it true?"
-    },
-    {
-      "id": "s02_shield",
-      "cuts": [
-        "full",
-        "90",
-        "60"
-      ],
-      "vo": "Paste it into Pakkam's Rumour Shield. It checks every claim against the official Government Order. The amount is false: the order says one thousand rupees. And it flags the scam tricks: a short link, an O T P request, and a fake deadline.",
-      "short_vo": "Pakkam's Rumour Shield checks it against the official Government Order. The amount is false, and it flags the scam tricks.",
-      "sub": "Pakkam's Rumour Shield checks every claim against the official Government Order. The amount is false: the order says Rs.1,000. And it flags the scam tricks: a short link, an OTP request, a fake deadline.",
-      "short_sub": "Pakkam's Rumour Shield checks it against the official Government Order. The amount is false, and it flags the scam tricks."
-    },
-    {
-      "id": "s03_home",
-      "cuts": [
-        "full"
-      ],
-      "vo": "This is Pakkam. Ask in your language, and get the answer with its proof.",
-      "sub": "This is Pakkam. Ask in your language, and get the answer with its proof."
-    },
-    {
-      "id": "s04_voice",
-      "cuts": [
-        "full",
-        "90",
-        "60"
-      ],
-      "vo": "Just tap the orb and ask, here in Tamil.",
-      "sub": "Just tap the orb and ask, here in Tamil.",
-      "vo_b": "Gnani Prisma turns the voice into text. Pakkam answers from the Government Order, and reads it aloud in Tamil.",
-      "sub_b": "Gnani Prisma turns the voice into text. Pakkam answers from the Government Order, and reads it aloud in Tamil."
-    },
-    {
-      "id": "s05_proof",
-      "cuts": [
-        "full",
-        "90",
-        "60"
-      ],
-      "vo": "Every answer shows its source. One tap opens the exact page of the Government Order, with the line highlighted, checked against the printed page.",
-      "sub": "Every answer shows its source. One tap opens the exact page of the Government Order, the line highlighted, checked against the printed page."
-    },
-    {
-      "id": "s06_langs",
-      "cuts": [
-        "full"
-      ],
-      "vo": "Tanglish, Hindi or English. Every answer comes only from the official documents.",
-      "sub": "Tanglish, Hindi or English. Every answer comes only from the official documents."
-    },
-    {
-      "id": "s07_refusal",
-      "cuts": [
-        "full",
-        "90",
-        "60"
-      ],
-      "vo": "And when the documents don't say it, Pakkam says so. It never guesses, and points you to the helpline instead.",
-      "short_vo": "And when the documents don't say it, Pakkam says so. It never guesses.",
-      "sub": "And when the documents don't say it, Pakkam says so. It never guesses, and points you to the helpline instead.",
-      "short_sub": "And when the documents don't say it, Pakkam says so. It never guesses."
-    },
-    {
-      "id": "s08_how",
-      "cuts": [
-        "full"
-      ],
-      "vo": "Under the hood: Gnani Prisma listens. Hybrid search reads eighteen official documents. Every sentence must cite a page, and every number must be on it. Then Gnani Timbre speaks the answer.",
-      "sub": "Under the hood: Gnani Prisma listens. Hybrid search reads 18 official documents. Every sentence must cite a page, and every number must be on it. Then Gnani Timbre speaks the answer."
-    },
-    {
-      "id": "s09_numbers",
-      "cuts": [
-        "full",
-        "90"
-      ],
-      "vo": "We tested it live on one hundred and ninety four real questions. Ninety eight percent of answers cite the correct page, and thirty nine of forty out of scope questions were honestly refused.",
-      "sub": "We tested it live on 194 real questions. 98% of answers cite the correct page, and 39 of 40 out-of-scope questions were honestly refused."
-    },
-    {
-      "id": "s10_end",
-      "cuts": [
-        "full",
-        "90",
-        "60"
-      ],
-      "vo": "Pakkam. Tap. Ask. See the proof.",
-      "sub": "Pakkam. Tap. Ask. See the proof."
-    }
+    {"id": "s01_hook", "vo": "This forward says Magalir Urimai is now two thousand rupees a month. Register today. Share your O T P. Sounds official? It's a trap."},
+    {"id": "s02_shield", "vo": "Paste it into Pakkam. Every claim is checked against the Government Order itself. Two thousand? False. The order says one thousand. The link, the O T P, the deadline? All flagged as scam tricks.",
+     "short_vo": "Pakkam checks it against the Government Order. Two thousand? False. And every scam trick is flagged."},
+    {"id": "s03_home", "vo": "Meet Pakkam. Pakkam means page in Tamil, because every answer comes with its page."},
+    {"id": "s04_voice", "vo": "Just tap the orb, and ask in Tamil.",
+     "vo_b": "Gnani Prisma hears it. Pakkam finds the answer in the Government Order, and Gnani Timbre says it back."},
+    {"id": "s05_proof", "vo": "Don't take our word for it. Tap the source, and see the exact page, the line highlighted, checked against the printed order."},
+    {"id": "s06_schemes", "vo": "Every scheme, straight from the source. The amount, who can apply, and the page it comes from."},
+    {"id": "s07_refusal", "vo": "Ask something the documents don't cover, and Pakkam won't guess. It says so, and points you to the helpline.",
+     "short_vo": "And when the documents don't say it, Pakkam won't guess."},
+    {"id": "s08_how", "vo": "Under the hood, every sentence must cite a page, and every number must be on that page. If a check fails, Pakkam refuses instead of guessing."},
+    {"id": "s09_numbers", "vo": "We tested it live on one hundred and ninety four real questions. Ninety eight percent cited the correct page."},
+    {"id": "s09b_story", "vo": "We built it for people like our grandparents, so they can ask in their own language, and trust the answer."},
+    {"id": "s10_end", "vo": "Pakkam. Tap. Ask. See the proof."}
   ]
 }
