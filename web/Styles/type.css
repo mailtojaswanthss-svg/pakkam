@@ -1,0 +1,84 @@
+/* Pakkam type scale: the text styles in the Figma file "Pakkam Illustrations" (Foundations
+   page). Headings use Plus Jakarta Sans for English, Anek Tamil for Tamil and Anek Devanagari
+   for Hindi; body text stays in Inter / Noto Sans for reading. Edit the styles in Figma first. */
+/* Size-matched stand-in while Plus Jakarta Sans loads, so the headline does not jump (CLS) */
+@font-face { font-family: 'Jakarta Fallback'; src: local('Arial'), local('Liberation Sans'), local('Helvetica'); size-adjust: 101.6%; }
+:root {
+  --font-heading: 'Plus Jakarta Sans', 'Jakarta Fallback', 'Anek Tamil', 'Anek Devanagari', 'Inter', system-ui, sans-serif;
+  --type-display: 800 clamp(2rem, 3.4vw, 3.1rem) / 1.1 var(--font-heading);
+  --type-h1: 800 clamp(1.9rem, 3vw, 2.75rem) / 1.12 var(--font-heading);
+  --type-h2: 700 clamp(1.3rem, 2vw, 1.6rem) / 1.25 var(--font-heading);
+  --type-h3: 700 1.05rem / 1.3 var(--font-heading);
+  --type-eyebrow: 800 0.78rem / 1.2 var(--font-heading);
+  --type-button: 800 0.92rem / 1.2 var(--font-heading);
+  --type-body-l: 500 1.06rem / 1.6 var(--font-primary);
+  --type-body: 400 1rem / 1.6 var(--font-primary);
+  --type-caption: 500 0.82rem / 1.45 var(--font-primary);
+  --tracking-heading: -0.025em;
+  --tracking-eyebrow: 0.16em;
+}
+:root:lang(ta) { --font-heading: 'Anek Tamil', 'Noto Sans Tamil', 'Plus Jakarta Sans', system-ui, sans-serif; --tracking-heading: 0; }
+:root:lang(hi) { --font-heading: 'Anek Devanagari', 'Noto Sans Devanagari', 'Plus Jakarta Sans', system-ui, sans-serif; --tracking-heading: 0; }
+
+h1, h2, h3, .hero-title, .feature-title, .slogan-line, .story-q, .story-big, .row-name, .scheme-banner h2,
+.about-hero h1, .page-header h1, .cap-card h3, .flow-step h3, .num b, .hc-step h3, .how-checks h2, .schemes-guide h2 {
+  font-family: var(--font-heading);
+  letter-spacing: var(--tracking-heading);
+}
+.page-header h1 { font: var(--type-h1); letter-spacing: var(--tracking-heading); }
+.hero-eyebrow, .chapter-n, .slide-text .chapter-n { font-family: var(--font-heading); letter-spacing: var(--tracking-eyebrow); }
+.cta-button, .about-tab, .player-dot { font-family: var(--font-heading); }
+.cta-button { letter-spacing: 0.02em; }
+/* Tamil and Hindi headings need more room above and below the line */
+:lang(ta) :is(h1, h2, h3, .hero-title, .slogan-line), :lang(hi) :is(h1, h2, h3, .hero-title, .slogan-line) { line-height: 1.35; }
+:lang(ta) .page-header h1, :lang(hi) .page-header h1 { line-height: 1.3; }
+
+/* ---------- Under the orb ---------- */
+.orb-slogan { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 0 0 14px; }
+.slogan-line { margin: 0; font-size: clamp(1.15rem, 1.6vw, 1.4rem); font-weight: 800; color: var(--text-primary); }
+.slogan-grad { background: linear-gradient(100deg, var(--accent-2), var(--accent-cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.slogan-example { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; max-width: 100%; padding: 4px 14px 4px 5px; border-radius: var(--radius-pill); border: 1px dashed color-mix(in srgb, var(--accent-cyan) 55%, transparent); background: color-mix(in srgb, var(--surface-1) 70%, transparent); color: var(--text-secondary); font: inherit; font-size: 0.9rem; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+.slogan-example:hover, .slogan-example:focus-visible { border-style: solid; border-color: var(--accent-cyan); color: var(--text-primary); }
+.ex-tag { flex: none; padding: 3px 9px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--accent-cyan) 16%, transparent); color: var(--text-highlight); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em; }
+.ex-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ex-text::before { content: '“'; } .ex-text::after { content: '”'; }
+.ex-caret { width: 2px; height: 1.05em; background: var(--accent-cyan); animation: caretBlink 1s steps(1) infinite; }
+@keyframes caretBlink { 50% { opacity: 0; } }
+body.intro .orb-slogan { animation: rise 0.7s var(--ease-out) 0.15s both; }
+/* while Pakkam listens or answers, the example steps aside */
+body:has(#hero-orb-assembly[data-state]:not([data-state="idle"])) .slogan-example { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .ex-caret { animation: none; display: none; } }
+html.calm .ex-caret, html.easy .ex-caret { display: none; }
+@media (min-width: 961px) and (max-height: 820px) {
+  #hero-orb-assembly .central-orb-container { width: 190px; height: 190px; }
+  .hero-pills { display: none; }
+  .orb-slogan { margin-bottom: 10px; gap: 4px; }
+}
+
+/* ---------- About: under the hood (the FigJam architecture diagram, as real text) ---------- */
+.pipeline { margin-top: 28px; padding: 20px; border-radius: var(--radius-card); background: var(--card-gradient), var(--surface-1); border: 1px solid var(--border-1); }
+.pipe-title { margin: 0 0 14px; font-size: 1.05rem; }
+.pipe-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 14px; counter-reset: none; }
+.pipe-step { position: relative; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: start; padding: 12px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border-1); }
+.pipe-n { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-2), var(--accent-cyan)); color: #fff; font: 800 0.8rem/1 var(--font-heading); }
+.pipe-step h4 { margin: 2px 0 3px; font: 700 0.95rem/1.3 var(--font-heading); color: var(--text-primary); }
+.pipe-step p { margin: 0; font-size: 0.84rem; line-height: 1.45; color: var(--text-secondary); }
+.pipe-refuse { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0 0; padding: 10px 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--bad) 45%, transparent); background: color-mix(in srgb, var(--bad) 10%, transparent); color: var(--text-primary); font-size: 0.9rem; }
+.pipe-x { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--bad); color: #fff; font-weight: 800; font-size: 0.75rem; }
+.test-method { margin: 22px 0 12px; padding: 18px 20px; border-radius: var(--radius-card); background: var(--surface-1); border: 1px solid var(--border-1); }
+.test-method h3 { margin: 0 0 10px; font-size: 1.05rem; }
+.test-method ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.55; }
+.test-method .tm-miss { color: var(--text-primary); }
+.test-method .tm-miss::marker { color: var(--warn); }
+@media (max-width: 860px) { .pipe-steps { grid-template-columns: minmax(0, 1fr); } }
+
+/* Dark theme backdrop: the Figma "Pakkam Aurora" shader, exported as a still (6 KB) */
+html[data-theme="dark"] body { background: var(--bg-canvas) url(../assets/art/aurora.webp) center top / cover no-repeat fixed; }
+/* Long or enlarged questions wrap instead of being cut off */
+.ex-text { white-space: normal; overflow: visible; text-overflow: clip; text-align: left; overflow-wrap: break-word; }
+.slogan-example { border-radius: 18px; }
+.ex-text { position: relative; display: inline-block; }
+.ex-full { visibility: hidden; }
+.ex-typed { position: absolute; inset: 0; }
+.ex-text::before, .ex-text::after { content: none; }
+.ex-full::before, .ex-typed::before { content: '“'; } .ex-full::after, .ex-typed::after { content: '”'; }

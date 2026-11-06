@@ -738,6 +738,8 @@ Object.assign(MESSAGES['hi-IN'], {
 
 // Round 7: stronger, honest copy (judge-ready), plus the Shield panel, story player and tabs.
 Object.assign(MESSAGES['en-IN'], {
+  'pipe.title': 'Under the hood', 'pipe.1t': 'Voice or text', 'pipe.1': 'Gnani Prisma turns speech into text, even mixed Tamil and English.', 'pipe.2t': 'Search', 'pipe.2': 'Hybrid search (BGE-M3) across 18 official documents, never the open internet.', 'pipe.3t': 'Rerank', 'pipe.3': 'A reranker keeps only the pages that really answer the question.', 'pipe.4t': 'Write', 'pipe.4': 'The answer is written only from those pages and the signed fact cards.', 'pipe.5t': 'Check', 'pipe.5': 'Every sentence must cite a page, and every number must be on that page.', 'pipe.6t': 'Show and speak', 'pipe.6': 'The page opens with the line highlighted; Gnani Timbre reads it aloud.', 'pipe.refuse': "If the pages don't answer it, or any check fails, Pakkam says it is not in the documents. It never guesses.", 'tm.title': 'How we tested', 'tm.1': '194 questions were sent to the live site one at a time, as a visitor would: 154 covered by the documents and 40 deliberately outside them.', 'tm.2': 'A covered answer counts as right only if it cites a page that really holds it: 133 of the 136 answered. The other 18 covered questions were declined rather than guessed.', 'tm.3': 'An out-of-scope question counts as right only if Pakkam refuses: 39 of 40.', 'tm.4': 'The one miss: a Hindi question about the date of the next PM-KISAN instalment was answered instead of refused. It is listed in the report.',
+  'slogan.a': 'Tap.', 'slogan.b': 'Ask.', 'slogan.c': 'See the proof.', 'slogan.try': 'Try asking', 'slogan.ask': 'Ask this question',
   'schemes.docCount1': 'official document', 'schemes.noAmount': 'Details on the official page',
   'home.title1': 'Ask in your language.', 'home.title2': 'Get the answer with its proof.',
   'home.subtitle': "Speak Tamil, Hindi or English. Pakkam reads the official scheme documents and opens the exact page. If the documents don't say it, Pakkam says so.",
@@ -762,6 +764,8 @@ Object.assign(MESSAGES['en-IN'], {
   'pl.prev': 'Previous chapter', 'pl.next': 'Next chapter', 'pl.play': 'Play the story', 'pl.pause': 'Pause the story', 'pl.chapter': 'Chapter {n} of {total}',
 });
 Object.assign(MESSAGES['ta-IN'], {
+  'pipe.title': 'உள்ளே நடப்பது', 'pipe.1t': 'குரல் அல்லது தட்டச்சு', 'pipe.1': 'ஞானி ப்ரிஸ்மா பேச்சை எழுத்தாக மாற்றும்; தமிழ்-ஆங்கிலக் கலப்பையும் புரிந்துகொள்ளும்.', 'pipe.2t': 'தேடல்', 'pipe.2': '18 அதிகாரப்பூர்வ ஆவணங்களில் மட்டும் கலப்புத் தேடல் (BGE-M3); திறந்த இணையத்தில் இல்லை.', 'pipe.3t': 'தரவரிசை', 'pipe.3': 'கேள்விக்கு உண்மையில் பதில் உள்ள பக்கங்களை மட்டும் ஒரு மறுதரவரிசை மாதிரி வைத்துக்கொள்ளும்.', 'pipe.4t': 'எழுதுதல்', 'pipe.4': 'அந்தப் பக்கங்களிலிருந்தும் சரிபார்த்த தகவல் அட்டைகளிலிருந்தும் மட்டுமே பதில் எழுதப்படும்.', 'pipe.5t': 'சரிபார்ப்பு', 'pipe.5': 'ஒவ்வொரு வாக்கியமும் ஒரு பக்கத்தைக் காட்ட வேண்டும்; ஒவ்வொரு எண்ணும் அந்தப் பக்கத்தில் இருக்க வேண்டும்.', 'pipe.6t': 'காட்டுதல், பேசுதல்', 'pipe.6': 'அந்த வரி குறிக்கப்பட்ட பக்கம் திறக்கும்; ஞானி டிம்ப்ரே அதை வாசிக்கும்.', 'pipe.refuse': 'பக்கங்களில் பதில் இல்லையென்றாலோ, ஏதாவது சரிபார்ப்பு தோற்றாலோ, ஆவணங்களில் இல்லை என்று பக்கம் சொல்லும். ஊகிக்காது.', 'tm.title': 'நாங்கள் எப்படிச் சோதித்தோம்', 'tm.1': '194 கேள்விகள் ஒரு பார்வையாளர் போல ஒவ்வொன்றாக நேரடித் தளத்துக்கு அனுப்பப்பட்டன: 154 ஆவணங்களில் உள்ளவை, 40 வேண்டுமென்றே வெளியே உள்ளவை.', 'tm.2': 'உண்மையில் அந்தத் தகவல் உள்ள பக்கத்தைக் காட்டினால் மட்டுமே பதில் சரி: பதிலளித்த 136-ல் 133. மீதமுள்ள 18 கேள்விகளுக்கு ஊகிக்காமல் மறுத்தது.', 'tm.3': 'வரம்புக்கு வெளியே உள்ள கேள்விக்கு மறுத்தால் மட்டுமே சரி: 40-ல் 39.', 'tm.4': 'ஒரே தவறு: அடுத்த பிஎம் கிசான் தவணை எப்போது என்ற இந்திக் கேள்விக்கு மறுக்காமல் பதில் சொன்னது. அது அறிக்கையில் உள்ளது.',
+  'slogan.a': 'தொடுங்கள்.', 'slogan.b': 'கேளுங்கள்.', 'slogan.c': 'ஆதாரத்தைப் பாருங்கள்.', 'slogan.try': 'இப்படிக் கேளுங்கள்', 'slogan.ask': 'இந்தக் கேள்வியைக் கேளுங்கள்',
   'schemes.docCount1': 'அதிகாரப்பூர்வ ஆவணம்', 'schemes.noAmount': 'விவரங்கள் அதிகாரப்பூர்வப் பக்கத்தில்',
   'home.title1': 'உங்கள் மொழியில் கேளுங்கள்.', 'home.title2': 'ஆதாரத்துடன் பதில் பெறுங்கள்.',
   'home.subtitle': 'தமிழ், இந்தி அல்லது ஆங்கிலத்தில் பேசுங்கள். பக்கம் அதிகாரப்பூர்வத் திட்ட ஆவணங்களைப் படித்து, சரியான பக்கத்தைத் திறந்து காட்டும். ஆவணங்களில் இல்லையென்றால், அதை நேர்மையாகச் சொல்லும்.',
@@ -786,6 +790,8 @@ Object.assign(MESSAGES['ta-IN'], {
   'pl.prev': 'முந்தைய அத்தியாயம்', 'pl.next': 'அடுத்த அத்தியாயம்', 'pl.play': 'கதையை இயக்கு', 'pl.pause': 'கதையை இடைநிறுத்து', 'pl.chapter': 'அத்தியாயம் {n} / {total}',
 });
 Object.assign(MESSAGES['hi-IN'], {
+  'pipe.title': 'अंदर क्या होता है', 'pipe.1t': 'आवाज़ या टेक्स्ट', 'pipe.1': 'ज्ञानी प्रिज़्मा बोली को टेक्स्ट में बदलता है, तमिल-अंग्रेज़ी मिली भाषा भी।', 'pipe.2t': 'खोज', 'pipe.2': '18 आधिकारिक दस्तावेज़ों में हाइब्रिड खोज (BGE-M3), खुले इंटरनेट पर कभी नहीं।', 'pipe.3t': 'छँटाई', 'pipe.3': 'एक रीरैंकर सिर्फ़ वे पन्ने रखता है जिनमें सच में जवाब है।', 'pipe.4t': 'लिखना', 'pipe.4': 'जवाब सिर्फ़ उन्हीं पन्नों और जाँचे गए तथ्य कार्डों से लिखा जाता है।', 'pipe.5t': 'जाँच', 'pipe.5': 'हर वाक्य को एक पन्ना बताना होता है, और हर संख्या उसी पन्ने पर होनी चाहिए।', 'pipe.6t': 'दिखाना और बोलना', 'pipe.6': 'पन्ना पंक्ति हाइलाइट करके खुलता है; ज्ञानी टिम्बर उसे पढ़कर सुनाता है।', 'pipe.refuse': 'अगर पन्नों में जवाब नहीं है, या कोई जाँच विफल होती है, तो पक्कम कहता है कि यह दस्तावेज़ों में नहीं है। वह अंदाज़ा नहीं लगाता।', 'tm.title': 'हमने कैसे परखा', 'tm.1': '194 सवाल एक-एक करके लाइव साइट पर भेजे गए, जैसे कोई आगंतुक भेजे: 154 दस्तावेज़ों के दायरे में और 40 जानबूझकर दायरे से बाहर।', 'tm.2': 'जवाब तभी सही माना गया जब वह ऐसा पन्ना बताए जिसमें बात सच में लिखी हो: दिए गए 136 में से 133। बाकी 18 पर अंदाज़ा लगाने के बजाय मना किया।', 'tm.3': 'दायरे से बाहर का सवाल तभी सही जब पक्कम मना करे: 40 में से 39।', 'tm.4': 'एक चूक: अगली पीएम-किसान किस्त की तारीख वाले हिंदी सवाल का जवाब दे दिया गया, जबकि मना करना था। यह रिपोर्ट में दर्ज है।',
+  'slogan.a': 'छुएँ।', 'slogan.b': 'पूछें।', 'slogan.c': 'सबूत देखें।', 'slogan.try': 'ऐसे पूछें', 'slogan.ask': 'यह सवाल पूछें',
   'schemes.docCount1': 'आधिकारिक दस्तावेज़', 'schemes.noAmount': 'विवरण आधिकारिक पन्ने पर',
   'home.title1': 'अपनी भाषा में पूछें।', 'home.title2': 'सबूत के साथ जवाब पाएँ।',
   'home.subtitle': 'तमिल, हिंदी या अंग्रेज़ी में बोलें। पक्कम आधिकारिक योजना दस्तावेज़ पढ़कर सही पन्ना खोलकर दिखाता है। अगर दस्तावेज़ों में बात नहीं है, तो पक्कम साफ़ बता देता है।',
@@ -2296,6 +2302,52 @@ function openSchemeDrawer(item) {
   close.focus();
 }
 
+// Under the orb: "Tap. Ask. See the proof." and a real example question that types itself out,
+// one language at a time. Tapping it asks it. Still (one example) for reduced motion and easy mode.
+const SLOGAN_EXAMPLES = [
+  { tag: 'தமிழ்', q: 'மகளிர் உரிமைத் தொகை எவ்வளவு?' },
+  { tag: 'Tanglish', q: 'PM Kisan la varushathuku evlo?' },
+  { tag: 'हिंदी', q: 'अटल पेंशन किसे मिलती है?' },
+  { tag: 'English', q: 'Who gets free breakfast at school?' },
+];
+const slogan = { index: 0, chars: 0, timer: null, hold: false };
+
+function showSloganExample(full) {
+  const button = document.getElementById('slogan-example');
+  if (!button) return;
+  const item = SLOGAN_EXAMPLES[slogan.index];
+  button.querySelector('.ex-tag').textContent = item.tag;
+  const shown = full ? item.q : [...item.q].slice(0, slogan.chars).join('');
+  // The full question sits invisibly underneath, so the box is its final size while it types.
+  const box = button.querySelector('.ex-text');
+  if (box.dataset.q !== item.q) { box.dataset.q = item.q; box.replaceChildren(el('span', 'ex-full', item.q), el('span', 'ex-typed')); }
+  box.querySelector('.ex-typed').textContent = shown;
+  button.setAttribute('aria-label', `${t('slogan.ask')}: ${item.q}`);
+  button.setAttribute('lang', { 'தமிழ்': 'ta', 'हिंदी': 'hi' }[item.tag] || 'en');
+}
+
+function runSlogan() {
+  clearTimeout(slogan.timer);
+  const still = reduceMotion() || document.documentElement.classList.contains('easy');
+  if (still) { showSloganExample(true); return; }
+  const tick = () => {
+    const total = [...SLOGAN_EXAMPLES[slogan.index].q].length;
+    if (slogan.hold || document.hidden) { slogan.timer = setTimeout(tick, 400); return; }
+    if (slogan.chars < total) { slogan.chars += 1; showSloganExample(false); slogan.timer = setTimeout(tick, 55); return; }
+    slogan.timer = setTimeout(() => { slogan.index = (slogan.index + 1) % SLOGAN_EXAMPLES.length; slogan.chars = 0; tick(); }, 2600);
+  };
+  tick();
+}
+
+function setupSlogan() {
+  const button = document.getElementById('slogan-example');
+  if (!button) return;
+  button.addEventListener('click', () => submitChatQuery(SLOGAN_EXAMPLES[slogan.index].q));
+  ['mouseenter', 'focus'].forEach((type) => button.addEventListener(type, () => { slogan.hold = true; slogan.chars = 999; showSloganExample(true); }));
+  ['mouseleave', 'blur'].forEach((type) => button.addEventListener(type, () => { slogan.hold = false; }));
+  runSlogan();
+}
+
 function renderHomeExamples() {
   const box = document.getElementById('home-examples');
   if (!box) return;
@@ -2776,6 +2828,7 @@ function refreshLanguageParts() {
   renderVoiceChips();
   renderHomeExamples();
   renderCredits();
+  setupSlogan();
   setupStoryPlayer();
   setupAboutTabs();
   applyShieldText();

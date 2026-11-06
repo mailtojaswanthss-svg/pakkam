@@ -22,9 +22,11 @@
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Anek+Tamil:wght@600;700&family=Anek+Devanagari:wght@600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" />
   <link rel="preload" as="image" href="./assets/images/dark-orb.webp" />
   <link rel="stylesheet" href="./Styles/global.css" />
+  <link rel="stylesheet" href="./Styles/type.css" />
+  <link rel="stylesheet" href="./Styles/motion.css" />
 </head>
 <body>
   <p id="orb-live" class="sr-only" aria-live="polite" aria-atomic="true"></p>
@@ -164,6 +166,10 @@
 
       <!-- Hero Copy & CTA -->
       <div class="hero-copy">
+        <div class="orb-slogan">
+          <p class="slogan-line"><span data-i18n="slogan.a">Tap.</span> <span data-i18n="slogan.b">Ask.</span> <span class="slogan-grad" data-i18n="slogan.c">See the proof.</span></p>
+          <button type="button" class="slogan-example" id="slogan-example"><span class="ex-tag" aria-hidden="true"></span><span class="ex-text"></span><span class="ex-caret" aria-hidden="true"></span></button>
+        </div>
         <ul class="hero-pills" role="list">
           <li class="hero-pill"><span class="pill-art" data-art="pill-lang"></span><span data-i18n="pill.lang">Your language</span></li>
           <li class="hero-pill"><span class="pill-art" data-art="pill-rights"></span><span data-i18n="pill.rights">Your rights</span></li>
@@ -538,12 +544,33 @@
           <li class="flow-step"><span class="flow-dot"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></span><h3 data-i18n="ab.h2t">Pakkam finds the page</h3><p data-i18n="ab.h2">It searches 18 official government documents, never the open internet.</p><span class="tech-badge" data-i18n="ab.badgeDocs">18 official documents</span></li>
           <li class="flow-step"><span class="flow-dot"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><h3 data-i18n="ab.h3t">It checks before it speaks</h3><p data-i18n="ab.h3">Every sentence must point to a page and every number must be on it. Then Gnani Timbre reads the answer aloud.</p><span class="tech-badge">Gnani Timbre</span></li>
         </ol>
+        <div class="pipeline">
+          <h3 class="pipe-title" data-i18n="pipe.title">Under the hood</h3>
+          <ol class="pipe-steps">
+          <li class="pipe-step"><span class="pipe-n" aria-hidden="true">1</span><div><h4 data-i18n="pipe.1t">Voice or text</h4><p data-i18n="pipe.1">Gnani Prisma turns speech into text, even mixed Tamil and English.</p></div></li>
+          <li class="pipe-step"><span class="pipe-n" aria-hidden="true">2</span><div><h4 data-i18n="pipe.2t">Search</h4><p data-i18n="pipe.2">Hybrid search (BGE-M3) across 18 official documents, never the open internet.</p></div></li>
+          <li class="pipe-step"><span class="pipe-n" aria-hidden="true">3</span><div><h4 data-i18n="pipe.3t">Rerank</h4><p data-i18n="pipe.3">A reranker keeps only the pages that really answer the question.</p></div></li>
+          <li class="pipe-step"><span class="pipe-n" aria-hidden="true">4</span><div><h4 data-i18n="pipe.4t">Write</h4><p data-i18n="pipe.4">The answer is written only from those pages and the signed fact cards.</p></div></li>
+          <li class="pipe-step"><span class="pipe-n" aria-hidden="true">5</span><div><h4 data-i18n="pipe.5t">Check</h4><p data-i18n="pipe.5">Every sentence must cite a page, and every number must be on that page.</p></div></li>
+          <li class="pipe-step"><span class="pipe-n" aria-hidden="true">6</span><div><h4 data-i18n="pipe.6t">Show and speak</h4><p data-i18n="pipe.6">The page opens with the line highlighted; Gnani Timbre reads it aloud.</p></div></li>
+          </ol>
+          <p class="pipe-refuse"><span class="pipe-x" aria-hidden="true">✗</span><span data-i18n="pipe.refuse">If the pages don't answer it, or any check fails, Pakkam says it is not in the documents. It never guesses.</span></p>
+        </div>
       </div>
       <div role="tabpanel" id="panel-tested" class="about-panel" aria-labelledby="tab-tested" tabindex="0" hidden>
       <div class="num-row">
           <div class="num"><b class="count" data-to="194">194</b><span data-i18n="ab.n1">test questions in 4 languages</span></div>
           <div class="num"><b class="count" data-to="98" data-suffix="%">98%</b><span data-i18n="ab.n2">of answers cite the correct page</span></div>
           <div class="num"><b class="count" data-to="39" data-suffix=" / 40">39 / 40</b><span data-i18n="ab.n3">out-of-scope questions honestly refused</span></div>
+        </div>
+        <div class="test-method">
+          <h3 data-i18n="tm.title">How we tested</h3>
+          <ul>
+            <li data-i18n="tm.1">194 questions were sent to the live site one at a time, as a visitor would: 154 covered by the documents and 40 deliberately outside them.</li>
+            <li data-i18n="tm.2">A covered answer counts as right only if it cites a page that really holds it: 133 of the 136 answered. The other 18 covered questions were declined rather than guessed.</li>
+            <li data-i18n="tm.3">An out-of-scope question counts as right only if Pakkam refuses: 39 of 40.</li>
+            <li class="tm-miss" data-i18n="tm.4">The one miss: a Hindi question about the date of the next PM-KISAN instalment was answered instead of refused. It is listed in the report.</li>
+          </ul>
         </div>
         <a class="text-link num-link" href="https://github.com/mailtojaswanthss-svg/pakkam/blob/main/docs/review/LIVE_BENCHMARK.md" target="_blank" rel="noopener" data-i18n="ab.numLink">See the full benchmark →</a>
       </div>

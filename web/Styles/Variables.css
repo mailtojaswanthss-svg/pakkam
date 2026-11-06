@@ -149,3 +149,15 @@
   --border-2: rgba(109, 40, 217, 0.18);
   --shadow-2: 0 18px 40px rgba(76, 52, 160, 0.14), inset 0 1px 0 #FFFFFF;
 }
+/* ---------- From the Figma variables (file "Pakkam Illustrations", collections "Pakkam tokens"
+   (Dark/Light modes) and "Pakkam sizes and motion"). The colour tokens above match those
+   variables value for value; these are the ones Figma added. Change them in Figma first. ---------- */
+:root, [data-theme="dark"] {
+  --good: #4ADE80; --bad: #F87171; --warn: #F59E0B; --neutral: #94A3B8;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius-card-f: 18px; --radius-panel-f: 24px;
+  --shadow-cta: 0 10px 28px rgba(168, 84, 247, 0.45);
+  --shadow-orb: 0 0 36px rgba(168, 84, 247, 0.3);
+  --focus-ring: 0 0 0 3px #42DEEB;
+}
+[data-theme="light"] { --good: #16A34A; --bad: #DC2626; --warn: #D97706; --neutral: #64748B; }

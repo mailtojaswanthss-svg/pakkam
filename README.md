@@ -9,16 +9,16 @@ Tamil · Hindi · English · Tanglish &nbsp;|&nbsp; text or voice (Gnani Prisma 
 
 [![CI](https://github.com/mailtojaswanthss-svg/pakkam/actions/workflows/ci.yml/badge.svg)](https://github.com/mailtojaswanthss-svg/pakkam/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB)
-![Tests](https://img.shields.io/badge/tests-634%20passing-2E7D32)
+![Tests](https://img.shields.io/badge/tests-658%20passing-2E7D32)
 ![License](https://img.shields.io/badge/code-MIT-5A36A3)
 ![Status](https://img.shields.io/badge/status-research%20prototype-E3A33B)
 
-[**Live site**](https://pakkam-alpha.vercel.app) · [How it works](#how-it-works) · [Results](#results) · [Quickstart](#quickstart) · [Status](STATUS.md)
+[**Live site**](https://pakkam-alpha.vercel.app) · [For judges](#for-judges) · [How it works](#how-it-works) · [Results](#results) · [Quickstart](#quickstart) · [Status](STATUS.md)
 
 </div>
 
 <p align="center">
-  <img src="docs/img/home-desktop.png" alt="Pakkam home page: Somewhere in a government order, there is a line about you." width="100%">
+  <img src="docs/img/home-desktop.png" alt="Pakkam home page: Tap. Ask. See the proof. Ask in your language. Get the answer with its proof." width="100%">
 </p>
 
 > **Disclaimer.** An independent student research prototype. It is **not** an official
@@ -26,6 +26,21 @@ Tamil · Hindi · English · Tanglish &nbsp;|&nbsp; text or voice (Gnani Prisma 
 > only: check the official source before acting on them. It uses only public documents
 > (listed in [docs/sources.csv](docs/sources.csv)) and stores no personal data
 > ([docs/PRIVACY.md](docs/PRIVACY.md)).
+
+---
+
+## For judges
+
+| | |
+|---|---|
+| **60-second demo, in order** | 1. Paste the "Rs.2,000 + OTP" rumour into *Check a forward* → 2. ask about the scheme in Tamil, by voice → 3. read the answer and its sources → 4. open the Government Order page, line highlighted → 5. ask something the documents do not cover → 6. Pakkam refuses honestly. |
+| **Backup video (40 s)** | [docs/judge/pakkam-demo.mp4](docs/judge/pakkam-demo.mp4), in case the live server is down |
+| **Pitch deck (7 slides)** | [docs/judge/pakkam-pitch-deck.pdf](docs/judge/pakkam-pitch-deck.pdf) |
+| **How an answer is made** | [docs/judge/architecture.png](docs/judge/architecture.png) (made in FigJam) |
+| **How we tested** | [docs/review/LIVE_BENCHMARK.md](docs/review/LIVE_BENCHMARK.md): 194 questions, 98% cite the correct page, 39 of 40 out-of-scope refused, and the one miss explained |
+| **Design** | Figma file "Pakkam Illustrations": variables (dark/light), text styles, components, every page, motion, the aurora shader |
+
+<p align="center"><img src="docs/judge/architecture.png" alt="Pipeline: question, Gnani Prisma, language detection, hybrid search over 18 official documents, reranker, a check that the pages answer it, answer from those pages, sentence and number checks, answer with page or honest refusal, Gnani Timbre." width="100%"></p>
 
 ---
 
