@@ -1,54 +1,87 @@
-/* Floating pages behind Pakkam ("pakkam" = page): faint page outlines and letters drifting
-   slowly upward. Colours follow the theme; one still frame when the viewer asks for less motion
-   (system setting or Settings > Reduce animations); pauses when the tab is hidden. */
+/* Pakkam's living background ("pakkam" = page): page outlines, Tamil and Hindi letters, ₹,
+   small glowing dots, faint circles and thin lines between nearby dots, drifting slowly upward.
+
+   - Spread over the whole screen with a jittered grid (no clumps, no empty holes), with random
+     size and opacity so it never looks regular. Items over the central text column are drawn
+     much fainter, so text always stays readable.
+   - Colours follow the theme. Density follows the screen and Settings > Background
+     (minimal: none, balanced, ambient: more).
+   - Cheap: device-pixel ratio capped at 2, about 30 frames a second, no objects created per
+     frame, glow sprites drawn once, neighbour lines checked pair by pair with squared distances.
+   - One still frame for "reduce animations"; paused when the tab or canvas is hidden. */
 (() => {
   'use strict';
 
   const canvas = document.getElementById('bg-pages');
   if (!canvas || !canvas.getContext) return;
+  canvas.setAttribute('aria-hidden', 'true');
   const ctx = canvas.getContext('2d');
-  const LETTERS = ['ப', 'க', 'ம்', 'அ', 'இ', 'a', '₹', 'பக்கம்'];
+  const root = document.documentElement;
+  const LETTERS = ['ப', 'க', 'ம்', 'அ', 'இ', 'த', 'प', 'क', 'म', '₹', 'பக்கம்'];
+  const KINDS = ['page', 'letter', 'dot', 'dot', 'dot', 'circle'];
   const reducedQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  const LINK = 170;            // px: dots closer than this get a faint line
+  const LINK2 = LINK * LINK;
+
   let items = [];
-  let lanes = [];      // x centres the items keep to: the side margins on wide screens
-  let nextLane = 0;
+  let dots = [];
   let width = 0;
   let height = 0;
   let ratio = 1;
-  let colors = { line: 'rgba(160,220,230,1)', accent: 'rgba(170,130,255,1)' };
+  let colors = { line: '#cfe7ee', accent: '#a78bfa', cyan: '#39dde5' };
+  let sprites = {};
   let last = 0;
   let frame = null;
+  let visible = true;
+  let columnLeft = 0;
+  let columnRight = 0;
 
-  const calm = () => reducedQuery.matches || document.documentElement.classList.contains('calm');
+  const calm = () => reducedQuery.matches || root.classList.contains('calm');
+  const mode = () => root.dataset.bg || 'balanced';
 
   function readColors() {
-    const style = getComputedStyle(document.documentElement);
+    const style = getComputedStyle(root);
     const pick = (name, fallback) => (style.getPropertyValue(name) || '').trim() || fallback;
-    colors = { line: pick('--text-primary', '#cfe7ee'), accent: pick('--accent-2', '#c4a5ff') };
+    colors = { line: pick('--text-primary', '#cfe7ee'), accent: pick('--accent-2', '#a78bfa'), cyan: pick('--accent-cyan', '#39dde5') };
+    sprites = { cyan: glowSprite(colors.cyan), accent: glowSprite(colors.accent) };
   }
 
-  function laneX() {
-    const x = lanes[nextLane % lanes.length];
-    nextLane += 1;
-    return x + (Math.random() - 0.5) * 16;
+  /** A soft round glow, drawn once and reused (no shadow-blur in the loop). */
+  function glowSprite(color) {
+    const size = 32;
+    const sprite = document.createElement('canvas');
+    sprite.width = size; sprite.height = size;
+    const g = sprite.getContext('2d');
+    const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    grad.addColorStop(0, color);
+    grad.addColorStop(0.25, color);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, size, size);
+    return sprite;
   }
 
-  function makeItem(randomY) {
-    const page = Math.random() < 0.6;
-    const size = page ? 40 + Math.random() * 40 : 18 + Math.random() * 20;
-    return {
-      page,
-      size,
-      x: laneX(),
-      y: randomY ? Math.random() * height : height + size * 2,
-      speed: 6 + Math.random() * 10,        // px per second
-      drift: 0,
-      angle: (Math.random() - 0.5) * 0.24,
-      spin: (Math.random() - 0.5) * 0.02,
-      alpha: 0.045 + Math.random() * 0.04,
-      letter: LETTERS[Math.floor(Math.random() * LETTERS.length)],
-      accent: Math.random() < 0.3,
-    };
+  function targetCount() {
+    if (mode() === 'minimal') return 0;
+    const base = width < 640 ? 10 : width < 1024 ? 18 : 40;
+    return Math.round(base * (mode() === 'ambient' ? 1.6 : 1));
+  }
+
+  /** Reset one item in place (reused, never re-created while animating). */
+  function place(item, x, y) {
+    const kind = KINDS[Math.floor(Math.random() * KINDS.length)];
+    const vary = 0.6 + Math.random() * 0.8;           // size ±40%
+    item.kind = kind;
+    item.x = x;
+    item.y = y;
+    item.size = kind === 'page' ? 34 * vary : kind === 'letter' ? 20 * vary : kind === 'circle' ? 26 * vary : 2.2 * vary;
+    item.speed = 4 + Math.random() * 8;               // px per second
+    item.angle = (Math.random() - 0.5) * 0.3;
+    item.spin = (Math.random() - 0.5) * 0.02;
+    item.alpha = (kind === 'dot' ? 0.5 : 0.08) * (0.5 + Math.random());   // opacity ±50%
+    item.letter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+    item.accent = Math.random() < 0.35;
+    return item;
   }
 
   function resize() {
@@ -59,90 +92,116 @@
     canvas.height = Math.round(height * ratio);
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
-    // Even lanes in the side margins, outside the ~1100px content column; spread across the
-    // page only when the margins are too narrow (phones, small laptops), and fewer items there.
-    const margin = (width - 1120) / 2;
-    if (margin >= 110) {
-      const perSide = margin >= 260 ? 2 : 1;
-      lanes = [];
-      for (let i = 0; i < perSide; i += 1) {
-        const x = (margin * (i + 0.5)) / perSide;
-        lanes.push(x, width - x);
-      }
-    } else {
-      const n = width < 640 ? 3 : 5;
-      lanes = Array.from({ length: n }, (_, i) => (width * (i + 0.5)) / n);
+    const column = Math.min(900, width * 0.72);
+    columnLeft = (width - column) / 2;
+    columnRight = columnLeft + column;
+    // Jittered grid: one item per cell, at a random spot inside it.
+    const count = targetCount();
+    const cols = Math.max(1, Math.round(Math.sqrt((count * width) / Math.max(height, 1))));
+    const rows = Math.max(1, Math.ceil(count / cols));
+    const cw = width / cols;
+    const ch = (height + 120) / rows;
+    items = [];
+    for (let i = 0; i < count; i += 1) {
+      const c = i % cols;
+      const r = Math.floor(i / cols);
+      items.push(place({}, (c + 0.15 + Math.random() * 0.7) * cw, (r + 0.15 + Math.random() * 0.7) * ch - 60));
     }
-    nextLane = 0;
-    const count = width < 640 ? 6 : Math.min(14, lanes.length * 3);
-    items = Array.from({ length: count }, (_, i) => {
-      const item = makeItem(false);
-      item.y = ((i + Math.random() * 0.5) / count) * (height + 200);  // evenly spaced from the start
-      return item;
-    });
+    dots = items.filter((item) => item.kind === 'dot');
     readColors();
     draw();
   }
 
+  /** Items over the central text column are drawn much fainter. */
+  const fade = (x) => (x > columnLeft && x < columnRight ? 0.35 : 1);
+
   function drawPage(item) {
     const w = item.size;
     const h = item.size * 1.3;
-    ctx.lineWidth = 1.2;
-    ctx.strokeStyle = item.accent ? colors.accent : colors.line;
+    ctx.lineWidth = 1.1;
     ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(-w / 2, -h / 2, w, h, 5);
+    if (ctx.roundRect) ctx.roundRect(-w / 2, -h / 2, w, h, 4);
     else ctx.rect(-w / 2, -h / 2, w, h);
+    ctx.moveTo(w / 2 - 8, -h / 2);
+    ctx.lineTo(w / 2, -h / 2 + 8);
     ctx.stroke();
-    // folded corner and text lines
-    ctx.beginPath();
-    ctx.moveTo(w / 2 - 10, -h / 2);
-    ctx.lineTo(w / 2, -h / 2 + 10);
-    ctx.stroke();
-    ctx.fillStyle = ctx.strokeStyle;
-    for (let i = 0; i < 5; i += 1) {
-      const lineWidth = (w - 16) * (i === 4 ? 0.55 : 0.9 - (i % 2) * 0.15);
-      ctx.fillRect(-w / 2 + 8, -h / 2 + 14 + i * (h - 24) / 5, lineWidth, 1.6);
+    for (let i = 0; i < 4; i += 1) ctx.fillRect(-w / 2 + 6, -h / 2 + 11 + i * (h - 20) / 4, (w - 12) * (i === 3 ? 0.55 : 0.85), 1.3);
+  }
+
+  function drawLinks() {
+    // Each pair once, squared distances only, nothing allocated (at most ~26 dots).
+    ctx.lineWidth = 0.7;
+    ctx.strokeStyle = colors.cyan;
+    for (let i = 0; i < dots.length; i += 1) {
+      const a = dots[i];
+      for (let j = i + 1; j < dots.length; j += 1) {
+        const b = dots[j];
+        const dx = a.x - b.x;
+        if (dx > LINK || dx < -LINK) continue;
+        const dy = a.y - b.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 > LINK2) continue;
+        ctx.globalAlpha = 0.12 * (1 - d2 / LINK2) * Math.min(fade(a.x), fade(b.x));
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
     }
   }
 
   function draw() {
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
-    items.forEach((item) => {
+    if (!items.length) return;
+    drawLinks();
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      const alpha = item.alpha * fade(item.x);
+      ctx.globalAlpha = alpha;
+      if (item.kind === 'dot') {
+        const sprite = item.accent ? sprites.accent : sprites.cyan;
+        const s = item.size * 6;
+        ctx.drawImage(sprite, item.x - s / 2, item.y - s / 2, s, s);
+        continue;
+      }
       ctx.save();
-      ctx.globalAlpha = item.alpha;
       ctx.translate(item.x, item.y);
       ctx.rotate(item.angle);
-      if (item.page) drawPage(item);
+      const color = item.accent ? colors.accent : colors.line;
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      if (item.kind === 'page') drawPage(item);
+      else if (item.kind === 'circle') { ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, item.size, 0, Math.PI * 2); ctx.stroke(); }
       else {
-        ctx.fillStyle = item.accent ? colors.accent : colors.line;
-        ctx.font = `600 ${item.size}px "Noto Sans Tamil", system-ui, sans-serif`;
+        ctx.font = `600 ${item.size}px "Noto Sans Tamil", "Noto Sans Devanagari", system-ui, sans-serif`;
         ctx.textAlign = 'center';
         ctx.fillText(item.letter, 0, 0);
       }
       ctx.restore();
-    });
+    }
+    ctx.globalAlpha = 1;
   }
 
   function step(now) {
     frame = requestAnimationFrame(step);
-    if (now - last < 33) return;  // about 30 frames a second is plenty for slow drift
+    if (now - last < 33) return;  // about 30 frames a second
     const dt = Math.min((now - last) / 1000, 0.1);
     last = now;
-    items.forEach((item, index) => {
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
       item.y -= item.speed * dt;
-      item.x += item.drift * dt;
       item.angle += item.spin * dt;
-      if (item.y < -item.size * 2) items[index] = makeItem(false);
-    });
+      if (item.y < -60) place(item, Math.random() * width, height + 40);
+    }
     draw();
   }
 
   function start() {
     stop();
     readColors();
-    draw();
-    if (calm() || document.hidden) return;
+    if (items.length !== targetCount()) { resize(); } else draw();
+    if (calm() || document.hidden || !visible || !items.length) return;
     last = performance.now();
     frame = requestAnimationFrame(step);
   }
@@ -158,19 +217,30 @@
     const delta = window.scrollY - lastScroll;
     lastScroll = window.scrollY;
     if (width < 900 || calm()) return;
-    items.forEach((item, index) => {
-      item.y -= delta * 0.12;
-      if (item.y < -item.size * 2) items[index] = makeItem(false);
-      else if (item.y > height + item.size * 2) { const fresh = makeItem(false); fresh.y = -fresh.size; items[index] = fresh; }
-    });
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      item.y -= delta * 0.1;
+      if (item.y < -60) place(item, Math.random() * width, height + 40);
+      else if (item.y > height + 60) place(item, Math.random() * width, -40);
+    }
     if (!frame) draw();
   }, { passive: true });
-  window.addEventListener('resize', resize);
+
+  window.addEventListener('resize', () => { resize(); start(); });
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => { visible = entries[0].isIntersecting; if (visible) start(); else stop(); }).observe(canvas);
+  }
   if (reducedQuery.addEventListener) reducedQuery.addEventListener('change', start);
-  // Theme or calm-mode changes (app.js sets data-theme and the "calm" class on <html>).
-  new MutationObserver(start).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
-  window.PakkamBackground = { start, stop, isAnimating: () => Boolean(frame) };
-  resize();
-  start();
+  // Theme, calm mode or background setting changed (app.js sets these on <html>).
+  new MutationObserver(start).observe(root, { attributes: true, attributeFilter: ['data-theme', 'class', 'data-bg'] });
+  window.PakkamBackground = {
+    start, stop, isAnimating: () => Boolean(frame),
+    stats: () => ({ count: items.length, xs: items.map((item) => Math.round(item.x)), colors: { ...colors } }),
+  };
+  // Start after the page has painted, so the background never delays the first view.
+  const boot = () => { resize(); start(); };
+  const later = () => (window.requestIdleCallback ? requestIdleCallback(boot, { timeout: 1500 }) : setTimeout(boot, 300));
+  if (document.readyState === 'complete') later();
+  else window.addEventListener('load', later, { once: true });
 })();

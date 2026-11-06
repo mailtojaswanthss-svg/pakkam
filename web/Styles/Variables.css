@@ -46,77 +46,95 @@
    ========================================================================== */
 :root,
 [data-theme="dark"] {
-  --bg-canvas: #0A1024;
-  --accent-2: #C4A5FF;
-  --bg-atmosphere:
-    radial-gradient(ellipse at 8% 18%, rgba(10, 228, 233, 0.20) 0%, transparent 46%),
-    radial-gradient(ellipse at 92% 82%, rgba(167, 120, 255, 0.22) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 40%, rgba(37, 56, 120, 0.55) 0%, transparent 70%),
-    linear-gradient(160deg, #0B1530 0%, #0A1024 55%, #140E2E 100%);
+  color-scheme: dark;
+  --bg-canvas: #080D1B;
+  --bg-secondary: #10182B;
+  --accent-2: #A78BFA;
+  --accent-cyan: #39DDE5;
+  --bg-atmosphere: linear-gradient(165deg, #0B1326 0%, #080D1B 50%, #0E0B22 100%);
 
-  /* Glassmorphism Navbar & Surfaces */
-  --glass-bg: rgba(21, 38, 76, 0.52);
-  --glass-surface: rgba(255, 255, 255, 0.08);
-  --glass-surface-hover: rgba(255, 255, 255, 0.13);
-  --glass-border: rgba(255, 255, 255, 0.20);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  /* Glass surfaces: brighter than the page so cards lift off it */
+  --glass-bg: rgba(16, 24, 43, 0.72);
+  --glass-surface: rgba(21, 31, 53, 0.82);
+  --glass-surface-hover: rgba(28, 41, 66, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --card-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --card-gradient: linear-gradient(145deg, rgba(167, 139, 250, 0.07), rgba(57, 221, 229, 0.025));
   --glass-blur: blur(16px);
 
-  /* Text Hierarchy */
-  --text-primary: #FFFFFF;
-  --text-secondary: #E3EEF3;
-  --text-muted: #B8C7D6;
-  --text-highlight: #3DE8EE;
+  /* Text */
+  --text-primary: #F4F7FF;
+  --text-secondary: #B5C1D6;
+  --text-muted: #8291AA;
+  --text-highlight: #39DDE5;
 
-  /* Interactive & Accents */
-  --nav-active-text: #0AE4E9;
-  --nav-active-bar: #0AE4E9;
-  --badge-border: rgba(10, 228, 233, 0.35);
-  --badge-text: #0AE4E9;
-  --badge-bg: rgba(5, 220, 210, 0.13);
-  --waveform-color: #FFFFFF;
+  /* Accents */
+  --nav-active-text: #39DDE5;
+  --nav-active-bar: #39DDE5;
+  --badge-border: rgba(57, 221, 229, 0.35);
+  --badge-text: #39DDE5;
+  --badge-bg: rgba(57, 221, 229, 0.12);
+  --waveform-color: #F4F7FF;
 
-  /* CTA Button */
+  /* Background layers */
+  --glow-a: rgba(57, 221, 229, 0.30);
+  --glow-b: rgba(139, 92, 246, 0.34);
+  --glow-c: rgba(56, 102, 230, 0.22);
+  --glow-d: rgba(167, 139, 250, 0.26);
+  --grid-line: rgba(148, 170, 220, 0.06);
+  --scrollbar: rgba(255, 255, 255, 0.18);
+
+  /* Ask button */
   --cta-bg: linear-gradient(90deg, #8A2BE2 0%, #B829FF 100%);
-  --cta-border: rgba(255, 255, 255, 0.35);
-  --cta-shadow: 0 0 28px rgba(168, 43, 226, 0.65);
+  --cta-border: rgba(255, 255, 255, 0.30);
+  --cta-shadow: 0 10px 30px rgba(168, 43, 226, 0.45);
+  --cta-shadow-hover: 0 14px 40px rgba(168, 43, 226, 0.6);
 }
 
 /* ==========================================================================
    LIGHT THEME (Secondary Reference)
    ========================================================================== */
 [data-theme="light"] {
-  --bg-canvas: #E6F0F3;
+  color-scheme: light;
+  --bg-canvas: #EAF2F8;
+  --bg-secondary: #F5F8FC;
   --accent-2: #6D28D9;
-  --bg-atmosphere:
-    radial-gradient(circle at 15% 45%, rgba(10, 228, 233, 0.16) 0%, transparent 60%),
-    radial-gradient(circle at 78% 35%, rgba(120, 80, 200, 0.12) 0%, transparent 60%),
-    linear-gradient(135deg, #EAF6F8 0%, #E2EEF2 50%, #ECE6F4 100%);
+  --accent-cyan: #089EAD;
+  --bg-atmosphere: linear-gradient(160deg, #EEF6FA 0%, #EAF2F8 50%, #EFEAF8 100%);
 
-  /* Glassmorphism Navbar & Surfaces */
-  --glass-bg: rgba(195, 206, 216, 0.65);
-  --glass-surface: rgba(255, 255, 255, 0.78);
-  --glass-surface-hover: rgba(255, 255, 255, 0.95);
-  --glass-border: rgba(21, 38, 76, 0.16);
-  --glass-shadow: 0 6px 24px rgba(21, 38, 76, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-surface: rgba(255, 255, 255, 0.85);
+  --glass-surface-hover: rgba(255, 255, 255, 0.97);
+  --glass-border: rgba(35, 54, 94, 0.12);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 8px 26px rgba(35, 54, 94, 0.10);
+  --card-shadow: 0 10px 28px rgba(35, 54, 94, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --card-gradient: linear-gradient(145deg, rgba(109, 40, 217, 0.05), rgba(8, 158, 173, 0.04));
   --glass-blur: blur(16px);
 
-  /* Text Hierarchy */
-  --text-primary: #15264C;
-  --text-secondary: #23365E;
-  --text-muted: #3B4A6B;
-  --text-highlight: #B91C1C;
+  --text-primary: #172642;
+  --text-secondary: #465873;
+  --text-muted: #4A5B78;
+  --text-highlight: #6D28D9;
 
-  /* Interactive & Accents */
-  --nav-active-text: #B91C1C;
-  --nav-active-bar: #B91C1C;
-  --badge-border: rgba(185, 28, 28, 0.35);
-  --badge-text: #B91C1C;
-  --badge-bg: rgba(185, 28, 28, 0.08);
-  --waveform-color: #15264C;
+  --nav-active-text: #6D28D9;
+  --nav-active-bar: #6D28D9;
+  --badge-border: rgba(109, 40, 217, 0.30);
+  --badge-text: #6D28D9;
+  --badge-bg: rgba(109, 40, 217, 0.07);
+  --waveform-color: #172642;
 
-  /* CTA Button */
+  --glow-a: rgba(8, 158, 173, 0.16);
+  --glow-b: rgba(139, 92, 246, 0.16);
+  --glow-c: rgba(96, 165, 250, 0.12);
+  --glow-d: rgba(167, 139, 250, 0.16);
+  --grid-line: rgba(35, 54, 94, 0.05);
+  --scrollbar: rgba(35, 54, 94, 0.22);
+
   --cta-bg: linear-gradient(90deg, #7C22D6 0%, #A021E8 100%);
   --cta-border: rgba(255, 255, 255, 0.6);
-  --cta-shadow: 0 8px 24px rgba(157, 42, 232, 0.45);
+  --cta-shadow: 0 8px 24px rgba(124, 34, 214, 0.35);
+  --cta-shadow-hover: 0 12px 32px rgba(124, 34, 214, 0.5);
 }

@@ -611,6 +611,8 @@ Object.assign(MESSAGES['en-IN'], {
   'ab.teamEyebrow': 'THE PEOPLE BEHIND PAKKAM', 'ab.teamTitle': 'Made by', 'ab.ctaTitle': 'Have a question about a scheme?',
   'credit.role1': 'Idea, AI and backend', 'credit.role2': 'Design and frontend',
   'answer.helpfulYes': 'Yes, helpful', 'answer.helpfulNo': 'Not helpful',
+  'set.bg': 'Background', 'set.bgMinimal': 'Minimal', 'set.bgBalanced': 'Balanced', 'set.bgAmbient': 'Ambient',
+  'feature.03': 'Check a Forward', 'feature.03body': 'Paste a WhatsApp message and see which claims are false.',
   'tour.start': 'Take the 60-second tour', 'tour.next': 'Next', 'tour.back': 'Back', 'tour.skip': 'Skip tour', 'tour.done': 'Finish', 'tour.count': 'Step {n} of {total}',
   'tour.1t': 'Ask in your own language', 'tour.1': 'Tap the orb and speak in Tamil, Tanglish, Hindi or English. You can also type.',
   'tour.2t': 'An answer with its sources', 'tour.2': 'Each answer lists the official pages it comes from. The small numbers after each line open the exact page.',
@@ -631,6 +633,8 @@ Object.assign(MESSAGES['ta-IN'], {
   'ab.teamEyebrow': 'பக்கத்தின் பின்னால் உள்ளவர்கள்', 'ab.teamTitle': 'உருவாக்கியவர்கள்', 'ab.ctaTitle': 'ஒரு திட்டத்தைப் பற்றிக் கேள்வி உள்ளதா?',
   'credit.role1': 'யோசனை, AI மற்றும் பின்தளம்', 'credit.role2': 'வடிவமைப்பு மற்றும் முன்தளம்',
   'answer.helpfulYes': 'ஆம், உதவியாக இருந்தது', 'answer.helpfulNo': 'உதவவில்லை',
+  'set.bg': 'பின்னணி', 'set.bgMinimal': 'குறைவு', 'set.bgBalanced': 'சீரானது', 'set.bgAmbient': 'அதிகம்',
+  'feature.03': 'செய்தியைச் சரிபாருங்கள்', 'feature.03body': 'வாட்ஸ்அப் செய்தியை ஒட்டி, எந்தக் கூற்றுகள் தவறு என்று பாருங்கள்.',
   'tour.start': '60 வினாடி அறிமுகச் சுற்று', 'tour.next': 'அடுத்து', 'tour.back': 'பின்', 'tour.skip': 'சுற்றைத் தவிர்', 'tour.done': 'முடி', 'tour.count': 'படி {n} / {total}',
   'tour.1t': 'உங்கள் மொழியில் கேளுங்கள்', 'tour.1': 'உருண்டையைத் தொட்டு தமிழ், தமிங்கிலம், இந்தி அல்லது ஆங்கிலத்தில் பேசுங்கள். தட்டச்சும் செய்யலாம்.',
   'tour.2t': 'ஆதாரத்துடன் பதில்', 'tour.2': 'ஒவ்வொரு பதிலும் அது வந்த அதிகாரப்பூர்வப் பக்கங்களைக் காட்டும். ஒவ்வொரு வரிக்குப் பின் உள்ள எண் அந்தப் பக்கத்தைத் திறக்கும்.',
@@ -651,6 +655,8 @@ Object.assign(MESSAGES['hi-IN'], {
   'ab.teamEyebrow': 'पक्कम के पीछे के लोग', 'ab.teamTitle': 'बनाने वाले', 'ab.ctaTitle': 'किसी योजना के बारे में सवाल है?',
   'credit.role1': 'विचार, AI और बैकएंड', 'credit.role2': 'डिज़ाइन और फ्रंटएंड',
   'answer.helpfulYes': 'हाँ, मददगार', 'answer.helpfulNo': 'मददगार नहीं',
+  'set.bg': 'पृष्ठभूमि', 'set.bgMinimal': 'कम', 'set.bgBalanced': 'संतुलित', 'set.bgAmbient': 'ज़्यादा',
+  'feature.03': 'फ़ॉरवर्ड जाँचें', 'feature.03body': 'व्हाट्सऐप संदेश चिपकाएँ और देखें कौन-से दावे गलत हैं।',
   'tour.start': '60 सेकंड का परिचय देखें', 'tour.next': 'आगे', 'tour.back': 'पीछे', 'tour.skip': 'परिचय छोड़ें', 'tour.done': 'पूरा', 'tour.count': 'चरण {n} / {total}',
   'tour.1t': 'अपनी भाषा में पूछें', 'tour.1': 'ऑर्ब दबाएँ और तमिल, तमिंग्लिश, हिंदी या अंग्रेज़ी में बोलें। टाइप भी कर सकते हैं।',
   'tour.2t': 'स्रोत के साथ जवाब', 'tour.2': 'हर जवाब उन आधिकारिक पन्नों को दिखाता है जिनसे वह आया। हर पंक्ति के बाद का छोटा नंबर वही पन्ना खोलता है।',
@@ -1988,7 +1994,8 @@ function renderHomeExamples() {
 const prefs = (() => {
   const read = (key, fallback) => { try { return localStorage.getItem(key) ?? fallback; } catch (_) { return fallback; } };
   return { speed: Number(read('pakkam_speed', '1')) || 1, easy: read('pakkam_easy', '0') === '1', size: Number(read('pakkam_size', '100')) || 100,
-    calm: read('pakkam_calm', '0') === '1', phone: read('pakkam_phone', '0') === '1' };
+    calm: read('pakkam_calm', '0') === '1', phone: read('pakkam_phone', '0') === '1',
+    bg: ['minimal', 'balanced', 'ambient'].includes(read('pakkam_bg', 'balanced')) ? read('pakkam_bg', 'balanced') : 'balanced' };
 })();
 
 function savePref(key, value) { try { localStorage.setItem(key, String(value)); } catch (_) { /* private mode */ } }
@@ -1997,6 +2004,7 @@ function applyPrefs() {
   const root = document.documentElement;
   root.classList.toggle('easy', prefs.easy);
   root.classList.toggle('calm', prefs.calm);
+  if (root.dataset.bg !== prefs.bg) root.dataset.bg = prefs.bg;
   root.style.fontSize = `${prefs.easy ? Math.max(prefs.size, 118) : prefs.size}%`;
   if (window.PakkamRecorder) window.PakkamRecorder.phoneMode = prefs.phone;
   const mark = (selector, attr, value) => document.querySelectorAll(`${selector} [${attr}]`).forEach((b) => {
@@ -2006,6 +2014,7 @@ function applyPrefs() {
   });
   mark('#setting-speed', 'data-speed', prefs.easy ? 0.85 : prefs.speed);
   mark('#setting-size', 'data-size', prefs.size);
+  mark('#setting-bg', 'data-bg-choice', prefs.bg);
   mark('#setting-theme', 'data-theme-choice', state.theme);
   mark('#setting-lang', 'data-lang', state.language);
   const set = (id, value) => { const box = document.getElementById(id); if (box) box.checked = value; };
@@ -2018,6 +2027,7 @@ function applyPrefs() {
 function bindSettings() {
   document.querySelectorAll('#setting-speed [data-speed]').forEach((b) => b.addEventListener('click', () => { prefs.speed = Number(b.dataset.speed); savePref('pakkam_speed', prefs.speed); applyPrefs(); }));
   document.querySelectorAll('#setting-size [data-size]').forEach((b) => b.addEventListener('click', () => { prefs.size = Number(b.dataset.size); savePref('pakkam_size', prefs.size); applyPrefs(); }));
+  document.querySelectorAll('#setting-bg [data-bg-choice]').forEach((b) => b.addEventListener('click', () => { prefs.bg = b.dataset.bgChoice; savePref('pakkam_bg', prefs.bg); applyPrefs(); }));
   document.querySelectorAll('#setting-theme [data-theme-choice]').forEach((b) => b.addEventListener('click', () => { applyTheme(b.dataset.themeChoice); applyPrefs(); }));
   const toggle = (id, key, onChange) => document.getElementById(id)?.addEventListener('change', (event) => { onChange(event.target.checked); savePref(key, event.target.checked ? '1' : '0'); applyPrefs(); });
   toggle('setting-easy', 'pakkam_easy', (on) => { prefs.easy = on; if (on) prefs.speed = 0.85; });
@@ -2207,6 +2217,12 @@ function updateStoryRail() {
 }
 window.addEventListener('scroll', () => { if (!railFrame) railFrame = requestAnimationFrame(updateStoryRail); }, { passive: true });
 
+/** A skipped or timed-out transition is harmless: the page still changes. Keep its promises quiet. */
+function quietTransition(transition) {
+  ['ready', 'finished', 'updateCallbackDone'].forEach((key) => transition[key]?.catch?.(() => {}));
+  return transition;
+}
+
 /** Page change with a soft crossfade (View Transitions where the browser has them). */
 function showPage(pageKey) {
   const go = () => {
@@ -2215,26 +2231,31 @@ function showPage(pageKey) {
     watchReveals();
     updateStoryRail();
   };
-  if (document.startViewTransition && !reduceMotion()) document.startViewTransition(go);
+  if (document.startViewTransition && !reduceMotion()) quietTransition(document.startViewTransition(go));
   else go();
 }
 
 /** Theme switch: the new theme spreads in a circle from the button that was pressed. */
 function switchTheme(event) {
   const swap = () => { toggleTheme(); applyPrefs(); };
-  if (!document.startViewTransition || reduceMotion()) { swap(); return; }
+  if (!document.startViewTransition || reduceMotion()) {
+    const root = document.documentElement;
+    if (!reduceMotion()) { root.classList.add('theme-fading'); setTimeout(() => root.classList.remove('theme-fading'), 320); }
+    swap();
+    return;
+  }
   const box = event?.currentTarget?.getBoundingClientRect?.();
   const x = box ? box.left + box.width / 2 : window.innerWidth / 2;
   const y = box ? box.top + box.height / 2 : 0;
   const r = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
   const root = document.documentElement;
   root.dataset.vt = 'theme';
-  const transition = document.startViewTransition(swap);
+  const transition = quietTransition(document.startViewTransition(swap));
   transition.ready.then(() => {
     root.animate({ clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
       { duration: 550, easing: 'cubic-bezier(.22,1,.36,1)', pseudoElement: '::view-transition-new(root)' });
   }).catch(() => {});
-  transition.finished.finally(() => { delete root.dataset.vt; });
+  transition.finished.catch(() => {}).finally(() => { delete root.dataset.vt; });
 }
 
 // Keyboard focus stays inside an open panel (scheme details, proof card) until it closes.

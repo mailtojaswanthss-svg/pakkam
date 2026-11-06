@@ -35,6 +35,9 @@
   <div class="bg-layer" aria-hidden="true">
     <span class="bg-glow bg-glow--a"></span>
     <span class="bg-glow bg-glow--b"></span>
+    <span class="bg-glow bg-glow--c"></span>
+    <span class="bg-glow bg-glow--d"></span>
+    <span class="bg-grid"></span>
     <canvas id="bg-pages"></canvas>
   </div>
 
@@ -86,24 +89,24 @@
     <div class="hero-stage">
       
       <!-- 01: Top Feature Callout -->
-      <div class="feature-callout callout-01">
-        <span class="feature-badge">01</span>
-        <div class="feature-text">
-          <h3 data-i18n="feature.01">Understand Documents</h3>
-          <p data-i18n="feature.01body">Turn complex government PDFs into simple explanations.</p>
-        </div>
-      </div>
+      <a href="#assistant" class="feature-callout callout-01" data-nav="assistant">
+          <span class="feature-badge">01</span>
+          <span class="feature-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M9.5 12h6M9.5 15.5h4"/></svg></span>
+          <div class="feature-text"><h3 class="feature-title" data-i18n="feature.01">Understand Documents</h3>
+          <p data-i18n="feature.01body">Turn complex government PDFs into simple explanations.</p></div>
+          <span class="feature-go"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
 
       <!-- Center Zone: 02 Callout + Symmetric Waveform + Theme Orb + 03 Callout -->
       <div class="orb-showcase-grid">
         <!-- 02: Left Feature Callout -->
-        <div class="feature-callout callout-02">
+        <a href="#assistant" class="feature-callout callout-02" data-nav="assistant">
           <span class="feature-badge">02</span>
-          <div class="feature-text">
-            <h3 data-i18n="feature.02">Speak Naturally</h3>
-            <p data-i18n="feature.02body">Ask questions in Tamil, Hindi or English.</p>
-          </div>
-        </div>
+          <span class="feature-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></span>
+          <div class="feature-text"><h3 class="feature-title" data-i18n="feature.02">Speak Naturally</h3>
+            <p data-i18n="feature.02body">Ask questions in Tamil, Hindi or English.</p></div>
+          <span class="feature-go"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
 
         <!-- Central Voice Orb & Symmetric Waveform -->
         <div id="hero-orb-assembly" class="orb-waveform-assembly">
@@ -117,6 +120,7 @@
 
           <p class="thought-bubble" aria-hidden="true"></p>
           <div id="hero-orb-trigger" class="central-orb-container" role="button" tabindex="0" aria-label="Activate Pakkam Voice Assistant" data-i18n-aria="assistant.shortcut">
+            <span class="orb-halo" aria-hidden="true"></span><span class="orb-ring orb-ring--a" aria-hidden="true"></span><span class="orb-ring orb-ring--b" aria-hidden="true"></span>
             <img id="hero-orb-img" src="./assets/images/dark-orb.webp" alt="Pakkam Voice Orb" class="central-orb-img" />
           </div>
 
@@ -130,13 +134,13 @@
         </div>
 
         <!-- 03: Right Feature Callout -->
-        <div class="feature-callout callout-03">
+        <a href="#shield" class="feature-callout callout-03" data-nav="shield">
           <span class="feature-badge">03</span>
-          <div class="feature-text">
-            <h3 data-i18n="feature.03">Trust Your Information</h3>
-            <p data-i18n="feature.03body">Explore answers supported by official documents and references.</p>
-          </div>
-        </div>
+          <span class="feature-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 19 6v5.5c0 4.3-2.9 7.7-7 9-4.1-1.3-7-4.7-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg></span>
+          <div class="feature-text"><h3 class="feature-title" data-i18n="feature.03">Trust Your Information</h3>
+            <p data-i18n="feature.03body">Explore answers supported by official documents and references.</p></div>
+          <span class="feature-go"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
       </div>
 
       <!-- Hero Copy & CTA -->
@@ -153,10 +157,10 @@
           <button class="chip-btn hero-secondary" type="button" data-nav="shield"><svg class="wa-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span data-i18n="home.shield">Check a WhatsApp forward</span></button>
         </div>
         <button id="tour-start" class="tour-link text-link" type="button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg><span data-i18n="tour.start">Take the 60-second tour</span></button>
-        <div class="hero-chips" aria-hidden="true">
-          <span class="hero-chip"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M9.5 12h6M9.5 15.5h4"/></svg><span data-i18n="feature.01">See the Proof</span></span>
-          <span class="hero-chip"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span data-i18n="feature.02">Speak Naturally</span></span>
-          <span class="hero-chip"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 19 6v5.5c0 4.3-2.9 7.7-7 9-4.1-1.3-7-4.7-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span data-i18n="feature.03">No Page, No Answer</span></span>
+        <div class="hero-chips">
+          <button type="button" class="hero-chip" data-nav="assistant"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M9.5 12h6M9.5 15.5h4"/></svg><span data-i18n="feature.01">See the Proof</span></button>
+          <button type="button" class="hero-chip" data-nav="assistant"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span data-i18n="feature.02">Speak Naturally</span></button>
+          <button type="button" class="hero-chip" data-nav="shield"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 19 6v5.5c0 4.3-2.9 7.7-7 9-4.1-1.3-7-4.7-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span data-i18n="feature.03">No Page, No Answer</span></button>
         </div>
         <div id="home-convo" class="home-convo" aria-live="polite">
           <p class="thought-line" data-orb="home"></p>
@@ -186,7 +190,8 @@
         <div id="assistant-orb-assembly" class="orb-waveform-assembly">
           <p class="thought-bubble" aria-hidden="true"></p>
           <div id="assistant-mic-orb" class="central-orb-container" title="Click to Speak">
-          <img class="central-orb-img theme-bound-orb" src="./assets/images/dark-orb.webp" alt="Voice Assistant Orb" />
+          <span class="orb-halo" aria-hidden="true"></span><span class="orb-ring orb-ring--a" aria-hidden="true"></span><span class="orb-ring orb-ring--b" aria-hidden="true"></span>
+            <img class="central-orb-img theme-bound-orb" src="./assets/images/dark-orb.webp" alt="Voice Assistant Orb" />
           </div>
         </div>
           <p id="voice-status-label" class="status-pill" data-i18n="assistant.tap">Tap Orb to Speak</p>
@@ -305,6 +310,8 @@
         <label class="switch"><input type="checkbox" id="setting-easy" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.easy">Easy mode for elders</span></label>
         <div class="setting-row"><span class="setting-name" data-i18n="set.textSize">Text size</span>
           <div class="segmented" id="setting-size" role="group"><button type="button" class="chip-btn" data-size="100">A</button><button type="button" class="chip-btn" data-size="112">A+</button><button type="button" class="chip-btn" data-size="125">A++</button></div></div>
+        <div class="setting-row"><span class="setting-name" data-i18n="set.bg">Background</span>
+          <div class="segmented" id="setting-bg" role="group"><button type="button" class="chip-btn" data-bg-choice="minimal" data-i18n="set.bgMinimal">Minimal</button><button type="button" class="chip-btn" data-bg-choice="balanced" data-i18n="set.bgBalanced">Balanced</button><button type="button" class="chip-btn" data-bg-choice="ambient" data-i18n="set.bgAmbient">Ambient</button></div></div>
         <label class="switch"><input type="checkbox" id="setting-calm" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.calm">Reduce animations</span></label>
       </article>
       <article class="glass-panel settings-card">
