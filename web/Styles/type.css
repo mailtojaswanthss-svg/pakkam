@@ -82,3 +82,7 @@ html[data-theme="dark"] body { background: var(--bg-canvas) url(../assets/art/au
 .ex-typed { position: absolute; inset: 0; }
 .ex-text::before, .ex-text::after { content: none; }
 .ex-full::before, .ex-typed::before { content: '“'; } .ex-full::after, .ex-typed::after { content: '”'; }
+
+/* Team photos on the credit cards (initials stay underneath as the fallback) */
+.credit-avatar { position: relative; overflow: hidden; }
+.credit-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; border-radius: inherit; }
