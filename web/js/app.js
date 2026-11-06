@@ -3,6 +3,7 @@ import { detectTalk, replyLanguage, TALK, EXAMPLES } from './talk.js';
 import { decorate, iconSvg, splitIcon } from './icons.js';
 import { SAMPLE_FACTS, SAMPLE_SOURCES, sampleFor } from './samples.js';
 import { runTour } from './tour.js';
+import { ART, fillArt } from './art.js';
 
 const API_BASE = window.PAKKAM_API_BASE || '';
 
@@ -72,6 +73,7 @@ function applyLanguage(language) {
   document.querySelectorAll('[data-i18n-aria]').forEach((element) => {
     element.setAttribute('aria-label', t(element.dataset.i18nAria));
   });
+  document.querySelectorAll('[data-i18n-alt]').forEach((element) => { element.alt = t(element.dataset.i18nAlt); });
   document.querySelectorAll('[data-i18n-title]').forEach((element) => {
     const translated = t(element.dataset.i18nTitle);
     if (element.tagName === 'TITLE') document.title = translated;
@@ -616,6 +618,15 @@ Object.assign(MESSAGES['en-IN'], {
   'shield.signsNote': 'Warning signs mean: be careful. On their own they do not prove the message is false. The verdict above comes only from the official documents.',
   'proof.pdfAt': 'Open the official PDF (page {page})', 'proof.pdfNote': 'If the PDF opens at page 1, go to page {page}. The page image above always shows the right page.',
   'answer.checkedBy': 'Checked against the printed page by {names}', 'answer.fromDoc': 'From the official document. Open a page to check it yourself.',
+  'catline.women': 'Schemes for women', 'catline.farmers': 'Schemes for farmers', 'catline.pension': 'Pension schemes', 'catline.gas': 'Cooking gas schemes',
+  'catline.children': 'Schemes for children', 'catline.health': 'Health schemes', 'catline.education': 'Education schemes', 'catline.welfare': 'Other welfare schemes',
+  'catline.hint': 'Tap a scheme to see its key facts and the official documents they come from.',
+  'guide.title': 'How to use this list', 'guide.1': 'Pick a scheme', 'guide.1b': 'Use the tabs, or search by name.',
+  'guide.2': 'Read the key facts', 'guide.2b': 'The amount and who can apply, each with the page it comes from.',
+  'guide.3': 'Open the official page', 'guide.3b': 'Check it yourself in the government document.',
+  'schemes.emptyArt': 'No scheme matches that. Try another word, or ask Pakkam.',
+  'alt.schemesHero': 'Illustration: a woman and an elderly man at a ration shop counter on a Tamil Nadu street.',
+  'alt.aboutOpening': 'Illustration: a grandfather and his grandchild looking at a phone together at home.',
   'sc.1t': 'The problem', 'sc.1': 'The rules are in long official papers that are hard to find and harder to read.',
   'sc.2t': 'Ask Pakkam', 'sc.2': 'Ask in your own language, by voice or by typing.',
   'sc.3t': 'See the proof', 'sc.3': 'The answer points to the exact line on the official page.',
@@ -650,6 +661,15 @@ Object.assign(MESSAGES['ta-IN'], {
   'shield.signsNote': 'எச்சரிக்கை அறிகுறிகள் என்றால் கவனம் தேவை. அவை மட்டுமே செய்தி தவறு என்று நிரூபிக்காது. மேலே உள்ள முடிவு அதிகாரப்பூர்வ ஆவணங்களிலிருந்து மட்டுமே.',
   'proof.pdfAt': 'அதிகாரப்பூர்வ PDF-ஐத் திற (பக்கம் {page})', 'proof.pdfNote': 'PDF முதல் பக்கத்தில் திறந்தால், பக்கம் {page}-க்குச் செல்லுங்கள். மேலே உள்ள பக்கப் படம் எப்போதும் சரியான பக்கத்தைக் காட்டும்.',
   'answer.checkedBy': 'அச்சுப் பக்கத்துடன் சரிபார்த்தவர்: {names}', 'answer.fromDoc': 'அதிகாரப்பூர்வ ஆவணத்திலிருந்து. பக்கத்தைத் திறந்து நீங்களே சரிபாருங்கள்.',
+  'catline.women': 'பெண்களுக்கான திட்டங்கள்', 'catline.farmers': 'விவசாயிகளுக்கான திட்டங்கள்', 'catline.pension': 'ஓய்வூதியத் திட்டங்கள்', 'catline.gas': 'சமையல் எரிவாயுத் திட்டங்கள்',
+  'catline.children': 'குழந்தைகளுக்கான திட்டங்கள்', 'catline.health': 'சுகாதாரத் திட்டங்கள்', 'catline.education': 'கல்வித் திட்டங்கள்', 'catline.welfare': 'பிற நலத் திட்டங்கள்',
+  'catline.hint': 'ஒரு திட்டத்தைத் தொட்டு, அதன் முக்கியத் தகவல்களையும் அவை வந்த அதிகாரப்பூர்வ ஆவணங்களையும் பாருங்கள்.',
+  'guide.title': 'இந்தப் பட்டியலைப் பயன்படுத்துவது எப்படி', 'guide.1': 'ஒரு திட்டத்தைத் தேர்ந்தெடுங்கள்', 'guide.1b': 'தாவல்களைப் பயன்படுத்துங்கள், அல்லது பெயரால் தேடுங்கள்.',
+  'guide.2': 'முக்கியத் தகவல்களைப் படியுங்கள்', 'guide.2b': 'தொகையும் யார் விண்ணப்பிக்கலாம் என்பதும், அவை வந்த பக்கத்துடன்.',
+  'guide.3': 'அதிகாரப்பூர்வப் பக்கத்தைத் திறங்கள்', 'guide.3b': 'அரசு ஆவணத்தில் நீங்களே சரிபாருங்கள்.',
+  'schemes.emptyArt': 'பொருந்தும் திட்டம் இல்லை. வேறு சொல்லில் தேடுங்கள், அல்லது பக்கத்திடம் கேளுங்கள்.',
+  'alt.schemesHero': 'ஓவியம்: தமிழ்நாட்டுத் தெருவில் நியாயவிலைக் கடையில் ஒரு பெண்ணும் ஒரு முதியவரும்.',
+  'alt.aboutOpening': 'ஓவியம்: வீட்டில் ஒரு தாத்தாவும் பேரனும் சேர்ந்து கைப்பேசியைப் பார்க்கிறார்கள்.',
   'sc.1t': 'சிக்கல்', 'sc.1': 'விதிகள் நீண்ட அதிகாரப்பூர்வ ஆவணங்களில் உள்ளன; கண்டுபிடிப்பது கடினம், படிப்பது இன்னும் கடினம்.',
   'sc.2t': 'பக்கத்திடம் கேளுங்கள்', 'sc.2': 'உங்கள் மொழியில், குரலிலோ தட்டச்சிலோ கேளுங்கள்.',
   'sc.3t': 'ஆதாரத்தைப் பாருங்கள்', 'sc.3': 'பதில் அதிகாரப்பூர்வப் பக்கத்தின் சரியான வரியைக் காட்டும்.',
@@ -684,6 +704,15 @@ Object.assign(MESSAGES['hi-IN'], {
   'shield.signsNote': 'चेतावनी के संकेत का मतलब है: सावधान रहें। अकेले ये साबित नहीं करते कि संदेश गलत है। ऊपर का फ़ैसला सिर्फ़ आधिकारिक दस्तावेज़ों से है।',
   'proof.pdfAt': 'आधिकारिक PDF खोलें (पन्ना {page})', 'proof.pdfNote': 'अगर PDF पहले पन्ने पर खुले, तो पन्ना {page} पर जाएँ। ऊपर की पन्ने की तस्वीर हमेशा सही पन्ना दिखाती है।',
   'answer.checkedBy': 'छपे पन्ने से जाँचा: {names}', 'answer.fromDoc': 'आधिकारिक दस्तावेज़ से। पन्ना खोलकर ख़ुद जाँचें।',
+  'catline.women': 'महिलाओं के लिए योजनाएँ', 'catline.farmers': 'किसानों के लिए योजनाएँ', 'catline.pension': 'पेंशन योजनाएँ', 'catline.gas': 'रसोई गैस योजनाएँ',
+  'catline.children': 'बच्चों के लिए योजनाएँ', 'catline.health': 'स्वास्थ्य योजनाएँ', 'catline.education': 'शिक्षा योजनाएँ', 'catline.welfare': 'अन्य कल्याण योजनाएँ',
+  'catline.hint': 'किसी योजना को दबाएँ और उसकी मुख्य जानकारी और वे आधिकारिक दस्तावेज़ देखें जिनसे वह आई है।',
+  'guide.title': 'इस सूची का उपयोग कैसे करें', 'guide.1': 'योजना चुनें', 'guide.1b': 'टैब का उपयोग करें, या नाम से खोजें।',
+  'guide.2': 'मुख्य जानकारी पढ़ें', 'guide.2b': 'राशि और कौन आवेदन कर सकता है, हर एक उसके पन्ने के साथ।',
+  'guide.3': 'आधिकारिक पन्ना खोलें', 'guide.3b': 'सरकारी दस्तावेज़ में ख़ुद जाँचें।',
+  'schemes.emptyArt': 'कोई योजना नहीं मिली। कोई दूसरा शब्द आज़माएँ, या पक्कम से पूछें।',
+  'alt.schemesHero': 'चित्र: तमिलनाडु की एक गली में राशन दुकान पर एक महिला और एक बुज़ुर्ग।',
+  'alt.aboutOpening': 'चित्र: घर पर दादा और पोता साथ में फ़ोन देख रहे हैं।',
   'sc.1t': 'समस्या', 'sc.1': 'नियम लंबे सरकारी काग़ज़ों में हैं; ढूँढना मुश्किल, पढ़ना और भी मुश्किल।',
   'sc.2t': 'पक्कम से पूछें', 'sc.2': 'अपनी भाषा में, बोलकर या लिखकर पूछें।',
   'sc.3t': 'सबूत देखें', 'sc.3': 'जवाब आधिकारिक पन्ने की सही पंक्ति दिखाता है।',
@@ -2040,6 +2069,7 @@ function renderSchemeFilters(items) {
       activeCategory = cat;
       renderSchemes(null, document.getElementById('scheme-search-input')?.value || '');
     }, `filter-tab${activeCategory === cat ? ' active' : ''}`);
+    if (cat !== 'all' && ART[`cat-${cat}`]) { const mini = el('span', 'tab-art'); mini.innerHTML = ART[`cat-${cat}`]; button.append(mini); }
     button.append(document.createTextNode(t(cat === 'all' ? 'schemes.all' : `cat.${cat}`)), el('span', 'tab-count', String(count)));
     button.setAttribute('aria-pressed', String(activeCategory === cat));
     return button;
@@ -2062,7 +2092,23 @@ function renderSchemes(_unused, searchQuery = '') {
   const shown = items
     .filter((i) => activeCategory === 'all' || i.category === activeCategory)
     .filter((i) => !query || i.scheme.toLowerCase().includes(query) || i.docs.some((d) => d.title.toLowerCase().includes(query)));
-  if (!shown.length) { grid.append(el('p', 'empty-state', t('schemes.empty'))); return; }
+  const banner = document.getElementById('scheme-banner');
+  if (banner) {
+    banner.hidden = activeCategory === 'all';
+    if (activeCategory !== 'all') {
+      const art = el('span', 'banner-art'); art.innerHTML = ART[`cat-${activeCategory}`] || '';
+      const words = el('div');
+      words.append(el('h2', '', t(`catline.${activeCategory}`)), el('p', '', t('catline.hint')));
+      banner.replaceChildren(art, words);
+    }
+  }
+  if (!shown.length) {
+    const empty = el('div', 'empty-art');
+    const art = el('span', 'empty-art-pic'); art.innerHTML = ART.empty;
+    empty.append(art, el('p', '', t('schemes.emptyArt')), chip(t('home.ask'), () => showPage('assistant'), 'cta-button'));
+    grid.append(empty);
+    return;
+  }
   const list = el('div', 'scheme-list');
   list.append(...shown.map((item) => {
     const row = el('button', 'scheme-row');
@@ -2104,6 +2150,7 @@ function openSchemeDrawer(item) {
   const close = chip('✕', closeSchemeDrawer, 'icon-btn drawer-close');
   close.setAttribute('aria-label', t('proof.close'));
   const head = el('div', 'drawer-head');
+  if (ART[`cat-${item.category}`]) { const art = el('span', 'drawer-art'); art.innerHTML = ART[`cat-${item.category}`]; head.append(art); }
   const titles = el('div');
   titles.append(el('p', 'tile-cat', [t(`cat.${item.category}`), item.issuer ? t(`issuer.${item.issuer}`) : ''].filter(Boolean).join(' · ')), el('h2', '', item.scheme));
   head.append(titles);
@@ -2537,6 +2584,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showPage('settings');
     setTimeout(() => document.querySelector('[data-i18n="set.privacyTitle"]')?.closest('.settings-card, section, div')?.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'center' }), 80);
   });
+  fillArt();
   heroEntrance();
   watchReveals();
   document.getElementById('tour-start')?.addEventListener('click', startTour);
