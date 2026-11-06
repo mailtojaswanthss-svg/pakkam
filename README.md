@@ -18,7 +18,7 @@ Tamil · Hindi · English · Tanglish &nbsp;|&nbsp; text or voice (Gnani Prisma 
 </div>
 
 <p align="center">
-  <img src="docs/img/home-desktop.png" alt="Pakkam home page: Tap. Ask. See the proof. Ask in your language. Get the answer with its proof." width="100%">
+  <img src="docs/img/home-desktop.png" alt="Pakkam home page: Speak. Hear. See the proof. Ask in your language. Get the answer with its proof." width="100%">
 </p>
 
 > **Disclaimer.** An independent student research prototype. It is **not** an official

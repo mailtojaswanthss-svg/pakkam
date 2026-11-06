@@ -67,12 +67,12 @@ Best time to post: a weekday between 8 and 10 AM IST.
 |---|---|---|
 | 0:00 | A family-group forward: "Rs.2,000 … share OTP", then "Is it true?" | Forwards like this reach families across Tamil Nadu every day. But is it true? |
 | 0:07 | Rumour Shield: "This forward is wrong", the claims checked against G.O.15, the warning signs | Pakkam's Rumour Shield checks it against the official Government Order. The amount is false, and it flags the scam tricks. |
-| 0:14 | Home: "Tap. Ask. See the proof." | This is Pakkam. Ask in your language, and get the answer with its proof. |
+| 0:14 | Home: "Speak. Hear. See the proof." | This is Pakkam. Ask in your language, and get the answer with its proof. |
 | 0:20 | The orb listens to a Tamil question, Prisma's transcript appears, the Tamil answer with its source | Just tap the orb and ask, here in Tamil. Gnani Prisma turns the voice into text… *(then Pakkam answers aloud in Tamil, subtitled)* |
 | 0:46 | The proof viewer: G.O.(Ms) No.15, page 3, checked against the printed page | Every answer shows its source. One tap opens the exact page… |
 | 0:56 | "When will the next PM-KISAN instalment come?" → Not in the documents, plus the helpline | And when the documents don't say it, Pakkam says so. It never guesses. |
 | 1:04 | Tested, honestly: 194 / 98% / 39 of 40, and the method | We tested it live on 194 real questions… |
-| 1:16 | End card: Tap. Ask. See the proof. · the link · Jaswanth S S & Mohit K | Pakkam. Tap. Ask. See the proof. |
+| 1:16 | End card: Speak. Hear. See the proof. · the link · Jaswanth S S & Mohit K | Pakkam. Speak. Hear. See the proof. |
 
 ## Rebuilding the videos
 ```
