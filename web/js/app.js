@@ -529,7 +529,7 @@ Object.assign(MESSAGES['en-IN'], {
   "st.p21": "Because technology should adapt to people, not the other way around.",
   "st.tag": "Your language. Your schemes. Your access.",
   "st.tag2": "One page at a time.",
-  "st.disclaimer": "Pakkam is an early research prototype by a student, not affiliated with any government body. Answers are for information only. Check the official source before you act.",
+  "st.disclaimer": "Pakkam is an early research prototype by students, not affiliated with any government body. Answers are for information only. Check the official source before you act.",
 });
 Object.assign(MESSAGES['ta-IN'], {
   'th.try': 'கேட்டுப் பாருங்கள்:', 'th.listen': 'கேட்கிறேன்…', 'th.writing': 'நீங்கள் சொன்னதை எழுதுகிறேன்…',
@@ -565,7 +565,7 @@ Object.assign(MESSAGES['ta-IN'], {
   'st.p21': 'ஏனென்றால் தொழில்நுட்பம்தான் மக்களுக்கு ஏற்ப மாற வேண்டும்; மக்கள் தொழில்நுட்பத்துக்கு ஏற்ப அல்ல.',
   'st.tag': 'உங்கள் மொழி. உங்கள் திட்டங்கள். உங்கள் அணுகல்.',
   'st.tag2': 'ஒரு நேரத்தில் ஒரு பக்கம்.',
-  'st.disclaimer': 'பக்கம் ஒரு மாணவர் உருவாக்கிய தொடக்க நிலை ஆய்வு முன்மாதிரி; எந்த அரசு அமைப்புடனும் தொடர்பில்லை. பதில்கள் தகவலுக்கு மட்டுமே. செயல்படும் முன் அதிகாரப்பூர்வ மூலத்தைச் சரிபாருங்கள்.',
+  'st.disclaimer': 'பக்கம் மாணவர்கள் உருவாக்கிய தொடக்க நிலை ஆய்வு முன்மாதிரி; எந்த அரசு அமைப்புடனும் தொடர்பில்லை. பதில்கள் தகவலுக்கு மட்டுமே. செயல்படும் முன் அதிகாரப்பூர்வ மூலத்தைச் சரிபாருங்கள்.',
 });
 Object.assign(MESSAGES['hi-IN'], {
   'th.try': 'पूछकर देखें:', 'th.listen': 'सुन रहा हूँ…', 'th.writing': 'आपने जो कहा, लिख रहा हूँ…',
@@ -601,7 +601,7 @@ Object.assign(MESSAGES['hi-IN'], {
   'st.p21': 'क्योंकि तकनीक को लोगों के हिसाब से ढलना चाहिए, लोगों को तकनीक के हिसाब से नहीं।',
   'st.tag': 'आपकी भाषा। आपकी योजनाएँ। आपकी पहुँच।',
   'st.tag2': 'एक समय में एक पन्ना।',
-  'st.disclaimer': 'पक्कम एक छात्र का शुरुआती रिसर्च प्रोटोटाइप है, किसी सरकारी संस्था से जुड़ा नहीं। जवाब केवल जानकारी के लिए हैं। कोई कदम उठाने से पहले आधिकारिक स्रोत देखें।',
+  'st.disclaimer': 'पक्कम छात्रों का शुरुआती रिसर्च प्रोटोटाइप है, किसी सरकारी संस्था से जुड़ा नहीं। जवाब केवल जानकारी के लिए हैं। कोई कदम उठाने से पहले आधिकारिक स्रोत देखें।',
 });
 
 
@@ -613,7 +613,7 @@ Object.assign(MESSAGES['en-IN'], {
   'ab.canEyebrow': 'WHAT IT DOES', 'ab.howEyebrow': 'UNDER THE HOOD', 'ab.numEyebrow': 'MEASURED ON THE LIVE SITE',
   'ab.numLink': 'See the full benchmark →', 'ab.badgeDocs': '18 official documents',
   'ab.teamEyebrow': 'THE PEOPLE BEHIND PAKKAM', 'ab.teamTitle': 'Made by', 'ab.ctaTitle': 'Have a question about a scheme?',
-  'credit.role1': 'Idea, AI and backend', 'credit.role2': 'Design and frontend',
+  'credit.role1': 'Idea, AI, backend and frontend', 'credit.role2': 'Design and frontend',
   'answer.helpfulYes': 'Yes, helpful', 'answer.helpfulNo': 'Not helpful',
   'shield.yourMessage': 'Your message, with warning signs marked', 'shield.markTitle': 'Warning sign: check before trusting',
   'shield.signsNote': 'Warning signs mean: be careful. On their own they do not prove the message is false. The verdict above comes only from the official documents.',
@@ -656,7 +656,7 @@ Object.assign(MESSAGES['ta-IN'], {
   'ab.canEyebrow': 'இது என்ன செய்யும்', 'ab.howEyebrow': 'உள்ளே எப்படி இயங்குகிறது', 'ab.numEyebrow': 'நேரடித் தளத்தில் அளவிடப்பட்டது',
   'ab.numLink': 'முழு சோதனை முடிவுகளைப் பாருங்கள் →', 'ab.badgeDocs': '18 அதிகாரப்பூர்வ ஆவணங்கள்',
   'ab.teamEyebrow': 'பக்கத்தின் பின்னால் உள்ளவர்கள்', 'ab.teamTitle': 'உருவாக்கியவர்கள்', 'ab.ctaTitle': 'ஒரு திட்டத்தைப் பற்றிக் கேள்வி உள்ளதா?',
-  'credit.role1': 'யோசனை, AI மற்றும் பின்தளம்', 'credit.role2': 'வடிவமைப்பு மற்றும் முன்தளம்',
+  'credit.role1': 'யோசனை, AI, பின்தளம் மற்றும் முன்தளம்', 'credit.role2': 'வடிவமைப்பு மற்றும் முன்தளம்',
   'answer.helpfulYes': 'ஆம், உதவியாக இருந்தது', 'answer.helpfulNo': 'உதவவில்லை',
   'shield.yourMessage': 'உங்கள் செய்தி, எச்சரிக்கை அறிகுறிகள் குறிக்கப்பட்டு', 'shield.markTitle': 'எச்சரிக்கை அறிகுறி: நம்பும் முன் சரிபாருங்கள்',
   'shield.signsNote': 'எச்சரிக்கை அறிகுறிகள் என்றால் கவனம் தேவை. அவை மட்டுமே செய்தி தவறு என்று நிரூபிக்காது. மேலே உள்ள முடிவு அதிகாரப்பூர்வ ஆவணங்களிலிருந்து மட்டுமே.',
@@ -699,7 +699,7 @@ Object.assign(MESSAGES['hi-IN'], {
   'ab.canEyebrow': 'यह क्या करता है', 'ab.howEyebrow': 'अंदर कैसे काम करता है', 'ab.numEyebrow': 'लाइव साइट पर मापा गया',
   'ab.numLink': 'पूरा बेंचमार्क देखें →', 'ab.badgeDocs': '18 आधिकारिक दस्तावेज़',
   'ab.teamEyebrow': 'पक्कम के पीछे के लोग', 'ab.teamTitle': 'बनाने वाले', 'ab.ctaTitle': 'किसी योजना के बारे में सवाल है?',
-  'credit.role1': 'विचार, AI और बैकएंड', 'credit.role2': 'डिज़ाइन और फ्रंटएंड',
+  'credit.role1': 'विचार, AI, बैकएंड और फ्रंटएंड', 'credit.role2': 'डिज़ाइन और फ्रंटएंड',
   'answer.helpfulYes': 'हाँ, मददगार', 'answer.helpfulNo': 'मददगार नहीं',
   'shield.yourMessage': 'आपका संदेश, चेतावनी के संकेत चिह्नित', 'shield.markTitle': 'चेतावनी का संकेत: भरोसा करने से पहले जाँचें',
   'shield.signsNote': 'चेतावनी के संकेत का मतलब है: सावधान रहें। अकेले ये साबित नहीं करते कि संदेश गलत है। ऊपर का फ़ैसला सिर्फ़ आधिकारिक दस्तावेज़ों से है।',
@@ -2528,8 +2528,8 @@ function renderOfflineAnswer(bubble, question) {
 // Names, roles and links of the people who built Pakkam. A person without a name is not shown,
 // and only real links are listed.
 const CREDITS = [
-  { name: 'Jaswanth S S', role: 'credit.role1', links: { github: 'https://github.com/mailtojaswanthss-svg' } },
-  { name: '', role: 'credit.role2', links: {} },  // teammate: name and links to be added
+  { name: 'Jaswanth S S', role: 'credit.role1', photo: '', links: { github: 'https://github.com/mailtojaswanthss-svg', linkedin: 'https://www.linkedin.com/in/jaswanthss' } },
+  { name: 'Mohit K', role: 'credit.role2', photo: '', links: { github: 'https://github.com/mxhxt010-code', linkedin: 'https://www.linkedin.com/in/mohit-k-575947371/' } },
 ];
 function renderCredits() {
   const box = document.getElementById('credits');
@@ -2547,7 +2547,15 @@ function renderCredits() {
     });
     const who = el('div', 'credit-who');
     who.append(el('h3', '', person.name), el('p', '', t(person.role)));
-    card.append(el('span', 'credit-avatar', initials), who, links);
+    const avatar = el('span', 'credit-avatar', initials);
+    if (person.photo) {
+      // A photo when one is set (web/assets/team/), initials if it is missing or fails to load.
+      const img = document.createElement('img');
+      img.src = person.photo; img.alt = person.name; img.width = 56; img.height = 56; img.loading = 'lazy'; img.decoding = 'async';
+      img.addEventListener('error', () => img.remove());
+      avatar.append(img);
+    }
+    card.append(avatar, who, links);
     return card;
   }));
 }
