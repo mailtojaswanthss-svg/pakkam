@@ -2528,8 +2528,8 @@ function renderOfflineAnswer(bubble, question) {
 // Names, roles and links of the people who built Pakkam. A person without a name is not shown,
 // and only real links are listed.
 const CREDITS = [
-  { name: 'Jaswanth S S', role: 'credit.role1', photo: '', links: { github: 'https://github.com/mailtojaswanthss-svg', linkedin: 'https://www.linkedin.com/in/jaswanthss' } },
-  { name: 'Mohit K', role: 'credit.role2', photo: '', links: { github: 'https://github.com/mxhxt010-code', linkedin: 'https://www.linkedin.com/in/mohit-k-575947371/' } },
+  { name: 'Jaswanth S S', role: 'credit.role1', photo: './assets/team/jaswanth.jpg', links: { github: 'https://github.com/mailtojaswanthss-svg', linkedin: 'https://www.linkedin.com/in/jaswanthss' } },
+  { name: 'Mohit K', role: 'credit.role2', photo: './assets/team/mohit.jpg', links: { github: 'https://github.com/mxhxt010-code', linkedin: 'https://www.linkedin.com/in/mohit-k-575947371/' } },
 ];
 function renderCredits() {
   const box = document.getElementById('credits');
