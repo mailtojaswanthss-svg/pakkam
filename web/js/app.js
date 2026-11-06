@@ -2,6 +2,7 @@
 import { detectTalk, replyLanguage, TALK, EXAMPLES } from './talk.js';
 import { decorate, iconSvg, splitIcon } from './icons.js';
 import { SAMPLE_FACTS, SAMPLE_SOURCES, sampleFor } from './samples.js';
+import { runTour } from './tour.js';
 
 const API_BASE = window.PAKKAM_API_BASE || '';
 
@@ -196,8 +197,9 @@ function navigateTo(pageKey) {
   const target = document.getElementById(`page-${pageKey}`);
   if (target) target.classList.add('active');
 
-  document.querySelectorAll('.nav-item[data-nav]').forEach((btn) => {
+  document.querySelectorAll('.nav-item[data-nav], .tab-item[data-nav]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.nav === pageKey);
+    if (btn.classList.contains('tab-item')) btn.setAttribute('aria-current', btn.dataset.nav === pageKey ? 'page' : 'false');
   });
 }
 
@@ -609,6 +611,13 @@ Object.assign(MESSAGES['en-IN'], {
   'ab.teamEyebrow': 'THE PEOPLE BEHIND PAKKAM', 'ab.teamTitle': 'Made by', 'ab.ctaTitle': 'Have a question about a scheme?',
   'credit.role1': 'Idea, AI and backend', 'credit.role2': 'Design and frontend',
   'answer.helpfulYes': 'Yes, helpful', 'answer.helpfulNo': 'Not helpful',
+  'tour.start': 'Take the 60-second tour', 'tour.next': 'Next', 'tour.back': 'Back', 'tour.skip': 'Skip tour', 'tour.done': 'Finish', 'tour.count': 'Step {n} of {total}',
+  'tour.1t': 'Ask in your own language', 'tour.1': 'Tap the orb and speak in Tamil, Tanglish, Hindi or English. You can also type.',
+  'tour.2t': 'An answer with its sources', 'tour.2': 'Each answer lists the official pages it comes from. The small numbers after each line open the exact page.',
+  'tour.3t': 'The real page, not a guess', 'tour.3': 'This is the page of the Government Order, with the line highlighted and the name of the person who checked it.',
+  'tour.4t': 'Check a WhatsApp forward', 'tour.4': 'Paste a forward and Pakkam checks every claim against the official documents and warns about scam signs.',
+  'tour.5t': 'Why we built it', 'tour.5': 'Pakkam started with a conversation with a grandfather. Read the story here.',
+  'nav.ask': 'Ask', 'nav.forward': 'Forward', 'shield.paste': '📋 Paste from WhatsApp', 'answer.sources': 'Sources', 'answer.copy': '📋 Copy', 'answer.copied': 'Copied', 'proof.pageShort': 'p.', 'composer.mic': 'Speak your question',
   'offline.banner': "Pakkam's server is offline right now. You can still look around, and answers below are samples.",
   'offline.retry': 'Try again', 'offline.sample': 'Sample answer: the live server is offline',
   'offline.none': "The live server is offline, so I can't answer this one right now. Try again in a little while, or try one of these sample questions.",
@@ -622,6 +631,13 @@ Object.assign(MESSAGES['ta-IN'], {
   'ab.teamEyebrow': 'பக்கத்தின் பின்னால் உள்ளவர்கள்', 'ab.teamTitle': 'உருவாக்கியவர்கள்', 'ab.ctaTitle': 'ஒரு திட்டத்தைப் பற்றிக் கேள்வி உள்ளதா?',
   'credit.role1': 'யோசனை, AI மற்றும் பின்தளம்', 'credit.role2': 'வடிவமைப்பு மற்றும் முன்தளம்',
   'answer.helpfulYes': 'ஆம், உதவியாக இருந்தது', 'answer.helpfulNo': 'உதவவில்லை',
+  'tour.start': '60 வினாடி அறிமுகச் சுற்று', 'tour.next': 'அடுத்து', 'tour.back': 'பின்', 'tour.skip': 'சுற்றைத் தவிர்', 'tour.done': 'முடி', 'tour.count': 'படி {n} / {total}',
+  'tour.1t': 'உங்கள் மொழியில் கேளுங்கள்', 'tour.1': 'உருண்டையைத் தொட்டு தமிழ், தமிங்கிலம், இந்தி அல்லது ஆங்கிலத்தில் பேசுங்கள். தட்டச்சும் செய்யலாம்.',
+  'tour.2t': 'ஆதாரத்துடன் பதில்', 'tour.2': 'ஒவ்வொரு பதிலும் அது வந்த அதிகாரப்பூர்வப் பக்கங்களைக் காட்டும். ஒவ்வொரு வரிக்குப் பின் உள்ள எண் அந்தப் பக்கத்தைத் திறக்கும்.',
+  'tour.3t': 'ஊகம் அல்ல, உண்மையான பக்கம்', 'tour.3': 'இது அரசாணையின் பக்கம்; அந்த வரி குறிக்கப்பட்டு, சரிபார்த்தவரின் பெயருடன்.',
+  'tour.4t': 'வாட்ஸ்அப் செய்தியைச் சரிபாருங்கள்', 'tour.4': 'செய்தியை ஒட்டுங்கள்; ஒவ்வொரு கூற்றையும் அதிகாரப்பூர்வ ஆவணங்களுடன் சரிபார்த்து மோசடி அறிகுறிகளை எச்சரிக்கும்.',
+  'tour.5t': 'நாங்கள் ஏன் உருவாக்கினோம்', 'tour.5': 'ஒரு தாத்தாவுடனான உரையாடலில் பக்கம் தொடங்கியது. அந்தக் கதையை இங்கே படியுங்கள்.',
+  'nav.ask': 'கேள்', 'nav.forward': 'சரிபார்', 'shield.paste': '📋 வாட்ஸ்அப்பிலிருந்து ஒட்டு', 'answer.sources': 'ஆதாரங்கள்', 'answer.copy': '📋 நகலெடு', 'answer.copied': 'நகலெடுக்கப்பட்டது', 'proof.pageShort': 'பக்.', 'composer.mic': 'உங்கள் கேள்வியைச் சொல்லுங்கள்',
   'offline.banner': 'பக்கம் சர்வர் இப்போது இயங்கவில்லை. தளத்தைப் பார்க்கலாம்; கீழே உள்ள பதில்கள் மாதிரிகள்.',
   'offline.retry': 'மீண்டும் முயல்க', 'offline.sample': 'மாதிரிப் பதில்: நேரடி சர்வர் இயங்கவில்லை',
   'offline.none': 'நேரடி சர்வர் இயங்கவில்லை; இப்போது இதற்குப் பதில் சொல்ல முடியாது. சிறிது நேரம் கழித்து முயலுங்கள், அல்லது இந்த மாதிரிக் கேள்விகளில் ஒன்றைக் கேளுங்கள்.',
@@ -635,6 +651,13 @@ Object.assign(MESSAGES['hi-IN'], {
   'ab.teamEyebrow': 'पक्कम के पीछे के लोग', 'ab.teamTitle': 'बनाने वाले', 'ab.ctaTitle': 'किसी योजना के बारे में सवाल है?',
   'credit.role1': 'विचार, AI और बैकएंड', 'credit.role2': 'डिज़ाइन और फ्रंटएंड',
   'answer.helpfulYes': 'हाँ, मददगार', 'answer.helpfulNo': 'मददगार नहीं',
+  'tour.start': '60 सेकंड का परिचय देखें', 'tour.next': 'आगे', 'tour.back': 'पीछे', 'tour.skip': 'परिचय छोड़ें', 'tour.done': 'पूरा', 'tour.count': 'चरण {n} / {total}',
+  'tour.1t': 'अपनी भाषा में पूछें', 'tour.1': 'ऑर्ब दबाएँ और तमिल, तमिंग्लिश, हिंदी या अंग्रेज़ी में बोलें। टाइप भी कर सकते हैं।',
+  'tour.2t': 'स्रोत के साथ जवाब', 'tour.2': 'हर जवाब उन आधिकारिक पन्नों को दिखाता है जिनसे वह आया। हर पंक्ति के बाद का छोटा नंबर वही पन्ना खोलता है।',
+  'tour.3t': 'असली पन्ना, अंदाज़ा नहीं', 'tour.3': 'यह सरकारी आदेश का पन्ना है, पंक्ति हाइलाइट की हुई और जाँचने वाले व्यक्ति का नाम साथ में।',
+  'tour.4t': 'व्हाट्सऐप फ़ॉरवर्ड जाँचें', 'tour.4': 'फ़ॉरवर्ड चिपकाएँ; पक्कम हर दावे को आधिकारिक दस्तावेज़ों से जाँचता है और धोखाधड़ी के संकेत बताता है।',
+  'tour.5t': 'हमने इसे क्यों बनाया', 'tour.5': 'पक्कम की शुरुआत एक दादाजी से बातचीत से हुई। कहानी यहाँ पढ़ें।',
+  'nav.ask': 'पूछें', 'nav.forward': 'जाँचें', 'shield.paste': '📋 व्हाट्सऐप से चिपकाएँ', 'answer.sources': 'स्रोत', 'answer.copy': '📋 कॉपी करें', 'answer.copied': 'कॉपी हो गया', 'proof.pageShort': 'पृ.', 'composer.mic': 'अपना सवाल बोलें',
   'offline.banner': 'पक्कम का सर्वर अभी बंद है। आप साइट देख सकते हैं; नीचे के जवाब नमूने हैं।',
   'offline.retry': 'फिर कोशिश करें', 'offline.sample': 'नमूना जवाब: लाइव सर्वर बंद है',
   'offline.none': 'लाइव सर्वर बंद है, इसलिए अभी इसका जवाब नहीं दे सकता। थोड़ी देर बाद कोशिश करें, या इनमें से कोई नमूना सवाल पूछें।',
@@ -1181,19 +1204,57 @@ function openProof(c) {
   if (c.source_url) box.append(linkChip(t('proof.source'), c.source_url));
 }
 
+/** Sentences as text with small numbered citation marks; each mark opens its page. */
+function sentenceNodes(sentences, data, tag = 'p', className = '') {
+  const byNumber = new Map((data.citations || []).map((c) => [c.number, c]));
+  const node = el(tag, className);
+  sentences.forEach((sentence, index) => {
+    if (index) node.append(' ');
+    node.append(sentence.text);
+    [...new Set(sentence.citations || [])].forEach((n) => {
+      const cite = byNumber.get(n);
+      if (!cite) return;
+      const mark = chip(String(n), () => openProof(cite), 'cite-num');
+      mark.setAttribute('aria-label', `${t('proof.open')}: ${citationLabel(cite)}`);
+      mark.title = citationLabel(cite);
+      const sup = el('sup');
+      sup.append(mark);
+      node.append(sup);
+    });
+  });
+  return node;
+}
+
 function renderSections(bubble, data) {
   const sections = sectionsOf(data);
   const named = sections.filter(([key]) => key !== 'other');
   if (named.length < 2) {
-    bubble.append(el('div', 'answer-text', data.sentences.map((s) => s.text).join(' ')));
+    bubble.append(sentenceNodes(data.sentences, data, 'div', 'answer-text'));
     return;
   }
   sections.forEach(([key, sentences]) => {
     const block = el('div', 'answer-section');
     if (key !== 'other') block.append(el('h4', '', t(`section.${key}`)));
-    block.append(el('p', '', sentences.map((s) => s.text).join(' ')));
+    block.append(sentenceNodes(sentences, data));
     bubble.append(block);
   });
+}
+
+/** "Sources" row above the answer: one small pill per official page. */
+function sourcesRow(citations) {
+  const row = el('div', 'sources-row');
+  row.append(el('span', 'sources-label', t('answer.sources')));
+  const pills = el('div', 'sources-pills');
+  [...citations].sort((a, b) => (a.number ?? 0) - (b.number ?? 0)).forEach((c) => {
+    const short = c.document.replace(/^G\.O\.\s*\(Ms\)\s*No\.\s*(\d+).*/i, 'G.O. $1');
+    const pill = chip('', () => openProof(c), 'source-pill proof-btn');
+    pill.append(el('span', 'source-n', String(c.number ?? '')), el('span', 'source-doc', short), el('span', 'source-page', `${t('proof.pageShort')} ${c.page_start}`));
+    if (c.checked_by) { const tick = el('span', 'source-check'); tick.innerHTML = iconSvg('check'); pill.append(tick); }
+    pill.title = `${t('proof.open')} · ${citationLabel(c)}`;
+    pills.append(pill);
+  });
+  row.append(pills);
+  return row;
 }
 
 function answerText(data) {
@@ -1215,10 +1276,9 @@ function renderAnswer(bubble, data, question) {
     ], t('answer.heardCheck')));
   }
 
+  if (data.citations && data.citations.length && !data.refused) bubble.append(sourcesRow(data.citations));
   if (data.sentences && data.sentences.length) renderSections(bubble, data);
   else bubble.append(el('div', 'answer-text', text));
-
-  if (data.citations && data.citations.length) bubble.append(citationRow(data.citations));
 
   // "What can I get?": a card per scheme with its signed amount, plus the yearly total.
   const facts = (data.scheme_facts || []).filter((f) => f.amount || f.who);
@@ -1260,6 +1320,7 @@ function renderAnswer(bubble, data, question) {
   // Next steps and the conversation check-in.
   if (data.sentences && data.sentences.length) {
     const actions = [];
+    actions.push(chip(t('answer.copy'), (event) => copyAnswer(event.currentTarget, text, data.citations?.[0])));
     if (data.scheme) actions.push(chip(t('answer.docs'), () => showChecklist(data.scheme)));
     actions.push(waChip(t('answer.share'), () => shareAnswer(question, text, data.citations?.[0])));
     actions.push(chip(t('answer.print'), () => printAnswer(question, data)));
@@ -1292,6 +1353,15 @@ async function sendFeedback(event, data, thumbs) {
   if (row) row.replaceChildren(el('span', 'answer-row-label', t('answer.feedbackThanks')));
   try { await postJson('/feedback', { status: data.status, thumbs, language: data.language }, 20000); } catch (_) { /* best effort */ }
   if (thumbs === 'down') { const bubble = addBubble('ai', t('answer.issue')); bubble.append(chipRow(issueChips())); }
+}
+
+async function copyAnswer(button, text, cite) {
+  const lines = [text];
+  if (cite) lines.push(`${cite.document}, ${t('proof.page')} ${cite.page_start}: ${cite.source_url}`);
+  try { await navigator.clipboard.writeText(lines.join('\n')); } catch (_) { return; }
+  decorate(button, `✓ ${t('answer.copied')}`);
+  button.classList.add('done');
+  setTimeout(() => { decorate(button, t('answer.copy')); button.classList.remove('done'); }, 1800);
 }
 
 function shareAnswer(question, text, cite) {
@@ -1565,22 +1635,43 @@ async function checkForward(message) {
   try {
     const data = await (await postJson('/check-forward', { message: message.slice(0, 1500) }, 180000)).json();
     status.textContent = '';
-    result.append(el('h2', `shield-overall shield-${data.overall}`, w.overall[data.overall] || data.overall));
+    // Verdict first: a big, coloured badge (red wrong, amber partly or unknown, green right).
+    const tone = { wrong: 'bad', partly_wrong: 'warn', looks_right: 'good', not_in_documents: 'warn' }[data.overall] || 'neutral';
+    const verdict = el('div', `shield-verdict-card tone-${tone}`);
+    const badge = el('span', 'verdict-badge');
+    badge.innerHTML = iconSvg({ bad: 'x', warn: 'warn', good: 'check' }[tone] || 'help');
+    const [, overallText] = splitIcon(w.overall[data.overall] || data.overall);
+    verdict.append(badge, el('h2', `shield-overall shield-${data.overall}`, overallText));
+    result.append(verdict);
     const correction = [w.correction];
-    data.claims.forEach((claim) => {
-      const card = el('article', 'shield-claim');
-      card.append(el('p', 'shield-verdict', w.verdict[claim.verdict] || claim.verdict), el('h3', '', claim.claim), el('p', '', claim.explanation));
-      const cite = claim.answer?.citations?.[0];
-      if (cite) card.append(proofButton(cite));
-      result.append(card);
-      correction.push(`${w.verdict[claim.verdict] || ''} ${claim.claim}: ${claim.explanation}${cite ? ` (${cite.document}, ${t('proof.page')} ${cite.page_start})` : ''}`);
-    });
+    if (data.claims.length) {
+      const list = el('div', 'claim-list');
+      data.claims.forEach((claim) => {
+        const claimTone = { supported: 'good', contradicted: 'bad' }[claim.verdict] || 'warn';
+        const card = el('article', `shield-claim tone-${claimTone}`);
+        const pill = el('span', 'shield-verdict');
+        decorate(pill, w.verdict[claim.verdict] || claim.verdict);
+        card.append(pill, el('h3', '', claim.claim), el('p', '', claim.explanation));
+        const cite = claim.answer?.citations?.[0];
+        if (cite) card.append(proofButton(cite));
+        list.append(card);
+        correction.push(`${w.verdict[claim.verdict] || ''} ${claim.claim}: ${claim.explanation}${cite ? ` (${cite.document}, ${t('proof.page')} ${cite.page_start})` : ''}`);
+      });
+      result.append(list);
+    }
     const signs = data.scam_signs.filter((sign) => sign !== 'official_link');
     if (signs.length) {
       const box = el('div', 'shield-signs');
-      box.append(el('h3', '', `⚠️ ${w.warnings}`));
+      const head = el('h3');
+      decorate(head, `⚠️ ${w.warnings}`);
+      box.append(head);
       const list = el('ul');
-      signs.forEach((sign) => { list.append(el('li', '', w.signs[sign] || sign)); correction.push(`⚠️ ${w.signs[sign] || sign}`); });
+      signs.forEach((sign) => {
+        const li = el('li');
+        decorate(li, `⚠️ ${w.signs[sign] || sign}`);
+        list.append(li);
+        correction.push(`⚠️ ${w.signs[sign] || sign}`);
+      });
       box.append(list);
       result.append(box);
     }
@@ -2161,6 +2252,39 @@ document.addEventListener('keydown', (event) => {
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 });
 
+// --- The 60-second tour (for first-time visitors and judges; ?tour=1 starts it) ----------
+const waitFor = (selector, ms = 9000) => new Promise((resolve) => {
+  const start = performance.now();
+  const check = () => {
+    const node = document.querySelector(selector);
+    if (node || performance.now() - start > ms) resolve(node);
+    else setTimeout(check, 120);
+  };
+  check();
+});
+
+function startTour() {
+  const tourQuestion = (EXAMPLES[state.language] || EXAMPLES['en-IN'])[0];
+  runTour([
+    { target: '#hero-orb-trigger', title: t('tour.1t'), body: t('tour.1'), enter: async () => { closeOverlay(); showPage('home'); } },
+    { target: '#chat-messages .chat-bubble.ai:last-child', title: t('tour.2t'), body: t('tour.2'),
+      enter: async () => {
+        showPage('assistant');
+        const before = document.querySelectorAll('#chat-messages .chat-bubble.ai:not(.thinking)').length;
+        submitChatQuery(tourQuestion);
+        const start = performance.now();
+        while (document.querySelectorAll('#chat-messages .chat-bubble.ai:not(.thinking)').length <= before && performance.now() - start < 15000) await new Promise((r) => setTimeout(r, 150));
+        stopSpeaking();
+      } },
+    { target: '.proof-box', title: t('tour.3t'), body: t('tour.3'),
+      enter: async () => { document.querySelector('#chat-messages .chat-bubble.ai:last-child .source-pill')?.click(); await waitFor('.proof-box'); },
+      leave: () => closeOverlay() },
+    { target: '#shield-form', title: t('tour.4t'), body: t('tour.4'),
+      enter: async () => { closeOverlay(); showPage('shield'); const box = document.getElementById('shield-input'); if (box && !box.value) box.value = SHIELD_EXAMPLE; } },
+    { target: '#page-about .about-hero h1', title: t('tour.5t'), body: t('tour.5'), enter: async () => { showPage('about'); } },
+  ], { next: t('tour.next'), back: t('tour.back'), skip: t('tour.skip'), done: t('tour.done'), count: t('tour.count') });
+}
+
 /** First visit in this tab: the orb, headline and boxes arrive one after another. */
 function heroEntrance() {
   let seen = false;
@@ -2212,6 +2336,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   heroEntrance();
   watchReveals();
+  document.getElementById('tour-start')?.addEventListener('click', startTour);
+  if (new URLSearchParams(window.location.search).get('tour') === '1') setTimeout(startTour, 700);
+  document.getElementById('composer-mic')?.addEventListener('click', () => orbTap('chat'));
   document.querySelectorAll('#setting-lang [data-lang]').forEach((button) => button.addEventListener('click', () => {
     convo.voiceLang = null;
     try { localStorage.removeItem('pakkam_voice'); } catch (_) { /* private mode */ }
@@ -2256,6 +2383,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (message.length >= 10) checkForward(message);
   });
   document.getElementById('shield-example')?.addEventListener('click', () => { document.getElementById('shield-input').value = SHIELD_EXAMPLE; });
+  document.getElementById('shield-paste')?.addEventListener('click', async () => {
+    try { const text = await navigator.clipboard.readText(); if (text) document.getElementById('shield-input').value = text.slice(0, 1500); } catch (_) { document.getElementById('shield-input').focus(); }
+  });
 
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
