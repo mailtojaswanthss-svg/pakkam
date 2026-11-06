@@ -152,6 +152,19 @@
     frame = null;
   }
 
+  // Parallax: on wide screens the pages drift a little against the scroll.
+  let lastScroll = window.scrollY;
+  window.addEventListener('scroll', () => {
+    const delta = window.scrollY - lastScroll;
+    lastScroll = window.scrollY;
+    if (width < 900 || calm()) return;
+    items.forEach((item, index) => {
+      item.y -= delta * 0.12;
+      if (item.y < -item.size * 2) items[index] = makeItem(false);
+      else if (item.y > height + item.size * 2) { const fresh = makeItem(false); fresh.y = -fresh.size; items[index] = fresh; }
+    });
+    if (!frame) draw();
+  }, { passive: true });
   window.addEventListener('resize', resize);
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
   if (reducedQuery.addEventListener) reducedQuery.addEventListener('change', start);
