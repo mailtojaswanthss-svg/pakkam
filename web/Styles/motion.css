@@ -1,0 +1,46 @@
+/* Pakkam motion, taken from the Figma file "Pakkam Illustrations" (Motion page, frame
+   "Home hero — motion"). Named Figma styles: Pakkam/Rise, Pakkam/Pop, Pakkam/Draw line,
+   Pakkam/Crossfade. Timings, offsets and easing come from get_motion_context; change them in
+   Figma first. Reduced motion and calm mode switch all of this off (see global.css). */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-rise: 0.7s;   /* Pakkam/Rise: fade in + 24px up */
+  --dur-pop: 0.5s;    /* Pakkam/Pop: fade in + scale from 60% */
+  --dur-draw: 1s;     /* Pakkam/Draw line: path trim end 0 -> 100% */
+  --dur-fade: 0.45s;  /* Pakkam/Crossfade */
+  --dur-orb: 0.9s;    /* orb: scale 80% -> 100%, opacity 0 -> 1 */
+}
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes artPop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes figmaFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes figmaDraw { from { stroke-dasharray: 0 1; } to { stroke-dasharray: 1 1; } }
+@keyframes orbIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: none; } }
+
+/* Home entrance, offsets as on the Figma timeline */
+body.intro #hero-orb-assembly { animation: orbIn var(--dur-orb) var(--ease-out) both; }
+body.intro .orb-slogan { animation: rise var(--dur-rise) var(--ease-out) 0.15s both; }
+body.intro .hero-copy > .hero-title { animation: none; }
+body.intro .hero-title .ht-1 { animation: rise var(--dur-rise) var(--ease-out) 0.3s both; }
+body.intro .hero-title .ht-2 { animation: rise var(--dur-rise) var(--ease-out) 0.4s both; }
+body.intro .hero-subtitle { animation: rise var(--dur-rise) var(--ease-out) 0.5s both; }
+body.intro .hero-actions { animation: rise var(--dur-rise) var(--ease-out) 0.55s both; }
+body.intro .hero-proof { animation: figmaFade var(--dur-fade) var(--ease-out) 0.8s both; }
+.orb-arrow .draw, .orb-arrow .draw-head { stroke-dasharray: 1 1; }
+/* The underline is stretched to the headline width, so it draws in its own units (path ~294 long) */
+.ht-underline .draw { vector-effect: none; stroke-dasharray: 320; stroke-dashoffset: 0; }
+@keyframes figmaDrawUnderline { from { stroke-dashoffset: 320; } to { stroke-dashoffset: 0; } }
+body.intro .ht-underline .ul-1 { animation: figmaDrawUnderline var(--dur-draw) var(--ease-out) 0.9s both; }
+body.intro .ht-underline .ul-2 { animation: figmaDrawUnderline var(--dur-draw) var(--ease-out) 1.15s both; }
+body.intro .orb-arrow .draw { animation: figmaDraw var(--dur-draw) var(--ease-out) 1.8s both; }
+body.intro .orb-arrow .draw-head { animation: figmaDraw var(--dur-fade) var(--ease-out) 2.6s both; }
+body.intro .ht-mark .pop { animation: artPop var(--dur-pop) var(--ease-out) 1.7s both; }
+
+/* The rest of the site uses the same named styles */
+.slide { transition-duration: var(--dur-fade); }
+.about-panel { animation: rise var(--dur-fade) var(--ease-out) both; }
+.how-checks.play .hc-art :is(.s1, .s2, .s3, .s4) { animation-name: artPop; animation-duration: var(--dur-pop); }
+@media (prefers-reduced-motion: reduce) {
+  body.intro :is(#hero-orb-assembly, .orb-slogan, .hero-title .ht-1, .hero-title .ht-2, .hero-subtitle, .hero-actions, .hero-proof),
+  .ht-underline *, .orb-arrow *, .ht-mark *, .about-panel { animation: none !important; }
+}
+html.calm :is(body.intro #hero-orb-assembly, .orb-slogan, .ht-1, .ht-2, .hero-subtitle, .hero-actions, .hero-proof, .about-panel) { animation: none !important; }
