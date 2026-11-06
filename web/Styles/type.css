@@ -1,8 +1,10 @@
 /* Pakkam type scale: the text styles in the Figma file "Pakkam Illustrations" (Foundations
    page). Headings use Plus Jakarta Sans for English, Anek Tamil for Tamil and Anek Devanagari
    for Hindi; body text stays in Inter / Noto Sans for reading. Edit the styles in Figma first. */
+/* Size-matched stand-in while Plus Jakarta Sans loads, so the headline does not jump (CLS) */
+@font-face { font-family: 'Jakarta Fallback'; src: local('Arial'), local('Liberation Sans'), local('Helvetica'); size-adjust: 101.6%; }
 :root {
-  --font-heading: 'Plus Jakarta Sans', 'Anek Tamil', 'Anek Devanagari', 'Inter', system-ui, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Jakarta Fallback', 'Anek Tamil', 'Anek Devanagari', 'Inter', system-ui, sans-serif;
   --type-display: 800 clamp(2rem, 3.4vw, 3.1rem) / 1.1 var(--font-heading);
   --type-h1: 800 clamp(1.9rem, 3vw, 2.75rem) / 1.12 var(--font-heading);
   --type-h2: 700 clamp(1.3rem, 2vw, 1.6rem) / 1.25 var(--font-heading);
@@ -72,3 +74,11 @@ html.calm .ex-caret, html.easy .ex-caret { display: none; }
 
 /* Dark theme backdrop: the Figma "Pakkam Aurora" shader, exported as a still (6 KB) */
 html[data-theme="dark"] body { background: var(--bg-canvas) url(../assets/art/aurora.webp) center top / cover no-repeat fixed; }
+/* Long or enlarged questions wrap instead of being cut off */
+.ex-text { white-space: normal; overflow: visible; text-overflow: clip; text-align: left; overflow-wrap: break-word; }
+.slogan-example { border-radius: 18px; }
+.ex-text { position: relative; display: inline-block; }
+.ex-full { visibility: hidden; }
+.ex-typed { position: absolute; inset: 0; }
+.ex-text::before, .ex-text::after { content: none; }
+.ex-full::before, .ex-typed::before { content: '“'; } .ex-full::after, .ex-typed::after { content: '”'; }

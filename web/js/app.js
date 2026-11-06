@@ -2318,7 +2318,10 @@ function showSloganExample(full) {
   const item = SLOGAN_EXAMPLES[slogan.index];
   button.querySelector('.ex-tag').textContent = item.tag;
   const shown = full ? item.q : [...item.q].slice(0, slogan.chars).join('');
-  button.querySelector('.ex-text').textContent = shown;
+  // The full question sits invisibly underneath, so the box is its final size while it types.
+  const box = button.querySelector('.ex-text');
+  if (box.dataset.q !== item.q) { box.dataset.q = item.q; box.replaceChildren(el('span', 'ex-full', item.q), el('span', 'ex-typed')); }
+  box.querySelector('.ex-typed').textContent = shown;
   button.setAttribute('aria-label', `${t('slogan.ask')}: ${item.q}`);
   button.setAttribute('lang', { 'தமிழ்': 'ta', 'हिंदी': 'hi' }[item.tag] || 'en');
 }
