@@ -120,6 +120,8 @@ def is_official_host(host: str) -> bool:
         if host == approved or (subdomains and host.endswith("." + approved)):
             return True
     return False
+
+
 _SIGNS: dict[ScamSign, re.Pattern[str]] = {
     "otp": re.compile(r"\botp\b|ஓடிபி|ओटीपी|one.?time.?password|verification code", re.I),
     "payment": re.compile(

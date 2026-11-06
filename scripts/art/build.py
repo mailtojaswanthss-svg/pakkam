@@ -3,6 +3,7 @@ Figma file "Pakkam Illustrations").
 
 Usage: python scripts/art/build.py web/js/art.js
 """
+
 import json
 import re
 import sys
@@ -12,41 +13,59 @@ sys.path.insert(0, str(Path(__file__).parent))
 from art_src import BG, CATEGORY, CHAPTERS, EMPTY, FIGMA_COLORS, SHIELD_STEPS, STEPS  # noqa: E402
 
 OUT_JS = Path(sys.argv[1])
-FIG_DIR = Path(__file__).parent / 'figma'  # not committed; import these SVGs into Figma
+FIG_DIR = Path(__file__).parent / "figma"  # not committed; import these SVGs into Figma
 FIG_DIR.mkdir(exist_ok=True)
 
-ALL = {**{f'cat-{k}': v for k, v in CATEGORY.items()}, **STEPS, 'empty': EMPTY, **CHAPTERS, **SHIELD_STEPS}
-BG_JS = Path(__file__).resolve().parents[2] / 'web' / 'js' / 'background.js'
+ALL = {
+    **{f"cat-{k}": v for k, v in CATEGORY.items()},
+    **STEPS,
+    "empty": EMPTY,
+    **CHAPTERS,
+    **SHIELD_STEPS,
+}
+BG_JS = Path(__file__).resolve().parents[2] / "web" / "js" / "background.js"
 
 
 def tidy(svg: str) -> str:
-    svg = re.sub(r'\s*\n\s*', '', svg)
-    svg = re.sub(r'(\d+\.\d{2})\d+', r'\1', svg)
+    svg = re.sub(r"\s*\n\s*", "", svg)
+    svg = re.sub(r"(\d+\.\d{2})\d+", r"\1", svg)
     return svg
 
 
 def site_svg(name: str, svg: str) -> str:
     # unique gradient ids per drawing, decorative for screen readers, themed via CSS
-    svg = svg.replace('ART_ORB3', f'art-orb-{name}').replace('ART_ORB', f'art-orb-{name}')
-    return tidy(svg.replace('<svg ', f'<svg class="art art-{name}" aria-hidden="true" focusable="false" ', 1))
+    svg = svg.replace("ART_ORB3", f"art-orb-{name}").replace("ART_ORB", f"art-orb-{name}")
+    return tidy(
+        svg.replace(
+            "<svg ", f'<svg class="art art-{name}" aria-hidden="true" focusable="false" ', 1
+        )
+    )
 
 
 def figma_svg(svg: str) -> str:
     vb = re.search(r'viewBox="0 0 (\d+) (\d+)"', svg)
     w, h = int(vb.group(1)) * 4, int(vb.group(2)) * 4
-    svg = svg.replace('<svg ', f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" ', 1)
-    svg = svg.replace('var(--accent-cyan)', '#079EAC').replace('var(--accent-2)', '#6D28D9')
-    svg = svg.replace(' fill="url(#ART_ORB)"', '').replace(' fill="url(#ART_ORB3)"', '')
+    svg = svg.replace(
+        "<svg ", f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" ', 1
+    )
+    svg = svg.replace("var(--accent-cyan)", "#079EAC").replace("var(--accent-2)", "#6D28D9")
+    svg = svg.replace(' fill="url(#ART_ORB)"', "").replace(' fill="url(#ART_ORB3)"', "")
 
     def resolve(match):
         tag, cls = match.group(1), match.group(2).split()
-        fill = next((FIGMA_COLORS[c][0] for c in cls if c in FIGMA_COLORS and FIGMA_COLORS[c][0] != 'none'), 'none')
-        stroke = next((FIGMA_COLORS[c][1] for c in cls if c in FIGMA_COLORS and FIGMA_COLORS[c][1] != 'none'), 'none')
-        width = '3.5' if 'wide' in cls else '1.4' if 'line-thin' in cls else '2'
+        fill = next(
+            (FIGMA_COLORS[c][0] for c in cls if c in FIGMA_COLORS and FIGMA_COLORS[c][0] != "none"),
+            "none",
+        )
+        stroke = next(
+            (FIGMA_COLORS[c][1] for c in cls if c in FIGMA_COLORS and FIGMA_COLORS[c][1] != "none"),
+            "none",
+        )
+        width = "3.5" if "wide" in cls else "1.4" if "line-thin" in cls else "2"
         extra = f' fill="{fill}" stroke="{stroke}" stroke-width="{width}" stroke-linecap="round" stroke-linejoin="round"'
-        if 'dash' in cls or 'road' in cls:
+        if "dash" in cls or "road" in cls:
             extra += ' stroke-dasharray="6 7"'
-        if tag == 'text':
+        if tag == "text":
             extra = f' fill="{fill}" font-family="Noto Sans Tamil" font-weight="700" font-size="{30 if "tamil-word" in cls else 16}"'
         return f'<{tag} data-name="{" ".join(cls)}"{extra}'
 
@@ -57,28 +76,36 @@ def figma_svg(svg: str) -> str:
 
 site = {name: site_svg(name, svg) for name, svg in ALL.items()}
 OUT_JS.write_text(
-    '/* Pakkam illustrations: flat drawings in the site palette, themed and animated by CSS\n'
-    '   (classes such as .skin, .paper, .anim-sway). The same drawings are in the Figma file\n'
+    "/* Pakkam illustrations: flat drawings in the site palette, themed and animated by CSS\n"
+    "   (classes such as .skin, .paper, .anim-sway). The same drawings are in the Figma file\n"
     '   "Pakkam Illustrations" for editing. Generated; edit the source drawings, not this file. */\n\n'
-    f'export const ART = {json.dumps(site, ensure_ascii=False, indent=2)};\n\n'
+    f"export const ART = {json.dumps(site, ensure_ascii=False, indent=2)};\n\n"
     "/** Drop the named drawing into every [data-art] slot that asks for it. */\n"
     "export function fillArt(root = document) {\n"
     "  root.querySelectorAll('[data-art]').forEach((slot) => {\n"
     "    if (!slot.firstElementChild && ART[slot.dataset.art]) slot.innerHTML = ART[slot.dataset.art];\n"
     "  });\n"
     "}\n",
-    encoding='utf-8',
+    encoding="utf-8",
 )
 for name, svg in ALL.items():
-    (FIG_DIR / f'{name}.svg').write_text(figma_svg(svg), encoding='utf-8')
+    (FIG_DIR / f"{name}.svg").write_text(figma_svg(svg), encoding="utf-8")
 for name, svg in BG.items():
-    (FIG_DIR / f'bg-{name}.svg').write_text(figma_svg(svg), encoding='utf-8')
+    (FIG_DIR / f"bg-{name}.svg").write_text(figma_svg(svg), encoding="utf-8")
 
 # The background drawings live inside background.js (a plain script), between two markers.
-START, END = '  /* BG-ART:START (generated by scripts/art/build.py) */', '  /* BG-ART:END */'
-bg_src = BG_JS.read_text(encoding='utf-8')
-block = START + '\n  const BG_ART = ' + json.dumps({k: tidy(v) for k, v in BG.items()}, ensure_ascii=False, indent=2).replace('\n', '\n  ') + ';\n' + END
+START, END = "  /* BG-ART:START (generated by scripts/art/build.py) */", "  /* BG-ART:END */"
+bg_src = BG_JS.read_text(encoding="utf-8")
+block = (
+    START
+    + "\n  const BG_ART = "
+    + json.dumps({k: tidy(v) for k, v in BG.items()}, ensure_ascii=False, indent=2).replace(
+        "\n", "\n  "
+    )
+    + ";\n"
+    + END
+)
 if START in bg_src:
-    bg_src = bg_src[:bg_src.index(START)] + block + bg_src[bg_src.index(END) + len(END):]
-    BG_JS.write_text(bg_src, encoding='utf-8')
-print(len(site), 'drawings,', OUT_JS.stat().st_size, 'bytes')
+    bg_src = bg_src[: bg_src.index(START)] + block + bg_src[bg_src.index(END) + len(END) :]
+    BG_JS.write_text(bg_src, encoding="utf-8")
+print(len(site), "drawings,", OUT_JS.stat().st_size, "bytes")

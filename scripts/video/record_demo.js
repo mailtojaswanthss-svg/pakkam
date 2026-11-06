@@ -101,99 +101,86 @@ const CURSOR = () => {
     mark(`${key}_answer`);
   };
 
-  // Load once and let the home intro finish off camera time (cut in the edit).
+  const navTo = async (key) => { await click(page.locator(`[data-nav="${key}"]`).filter({ visible: true }).first()); await sleep(900); };
+  const smoothTo = (selector, block = 'center') => page.evaluate(([sel, blk]) => document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth', block: blk }), [selector, block]);
+
+  // Set up off camera: Tamil as the spoken language, then back to Home (cut in the edit).
   await page.goto(SITE, { waitUntil: 'networkidle' });
-  await sleep(3500);
+  await sleep(2500);
+  await navTo('settings');
+  await click(page.locator('.settings-voice-chips button', { hasText: 'தமிழ்' }));
+  await navTo('home');
+  await sleep(1500);
   mark('ready');
 
-  // s02: Rumour Shield
-  await click(page.locator('.nav-item[data-nav="shield"]'));
-  await sleep(900);
-  mark('s02');
+  // Lakshmi story. l3: Pakkam's home page (the reveal)
+  mark('l3');
+  await sleep(1000 * (D.l3_intro + 1.5));
+  mark('l3_end');
+
+  // l4: she taps the orb and asks in Tamil; the answer comes with the order and page; she opens it
+  mark('l4');
+  await holdUntil(marks.l4, D.l4_ask + 0.4);
+  await click(page.locator('#hero-orb-trigger'));
+  mark('l4_mic');
+  await page.waitForFunction(() => { const c = document.getElementById('home-answer'); return c && !c.hidden && c.querySelector('.proof-btn'); }, null, { timeout: 120000 });
+  mark('l4_answer');
+  await sleep(600);
+  await smoothTo('#home-convo', 'center');
+  await sleep(1000 * (D.l4_ask_b + D.tamil_answer + 1.0));
+  mark('l4_proof');
+  await click(page.locator('#home-answer .proof-btn').first());
+  await sleep(1000 * (D.l4_ask_c + 2.4));
+  await page.keyboard.press('Escape');
   await sleep(500);
+  mark('l4_end');
+
+  // l5: the honest refusal, typed on the Ask page
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await click(page.locator('#cta-ask-pakkam'));
+  await sleep(900);
+  mark('l5');
+  await ask('When will the next PM-KISAN installment come?', 'refusal');
+  await sleep(1000 * (D.l5_refusal_short + 2.0));
+  mark('l5_end');
+
+  // l5b: the honest test numbers on About > Tested
+  await navTo('about');
+  await click(page.locator('#tab-tested'));
+  mark('l5b');
+  await sleep(6000);
+  mark('l5b_end');
+
+  // l6: the bigger picture: Rumour Shield, schemes, languages
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await navTo('shield');
+  mark('l6_shield');
   await click(page.locator('#shield-input'));
   await page.locator('#shield-input').fill(SCRIPT.forward);
-  await sleep(1200);
+  await sleep(600);
   await click(page.locator('#shield-check'));
   await page.waitForSelector('.shield-verdict-card', { timeout: 120000 });
-  mark('s02_verdict');
-  await sleep(1500);
-  await page.mouse.wheel(0, 380);
-  await sleep(1800);
-  await page.mouse.wheel(0, 320);
-  await holdUntil(marks.s02, D.s02_shield + 1.2);
-  mark('s02_end');
-
-  // s03: home
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  await sleep(400);
-  await click(page.locator('.nav-item[data-nav="home"]'));
-  await sleep(600);
-  mark('s03');
-  await holdUntil(marks.s03, Math.max(D.s03_home + 1.2, 5));
-  mark('s03_end');
-
-  // s04: voice question in Tamil, on the Ask page
-  await click(page.locator('#cta-ask-pakkam'));
-  await sleep(1000);
-  mark('s04');
-  await click(page.locator('#voice-lang-chips button', { hasText: 'தமிழ்' }));
-  await holdUntil(marks.s04, D.s04_voice + 0.3);
-  const before = await aiCount();
-  await click(page.locator('#assistant-mic-orb'));
-  mark('s04_mic');
-  answers.s04 = await waitAnswer(before, 120000);
-  mark('s04_answer');
-  await sleep(1000 * (D.s04_voice_b + 9));
-  mark('s04_end');
-
-  // s05: open the proof
-  mark('s05');
-  const pill = page.locator('#chat-messages .chat-bubble.ai').last().locator('.source-pill').first();
-  await click(pill);
-  await sleep(2500);
-  await holdUntil(marks.s05, D.s05_proof + 1.5);
-  await page.keyboard.press('Escape');
-  await sleep(600);
-  mark('s05_end');
-
-  // s06: three more languages, typed
-  await click(page.locator('#voice-lang-chips button', { hasText: 'English' }));
-  mark('s06');
-  await ask('PM Kisan la varushathuku evlo?', 'tanglish');
-  await sleep(2500);
-  await ask('अटल पेंशन किसे मिलती है?', 'hindi');
-  await sleep(2500);
-  await ask('Who gets free breakfast at school?', 'english');
-  await sleep(2500);
-  mark('s06_end');
-
-  // s07: honest refusal
-  mark('s07');
-  await ask('When will the next PM-KISAN installment come?', 'refusal');
-  await sleep(1000 * (D.s07_refusal + 1.5));
-  mark('s07_end');
-
-  // s08: under the hood
-  await click(page.locator('.nav-item[data-nav="about"]'));
-  await sleep(900);
-  await click(page.locator('#tab-how'));
-  await sleep(500);
-  await page.evaluate(() => document.querySelector('.pipeline').scrollIntoView({ behavior: 'smooth', block: 'center' }));
-  await sleep(1100);
-  mark('s08');
-  await holdUntil(marks.s08, D.s08_how + 1.2);
-  mark('s08_end');
-
-  // s09: tested, honestly
-  await page.evaluate(() => document.querySelector('.about-tablist').scrollIntoView({ behavior: 'smooth', block: 'start' }));
-  await sleep(900);
-  await click(page.locator('#tab-tested'));
-  mark('s09');
-  await sleep(1800);
-  await page.evaluate(() => document.querySelector('.test-method').scrollIntoView({ behavior: 'smooth', block: 'center' }));
-  await holdUntil(marks.s09, D.s09_numbers + 1.5);
-  mark('s09_end');
+  mark('l6_verdict');
+  await sleep(800);
+  await smoothTo('.shield-signs');
+  await sleep(2600);
+  mark('l6_verdict_end');
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await navTo('schemes');
+  mark('l6_schemes');
+  await sleep(1200);
+  await smoothTo('#scheme-filters', 'start');
+  await sleep(2400);
+  mark('l6_schemes_end');
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await navTo('settings');
+  mark('l6_lang');
+  await sleep(800);
+  for (const label of ['English', 'हिन्दी', 'தமிழ்']) {
+    const chip = page.locator('.settings-voice-chips button', { hasText: label }).first();
+    if (await chip.count()) { await click(chip); await sleep(700); }
+  }
+  mark('l6_lang_end');
 
   const video = page.video();
   await context.close();
