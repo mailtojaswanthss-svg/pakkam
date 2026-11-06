@@ -409,8 +409,8 @@ pull request, without PyTorch, and builds the Docker image on pushes.
 
 | Person | Role |
 |---|---|
-| Jaswanth ([@mailtojaswanthss-svg](https://github.com/mailtojaswanthss-svg)) | Project lead: product, design direction, engineering, evaluation |
-| _Teammate name_ | _Role_ |
+| Jaswanth S S · [GitHub](https://github.com/mailtojaswanthss-svg) · [LinkedIn](https://www.linkedin.com/in/jaswanthss) | Project lead: idea, AI and backend, frontend, evaluation |
+| Mohit K · [GitHub](https://github.com/mxhxt010-code) · [LinkedIn](https://www.linkedin.com/in/mohit-k-575947371/) | Design and frontend |
 
 Day-by-day contributions are logged in [docs/CONTRIBUTIONS.md](docs/CONTRIBUTIONS.md).
 Built with help from Claude (Anthropic) as a coding assistant.
