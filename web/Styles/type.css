@@ -85,4 +85,5 @@ html[data-theme="dark"] body { background: var(--bg-canvas) url(../assets/art/au
 
 /* Team photos on the credit cards (initials stay underneath as the fallback) */
 .credit-avatar { position: relative; overflow: hidden; }
-.credit-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; border-radius: inherit; }
+.credit-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; border-radius: inherit; }
+.credit-link svg { fill: none; stroke: currentColor; }
