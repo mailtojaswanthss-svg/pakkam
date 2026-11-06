@@ -5,9 +5,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n-title="home.documentTitle">PAKKAM — Government Services, Simplified for Everyone</title>
+  <meta name="description" content="Ask about Tamil Nadu and central welfare schemes in Tamil, Hindi or English, by voice or text. Every answer shows the page of the official government document it comes from." />
+  <meta name="theme-color" content="#0A1024" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#E6F0F3" media="(prefers-color-scheme: light)" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Pakkam" />
+  <meta property="og:title" content="Pakkam — welfare schemes, explained from the official page" />
+  <meta property="og:description" content="Ask in Tamil, Hindi or English. Every answer shows the page of the official document. If the documents don't say it, Pakkam says so." />
+  <meta property="og:url" content="https://pakkam-alpha.vercel.app/" />
+  <meta property="og:image" content="https://pakkam-alpha.vercel.app/assets/og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="./assets/favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" />
+  <link rel="preload" as="image" href="./assets/images/dark-orb.webp" />
   <link rel="stylesheet" href="./Styles/global.css" />
 </head>
 <body>
+  <a class="skip-link" href="#content" data-i18n="a11y.skip">Skip to content</a>
 
   <!-- ========================================================================
        COMPACT GLASSMORPHIC CAPSULE NAVBAR
@@ -22,7 +42,7 @@
     <nav class="navbar-capsule" aria-label="Primary Navigation" data-i18n-aria="nav.aria">
       <!-- Left: Provided Ribbon P PNG + Bold Arial PAKKAM -->
       <a href="#home" class="brand-logo" data-nav="home">
-        <img src="./assets/images/Logo for pakkam.png" alt="Pakkam Emblem" class="brand-logo__img" />
+        <img src="./assets/images/logo.webp" width="25" height="28" alt="Pakkam Emblem" class="brand-logo__img" />
         <span class="brand-logo__text">PAKKAM</span>
       </a>
 
@@ -61,6 +81,7 @@
   <!-- ========================================================================
        PAGE 01: MASTER HOMEPAGE (DARK & LIGHT REFERENCE MATCH)
        ======================================================================== -->
+  <span id="content" tabindex="-1"></span>
   <main id="page-home" class="page-section active">
     <div class="hero-stage">
       
@@ -132,9 +153,9 @@
           <button class="chip-btn hero-secondary" type="button" data-nav="shield"><svg class="wa-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span data-i18n="home.shield">Check a WhatsApp forward</span></button>
         </div>
         <div class="hero-chips" aria-hidden="true">
-          <span class="hero-chip">📄 <span data-i18n="feature.01">See the Proof</span></span>
-          <span class="hero-chip">🗣️ <span data-i18n="feature.02">Speak Naturally</span></span>
-          <span class="hero-chip">🙅 <span data-i18n="feature.03">No Page, No Answer</span></span>
+          <span class="hero-chip"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M9.5 12h6M9.5 15.5h4"/></svg><span data-i18n="feature.01">See the Proof</span></span>
+          <span class="hero-chip"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span data-i18n="feature.02">Speak Naturally</span></span>
+          <span class="hero-chip"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 19 6v5.5c0 4.3-2.9 7.7-7 9-4.1-1.3-7-4.7-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span data-i18n="feature.03">No Page, No Answer</span></span>
         </div>
         <div id="home-convo" class="home-convo" aria-live="polite">
           <p class="thought-line" data-orb="home"></p>
@@ -261,14 +282,14 @@
     </div>
     <div class="settings-grid">
       <article class="glass-panel settings-card">
-        <h2><span aria-hidden="true">🌐</span> <span data-i18n="set.langTitle">Language & theme</span></h2>
+        <h2><span data-i18n="set.langTitle">Language & theme</span></h2>
         <div class="setting-row setting-col"><span class="setting-name" data-i18n="set.siteLang">Language of the site</span>
           <div class="segmented lang-buttons" id="setting-lang" role="group"><button type="button" class="chip-btn" data-lang="en-IN">English</button><button type="button" class="chip-btn" data-lang="ta-IN">தமிழ்</button><button type="button" class="chip-btn" data-lang="hi-IN">हिन्दी</button></div></div>
         <div class="setting-row"><span class="setting-name" data-i18n="settings.theme">Appearance theme</span>
           <div class="segmented" id="setting-theme" role="group"><button type="button" class="chip-btn" data-theme-choice="dark" data-i18n="set.dark">Dark</button><button type="button" class="chip-btn" data-theme-choice="light" data-i18n="set.light">Light</button></div></div>
       </article>
       <article class="glass-panel settings-card">
-        <h2><span aria-hidden="true">🔊</span> <span data-i18n="set.voiceTitle">Voice & speech</span></h2>
+        <h2><span data-i18n="set.voiceTitle">Voice & speech</span></h2>
         <label class="switch"><input type="checkbox" id="setting-autoplay-tts" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="settings.autoplay">Auto-play voice responses</span></label>
         <div class="setting-row"><span class="setting-name" data-i18n="set.speed">Speaking speed</span>
           <div class="segmented" id="setting-speed" role="group"><button type="button" class="chip-btn" data-speed="1" data-i18n="set.normal">Normal</button><button type="button" class="chip-btn" data-speed="0.85" data-i18n="set.slow">Slow</button></div></div>
@@ -276,7 +297,7 @@
         <label class="switch"><input type="checkbox" class="conv-mode-input" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="conv.mode">Conversation mode: keep listening after each answer</span></label>
       </article>
       <article class="glass-panel settings-card">
-        <h2><span aria-hidden="true">👓</span> <span data-i18n="set.readTitle">Reading & accessibility</span></h2>
+        <h2><span data-i18n="set.readTitle">Reading & accessibility</span></h2>
         <p class="setting-help" data-i18n="set.easyHelp">Bigger text and buttons, slower voice, and a simpler home page.</p>
         <label class="switch"><input type="checkbox" id="setting-easy" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.easy">Easy mode for elders</span></label>
         <div class="setting-row"><span class="setting-name" data-i18n="set.textSize">Text size</span>
@@ -284,92 +305,149 @@
         <label class="switch"><input type="checkbox" id="setting-calm" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.calm">Reduce animations</span></label>
       </article>
       <article class="glass-panel settings-card">
-        <h2><span aria-hidden="true">🔒</span> <span data-i18n="set.privacyTitle">Privacy & data</span></h2>
+        <h2><span data-i18n="set.privacyTitle">Privacy & data</span></h2>
         <p class="setting-help" data-i18n="set.privacyHelp">Pakkam does not store your questions or voice on the server. Your history below stays only in this browser.</p>
         <label class="switch"><input type="checkbox" id="setting-phone" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="set.phone">Phone-call voice test (8 kHz phone audio)</span></label>
         <button id="clear-history-btn" class="chip-btn danger" type="button" data-i18n="history.clear">Clear All History</button>
       </article>
       <article class="glass-panel settings-card settings-wide">
-        <h2><span aria-hidden="true">🕘</span> <span data-i18n="history.title">Conversation History</span></h2>
+        <h2><span data-i18n="history.title">Conversation History</span></h2>
         <div id="history-list" class="history-list"></div>
       </article>
     </div>
   </section>
 
   <section id="page-about" class="page-section about-page">
-    <header class="about-opening">
+    <header class="about-hero">
+      <p class="about-word" aria-hidden="true" lang="ta">பக்கம்</p>
       <p class="hero-eyebrow" data-i18n="st.eyebrow">THE STORY BEHIND PAKKAM</p>
       <h1 data-i18n="st.title">It started with someone we love.</h1>
-      <button id="about-listen" class="cta-button about-listen" type="button"><span data-i18n="about.listen">🔊 Hear Pakkam explain itself</span></button>
+      <button id="about-listen" class="cta-button about-listen" type="button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg><span data-i18n="about.listen">Hear Pakkam explain itself</span><span class="listen-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
       <p id="about-listen-text" class="about-listen-text" hidden></p>
+      <span class="scroll-cue" aria-hidden="true"></span>
     </header>
+
     <article class="story">
-      <p data-i18n="st.p1">We often think of technology as something that makes life easier. Faster payments, instant information, services at our fingertips.</p>
-      <p data-i18n="st.p2">But one day, I realised that not everyone experiences technology that way.</p>
-      <p data-i18n="st.p3">I love my grandparents. During one of our conversations, my grandfather spoke about something that had been troubling him. Accessing government services wasn’t easy. Understanding government messages was a struggle, and navigating mobile applications and government portals felt like an entirely different world.</p>
-      <p data-i18n="st.p4">The information existed. The services existed. But accessing them was another challenge altogether.</p>
-      <p data-i18n="st.p5">And that conversation stayed with me.</p>
-      <h2 class="story-q" data-i18n="st.h2">What if technology could speak their language?</h2>
-      <p data-i18n="st.p6">A friend and I talked it through, and it came down to a simple question:</p>
-      <blockquote class="story-quote" data-i18n="st.q1">Why should someone struggle to understand a government document when technology could simply explain it to them?</blockquote>
-      <p data-i18n="st.p7">What if an elderly person could ask a question in Tamil and receive an answer in Tamil, with the page of the official document shown right there?</p>
-      <p data-i18n="st.p8">What if accessing information didn’t require knowing how to navigate complicated websites or understand official language?</p>
-      <p data-i18n="st.p9">We didn’t want to build another portal that people had to learn how to use.</p>
-      <p class="story-strong" data-i18n="st.p10">We wanted to build something people could simply talk to.</p>
-      <p data-i18n="st.p11">That’s how Pakkam was born.</p>
-      <p data-i18n="st.p12">I began building an assistant that reads official scheme documents and answers questions in people’s own languages: Tamil, Hindi and English, with Tamil-English mixed typing too.</p>
-      <p data-i18n="st.p13">An assistant that doesn’t just give an answer, but shows where that answer came from.</p>
-      <p data-i18n="st.p14">And most importantly, one that knows when the documents don’t contain an answer, and says so rather than pretending to know.</p>
-      <p data-i18n="st.p15">We started with the schemes we could check against official documents. There is more to cover, and we say so openly.</p>
-      <h2 class="story-q" data-i18n="st.h3">Why the name Pakkam?</h2>
-      <p class="story-name">பக்கம் — Pakkam. <span data-i18n="st.p16">A page in Tamil.</span></p>
-      <p data-i18n="st.p17">The name comes from the simplest part of our original idea.</p>
-      <p data-i18n="st.p18">A government document is made of pages. Each page contains information that could affect someone’s life, but understanding it shouldn’t require specialist knowledge.</p>
-      <p class="story-strong" data-i18n="st.p19">We wanted to make every page easier to understand.</p>
-      <h2 class="story-q" data-i18n="st.h4">More than an AI assistant.</h2>
-      <p data-i18n="st.p20">Pakkam is about reducing the distance between people and the information they need: between a government scheme and the person who could benefit from it.</p>
-      <p class="story-strong" data-i18n="st.p21">Because technology should adapt to people, not the other way around.</p>
-      <div class="story-sign">
-        <p class="story-brand">Pakkam</p>
+      <div class="story-rail" aria-hidden="true"><span class="story-rail-fill"></span></div>
+      <section class="chapter">
+        <p class="chapter-n reveal">01 · <span data-i18n="st.c1">The conversation</span></p>
+        <p class="reveal" data-i18n="st.p1">We often think of technology as something that makes life easier. Faster payments, instant information, services at our fingertips.</p>
+        <p class="reveal" data-i18n="st.p2">But one day, I realised that not everyone experiences technology that way.</p>
+        <p class="reveal" data-i18n="st.p3">I love my grandparents. During one of our conversations, my grandfather spoke about something that had been troubling him. Accessing government services wasn’t easy. Understanding government messages was a struggle, and navigating mobile applications and government portals felt like an entirely different world.</p>
+        <p class="reveal" data-i18n="st.p4">The information existed. The services existed. But accessing them was another challenge altogether.</p>
+        <p class="reveal story-strong" data-i18n="st.p5">And that conversation stayed with me.</p>
+      </section>
+      <section class="chapter">
+        <p class="chapter-n reveal">02 · <span data-i18n="st.c2">The question</span></p>
+        <h2 class="story-q reveal" data-i18n="st.h2">What if technology could speak their language?</h2>
+        <p class="reveal" data-i18n="st.p6">A friend and I talked it through, and it came down to a simple question:</p>
+        <blockquote class="story-quote reveal" data-i18n="st.q1">Why should someone struggle to understand a government document when technology could simply explain it to them?</blockquote>
+        <p class="reveal" data-i18n="st.p7">What if an elderly person could ask a question in Tamil and receive an answer in Tamil, with the page of the official document shown right there?</p>
+        <p class="reveal" data-i18n="st.p8">What if accessing information didn’t require knowing how to navigate complicated websites or understand official language?</p>
+      </section>
+      <section class="chapter">
+        <p class="chapter-n reveal">03 · <span data-i18n="st.c3">How Pakkam was born</span></p>
+        <p class="reveal" data-i18n="st.p9">We didn’t want to build another portal that people had to learn how to use.</p>
+        <p class="story-big reveal" data-i18n="st.p10">We wanted to build something people could simply talk to.</p>
+        <p class="reveal story-strong" data-i18n="st.p11">That’s how Pakkam was born.</p>
+        <p class="reveal" data-i18n="st.p12">I began building an assistant that reads official scheme documents and answers questions in people’s own languages: Tamil, Hindi and English, with Tamil-English mixed typing too.</p>
+        <p class="reveal" data-i18n="st.p13">An assistant that doesn’t just give an answer, but shows where that answer came from.</p>
+        <p class="reveal" data-i18n="st.p14">And most importantly, one that knows when the documents don’t contain an answer, and says so rather than pretending to know.</p>
+        <p class="reveal" data-i18n="st.p15">We started with the schemes we could check against official documents. There is more to cover, and we say so openly.</p>
+      </section>
+      <section class="chapter chapter-name">
+        <p class="chapter-n reveal">04 · <span data-i18n="st.c4">The name</span></p>
+        <h2 class="story-q reveal" data-i18n="st.h3">Why the name Pakkam?</h2>
+        <div class="name-figure reveal">
+          <svg class="page-turn" viewBox="0 0 160 120" aria-hidden="true">
+            <path class="pt-back" d="M80 18 L146 10 L146 104 L80 112 Z"/>
+            <path class="pt-lines" d="M92 34 L134 29 M92 46 L134 41 M92 58 L134 53 M92 70 L122 66.5"/>
+            <path class="pt-leaf" d="M80 18 L14 10 L14 104 L80 112 Z"/>
+            <path class="pt-spine" d="M80 18 L80 112"/>
+          </svg>
+          <p class="story-name"><span lang="ta">பக்கம்</span> — Pakkam. <span data-i18n="st.p16">A page in Tamil.</span></p>
+        </div>
+        <p class="reveal" data-i18n="st.p17">The name comes from the simplest part of our original idea.</p>
+        <p class="reveal" data-i18n="st.p18">A government document is made of pages. Each page contains information that could affect someone’s life, but understanding it shouldn’t require specialist knowledge.</p>
+        <p class="reveal story-strong" data-i18n="st.p19">We wanted to make every page easier to understand.</p>
+      </section>
+      <section class="chapter">
+        <p class="chapter-n reveal">05 · <span data-i18n="st.c5">What it is for</span></p>
+        <h2 class="story-q reveal" data-i18n="st.h4">More than an AI assistant.</h2>
+        <p class="reveal" data-i18n="st.p20">Pakkam is about reducing the distance between people and the information they need: between a government scheme and the person who could benefit from it.</p>
+        <p class="story-big reveal" data-i18n="st.p21">Because technology should adapt to people, not the other way around.</p>
+      </section>
+      <div class="story-sign reveal">
+        <p class="story-brand">Pakkam <span lang="ta">பக்கம்</span></p>
         <p data-i18n="st.tag">Your language. Your schemes. Your access.</p>
         <p class="story-page" data-i18n="st.tag2">One page at a time.</p>
       </div>
     </article>
 
     <section class="about-block">
-      <h2 data-i18n="ab.canTitle">What Pakkam can do</h2>
-      <div class="tile-grid tile-grid--six">
-        <article class="tile"><span class="tile-icon" aria-hidden="true">🎙️</span><h3 data-i18n="ab.f1t">Listens in your language</h3><p data-i18n="ab.f1">Tamil, Tanglish, Hindi or English, by voice or text, and answers out loud.</p></article>
-        <article class="tile"><span class="tile-icon" aria-hidden="true">📄</span><h3 data-i18n="ab.f2t">Shows the proof</h3><p data-i18n="ab.f2">Every answer opens the page of the official document, with the line highlighted.</p></article>
-        <article class="tile"><span class="tile-icon" aria-hidden="true">🙅</span><h3 data-i18n="ab.f3t">Says "I don't know"</h3><p data-i18n="ab.f3">If the documents do not say it, Pakkam tells you instead of guessing.</p></article>
-        <article class="tile"><span class="tile-icon" aria-hidden="true">🛡️</span><h3 data-i18n="ab.f4t">Checks WhatsApp forwards</h3><p data-i18n="ab.f4">Finds false claims and scam signs like fake links and OTP requests.</p></article>
-        <article class="tile"><span class="tile-icon" aria-hidden="true">📋</span><h3 data-i18n="ab.f5t">Helps you prepare</h3><p data-i18n="ab.f5">Documents to carry, and a draft appeal note if an application was rejected.</p></article>
-        <article class="tile"><span class="tile-icon" aria-hidden="true">👤</span><h3 data-i18n="ab.f6t">Connects you to people</h3><p data-i18n="ab.f6">Scheme helplines, and a way to send your question to an officer.</p></article>
+      <p class="hero-eyebrow reveal" data-i18n="ab.canEyebrow">WHAT IT DOES</p>
+      <h2 class="reveal" data-i18n="ab.canTitle">What Pakkam can do</h2>
+      <div class="cap-grid">
+        <article class="cap-card reveal"><span class="cap-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></span><h3 data-i18n="ab.f1t">Listens in your language</h3><p data-i18n="ab.f1">Tamil, Tanglish, Hindi or English, by voice or text, and answers out loud.</p></article>
+        <article class="cap-card reveal"><span class="cap-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M9.5 12h6M9.5 15.5h4"/></svg></span><h3 data-i18n="ab.f2t">Shows the proof</h3><p data-i18n="ab.f2">Every answer opens the page of the official document, with the line highlighted.</p></article>
+        <article class="cap-card reveal"><span class="cap-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m6 6 12 12"/></svg></span><h3 data-i18n="ab.f3t">Says "I don't know"</h3><p data-i18n="ab.f3">If the documents do not say it, Pakkam tells you instead of guessing.</p></article>
+        <article class="cap-card reveal"><span class="cap-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 19 6v5.5c0 4.3-2.9 7.7-7 9-4.1-1.3-7-4.7-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg></span><h3 data-i18n="ab.f4t">Checks WhatsApp forwards</h3><p data-i18n="ab.f4">Finds false claims and scam signs like fake links and OTP requests.</p></article>
+        <article class="cap-card reveal"><span class="cap-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 10h6M9 13.5h6M9 17h3.5"/></svg></span><h3 data-i18n="ab.f5t">Helps you prepare</h3><p data-i18n="ab.f5">Documents to carry, and a draft appeal note if an application was rejected.</p></article>
+        <article class="cap-card reveal"><span class="cap-icon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20.5c.8-4 3.6-6.5 7-6.5s6.2 2.5 7 6.5"/></svg></span><h3 data-i18n="ab.f6t">Connects you to people</h3><p data-i18n="ab.f6">Scheme helplines, and a way to send your question to an officer.</p></article>
       </div>
     </section>
 
     <section class="about-block">
-      <h2 data-i18n="ab.howTitle">How it answers</h2>
-      <ol class="flow">
-        <li><span class="flow-n">1</span><div><h3 data-i18n="ab.h1t">You ask</h3><p data-i18n="ab.h1">Gnani Prisma turns your voice into text, even mixed Tamil and English.</p></div></li>
-        <li><span class="flow-n">2</span><div><h3 data-i18n="ab.h2t">Pakkam finds the page</h3><p data-i18n="ab.h2">It searches 18 official government documents, never the open internet.</p></div></li>
-        <li><span class="flow-n">3</span><div><h3 data-i18n="ab.h3t">It checks before it speaks</h3><p data-i18n="ab.h3">Every sentence must point to a page and every number must be on it. Then Gnani Timbre reads the answer aloud.</p></div></li>
+      <p class="hero-eyebrow reveal" data-i18n="ab.howEyebrow">UNDER THE HOOD</p>
+      <h2 class="reveal" data-i18n="ab.howTitle">How it answers</h2>
+      <ol class="flow-line">
+        <li class="flow-step reveal"><span class="flow-dot"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></span><h3 data-i18n="ab.h1t">You ask</h3><p data-i18n="ab.h1">Gnani Prisma turns your voice into text, even mixed Tamil and English.</p><span class="tech-badge">Gnani Prisma</span></li>
+        <li class="flow-step reveal"><span class="flow-dot"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></span><h3 data-i18n="ab.h2t">Pakkam finds the page</h3><p data-i18n="ab.h2">It searches 18 official government documents, never the open internet.</p><span class="tech-badge" data-i18n="ab.badgeDocs">18 official documents</span></li>
+        <li class="flow-step reveal"><span class="flow-dot"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><h3 data-i18n="ab.h3t">It checks before it speaks</h3><p data-i18n="ab.h3">Every sentence must point to a page and every number must be on it. Then Gnani Timbre reads the answer aloud.</p><span class="tech-badge">Gnani Timbre</span></li>
       </ol>
     </section>
 
     <section class="about-block">
-      <h2 data-i18n="ab.numTitle">Tested, honestly</h2>
-      <div class="stat-row">
-        <div class="stat"><b>194</b><span data-i18n="ab.n1">test questions in 4 languages</span></div>
-        <div class="stat"><b>98%</b><span data-i18n="ab.n2">of answers cite the correct page</span></div>
-        <div class="stat"><b>39 / 40</b><span data-i18n="ab.n3">out-of-scope questions honestly refused</span></div>
+      <p class="hero-eyebrow reveal" data-i18n="ab.numEyebrow">MEASURED ON THE LIVE SITE</p>
+      <h2 class="reveal" data-i18n="ab.numTitle">Tested, honestly</h2>
+      <div class="num-row">
+        <div class="num reveal"><b class="count" data-to="194">194</b><span data-i18n="ab.n1">test questions in 4 languages</span></div>
+        <div class="num reveal"><b class="count" data-to="98" data-suffix="%">98%</b><span data-i18n="ab.n2">of answers cite the correct page</span></div>
+        <div class="num reveal"><b class="count" data-to="39" data-suffix=" / 40">39 / 40</b><span data-i18n="ab.n3">out-of-scope questions honestly refused</span></div>
       </div>
-      <p class="setting-help story-disclaimer" data-i18n="st.disclaimer">Pakkam is an early research prototype by a student, not affiliated with any government body. Answers are for information only. Check the official source before you act.</p>
-      <p class="setting-help" data-i18n="ab.credit">Built for the Gnani.ai Great Indian AI Internship Challenge 2026, with Gnani Prisma and Timbre for voice. A student project, not a government service.</p>
+      <a class="text-link num-link" href="https://github.com/mailtojaswanthss-svg/pakkam/blob/main/docs/review/LIVE_BENCHMARK.md" target="_blank" rel="noopener" data-i18n="ab.numLink">See the full benchmark →</a>
+    </section>
+
+    <section class="about-block">
+      <p class="hero-eyebrow reveal" data-i18n="ab.teamEyebrow">THE PEOPLE BEHIND PAKKAM</p>
+      <h2 class="reveal" data-i18n="ab.teamTitle">Made by</h2>
+      <div id="credits" class="credit-grid"></div>
+      <p class="setting-help credit-note reveal" data-i18n="ab.credit">Built for the Gnani.ai Great Indian AI Internship Challenge 2026, with Gnani Prisma and Timbre for voice. A student project, not a government service.</p>
+    </section>
+
+    <section class="about-close-cta reveal">
+      <h2 data-i18n="ab.ctaTitle">Have a question about a scheme?</h2>
+      <button class="cta-button" type="button" data-nav="assistant"><span data-i18n="home.ask">Ask Pakkam AI</span> →</button>
     </section>
   </section>
 
-  <footer class="site-footer"><span>PAKKAM</span><p data-i18n="footer.line">Public information, made easier to understand.</p><button class="text-link" data-nav="about" data-i18n="nav.about">About</button></footer>
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <img src="./assets/images/logo.webp" alt="" width="27" height="30" />
+      <div>
+        <p class="footer-name">PAKKAM <span lang="ta">பக்கம்</span></p>
+        <p data-i18n="st.tag">Your language. Your schemes. Your access.</p>
+      </div>
+    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <button class="text-link" type="button" data-nav="about" data-i18n="nav.about">About</button>
+      <button class="text-link" type="button" data-nav="schemes" data-i18n="nav.schemes">Schemes</button>
+      <button class="text-link" type="button" id="footer-privacy" data-i18n="footer.privacy">Privacy</button>
+      <a class="text-link" href="https://github.com/mailtojaswanthss-svg/pakkam" target="_blank" rel="noopener" data-i18n="footer.code">Source code</a>
+      <a class="text-link" href="https://github.com/mailtojaswanthss-svg/pakkam/issues" target="_blank" rel="noopener" data-i18n="footer.contact">Report a problem</a>
+    </nav>
+    <p class="footer-note" data-i18n="st.disclaimer">Pakkam is an early research prototype by a student, not affiliated with any government body. Answers are for information only. Check the official source before you act.</p>
+  </footer>
 
   <script src="./js/recorder.js"></script>
   <script src="./js/background.js"></script>

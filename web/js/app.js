@@ -1,5 +1,7 @@
 // web/js/app.js
 import { detectTalk, replyLanguage, TALK, EXAMPLES } from './talk.js';
+import { decorate, iconSvg, splitIcon } from './icons.js';
+import { SAMPLE_FACTS, SAMPLE_SOURCES, sampleFor } from './samples.js';
 
 const API_BASE = window.PAKKAM_API_BASE || '';
 
@@ -61,7 +63,7 @@ function applyLanguage(language) {
   if (selector) selector.value = state.language;
   document.querySelectorAll('[data-i18n]').forEach((element) => {
     const value = t(element.dataset.i18n);
-    if (value) element.textContent = value;
+    if (value) decorate(element, value);
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
     element.placeholder = t(element.dataset.i18nPlaceholder);
@@ -597,6 +599,47 @@ Object.assign(MESSAGES['hi-IN'], {
 });
 
 
+// Round 5: footer, About chapters and credits, offline mode.
+Object.assign(MESSAGES['en-IN'], {
+  'a11y.skip': 'Skip to content', 'footer.privacy': 'Privacy', 'footer.code': 'Source code', 'footer.contact': 'Report a problem',
+  'about.listen': 'Hear Pakkam explain itself', 'about.stop': 'Stop',
+  'st.c1': 'The conversation', 'st.c2': 'The question', 'st.c3': 'How Pakkam was born', 'st.c4': 'The name', 'st.c5': 'What it is for',
+  'ab.canEyebrow': 'WHAT IT DOES', 'ab.howEyebrow': 'UNDER THE HOOD', 'ab.numEyebrow': 'MEASURED ON THE LIVE SITE',
+  'ab.numLink': 'See the full benchmark →', 'ab.badgeDocs': '18 official documents',
+  'ab.teamEyebrow': 'THE PEOPLE BEHIND PAKKAM', 'ab.teamTitle': 'Made by', 'ab.ctaTitle': 'Have a question about a scheme?',
+  'credit.role1': 'Idea, AI and backend', 'credit.role2': 'Design and frontend',
+  'answer.helpfulYes': 'Yes, helpful', 'answer.helpfulNo': 'Not helpful',
+  'offline.banner': "Pakkam's server is offline right now. You can still look around, and answers below are samples.",
+  'offline.retry': 'Try again', 'offline.sample': 'Sample answer: the live server is offline',
+  'offline.none': "The live server is offline, so I can't answer this one right now. Try again in a little while, or try one of these sample questions.",
+});
+Object.assign(MESSAGES['ta-IN'], {
+  'a11y.skip': 'உள்ளடக்கத்திற்குச் செல்', 'footer.privacy': 'தனியுரிமை', 'footer.code': 'மூலக் குறியீடு', 'footer.contact': 'சிக்கலைத் தெரிவிக்க',
+  'about.listen': 'பக்கம் தன்னைப் பற்றிச் சொல்வதைக் கேளுங்கள்', 'about.stop': 'நிறுத்து',
+  'st.c1': 'அந்த உரையாடல்', 'st.c2': 'அந்தக் கேள்வி', 'st.c3': 'பக்கம் பிறந்த கதை', 'st.c4': 'பெயர்', 'st.c5': 'இது எதற்காக',
+  'ab.canEyebrow': 'இது என்ன செய்யும்', 'ab.howEyebrow': 'உள்ளே எப்படி இயங்குகிறது', 'ab.numEyebrow': 'நேரடித் தளத்தில் அளவிடப்பட்டது',
+  'ab.numLink': 'முழு சோதனை முடிவுகளைப் பாருங்கள் →', 'ab.badgeDocs': '18 அதிகாரப்பூர்வ ஆவணங்கள்',
+  'ab.teamEyebrow': 'பக்கத்தின் பின்னால் உள்ளவர்கள்', 'ab.teamTitle': 'உருவாக்கியவர்கள்', 'ab.ctaTitle': 'ஒரு திட்டத்தைப் பற்றிக் கேள்வி உள்ளதா?',
+  'credit.role1': 'யோசனை, AI மற்றும் பின்தளம்', 'credit.role2': 'வடிவமைப்பு மற்றும் முன்தளம்',
+  'answer.helpfulYes': 'ஆம், உதவியாக இருந்தது', 'answer.helpfulNo': 'உதவவில்லை',
+  'offline.banner': 'பக்கம் சர்வர் இப்போது இயங்கவில்லை. தளத்தைப் பார்க்கலாம்; கீழே உள்ள பதில்கள் மாதிரிகள்.',
+  'offline.retry': 'மீண்டும் முயல்க', 'offline.sample': 'மாதிரிப் பதில்: நேரடி சர்வர் இயங்கவில்லை',
+  'offline.none': 'நேரடி சர்வர் இயங்கவில்லை; இப்போது இதற்குப் பதில் சொல்ல முடியாது. சிறிது நேரம் கழித்து முயலுங்கள், அல்லது இந்த மாதிரிக் கேள்விகளில் ஒன்றைக் கேளுங்கள்.',
+});
+Object.assign(MESSAGES['hi-IN'], {
+  'a11y.skip': 'सामग्री पर जाएँ', 'footer.privacy': 'निजता', 'footer.code': 'सोर्स कोड', 'footer.contact': 'समस्या बताएँ',
+  'about.listen': 'पक्कम से उसका परिचय सुनें', 'about.stop': 'रोकें',
+  'st.c1': 'वह बातचीत', 'st.c2': 'वह सवाल', 'st.c3': 'पक्कम का जन्म', 'st.c4': 'नाम', 'st.c5': 'यह किसलिए है',
+  'ab.canEyebrow': 'यह क्या करता है', 'ab.howEyebrow': 'अंदर कैसे काम करता है', 'ab.numEyebrow': 'लाइव साइट पर मापा गया',
+  'ab.numLink': 'पूरा बेंचमार्क देखें →', 'ab.badgeDocs': '18 आधिकारिक दस्तावेज़',
+  'ab.teamEyebrow': 'पक्कम के पीछे के लोग', 'ab.teamTitle': 'बनाने वाले', 'ab.ctaTitle': 'किसी योजना के बारे में सवाल है?',
+  'credit.role1': 'विचार, AI और बैकएंड', 'credit.role2': 'डिज़ाइन और फ्रंटएंड',
+  'answer.helpfulYes': 'हाँ, मददगार', 'answer.helpfulNo': 'मददगार नहीं',
+  'offline.banner': 'पक्कम का सर्वर अभी बंद है। आप साइट देख सकते हैं; नीचे के जवाब नमूने हैं।',
+  'offline.retry': 'फिर कोशिश करें', 'offline.sample': 'नमूना जवाब: लाइव सर्वर बंद है',
+  'offline.none': 'लाइव सर्वर बंद है, इसलिए अभी इसका जवाब नहीं दे सकता। थोड़ी देर बाद कोशिश करें, या इनमें से कोई नमूना सवाल पूछें।',
+});
+
 // Rumour Shield and appeal texts (from the earlier chat page, web-backup/assets/chat.js).
 const SHIELD = {
   'en-IN': {
@@ -736,14 +779,18 @@ const el = (tag, className, text) => {
 };
 
 function chip(label, onClick, className = 'chip-btn') {
-  const button = el('button', className, label);
+  const button = el('button', className);
+  if (label) decorate(button, label);
   button.type = 'button';
   button.addEventListener('click', onClick);
   return button;
 }
 
+function labelled(node, label) { node.setAttribute('aria-label', label); node.title = label; return node; }
+
 function linkChip(label, href) {
-  const link = el('a', 'chip-btn', label);
+  const link = el('a', 'chip-btn');
+  decorate(link, label);
   link.href = href;
   link.target = '_blank';
   link.rel = 'noopener';
@@ -1023,7 +1070,8 @@ function issueChips() {
   const chips = [];
   const helpline = convo.last?.data?.contact?.helpline;
   if (helpline) {
-    const call = el('a', 'chip-btn', `📞 ${t('answer.call')}: ${helpline}`);
+    const call = el('a', 'chip-btn');
+    decorate(call, `📞 ${t('answer.call')}: ${helpline}`);
     call.href = `tel:${helpline.replace(/[^\d+]/g, '')}`;
     chips.push(call);
   }
@@ -1198,7 +1246,8 @@ function renderAnswer(bubble, data, question) {
   if (data.refused) {
     const chips = [];
     if (data.contact?.helpline) {
-      const call = el('a', 'chip-btn', `📞 ${t('answer.call')}: ${data.contact.helpline}`);
+      const call = el('a', 'chip-btn');
+      decorate(call, `📞 ${t('answer.call')}: ${data.contact.helpline}`);
       call.href = `tel:${data.contact.helpline.replace(/[^\d+]/g, '')}`;
       chips.push(call);
     }
@@ -1221,8 +1270,8 @@ function renderAnswer(bubble, data, question) {
       chip(t('answer.notClear'), (event) => { event.currentTarget.closest('.answer-row')?.remove(); handleTalk('notClear', 'puriyala', {}); }),
     ], t('answer.understood'));
     const feedback = chipRow([
-      chip('👍', (event) => sendFeedback(event, data, 'up')),
-      chip('👎', (event) => sendFeedback(event, data, 'down')),
+      labelled(chip('👍', (event) => sendFeedback(event, data, 'up'), 'chip-btn icon-chip'), t('answer.helpfulYes')),
+      labelled(chip('👎', (event) => sendFeedback(event, data, 'down'), 'chip-btn icon-chip'), t('answer.helpfulNo')),
     ], t('answer.helpful'));
     bubble.append(check, feedback);
   }
@@ -1352,6 +1401,14 @@ async function submitChatQuery(queryText, options = {}) {
     replyLoading = false;
     clearTimeout(slow);
     bubble.classList.remove('thinking');
+    if (isOfflineError(error)) {
+      setOffline(true);
+      const sampleText = renderOfflineAnswer(bubble, question);
+      showOnHome(sampleText || t('offline.none'));
+      orb('idle');
+      setStatus(t('assistant.tap'));
+      return;
+    }
     bubble.replaceChildren(el('div', 'answer-text', errorText(error)));
     showOnHome(errorText(error));
     orb('error');
@@ -1629,7 +1686,13 @@ function openAppeal(schemeName) {
 let sources;  // undefined = loading, null = offline
 
 async function loadSources() {
-  try { sources = await (await api('/sources', {}, 30000)).json(); } catch (_) { sources = null; }
+  try {
+    sources = await (await api('/sources', {}, 30000)).json();
+    setOffline(false);
+  } catch (_) {
+    sources = SAMPLE_SOURCES;  // browse the built-in sample list while the server is down
+    setOffline(true);
+  }
   return sources;
 }
 
@@ -1649,7 +1712,7 @@ async function loadSchemeFacts() {
     const list = await (await api(`/scheme-facts?lang=${lang}`, {}, 30000)).json();
     schemeFacts = Object.fromEntries(list.map((f) => [f.scheme, f]));
   } catch (_) {
-    schemeFacts = {};
+    schemeFacts = server.online ? {} : Object.fromEntries(SAMPLE_FACTS.map((f) => [f.scheme, f]));
   }
 }
 
@@ -1751,7 +1814,7 @@ const WA_SVG = document.querySelector('.wa-icon')?.outerHTML || '';
 function waChip(label, onClick, className) {
   const button = chip('', onClick, className);
   button.innerHTML = WA_SVG;
-  button.append(el('span', '', label.replace(/^📤\s*/, '')));
+  button.append(el('span', '', splitIcon(label)[1]));
   return button;
 }
 
@@ -1815,12 +1878,14 @@ function openSchemeDrawer(item) {
 function renderHomeExamples() {
   const box = document.getElementById('home-examples');
   if (!box) return;
-  const icons = ['💰', '🗣️', '🌾', '🔥'];
+  const icons = ['rupee', 'simple', 'leaf', 'flame'];
   box.replaceChildren(...(EXAMPLES[state.language] || EXAMPLES['en-IN']).map((q, index) => {
     const card = el('button', 'example-card');
     card.type = 'button';
     card.style.setProperty('--i', String(index));
-    card.append(el('span', 'example-icon', icons[index % icons.length]), el('span', 'example-text', q), el('span', 'example-go', '→'));
+    const mark = el('span', 'example-icon');
+    mark.innerHTML = iconSvg(icons[index % icons.length]);
+    card.append(mark, el('span', 'example-text', q), el('span', 'example-go', '→'));
     card.addEventListener('click', () => submitChatQuery(q));
     return card;
   }));
@@ -1916,20 +1981,193 @@ function renderHistory() {
 async function aboutListen() {
   const button = document.getElementById('about-listen');
   const text = document.getElementById('about-listen-text');
+  const label = button.querySelector('[data-i18n="about.listen"]');
+  const setLabel = (key) => { if (label) label.textContent = splitIcon(t(key))[1]; };
   if (state.currentAudio && button.dataset.playing === '1') {
     stopSpeaking();
     button.dataset.playing = '0';
-    button.firstElementChild.textContent = t('about.listen');
+    setLabel('about.listen');
     return;
   }
   const intro = t('about.intro');
   text.textContent = intro;
   text.hidden = false;
   button.dataset.playing = '1';
-  button.firstElementChild.textContent = t('about.stop');
+  setLabel('about.stop');
   await speak(intro, SPEECH_LANG[state.language] || 'en');
   button.dataset.playing = '0';
-  button.firstElementChild.textContent = t('about.listen');
+  setLabel('about.listen');
+}
+
+/* ==========================================================================
+   14b. ROUND 5: offline fallback, credits, motion
+   ========================================================================== */
+const reduceMotion = () => document.documentElement.classList.contains('calm') || Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+
+// --- Offline: never show a broken page ---------------------------------------------------
+const server = { online: true };
+function isOfflineError(error) {
+  return error instanceof TypeError || (error instanceof ApiError && [404, 502, 503, 504, 520, 521, 522, 523, 524, 530].includes(error.status));
+}
+function setOffline(off) {
+  server.online = !off;
+  let banner = document.getElementById('offline-banner');
+  if (!off) { banner?.remove(); return; }
+  if (banner) return;
+  banner = el('div', 'offline-banner');
+  banner.id = 'offline-banner';
+  banner.setAttribute('role', 'status');
+  banner.append(el('span', '', t('offline.banner')), chip(t('offline.retry'), retryServer, 'chip-btn offline-retry'));
+  document.body.prepend(banner);
+}
+async function retryServer() {
+  const button = document.querySelector('.offline-retry');
+  if (button) button.disabled = true;
+  await loadSources();
+  await loadSchemeFacts();
+  renderSchemes(null, document.getElementById('scheme-search-input')?.value || '');
+  if (button) button.disabled = false;
+}
+/** Answer from the built-in samples when the server is down. */
+function renderOfflineAnswer(bubble, question) {
+  const sample = sampleFor(question, SPEECH_LANG[state.language] || 'en');
+  if (!sample) {
+    bubble.replaceChildren(el('div', 'answer-text', t('offline.none')));
+    bubble.append(chipRow(exampleChips().slice(0, 2)));
+    return '';
+  }
+  const text = renderAnswer(bubble, sample, question);
+  bubble.prepend(el('p', 'answer-flag sample-flag', t('offline.sample')));
+  return text;
+}
+
+// --- Credits ---------------------------------------------------------------------------
+// Names, roles and links of the people who built Pakkam. A person without a name is not shown,
+// and only real links are listed.
+const CREDITS = [
+  { name: 'Jaswanth S S', role: 'credit.role1', links: { github: 'https://github.com/mailtojaswanthss-svg' } },
+  { name: '', role: 'credit.role2', links: {} },  // teammate: name and links to be added
+];
+function renderCredits() {
+  const box = document.getElementById('credits');
+  if (!box) return;
+  box.replaceChildren(...CREDITS.filter((p) => p.name).map((person) => {
+    const card = el('article', 'credit-card reveal in');
+    const initials = person.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+    const links = el('div', 'credit-links');
+    Object.entries(person.links || {}).forEach(([kind, href]) => {
+      const a = el('a', 'icon-btn credit-link');
+      a.href = href; a.target = '_blank'; a.rel = 'noopener';
+      a.innerHTML = iconSvg(kind);
+      a.setAttribute('aria-label', `${person.name} on ${kind === 'github' ? 'GitHub' : kind === 'linkedin' ? 'LinkedIn' : kind}`);
+      links.append(a);
+    });
+    const who = el('div', 'credit-who');
+    who.append(el('h3', '', person.name), el('p', '', t(person.role)));
+    card.append(el('span', 'credit-avatar', initials), who, links);
+    return card;
+  }));
+}
+
+// --- Motion ------------------------------------------------------------------------------
+let revealer = null;
+function watchReveals(root = document) {
+  const nodes = root.querySelectorAll('.reveal:not(.in), .count:not(.counted)');
+  if (reduceMotion() || !('IntersectionObserver' in window)) {
+    nodes.forEach((node) => { node.classList.add('in'); if (node.classList.contains('count')) countUp(node, true); });
+    return;
+  }
+  if (!revealer) {
+    revealer = new IntersectionObserver((entries) => entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in');
+      if (entry.target.classList.contains('count')) countUp(entry.target);
+      revealer.unobserve(entry.target);
+    }), { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+  }
+  nodes.forEach((node) => revealer.observe(node));
+}
+
+function countUp(node, instant = false) {
+  if (node.classList.contains('counted')) return;
+  node.classList.add('counted');
+  const to = Number(node.dataset.to || 0);
+  const suffix = node.dataset.suffix || '';
+  if (instant || reduceMotion()) { node.textContent = `${to}${suffix}`; return; }
+  const start = performance.now();
+  const step = (now) => {
+    const p = Math.min(1, (now - start) / 1200);
+    node.textContent = `${Math.round(to * (1 - (1 - p) ** 3))}${suffix}`;
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// The reading line beside the story fills as the story scrolls past.
+let railFrame = null;
+function updateStoryRail() {
+  railFrame = null;
+  const story = document.querySelector('#page-about.active .story');
+  const fill = story?.querySelector('.story-rail-fill');
+  if (!story || !fill) return;
+  const box = story.getBoundingClientRect();
+  const read = Math.min(1, Math.max(0, (window.innerHeight * 0.6 - box.top) / box.height));
+  fill.style.transform = `scaleY(${read.toFixed(3)})`;
+}
+window.addEventListener('scroll', () => { if (!railFrame) railFrame = requestAnimationFrame(updateStoryRail); }, { passive: true });
+
+/** Page change with a soft crossfade (View Transitions where the browser has them). */
+function showPage(pageKey) {
+  const go = () => {
+    navigateTo(pageKey);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    watchReveals();
+    updateStoryRail();
+  };
+  if (document.startViewTransition && !reduceMotion()) document.startViewTransition(go);
+  else go();
+}
+
+/** Theme switch: the new theme spreads in a circle from the button that was pressed. */
+function switchTheme(event) {
+  const swap = () => { toggleTheme(); applyPrefs(); };
+  if (!document.startViewTransition || reduceMotion()) { swap(); return; }
+  const box = event?.currentTarget?.getBoundingClientRect?.();
+  const x = box ? box.left + box.width / 2 : window.innerWidth / 2;
+  const y = box ? box.top + box.height / 2 : 0;
+  const r = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+  const root = document.documentElement;
+  root.dataset.vt = 'theme';
+  const transition = document.startViewTransition(swap);
+  transition.ready.then(() => {
+    root.animate({ clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
+      { duration: 550, easing: 'cubic-bezier(.22,1,.36,1)', pseudoElement: '::view-transition-new(root)' });
+  }).catch(() => {});
+  transition.finished.finally(() => { delete root.dataset.vt; });
+}
+
+// Keyboard focus stays inside an open panel (scheme details, proof card) until it closes.
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Tab') return;
+  const panels = document.querySelectorAll('.scheme-drawer, .proof-overlay');
+  const panel = panels[panels.length - 1];
+  if (!panel) return;
+  const items = [...panel.querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])')].filter((n) => n.offsetParent !== null);
+  if (!items.length) return;
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (!panel.contains(document.activeElement)) { event.preventDefault(); first.focus(); }
+  else if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+});
+
+/** First visit in this tab: the orb, headline and boxes arrive one after another. */
+function heroEntrance() {
+  let seen = false;
+  try { seen = sessionStorage.getItem('pakkam_intro') === '1'; sessionStorage.setItem('pakkam_intro', '1'); } catch (_) { /* private mode */ }
+  if (seen || reduceMotion()) return;
+  document.body.classList.add('intro');
+  setTimeout(() => document.body.classList.remove('intro'), 2200);
 }
 
 /* ==========================================================================
@@ -1941,6 +2179,7 @@ function refreshLanguageParts() {
   renderWelcomeChips();
   renderVoiceChips();
   renderHomeExamples();
+  renderCredits();
   applyShieldText();
   applyPrefs();
   loadSchemeFacts().then(() => renderSchemes(null, document.getElementById('scheme-search-input')?.value || ''));
@@ -1958,10 +2197,21 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSources().then(() => renderSchemes(null, document.getElementById('scheme-search-input')?.value || ''));
 
   document.querySelectorAll('[data-nav]').forEach((node) => {
-    node.addEventListener('click', (event) => { event.preventDefault(); navigateTo(node.dataset.nav); });
+    node.addEventListener('click', (event) => { event.preventDefault(); showPage(node.dataset.nav); });
   });
-  document.getElementById('theme-toggle-btn')?.addEventListener('click', () => { toggleTheme(); applyPrefs(); });
-  document.getElementById('settings-theme-btn')?.addEventListener('click', toggleTheme);
+  document.getElementById('theme-toggle-btn')?.addEventListener('click', switchTheme);
+  document.getElementById('settings-theme-btn')?.addEventListener('click', switchTheme);
+  document.querySelector('.skip-link')?.addEventListener('click', (event) => {
+    event.preventDefault();
+    const heading = document.querySelector('.page-section.active h1, .page-section.active h2');
+    if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus(); }
+  });
+  document.getElementById('footer-privacy')?.addEventListener('click', () => {
+    showPage('settings');
+    setTimeout(() => document.querySelector('[data-i18n="set.privacyTitle"]')?.closest('.settings-card, section, div')?.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'center' }), 80);
+  });
+  heroEntrance();
+  watchReveals();
   document.querySelectorAll('#setting-lang [data-lang]').forEach((button) => button.addEventListener('click', () => {
     convo.voiceLang = null;
     try { localStorage.removeItem('pakkam_voice'); } catch (_) { /* private mode */ }
