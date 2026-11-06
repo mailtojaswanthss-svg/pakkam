@@ -10,6 +10,8 @@
   const LETTERS = ['ப', 'க', 'ம்', 'அ', 'இ', 'a', '₹', 'பக்கம்'];
   const reducedQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   let items = [];
+  let lanes = [];      // x centres the items keep to: the side margins on wide screens
+  let nextLane = 0;
   let width = 0;
   let height = 0;
   let ratio = 1;
@@ -22,22 +24,28 @@
   function readColors() {
     const style = getComputedStyle(document.documentElement);
     const pick = (name, fallback) => (style.getPropertyValue(name) || '').trim() || fallback;
-    colors = { line: pick('--text-primary', '#cfe7ee'), accent: pick('--raw-purple', '#a970ff') };
+    colors = { line: pick('--text-primary', '#cfe7ee'), accent: pick('--accent-2', '#c4a5ff') };
+  }
+
+  function laneX() {
+    const x = lanes[nextLane % lanes.length];
+    nextLane += 1;
+    return x + (Math.random() - 0.5) * 16;
   }
 
   function makeItem(randomY) {
     const page = Math.random() < 0.6;
-    const size = page ? 46 + Math.random() * 54 : 18 + Math.random() * 26;
+    const size = page ? 40 + Math.random() * 40 : 18 + Math.random() * 20;
     return {
       page,
       size,
-      x: Math.random() * width,
+      x: laneX(),
       y: randomY ? Math.random() * height : height + size * 2,
       speed: 6 + Math.random() * 10,        // px per second
-      drift: (Math.random() - 0.5) * 6,
-      angle: (Math.random() - 0.5) * 0.5,
-      spin: (Math.random() - 0.5) * 0.05,
-      alpha: 0.05 + Math.random() * 0.07,
+      drift: 0,
+      angle: (Math.random() - 0.5) * 0.24,
+      spin: (Math.random() - 0.5) * 0.02,
+      alpha: 0.045 + Math.random() * 0.04,
       letter: LETTERS[Math.floor(Math.random() * LETTERS.length)],
       accent: Math.random() < 0.3,
     };
@@ -51,8 +59,27 @@
     canvas.height = Math.round(height * ratio);
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
-    const count = Math.round(Math.min(18, Math.max(8, (width * height) / 90000)));
-    items = Array.from({ length: count }, () => makeItem(true));
+    // Even lanes in the side margins, outside the ~1100px content column; spread across the
+    // page only when the margins are too narrow (phones, small laptops), and fewer items there.
+    const margin = (width - 1120) / 2;
+    if (margin >= 110) {
+      const perSide = margin >= 260 ? 2 : 1;
+      lanes = [];
+      for (let i = 0; i < perSide; i += 1) {
+        const x = (margin * (i + 0.5)) / perSide;
+        lanes.push(x, width - x);
+      }
+    } else {
+      const n = width < 640 ? 3 : 5;
+      lanes = Array.from({ length: n }, (_, i) => (width * (i + 0.5)) / n);
+    }
+    nextLane = 0;
+    const count = width < 640 ? 6 : Math.min(14, lanes.length * 3);
+    items = Array.from({ length: count }, (_, i) => {
+      const item = makeItem(false);
+      item.y = ((i + Math.random() * 0.5) / count) * (height + 200);  // evenly spaced from the start
+      return item;
+    });
     readColors();
     draw();
   }

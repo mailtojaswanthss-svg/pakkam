@@ -30,7 +30,7 @@
       <ul class="nav-links" id="nav-links">
         <li><button class="nav-item active" data-nav="home" data-i18n="nav.home">Home</button></li>
         <li><button class="nav-item" data-nav="schemes" data-i18n="nav.schemes">Schemes</button></li>
-        <li><button class="nav-item" data-nav="shield" data-i18n="nav.shield">Check a forward</button></li>
+        <li><button class="nav-item nav-wa" data-nav="shield"><svg class="wa-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span data-i18n="nav.shield">Check a forward</span></button></li>
         <li><button class="nav-item" data-nav="about" data-i18n="nav.about">About</button></li>
       </ul>
 
@@ -94,6 +94,7 @@
             <span class="wave-bar b-sm"></span>
           </div>
 
+          <p class="thought-bubble" aria-hidden="true"></p>
           <div id="hero-orb-trigger" class="central-orb-container" role="button" tabindex="0" aria-label="Activate Pakkam Voice Assistant" data-i18n-aria="assistant.shortcut">
             <img id="hero-orb-img" src="./assets/images/dark-orb.webp" alt="Pakkam Voice Orb" class="central-orb-img" />
           </div>
@@ -119,7 +120,6 @@
 
       <!-- Hero Copy & CTA -->
       <div class="hero-copy">
-        <p class="hero-eyebrow" data-i18n="home.eyebrow">OFFICIAL SERVICES. CLEAR ANSWERS.</p>
         <h1 class="hero-title">
           <span data-i18n="home.title">Government schemes, explained from the official page.</span>
         </h1>
@@ -129,15 +129,15 @@
             <span data-i18n="home.ask">ASK PAKKAM AI</span>
             <span aria-hidden="true">→</span>
           </button>
-          <button class="chip-btn hero-secondary" type="button" data-nav="shield" data-i18n="home.shield">🛡️ Check a WhatsApp forward</button>
+          <button class="chip-btn hero-secondary" type="button" data-nav="shield"><svg class="wa-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span data-i18n="home.shield">Check a WhatsApp forward</span></button>
         </div>
         <div class="hero-chips" aria-hidden="true">
           <span class="hero-chip">📄 <span data-i18n="feature.01">See the Proof</span></span>
           <span class="hero-chip">🗣️ <span data-i18n="feature.02">Speak Naturally</span></span>
           <span class="hero-chip">🙅 <span data-i18n="feature.03">No Page, No Answer</span></span>
         </div>
-        <label class="switch"><input type="checkbox" class="conv-mode-input" /><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label" data-i18n="conv.mode">Conversation mode: keep listening after each answer</span></label>
         <div id="home-convo" class="home-convo" aria-live="polite">
+          <p class="thought-line" data-orb="home"></p>
           <p id="home-status" class="home-status status-pill" data-i18n="home.tapOrb">Tap the orb and ask your question</p>
           <p id="home-heard" class="home-heard"></p>
           <div id="home-answer" class="home-answer glass-panel" hidden></div>
@@ -152,18 +152,6 @@
       </div>
       <div id="home-examples" class="example-grid"></div>
     </section>
-    <section class="home-band" aria-labelledby="does-title">
-      <div class="band-head">
-        <p class="hero-eyebrow" data-i18n="home.doesLabel">WHAT PAKKAM DOES</p>
-        <h2 id="does-title" data-i18n="home.doesTitle">Answers you can check, not just believe</h2>
-      </div>
-      <div class="tile-grid">
-        <article class="tile"><span class="tile-icon" aria-hidden="true">🎙️</span><h3 data-i18n="home.step1Title">Ask in your own words</h3><p data-i18n="home.step1Body">Speak or type in Tamil, Tanglish, Hindi or English.</p></article>
-        <article class="tile"><span class="tile-icon" aria-hidden="true">📄</span><h3 data-i18n="home.step2Title">See the official page</h3><p data-i18n="home.step2Body">Every answer shows the government document and page it comes from.</p></article>
-        <article class="tile"><span class="tile-icon" aria-hidden="true">🛡️</span><h3 data-i18n="home.tile3Title">Stop the rumour</h3><p data-i18n="home.tile3Body">Paste a WhatsApp forward and see which claims are false, with scam warnings.</p></article>
-      </div>
-      <button class="text-link" data-nav="about" data-i18n="home.aboutLink">The story behind Pakkam →</button>
-    </section>
   </main>
 
   <!-- ========================================================================
@@ -174,11 +162,13 @@
       <!-- Left Voice Orb Control Card -->
       <aside class="glass-panel orb-dock">
         <div id="assistant-orb-assembly" class="orb-waveform-assembly">
+          <p class="thought-bubble" aria-hidden="true"></p>
           <div id="assistant-mic-orb" class="central-orb-container" title="Click to Speak">
           <img class="central-orb-img theme-bound-orb" src="./assets/images/dark-orb.webp" alt="Voice Assistant Orb" />
           </div>
         </div>
           <p id="voice-status-label" class="status-pill" data-i18n="assistant.tap">Tap Orb to Speak</p>
+        <p class="thought-line" data-orb="chat"></p>
         <p id="live-transcript-preview" class="live-transcript">
           <span data-i18n="assistant.languages">Supports Tamil, Hindi & English</span>
         </p>
@@ -220,7 +210,7 @@
     <div class="page-header">
       <div>
         <p class="hero-eyebrow" data-i18n="shield.eyebrow">RUMOUR SHIELD</p>
-        <h1 data-i18n="shield.title">Is this WhatsApp forward true?</h1>
+        <h1 class="shield-heading"><svg class="wa-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span data-i18n="shield.title">Is this WhatsApp forward true?</span></h1>
         <p class="page-intro" data-i18n="shield.intro">Paste the message. Pakkam checks every claim against the official government documents and points out scam signs.</p>
       </div>
     </div>
@@ -308,20 +298,43 @@
 
   <section id="page-about" class="page-section about-page">
     <header class="about-opening">
-      <p class="hero-eyebrow" data-i18n="about.eyebrow">THE STORY BEHIND PAKKAM</p>
-      <h1><span data-i18n="ab.title1">Pakkam means</span> <span class="grad" data-i18n="ab.title2">page.</span></h1>
-      <p class="about-lede" data-i18n="ab.lede">A voice assistant that answers questions about welfare schemes from the official government documents, and shows you the exact page.</p>
+      <p class="hero-eyebrow" data-i18n="st.eyebrow">THE STORY BEHIND PAKKAM</p>
+      <h1 data-i18n="st.title">It started with someone we love.</h1>
       <button id="about-listen" class="cta-button about-listen" type="button"><span data-i18n="about.listen">🔊 Hear Pakkam explain itself</span></button>
       <p id="about-listen-text" class="about-listen-text" hidden></p>
     </header>
-
-    <section class="about-block">
-      <h2 data-i18n="ab.whyTitle">Why we built it</h2>
-      <div class="about-two">
-        <p data-i18n="about.story">I love my grandparents very much. One day, my grandfather told me how hard it was to access loans, read government messages and find his way through complicated portals on a mobile phone. That conversation stayed with me.</p>
-        <p data-i18n="ab.problem">The real rules for schemes like Magalir Urimai Thogai or PM-KISAN are written in long Government Orders that few people read. So families rely on WhatsApp forwards, middlemen or chatbots that sound sure but can be wrong. For someone's ₹1,000 a month, a confident wrong answer is worse than no answer.</p>
+    <article class="story">
+      <p data-i18n="st.p1">We often think of technology as something that makes life easier. Faster payments, instant information, services at our fingertips.</p>
+      <p data-i18n="st.p2">But one day, I realised that not everyone experiences technology that way.</p>
+      <p data-i18n="st.p3">I love my grandparents. During one of our conversations, my grandfather spoke about something that had been troubling him. Accessing government services wasn’t easy. Understanding government messages was a struggle, and navigating mobile applications and government portals felt like an entirely different world.</p>
+      <p data-i18n="st.p4">The information existed. The services existed. But accessing them was another challenge altogether.</p>
+      <p data-i18n="st.p5">And that conversation stayed with me.</p>
+      <h2 class="story-q" data-i18n="st.h2">What if technology could speak their language?</h2>
+      <p data-i18n="st.p6">A friend and I talked it through, and it came down to a simple question:</p>
+      <blockquote class="story-quote" data-i18n="st.q1">Why should someone struggle to understand a government document when technology could simply explain it to them?</blockquote>
+      <p data-i18n="st.p7">What if an elderly person could ask a question in Tamil and receive an answer in Tamil, with the page of the official document shown right there?</p>
+      <p data-i18n="st.p8">What if accessing information didn’t require knowing how to navigate complicated websites or understand official language?</p>
+      <p data-i18n="st.p9">We didn’t want to build another portal that people had to learn how to use.</p>
+      <p class="story-strong" data-i18n="st.p10">We wanted to build something people could simply talk to.</p>
+      <p data-i18n="st.p11">That’s how Pakkam was born.</p>
+      <p data-i18n="st.p12">I began building an assistant that reads official scheme documents and answers questions in people’s own languages: Tamil, Hindi and English, with Tamil-English mixed typing too.</p>
+      <p data-i18n="st.p13">An assistant that doesn’t just give an answer, but shows where that answer came from.</p>
+      <p data-i18n="st.p14">And most importantly, one that knows when the documents don’t contain an answer, and says so rather than pretending to know.</p>
+      <p data-i18n="st.p15">We started with the schemes we could check against official documents. There is more to cover, and we say so openly.</p>
+      <h2 class="story-q" data-i18n="st.h3">Why the name Pakkam?</h2>
+      <p class="story-name">பக்கம் — Pakkam. <span data-i18n="st.p16">A page in Tamil.</span></p>
+      <p data-i18n="st.p17">The name comes from the simplest part of our original idea.</p>
+      <p data-i18n="st.p18">A government document is made of pages. Each page contains information that could affect someone’s life, but understanding it shouldn’t require specialist knowledge.</p>
+      <p class="story-strong" data-i18n="st.p19">We wanted to make every page easier to understand.</p>
+      <h2 class="story-q" data-i18n="st.h4">More than an AI assistant.</h2>
+      <p data-i18n="st.p20">Pakkam is about reducing the distance between people and the information they need: between a government scheme and the person who could benefit from it.</p>
+      <p class="story-strong" data-i18n="st.p21">Because technology should adapt to people, not the other way around.</p>
+      <div class="story-sign">
+        <p class="story-brand">Pakkam</p>
+        <p data-i18n="st.tag">Your language. Your schemes. Your access.</p>
+        <p class="story-page" data-i18n="st.tag2">One page at a time.</p>
       </div>
-    </section>
+    </article>
 
     <section class="about-block">
       <h2 data-i18n="ab.canTitle">What Pakkam can do</h2>
@@ -351,6 +364,7 @@
         <div class="stat"><b>98%</b><span data-i18n="ab.n2">of answers cite the correct page</span></div>
         <div class="stat"><b>39 / 40</b><span data-i18n="ab.n3">out-of-scope questions honestly refused</span></div>
       </div>
+      <p class="setting-help story-disclaimer" data-i18n="st.disclaimer">Pakkam is an early research prototype by a student, not affiliated with any government body. Answers are for information only. Check the official source before you act.</p>
       <p class="setting-help" data-i18n="ab.credit">Built for the Gnani.ai Great Indian AI Internship Challenge 2026, with Gnani Prisma and Timbre for voice. A student project, not a government service.</p>
     </section>
   </section>
