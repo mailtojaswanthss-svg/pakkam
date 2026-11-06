@@ -289,13 +289,27 @@
         <p class="page-intro" data-i18n="schemes.intro">Search available scheme information and review eligibility details.</p>
         <p id="schemes-summary" class="schemes-summary"></p>
       </div>
-      <div style="width: 340px;">
+      <div class="schemes-side">
+        <figure class="art-picture schemes-hero"><img src="./assets/art/schemes-hero.webp" width="1200" height="675" loading="lazy" decoding="async" alt="Illustration: a woman and an elderly man at a ration shop counter on a Tamil Nadu street." data-i18n-alt="alt.schemesHero" /></figure>
         <input type="search" id="scheme-search-input" class="input-pill" placeholder="Search schemes..." data-i18n-placeholder="schemes.search" />
       </div>
     </div>
 
-    <div id="scheme-filters" class="scheme-filters" role="group" aria-label="Filter schemes"></div>
-    <div id="schemes-grid" class="scheme-card-grid"></div>
+    <div class="schemes-body">
+      <div class="schemes-main">
+        <div id="scheme-filters" class="scheme-filters" role="group" aria-label="Filter schemes"></div>
+        <div id="scheme-banner" class="scheme-banner" aria-live="polite" hidden></div>
+        <div id="schemes-grid" class="scheme-card-grid"></div>
+      </div>
+      <aside class="schemes-guide" aria-labelledby="guide-title">
+        <h2 id="guide-title" data-i18n="guide.title">How to use this list</h2>
+        <ol>
+          <li><span class="guide-art" data-art="step-pick"></span><div><h3 data-i18n="guide.1">Pick a scheme</h3><p data-i18n="guide.1b">Use the tabs, or search by name.</p></div></li>
+          <li><span class="guide-art" data-art="step-read"></span><div><h3 data-i18n="guide.2">Read the key facts</h3><p data-i18n="guide.2b">The amount and who can apply, each with the page it comes from.</p></div></li>
+          <li><span class="guide-art" data-art="step-open"></span><div><h3 data-i18n="guide.3">Open the official page</h3><p data-i18n="guide.3b">Check it yourself in the government document.</p></div></li>
+        </ol>
+      </aside>
+    </div>
   </section>
 
 
@@ -352,6 +366,7 @@
   <section id="page-about" class="page-section about-page">
     <header class="about-hero">
       <p class="about-word" aria-hidden="true" lang="ta">பக்கம்</p>
+      <figure class="art-picture about-opening-pic"><img src="./assets/art/about-opening.webp" width="1000" height="750" loading="lazy" decoding="async" alt="Illustration: a grandfather and his grandchild looking at a phone together at home." data-i18n-alt="alt.aboutOpening" /></figure>
       <p class="hero-eyebrow" data-i18n="st.eyebrow">THE STORY BEHIND PAKKAM</p>
       <h1 data-i18n="st.title">It started with someone we love.</h1>
       <button id="about-listen" class="cta-button about-listen" type="button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg><span data-i18n="about.listen">Hear Pakkam explain itself</span><span class="listen-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
@@ -388,6 +403,7 @@
       <div class="story-rail" aria-hidden="true"><span class="story-rail-fill"></span></div>
       <section class="chapter">
         <p class="chapter-n reveal">01 · <span data-i18n="st.c1">The conversation</span></p>
+        <div class="chapter-art reveal" data-art="ch1"></div>
         <p class="reveal" data-i18n="st.p1">We often think of technology as something that makes life easier. Faster payments, instant information, services at our fingertips.</p>
         <p class="reveal" data-i18n="st.p2">But one day, I realised that not everyone experiences technology that way.</p>
         <p class="reveal" data-i18n="st.p3">I love my grandparents. During one of our conversations, my grandfather spoke about something that had been troubling him. Accessing government services wasn’t easy. Understanding government messages was a struggle, and navigating mobile applications and government portals felt like an entirely different world.</p>
@@ -396,6 +412,7 @@
       </section>
       <section class="chapter">
         <p class="chapter-n reveal">02 · <span data-i18n="st.c2">The question</span></p>
+        <div class="chapter-art reveal" data-art="ch2"></div>
         <h2 class="story-q reveal" data-i18n="st.h2">What if technology could speak their language?</h2>
         <p class="reveal" data-i18n="st.p6">A friend and I talked it through, and it came down to a simple question:</p>
         <blockquote class="story-quote reveal" data-i18n="st.q1">Why should someone struggle to understand a government document when technology could simply explain it to them?</blockquote>
@@ -404,6 +421,7 @@
       </section>
       <section class="chapter">
         <p class="chapter-n reveal">03 · <span data-i18n="st.c3">How Pakkam was born</span></p>
+        <div class="chapter-art reveal" data-art="ch3"></div>
         <p class="reveal" data-i18n="st.p9">We didn’t want to build another portal that people had to learn how to use.</p>
         <p class="story-big reveal" data-i18n="st.p10">We wanted to build something people could simply talk to.</p>
         <p class="reveal story-strong" data-i18n="st.p11">That’s how Pakkam was born.</p>
@@ -414,14 +432,9 @@
       </section>
       <section class="chapter chapter-name">
         <p class="chapter-n reveal">04 · <span data-i18n="st.c4">The name</span></p>
+        <div class="chapter-art reveal" data-art="ch4"></div>
         <h2 class="story-q reveal" data-i18n="st.h3">Why the name Pakkam?</h2>
         <div class="name-figure reveal">
-          <svg class="page-turn" viewBox="0 0 160 120" aria-hidden="true">
-            <path class="pt-back" d="M80 18 L146 10 L146 104 L80 112 Z"/>
-            <path class="pt-lines" d="M92 34 L134 29 M92 46 L134 41 M92 58 L134 53 M92 70 L122 66.5"/>
-            <path class="pt-leaf" d="M80 18 L14 10 L14 104 L80 112 Z"/>
-            <path class="pt-spine" d="M80 18 L80 112"/>
-          </svg>
           <p class="story-name"><span lang="ta">பக்கம்</span> — Pakkam. <span data-i18n="st.p16">A page in Tamil.</span></p>
         </div>
         <p class="reveal" data-i18n="st.p17">The name comes from the simplest part of our original idea.</p>
@@ -430,6 +443,7 @@
       </section>
       <section class="chapter">
         <p class="chapter-n reveal">05 · <span data-i18n="st.c5">What it is for</span></p>
+        <div class="chapter-art reveal" data-art="ch5"></div>
         <h2 class="story-q reveal" data-i18n="st.h4">More than an AI assistant.</h2>
         <p class="reveal" data-i18n="st.p20">Pakkam is about reducing the distance between people and the information they need: between a government scheme and the person who could benefit from it.</p>
         <p class="story-big reveal" data-i18n="st.p21">Because technology should adapt to people, not the other way around.</p>
