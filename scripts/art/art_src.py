@@ -267,8 +267,8 @@ SHIELD_STEPS = {
   <circle class="good pop" cx="22" cy="26" r="7"/><path class="tick pop" d="M18.5 26l2.3 2.3l4.4-4.4"/>
 </svg>''',
     'arrow-orb': '''<svg viewBox="0 0 90 60">
-  <path class="accent-line draw" d="M84 52C64 56 34 50 22 32C16 22 16 14 18 8"/>
-  <path class="accent-line draw-head" d="M10 16L18 7L26 15"/>
+  <path class="accent-line draw" pathLength="1" d="M84 52C64 56 34 50 22 32C16 22 16 14 18 8"/>
+  <path class="accent-line draw-head" pathLength="1" d="M10 16L18 7L26 15"/>
 </svg>''',
     'underline': '''<svg viewBox="0 0 300 16" preserveAspectRatio="none">
   <path class="ul-1 draw" d="M3 11C70 4 150 3 297 7"/>
