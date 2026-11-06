@@ -34,7 +34,7 @@ Tamil · Hindi · English · Tanglish &nbsp;|&nbsp; text or voice (Gnani Prisma 
 | | |
 |---|---|
 | **60-second demo, in order** | 1. Paste the "Rs.2,000 + OTP" rumour into *Check a forward* → 2. ask about the scheme in Tamil, by voice → 3. read the answer and its sources → 4. open the Government Order page, line highlighted → 5. ask something the documents do not cover → 6. Pakkam refuses honestly. |
-| **Demo videos (live site, narrated by Gnani Timbre)** | [90 s](docs/judge/pakkam-90s.mp4) · [60 s](docs/judge/pakkam-60s.mp4) · [full 2 min](docs/judge/pakkam-full.mp4), with English captions; post text in [LINKEDIN_POST.md](docs/judge/LINKEDIN_POST.md) |
+| **Demo videos (Lakshmi story, live site, narrated by Gnani Timbre)** | [90 s](docs/judge/pakkam-90s.mp4) · [60 s](docs/judge/pakkam-60s.mp4) · [full](docs/judge/pakkam-full.mp4), no subtitles; post text in [LINKEDIN_POST.md](docs/judge/LINKEDIN_POST.md) |
 | **Pitch deck (7 slides)** | [docs/judge/pakkam-pitch-deck.pdf](docs/judge/pakkam-pitch-deck.pdf) |
 | **How an answer is made** | [docs/judge/architecture.png](docs/judge/architecture.png) (made in FigJam) |
 | **How we tested** | [docs/review/LIVE_BENCHMARK.md](docs/review/LIVE_BENCHMARK.md): 194 questions, 98% cite the correct page, 39 of 40 out-of-scope refused, and the one miss explained |

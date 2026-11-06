@@ -98,13 +98,14 @@ def build_scenes() -> dict:
                                    ("main", M["l6_schemes"] + 0.8, M["l6_schemes_end"], 1),
                                    ("main", M["l6_lang"] + 0.6, M["l6_lang_end"], 1)], [("l6_bigger", 0.4)])
     s["end"] = scene("end", [("art4", 0, 4.0, 1), ("end", e0, e0 + 5.0, 1)], [("l7_end", 0.6)], tail=0.4)
+    s["end_short"] = scene("end_short", [("end", e0, e0 + 5.0, 1)], [("l7_end", 0.4)], tail=0.3)
     return s
 
 
 CUTS = {
     "full": ["day", "struggle", "intro", "ask", "refusal", "bigger", "end"],
     "90s": ["day", "struggle", "intro", "ask", "refusal_short", "bigger", "end"],
-    "60s": ["day", "intro", "ask", "refusal_short", "end"],
+    "60s": ["day", "intro", "ask", "refusal_short", "end_short"],
 }
 
 
