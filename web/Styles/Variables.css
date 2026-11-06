@@ -47,11 +47,12 @@
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg-canvas: #080B18;
+  --bg-canvas: #070A17;
   --bg-secondary: #10162A;
   --accent-2: #A855F7;
   --accent-cyan: #42DDEB;
-  --bg-atmosphere: linear-gradient(165deg, #0A1022 0%, #080B18 55%, #0D0A1F 100%);
+  --bg-atmosphere: radial-gradient(1100px 520px at 50% 18%, rgba(91, 76, 214, 0.16), transparent 70%), linear-gradient(165deg, #0A1024 0%, #070A17 55%, #0E0A22 100%);
+  --edge-gradient: linear-gradient(150deg, rgba(168, 85, 247, 0.55), rgba(255, 255, 255, 0.08) 40%, rgba(66, 221, 235, 0.4));
 
   /* Glass surfaces: brighter than the page so cards lift off it */
   --glass-bg: rgba(16, 22, 42, 0.78);

@@ -81,6 +81,7 @@ function applyLanguage(language) {
   });
   renderSchemes(activeSchemeCategory, document.getElementById('scheme-search-input')?.value || '');
   renderHistory();
+  labelPlayer();
 }
 
 const state = {
@@ -735,10 +736,81 @@ Object.assign(MESSAGES['hi-IN'], {
   'offline.none': 'लाइव सर्वर बंद है, इसलिए अभी इसका जवाब नहीं दे सकता। थोड़ी देर बाद कोशिश करें, या इनमें से कोई नमूना सवाल पूछें।',
 });
 
+// Round 7: stronger, honest copy (judge-ready), plus the Shield panel, story player and tabs.
+Object.assign(MESSAGES['en-IN'], {
+  'home.title1': 'Ask in your language.', 'home.title2': 'Get the answer with its proof.',
+  'home.subtitle': "Speak Tamil, Hindi or English. Pakkam reads the official scheme documents and opens the exact page. If the documents don't say it, Pakkam says so.",
+  'home.proof1': 'Tested on 194 real questions', 'home.proof2': '98% of answers cite the correct page', 'home.proof3': '39 of 40 out-of-scope questions honestly refused',
+  'home.proofLink': 'See the full test report',
+  'feature.01': 'Proof on every answer', 'feature.01body': 'The exact page of the official document, the line highlighted.',
+  'feature.02': 'Just speak', 'feature.02body': 'Tamil, Tanglish, Hindi or English. No typing needed.',
+  'feature.03': 'Stop the fake forward', 'feature.03body': 'Paste a WhatsApp message and see which claims are false.',
+  'home.ask': 'Ask Pakkam', 'home.shield': 'Check a WhatsApp forward',
+  'assistant.welcome': 'Vanakkam! Ask me about a welfare scheme, by voice or text. I answer only from official documents, and I show you the page.',
+  'schemes.eyebrow': 'OFFICIAL SOURCES', 'schemes.title': 'Every scheme, straight from the source',
+  'schemes.intro': 'Key facts checked against the printed official page, with the page one tap away.',
+  'settings.title': 'Make Pakkam yours', 'settings.intro': 'Language, voice, text size and calm mode, set the way you like. Saved only on this device.',
+  'ab.ctaTitle': 'Have a question about a scheme? Ask Pakkam, and see the proof.',
+  'home.documentTitle': 'Pakkam: ask in your language, get the answer with its proof',
+  'tab.does': 'What Pakkam does', 'tab.how': 'How it answers', 'tab.tested': 'Tested, honestly', 'tab.team': 'Made by', 'footer.tag': 'Your language. Your schemes. Your access. One page at a time.',
+  'hc.title': 'How Pakkam checks a forward',
+  'hc.1t': 'Paste the forward', 'hc.1': 'Copy the WhatsApp message and paste it here.',
+  'hc.2t': 'Every claim is checked', 'hc.2': 'Each claim is matched against the official order, page by page.',
+  'hc.3t': 'Verdict and warning signs', 'hc.3': 'True, false or not in the documents, plus any scam tricks.',
+  'hc.good': 'True', 'hc.bad': 'False', 'hc.neutral': 'Not in the documents', 'hc.warn': 'Warning signs', 'hc.note': 'Warning signs alone never prove a message false. The verdict comes only from the official documents.', 'hc.result': 'This check', 'pill.lang': 'Your language', 'pill.rights': 'Your rights', 'pill.access': 'Your access',
+  'pl.prev': 'Previous chapter', 'pl.next': 'Next chapter', 'pl.play': 'Play the story', 'pl.pause': 'Pause the story', 'pl.chapter': 'Chapter {n} of {total}',
+});
+Object.assign(MESSAGES['ta-IN'], {
+  'home.title1': 'உங்கள் மொழியில் கேளுங்கள்.', 'home.title2': 'ஆதாரத்துடன் பதில் பெறுங்கள்.',
+  'home.subtitle': 'தமிழ், இந்தி அல்லது ஆங்கிலத்தில் பேசுங்கள். பக்கம் அதிகாரப்பூர்வத் திட்ட ஆவணங்களைப் படித்து, சரியான பக்கத்தைத் திறந்து காட்டும். ஆவணங்களில் இல்லையென்றால், அதை நேர்மையாகச் சொல்லும்.',
+  'home.proof1': '194 உண்மையான கேள்விகளில் சோதிக்கப்பட்டது', 'home.proof2': '98% பதில்கள் சரியான பக்கத்தைக் காட்டுகின்றன', 'home.proof3': 'வரம்புக்கு வெளியே உள்ள 40-ல் 39 கேள்விகளுக்கு நேர்மையான மறுப்பு',
+  'home.proofLink': 'முழு சோதனை அறிக்கையைப் பாருங்கள்',
+  'feature.01': 'ஒவ்வொரு பதிலுக்கும் ஆதாரம்', 'feature.01body': 'அதிகாரப்பூர்வ ஆவணத்தின் சரியான பக்கம், அந்த வரி குறிக்கப்பட்டு.',
+  'feature.02': 'பேசினால் போதும்', 'feature.02body': 'தமிழ், Tanglish, இந்தி அல்லது ஆங்கிலம். தட்டச்சு தேவையில்லை.',
+  'feature.03': 'போலிச் செய்தியை நிறுத்துங்கள்', 'feature.03body': 'வாட்ஸ்அப் செய்தியை ஒட்டி, எந்தக் கூற்றுகள் தவறு என்று பாருங்கள்.',
+  'home.ask': 'பக்கத்திடம் கேளுங்கள்', 'home.shield': 'வாட்ஸ்அப் செய்தியைச் சரிபாருங்கள்',
+  'assistant.welcome': 'வணக்கம்! ஒரு நலத்திட்டத்தைப் பற்றி குரலிலோ தட்டச்சிலோ கேளுங்கள். அதிகாரப்பூர்வ ஆவணங்களிலிருந்து மட்டுமே பதில் சொல்லி, அந்தப் பக்கத்தையும் காட்டுவேன்.',
+  'schemes.eyebrow': 'அதிகாரப்பூர்வ ஆதாரங்கள்', 'schemes.title': 'ஒவ்வொரு திட்டமும், மூல ஆவணத்திலிருந்தே',
+  'schemes.intro': 'அச்சிட்ட அதிகாரப்பூர்வப் பக்கத்துடன் சரிபார்த்த முக்கியத் தகவல்கள்; பக்கம் ஒரு தொடுதலில்.',
+  'settings.title': 'பக்கத்தை உங்களுக்கு ஏற்றபடி அமையுங்கள்', 'settings.intro': 'மொழி, குரல், எழுத்து அளவு, அமைதி முறை, உங்கள் விருப்பப்படி. இந்தச் சாதனத்தில் மட்டுமே சேமிக்கப்படும்.',
+  'ab.ctaTitle': 'ஒரு திட்டத்தைப் பற்றிக் கேள்வியா? பக்கத்திடம் கேட்டு, ஆதாரத்தைப் பாருங்கள்.',
+  'home.documentTitle': 'பக்கம்: உங்கள் மொழியில் கேளுங்கள், ஆதாரத்துடன் பதில் பெறுங்கள்',
+  'tab.does': 'பக்கம் என்ன செய்யும்', 'tab.how': 'எப்படிப் பதில் சொல்கிறது', 'tab.tested': 'நேர்மையான சோதனை', 'tab.team': 'உருவாக்கியவர்கள்', 'footer.tag': 'உங்கள் மொழி. உங்கள் திட்டங்கள். உங்கள் அணுகல். ஒரு நேரத்தில் ஒரு பக்கம்.',
+  'hc.title': 'பக்கம் ஒரு செய்தியை எப்படிச் சரிபார்க்கிறது',
+  'hc.1t': 'செய்தியை ஒட்டுங்கள்', 'hc.1': 'வாட்ஸ்அப் செய்தியை நகலெடுத்து இங்கே ஒட்டுங்கள்.',
+  'hc.2t': 'ஒவ்வொரு கூற்றும் சரிபார்க்கப்படும்', 'hc.2': 'ஒவ்வொரு கூற்றும் அதிகாரப்பூர்வ ஆணையுடன் பக்கம் பக்கமாக ஒப்பிடப்படும்.',
+  'hc.3t': 'முடிவும் எச்சரிக்கை அறிகுறிகளும்', 'hc.3': 'உண்மை, தவறு, அல்லது ஆவணங்களில் இல்லை; கூடவே மோசடி அறிகுறிகள்.',
+  'hc.good': 'உண்மை', 'hc.bad': 'தவறு', 'hc.neutral': 'ஆவணங்களில் இல்லை', 'hc.warn': 'எச்சரிக்கை அறிகுறிகள்', 'hc.note': 'எச்சரிக்கை அறிகுறிகள் மட்டுமே ஒரு செய்தியைத் தவறு என்று நிரூபிக்காது. முடிவு அதிகாரப்பூர்வ ஆவணங்களிலிருந்து மட்டுமே.', 'hc.result': 'இந்தச் சரிபார்ப்பு', 'pill.lang': 'உங்கள் மொழி', 'pill.rights': 'உங்கள் உரிமைகள்', 'pill.access': 'உங்கள் அணுகல்',
+  'pl.prev': 'முந்தைய அத்தியாயம்', 'pl.next': 'அடுத்த அத்தியாயம்', 'pl.play': 'கதையை இயக்கு', 'pl.pause': 'கதையை இடைநிறுத்து', 'pl.chapter': 'அத்தியாயம் {n} / {total}',
+});
+Object.assign(MESSAGES['hi-IN'], {
+  'home.title1': 'अपनी भाषा में पूछें।', 'home.title2': 'सबूत के साथ जवाब पाएँ।',
+  'home.subtitle': 'तमिल, हिंदी या अंग्रेज़ी में बोलें। पक्कम आधिकारिक योजना दस्तावेज़ पढ़कर सही पन्ना खोलकर दिखाता है। अगर दस्तावेज़ों में बात नहीं है, तो पक्कम साफ़ बता देता है।',
+  'home.proof1': '194 असली सवालों पर परखा गया', 'home.proof2': '98% जवाब सही पन्ना दिखाते हैं', 'home.proof3': 'दायरे से बाहर के 40 में से 39 सवालों पर ईमानदारी से मना किया',
+  'home.proofLink': 'पूरी परीक्षण रिपोर्ट देखें',
+  'feature.01': 'हर जवाब के साथ सबूत', 'feature.01body': 'आधिकारिक दस्तावेज़ का सही पन्ना, पंक्ति हाइलाइट की हुई।',
+  'feature.02': 'बस बोलिए', 'feature.02body': 'तमिल, Tanglish, हिंदी या अंग्रेज़ी। टाइप करने की ज़रूरत नहीं।',
+  'feature.03': 'झूठे फ़ॉरवर्ड को रोकें', 'feature.03body': 'व्हाट्सऐप संदेश चिपकाएँ और देखें कौन-से दावे गलत हैं।',
+  'home.ask': 'पक्कम से पूछें', 'home.shield': 'व्हाट्सऐप फ़ॉरवर्ड जाँचें',
+  'assistant.welcome': 'नमस्ते! किसी कल्याण योजना के बारे में बोलकर या लिखकर पूछें। मैं सिर्फ़ आधिकारिक दस्तावेज़ों से जवाब देता हूँ, और पन्ना भी दिखाता हूँ।',
+  'schemes.eyebrow': 'आधिकारिक स्रोत', 'schemes.title': 'हर योजना, सीधे स्रोत से',
+  'schemes.intro': 'छपे आधिकारिक पन्ने से जाँची गई मुख्य जानकारी, पन्ना बस एक टैप दूर।',
+  'settings.title': 'पक्कम को अपने हिसाब से बनाएँ', 'settings.intro': 'भाषा, आवाज़, अक्षर का आकार और शांत मोड, जैसा आपको पसंद हो। सिर्फ़ इसी डिवाइस पर सहेजा जाता है।',
+  'ab.ctaTitle': 'किसी योजना के बारे में सवाल है? पक्कम से पूछें, और सबूत देखें।',
+  'home.documentTitle': 'पक्कम: अपनी भाषा में पूछें, सबूत के साथ जवाब पाएँ',
+  'tab.does': 'पक्कम क्या करता है', 'tab.how': 'जवाब कैसे देता है', 'tab.tested': 'ईमानदार परीक्षण', 'tab.team': 'बनाने वाले', 'footer.tag': 'आपकी भाषा। आपकी योजनाएँ। आपकी पहुँच। एक समय में एक पन्ना।',
+  'hc.title': 'पक्कम फ़ॉरवर्ड को कैसे जाँचता है',
+  'hc.1t': 'फ़ॉरवर्ड चिपकाएँ', 'hc.1': 'व्हाट्सऐप संदेश कॉपी करके यहाँ चिपकाएँ।',
+  'hc.2t': 'हर दावे की जाँच', 'hc.2': 'हर दावे को आधिकारिक आदेश से, पन्ने-पन्ने मिलाया जाता है।',
+  'hc.3t': 'फ़ैसला और चेतावनी के संकेत', 'hc.3': 'सच, गलत, या दस्तावेज़ों में नहीं; साथ में धोखाधड़ी के संकेत।',
+  'hc.good': 'सच', 'hc.bad': 'गलत', 'hc.neutral': 'दस्तावेज़ों में नहीं', 'hc.warn': 'चेतावनी के संकेत', 'hc.note': 'सिर्फ़ चेतावनी के संकेत किसी संदेश को गलत साबित नहीं करते। फ़ैसला सिर्फ़ आधिकारिक दस्तावेज़ों से आता है।', 'hc.result': 'यह जाँच', 'pill.lang': 'आपकी भाषा', 'pill.rights': 'आपके अधिकार', 'pill.access': 'आपकी पहुँच',
+  'pl.prev': 'पिछला अध्याय', 'pl.next': 'अगला अध्याय', 'pl.play': 'कहानी चलाएँ', 'pl.pause': 'कहानी रोकें', 'pl.chapter': 'अध्याय {n} / {total}',
+});
+
 // Rumour Shield and appeal texts (from the earlier chat page, web-backup/assets/chat.js).
 const SHIELD = {
   'en-IN': {
-    eyebrow: 'RUMOUR SHIELD', title: 'Is this WhatsApp forward true?', intro: 'Paste the message. Pakkam checks every claim against the official government documents and points out scam signs.',
+    eyebrow: 'RUMOUR SHIELD', title: 'Is this WhatsApp forward true?', intro: 'Paste it. Pakkam checks every claim against the official orders and points out the scam tricks.',
     placeholder: 'Paste the WhatsApp message here', example: 'Try an example', check: 'Check it',
     checking: 'Checking each claim against the government orders…', failed: 'Pakkam could not check this now. Try again in a minute.',
     overall: { wrong: '❌ This forward is wrong', partly_wrong: '⚠️ Partly wrong', looks_right: '✅ Matches the official documents',
@@ -755,7 +827,7 @@ const SHIELD = {
     correction: 'Fact-check by Pakkam (from the official government documents):',
   },
   'ta-IN': {
-    eyebrow: 'வதந்தி கவசம்', title: 'இந்த வாட்ஸ்அப் செய்தி உண்மையா?', intro: 'செய்தியை ஒட்டுங்கள். ஒவ்வொரு கூற்றையும் அதிகாரப்பூர்வ அரசு ஆவணங்களுடன் சரிபார்த்து, மோசடி அறிகுறிகளையும் பக்கம் காட்டும்.',
+    eyebrow: 'வதந்தி கவசம்', title: 'இந்த வாட்ஸ்அப் செய்தி உண்மையா?', intro: 'ஒட்டினால் போதும். ஒவ்வொரு கூற்றையும் அதிகாரப்பூர்வ ஆணைகளுடன் பக்கம் சரிபார்த்து, மோசடி தந்திரங்களைச் சுட்டிக்காட்டும்.',
     placeholder: 'வாட்ஸ்அப் செய்தியை இங்கே ஒட்டுங்கள்', example: 'ஒரு எடுத்துக்காட்டு', check: 'சரிபார்',
     checking: 'ஒவ்வொரு கூற்றும் அரசாணையுடன் சரிபார்க்கப்படுகிறது…', failed: 'இப்போது சரிபார்க்க முடியவில்லை. ஒரு நிமிடம் கழித்து முயற்சிக்கவும்.',
     overall: { wrong: '❌ இந்தச் செய்தி தவறு', partly_wrong: '⚠️ ஓரளவு தவறு', looks_right: '✅ அதிகாரப்பூர்வ ஆவணங்களுடன் பொருந்துகிறது',
@@ -772,7 +844,7 @@ const SHIELD = {
     correction: 'பக்கம் சரிபார்ப்பு (அதிகாரப்பூர்வ அரசு ஆவணங்களிலிருந்து):',
   },
   'hi-IN': {
-    eyebrow: 'अफ़वाह कवच', title: 'क्या यह व्हाट्सऐप संदेश सच है?', intro: 'संदेश चिपकाएँ। पक्कम हर दावे को आधिकारिक सरकारी दस्तावेज़ों से जाँचता है और धोखाधड़ी के संकेत बताता है।',
+    eyebrow: 'अफ़वाह कवच', title: 'क्या यह व्हाट्सऐप संदेश सच है?', intro: 'बस चिपकाएँ। पक्कम हर दावे को आधिकारिक आदेशों से जाँचता है और धोखाधड़ी की चालें पकड़ता है।',
     placeholder: 'व्हाट्सऐप संदेश यहाँ चिपकाएँ', example: 'एक उदाहरण', check: 'जाँचें',
     checking: 'हर दावे को सरकारी आदेश से जाँचा जा रहा है…', failed: 'अभी जाँच नहीं हो सकी। एक मिनट बाद कोशिश करें।',
     overall: { wrong: '❌ यह संदेश गलत है', partly_wrong: '⚠️ आंशिक रूप से गलत', looks_right: '✅ आधिकारिक दस्तावेज़ों से मेल खाता है',
@@ -1832,6 +1904,27 @@ function echoMessage(message, signs = []) {
   return box;
 }
 
+/** "How it checks" panel: play its three drawings (again), and light up the outcomes a check gave. */
+function playHowChecks() {
+  const panel = document.querySelector('.how-checks');
+  if (!panel) return;
+  panel.classList.remove('play');
+  void panel.offsetWidth;  // restart the CSS animations
+  panel.classList.add('play');
+}
+
+function markOutcomes(found) {
+  const panel = document.querySelector('.how-checks');
+  if (!panel) return;
+  const hit = new Set(found);
+  panel.classList.toggle('has-result', hit.size > 0);
+  panel.querySelectorAll('[data-outcome]').forEach((li) => li.classList.toggle('is-hit', hit.has(li.dataset.outcome)));
+  panel.querySelectorAll('.art-hc-verdict .v').forEach((g) => {
+    const outcome = ['good', 'bad', 'neutral', 'warn'].find((o) => g.classList.contains(`v-${o}`));
+    g.classList.toggle('hit', hit.has(outcome));
+  });
+}
+
 async function checkForward(message) {
   const w = shieldWords();
   const status = document.getElementById('shield-status');
@@ -1840,6 +1933,7 @@ async function checkForward(message) {
   result.replaceChildren();
   status.textContent = w.checking;
   button.disabled = true;
+  markOutcomes([]);
   try {
     const data = await (await postJson('/check-forward', { message: message.slice(0, 1500) }, 180000)).json();
     status.textContent = '';
@@ -1887,6 +1981,10 @@ async function checkForward(message) {
       result.append(box);
     }
     if (data.scam_signs.includes('official_link')) result.append(el('p', 'proof-note', w.signs.official_link));
+    const found = data.claims.map((claim) => ({ supported: 'good', contradicted: 'bad' }[claim.verdict] || 'neutral'));
+    if (!data.claims.length) found.push(tone);
+    if (signs.length) found.push('warn');
+    markOutcomes(found);
     correction.push('— Pakkam (பக்கம்)');
     result.append(waChip(w.share, () => window.open(`https://wa.me/?text=${encodeURIComponent(correction.join('\n'))}`, '_blank', 'noopener'), 'cta-button shield-share'));
   } catch (error) {
@@ -2433,18 +2531,140 @@ function countUp(node, instant = false) {
   requestAnimationFrame(step);
 }
 
-// The reading line beside the story fills as the story scrolls past.
-let railFrame = null;
-function updateStoryRail() {
-  railFrame = null;
-  const story = document.querySelector('#page-about.active .story');
-  const fill = story?.querySelector('.story-rail-fill');
-  if (!story || !fill) return;
-  const box = story.getBoundingClientRect();
-  const read = Math.min(1, Math.max(0, (window.innerHeight * 0.6 - box.top) / box.height));
-  fill.style.transform = `scaleY(${read.toFixed(3)})`;
+// About: the story as a five-chapter player (one scene and its words at a time), and the rest
+// of the page in four tabs. Auto-play is off by default and pauses on hover, focus or touch.
+const SLIDE_MS = 12000;
+const player = { index: 0, playing: false, hold: false, elapsed: 0, last: 0, tick: null };
+const playerRoot = () => document.querySelector('.story-player');
+
+function labelPlayer() {
+  const root = playerRoot();
+  if (!root) return;
+  const slides = root.querySelectorAll('.slide');
+  slides.forEach((slide, i) => slide.setAttribute('aria-label', fill(t('pl.chapter'), { n: i + 1, total: slides.length })));
+  const play = root.querySelector('.player-play');
+  play.setAttribute('aria-label', t(player.playing ? 'pl.pause' : 'pl.play'));
+  play.setAttribute('aria-pressed', String(player.playing));
+  play.classList.toggle('is-playing', player.playing);
 }
-window.addEventListener('scroll', () => { if (!railFrame) railFrame = requestAnimationFrame(updateStoryRail); }, { passive: true });
+
+function showProgress() {
+  const root = playerRoot();
+  if (!root) return;
+  const n = root.querySelectorAll('.slide').length;
+  const part = player.playing ? Math.min(1, player.elapsed / SLIDE_MS) : 1;
+  root.style.setProperty('--player-progress', ((player.index + part) / n).toFixed(4));
+}
+
+function goToSlide(index, announce = true) {
+  const root = playerRoot();
+  if (!root) return;
+  const slides = [...root.querySelectorAll('.slide')];
+  const n = slides.length;
+  player.index = (index + n) % n;
+  player.elapsed = 0;
+  slides.forEach((slide, i) => {
+    const on = i === player.index;
+    slide.hidden = false;
+    slide.inert = !on;
+    slide.setAttribute('aria-hidden', String(!on));
+    slide.classList.toggle('is-active', on);
+    const art = slide.querySelector('.chapter-art');
+    if (!art) return;
+    art.classList.remove('in');
+    if (on) { void art.offsetWidth; art.classList.add('in'); }  // replay the scene
+  });
+  root.querySelectorAll('.player-dot').forEach((dot, i) => {
+    dot.classList.toggle('is-active', i === player.index);
+    dot.setAttribute('aria-current', i === player.index ? 'step' : 'false');
+  });
+  root.querySelector('.player-count').textContent = `${player.index + 1} / ${n}`;
+  if (announce) {
+    const name = slides[player.index].querySelector('.chapter-n span')?.textContent || '';
+    root.querySelector('.player-live').textContent = `${fill(t('pl.chapter'), { n: player.index + 1, total: n })}: ${name}`;
+  }
+  showProgress();
+}
+
+function setPlaying(on) {
+  player.playing = Boolean(on) && !reduceMotion();
+  player.elapsed = 0;
+  player.last = performance.now();
+  clearInterval(player.tick);
+  player.tick = null;
+  if (player.playing) {
+    player.tick = setInterval(() => {
+      const now = performance.now();
+      if (!player.hold && !document.hidden) player.elapsed += now - player.last;
+      player.last = now;
+      if (player.elapsed >= SLIDE_MS) {
+        if (player.index === playerRoot().querySelectorAll('.slide').length - 1) { setPlaying(false); return; }
+        goToSlide(player.index + 1);
+      }
+      showProgress();
+    }, 200);
+  }
+  labelPlayer();
+  showProgress();
+}
+
+function setupStoryPlayer() {
+  const root = playerRoot();
+  if (!root) return;
+  root.querySelector('.player-prev').addEventListener('click', () => goToSlide(player.index - 1));
+  root.querySelector('.player-next').addEventListener('click', () => goToSlide(player.index + 1));
+  root.querySelector('.player-play').addEventListener('click', () => setPlaying(!player.playing));
+  root.querySelectorAll('.player-dot').forEach((dot) => dot.addEventListener('click', () => goToSlide(Number(dot.dataset.go))));
+  root.addEventListener('keydown', (event) => {
+    if (event.target.closest('input, textarea, [role="tab"]')) return;
+    if (event.key === 'ArrowRight') { event.preventDefault(); goToSlide(player.index + 1); }
+    if (event.key === 'ArrowLeft') { event.preventDefault(); goToSlide(player.index - 1); }
+  });
+  // Hovering, focusing or touching the story pauses auto-play, so nobody loses their place.
+  root.addEventListener('mouseenter', () => { player.hold = true; });
+  root.addEventListener('mouseleave', () => { player.hold = false; });
+  root.addEventListener('focusin', (event) => { if (!event.target.closest('.player-play')) player.hold = true; });
+  root.addEventListener('focusout', () => { player.hold = false; });
+  const stage = root.querySelector('.player-stage');
+  let startX = null;
+  let startY = 0;
+  stage.addEventListener('touchstart', (event) => { startX = event.touches[0].clientX; startY = event.touches[0].clientY; player.hold = true; }, { passive: true });
+  stage.addEventListener('touchend', (event) => {
+    player.hold = false;
+    if (startX === null) return;
+    const dx = event.changedTouches[0].clientX - startX;
+    const dy = event.changedTouches[0].clientY - startY;
+    startX = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) goToSlide(player.index + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+  if (reduceMotion()) root.querySelector('.player-play').hidden = true;
+  document.addEventListener('pakkam:page', () => setPlaying(false));
+  goToSlide(0, false);
+  labelPlayer();
+}
+
+function setupAboutTabs() {
+  const tabs = [...document.querySelectorAll('.about-tablist [role="tab"]')];
+  const select = (tab, focus = false) => {
+    tabs.forEach((other) => {
+      const on = other === tab;
+      other.setAttribute('aria-selected', String(on));
+      other.tabIndex = on ? 0 : -1;
+      document.getElementById(other.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) tab.focus();
+    watchReveals();
+  };
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(tab));
+    tab.addEventListener('keydown', (event) => {
+      const to = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[event.key];
+      if (to === undefined) return;
+      event.preventDefault();
+      select(tabs[(to + tabs.length) % tabs.length], true);
+    });
+  });
+}
 
 /** A skipped or timed-out transition is harmless: the page still changes. Keep its promises quiet. */
 function quietTransition(transition) {
@@ -2458,7 +2678,6 @@ function showPage(pageKey) {
     navigateTo(pageKey);
     window.scrollTo({ top: 0, behavior: 'instant' });
     watchReveals();
-    updateStoryRail();
   };
   if (document.startViewTransition && !reduceMotion()) quietTransition(document.startViewTransition(go));
   else go();
@@ -2554,6 +2773,8 @@ function refreshLanguageParts() {
   renderVoiceChips();
   renderHomeExamples();
   renderCredits();
+  setupStoryPlayer();
+  setupAboutTabs();
   applyShieldText();
   applyPrefs();
   loadSchemeFacts().then(() => renderSchemes(null, document.getElementById('scheme-search-input')?.value || ''));
@@ -2639,7 +2860,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const message = document.getElementById('shield-input').value.trim();
     if (message.length >= 10) checkForward(message);
   });
-  document.getElementById('shield-example')?.addEventListener('click', () => { document.getElementById('shield-input').value = SHIELD_EXAMPLE; });
+  document.getElementById('shield-example')?.addEventListener('click', () => { document.getElementById('shield-input').value = SHIELD_EXAMPLE; playHowChecks(); });
+  const howChecks = document.querySelector('.how-checks');
+  if (howChecks && 'IntersectionObserver' in window) {
+    new IntersectionObserver((entries, obs) => { if (entries[0].isIntersecting) { playHowChecks(); obs.disconnect(); } }, { threshold: 0.2 }).observe(howChecks);
+  } else howChecks?.classList.add('play');
   document.getElementById('shield-paste')?.addEventListener('click', async () => {
     try { const text = await navigator.clipboard.readText(); if (text) document.getElementById('shield-input').value = text.slice(0, 1500); } catch (_) { document.getElementById('shield-input').focus(); }
   });
