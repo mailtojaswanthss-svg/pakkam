@@ -58,6 +58,18 @@ const CURSOR = () => {
   const page = await context.newPage();
   await page.addInitScript(() => { try { localStorage.setItem('pakkam_theme', 'dark'); localStorage.setItem('pakkam_lang', 'en-IN'); } catch (_) {} });
   await page.addInitScript(CURSOR);
+  // Serve the front end from this checkout (main), so the video shows the latest copy even before
+  // the laptop redeploys Vercel. Every API call still goes to the live backend.
+  const WEB = path.join(__dirname, '..', '..', 'web');
+  await page.route(/\/(index\.html)?(\?.*)?$|\/js\/[a-z]+\.js|\/Styles\/[A-Za-z]+\.css/, async (route) => {
+    const u = new URL(route.request().url());
+    if (u.origin !== new URL(SITE).origin) return route.continue();
+    const rel = u.pathname === '/' ? 'index.html' : u.pathname.slice(1);
+    const file = path.join(WEB, rel);
+    if (!fs.existsSync(file)) return route.continue();
+    const type = rel.endsWith('.js') ? 'text/javascript' : rel.endsWith('.css') ? 'text/css' : 'text/html';
+    return route.fulfill({ status: 200, contentType: `${type}; charset=utf-8`, body: fs.readFileSync(file) });
+  });
   let mx = W / 2;
   let my = H / 2;
   const moveTo = async (locator, dx = 0.5, dy = 0.5) => {
