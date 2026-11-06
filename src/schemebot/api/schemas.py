@@ -447,11 +447,16 @@ class ForwardResponse(BaseModel):
     overall: Literal["looks_right", "partly_wrong", "wrong", "not_in_documents", "no_claims"]
     claims: list[ForwardClaimOut]
     scam_signs: list[
-        Literal["unofficial_link", "official_link", "otp", "payment", "personal_data", "urgency"]
+        Literal[
+            "unofficial_link", "official_link", "insecure_link", "otp", "payment",
+            "personal_data", "urgency",
+        ]
     ] = Field(
         default_factory=list,
-        description="Warning signs found by fixed rules: a non-government link, a request for "
-        "an OTP, money or ID numbers, or 'today only' pressure.",
+        description="Warning signs found by fixed rules: a link that is not an approved "
+        "official host (data/official_domains.json), an official host over plain http, a "
+        "request for an OTP, money or ID numbers, or 'today only' pressure. Signs never "
+        "change the overall verdict, which comes only from the document-checked claims.",
     )
 
 

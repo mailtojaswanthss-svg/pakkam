@@ -45,3 +45,16 @@ def test_the_recorder_loads_before_the_app() -> None:
 def test_small_talk_module_is_imported() -> None:
     app = (ROOT / "web/js/app.js").read_text(encoding="utf-8")
     assert "from './talk.js'" in app
+
+
+def test_the_page_and_the_backend_recognise_the_same_official_hosts() -> None:
+    """Rumour Shield marks links in the browser; it must agree with forward.py's allowlist."""
+    import json
+
+    app = (ROOT / "web/js/app.js").read_text(encoding="utf-8")
+    data = json.loads((ROOT / "data/official_domains.json").read_text(encoding="utf-8"))
+    exact = re.search(r"const OFFICIAL_EXACT = \[([^\]]*)\]", app)
+    suffix = re.search(r"const OFFICIAL_SUFFIX = \[([^\]]*)\]", app)
+    assert exact and suffix
+    assert set(re.findall(r"'([^']+)'", exact.group(1))) == {e["host"] for e in data["exact"]}
+    assert set(re.findall(r"'([^']+)'", suffix.group(1))) == {e["domain"] for e in data["suffix"]}
