@@ -2154,3 +2154,26 @@ html[data-theme="dark"] .ht-underline .ul-1 { filter: drop-shadow(0 0 4px rgba(6
 .about-panel { min-height: 260px; }
 @media (min-width: 961px) { .callout-02, .callout-03 { min-height: 112px; } }
 .hero-title { width: fit-content; max-width: 100%; margin-inline: auto; }
+
+/* ---------- Schemes: tabs and search on one line, list and guide on one line ---------- */
+.schemes-search .input-pill { width: 100%; }
+.schemes-search { margin-top: 14px; }
+@media (min-width: 1200px) {
+  .schemes-body { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: auto auto 1fr; column-gap: 28px; row-gap: 0; }
+  .schemes-main { display: contents; }
+  .schemes-body #scheme-filters { grid-column: 1; grid-row: 1; margin-top: 0; }
+  .schemes-search { grid-column: 2; grid-row: 1; align-self: center; margin: 0; }
+  .schemes-body #scheme-banner { grid-column: 1; grid-row: 2; }
+  .schemes-body #schemes-grid { grid-column: 1; grid-row: 3; margin-top: 18px; }
+  .schemes-body #scheme-banner:not([hidden]) + #schemes-grid { margin-top: 14px; }
+  .schemes-guide { grid-column: 2; grid-row: 2 / 4; align-self: start; margin-top: 18px; }
+  .schemes-side .schemes-search { display: none; }
+}
+.filter-tab { display: inline-flex; align-items: center; gap: 2px; line-height: 1.2; }
+.tab-art { vertical-align: middle; margin-right: 6px; }
+/* every row the same shape: the facts column has one width and at most two lines */
+@media (min-width: 761px) {
+  .scheme-row { grid-template-columns: minmax(0, 1fr) 300px 14px; min-height: 96px; }
+  .row-side { max-width: none; width: 300px; }
+  .row-amount { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+}
