@@ -1,0 +1,54 @@
+/* Pakkam type scale: the text styles in the Figma file "Pakkam Illustrations" (Foundations
+   page). Headings use Plus Jakarta Sans for English, Anek Tamil for Tamil and Anek Devanagari
+   for Hindi; body text stays in Inter / Noto Sans for reading. Edit the styles in Figma first. */
+:root {
+  --font-heading: 'Plus Jakarta Sans', 'Anek Tamil', 'Anek Devanagari', 'Inter', system-ui, sans-serif;
+  --type-display: 800 clamp(2rem, 3.4vw, 3.1rem) / 1.1 var(--font-heading);
+  --type-h1: 800 clamp(1.9rem, 3vw, 2.75rem) / 1.12 var(--font-heading);
+  --type-h2: 700 clamp(1.3rem, 2vw, 1.6rem) / 1.25 var(--font-heading);
+  --type-h3: 700 1.05rem / 1.3 var(--font-heading);
+  --type-eyebrow: 800 0.78rem / 1.2 var(--font-heading);
+  --type-button: 800 0.92rem / 1.2 var(--font-heading);
+  --type-body-l: 500 1.06rem / 1.6 var(--font-primary);
+  --type-body: 400 1rem / 1.6 var(--font-primary);
+  --type-caption: 500 0.82rem / 1.45 var(--font-primary);
+  --tracking-heading: -0.025em;
+  --tracking-eyebrow: 0.16em;
+}
+:root:lang(ta) { --font-heading: 'Anek Tamil', 'Noto Sans Tamil', 'Plus Jakarta Sans', system-ui, sans-serif; --tracking-heading: 0; }
+:root:lang(hi) { --font-heading: 'Anek Devanagari', 'Noto Sans Devanagari', 'Plus Jakarta Sans', system-ui, sans-serif; --tracking-heading: 0; }
+
+h1, h2, h3, .hero-title, .feature-title, .slogan-line, .story-q, .story-big, .row-name, .scheme-banner h2,
+.about-hero h1, .page-header h1, .cap-card h3, .flow-step h3, .num b, .hc-step h3, .how-checks h2, .schemes-guide h2 {
+  font-family: var(--font-heading);
+  letter-spacing: var(--tracking-heading);
+}
+.page-header h1 { font: var(--type-h1); letter-spacing: var(--tracking-heading); }
+.hero-eyebrow, .chapter-n, .slide-text .chapter-n { font-family: var(--font-heading); letter-spacing: var(--tracking-eyebrow); }
+.cta-button, .about-tab, .player-dot { font-family: var(--font-heading); }
+.cta-button { letter-spacing: 0.02em; }
+/* Tamil and Hindi headings need more room above and below the line */
+:lang(ta) :is(h1, h2, h3, .hero-title, .slogan-line), :lang(hi) :is(h1, h2, h3, .hero-title, .slogan-line) { line-height: 1.35; }
+:lang(ta) .page-header h1, :lang(hi) .page-header h1 { line-height: 1.3; }
+
+/* ---------- Under the orb ---------- */
+.orb-slogan { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 0 0 14px; }
+.slogan-line { margin: 0; font-size: clamp(1.15rem, 1.6vw, 1.4rem); font-weight: 800; color: var(--text-primary); }
+.slogan-grad { background: linear-gradient(100deg, var(--accent-2), var(--accent-cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.slogan-example { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; max-width: 100%; padding: 4px 14px 4px 5px; border-radius: var(--radius-pill); border: 1px dashed color-mix(in srgb, var(--accent-cyan) 55%, transparent); background: color-mix(in srgb, var(--surface-1) 70%, transparent); color: var(--text-secondary); font: inherit; font-size: 0.9rem; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+.slogan-example:hover, .slogan-example:focus-visible { border-style: solid; border-color: var(--accent-cyan); color: var(--text-primary); }
+.ex-tag { flex: none; padding: 3px 9px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--accent-cyan) 16%, transparent); color: var(--text-highlight); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em; }
+.ex-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ex-text::before { content: '“'; } .ex-text::after { content: '”'; }
+.ex-caret { width: 2px; height: 1.05em; background: var(--accent-cyan); animation: caretBlink 1s steps(1) infinite; }
+@keyframes caretBlink { 50% { opacity: 0; } }
+body.intro .orb-slogan { animation: rise 0.7s var(--ease-out) 0.15s both; }
+/* while Pakkam listens or answers, the example steps aside */
+body:has(#hero-orb-assembly[data-state]:not([data-state="idle"])) .slogan-example { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .ex-caret { animation: none; display: none; } }
+html.calm .ex-caret, html.easy .ex-caret { display: none; }
+@media (min-width: 961px) and (max-height: 820px) {
+  #hero-orb-assembly .central-orb-container { width: 190px; height: 190px; }
+  .hero-pills { display: none; }
+  .orb-slogan { margin-bottom: 10px; gap: 4px; }
+}

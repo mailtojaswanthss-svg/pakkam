@@ -738,6 +738,7 @@ Object.assign(MESSAGES['hi-IN'], {
 
 // Round 7: stronger, honest copy (judge-ready), plus the Shield panel, story player and tabs.
 Object.assign(MESSAGES['en-IN'], {
+  'slogan.a': 'Tap.', 'slogan.b': 'Ask.', 'slogan.c': 'See the proof.', 'slogan.try': 'Try asking', 'slogan.ask': 'Ask this question',
   'schemes.docCount1': 'official document', 'schemes.noAmount': 'Details on the official page',
   'home.title1': 'Ask in your language.', 'home.title2': 'Get the answer with its proof.',
   'home.subtitle': "Speak Tamil, Hindi or English. Pakkam reads the official scheme documents and opens the exact page. If the documents don't say it, Pakkam says so.",
@@ -762,6 +763,7 @@ Object.assign(MESSAGES['en-IN'], {
   'pl.prev': 'Previous chapter', 'pl.next': 'Next chapter', 'pl.play': 'Play the story', 'pl.pause': 'Pause the story', 'pl.chapter': 'Chapter {n} of {total}',
 });
 Object.assign(MESSAGES['ta-IN'], {
+  'slogan.a': 'தொடுங்கள்.', 'slogan.b': 'கேளுங்கள்.', 'slogan.c': 'ஆதாரத்தைப் பாருங்கள்.', 'slogan.try': 'இப்படிக் கேளுங்கள்', 'slogan.ask': 'இந்தக் கேள்வியைக் கேளுங்கள்',
   'schemes.docCount1': 'அதிகாரப்பூர்வ ஆவணம்', 'schemes.noAmount': 'விவரங்கள் அதிகாரப்பூர்வப் பக்கத்தில்',
   'home.title1': 'உங்கள் மொழியில் கேளுங்கள்.', 'home.title2': 'ஆதாரத்துடன் பதில் பெறுங்கள்.',
   'home.subtitle': 'தமிழ், இந்தி அல்லது ஆங்கிலத்தில் பேசுங்கள். பக்கம் அதிகாரப்பூர்வத் திட்ட ஆவணங்களைப் படித்து, சரியான பக்கத்தைத் திறந்து காட்டும். ஆவணங்களில் இல்லையென்றால், அதை நேர்மையாகச் சொல்லும்.',
@@ -786,6 +788,7 @@ Object.assign(MESSAGES['ta-IN'], {
   'pl.prev': 'முந்தைய அத்தியாயம்', 'pl.next': 'அடுத்த அத்தியாயம்', 'pl.play': 'கதையை இயக்கு', 'pl.pause': 'கதையை இடைநிறுத்து', 'pl.chapter': 'அத்தியாயம் {n} / {total}',
 });
 Object.assign(MESSAGES['hi-IN'], {
+  'slogan.a': 'छुएँ।', 'slogan.b': 'पूछें।', 'slogan.c': 'सबूत देखें।', 'slogan.try': 'ऐसे पूछें', 'slogan.ask': 'यह सवाल पूछें',
   'schemes.docCount1': 'आधिकारिक दस्तावेज़', 'schemes.noAmount': 'विवरण आधिकारिक पन्ने पर',
   'home.title1': 'अपनी भाषा में पूछें।', 'home.title2': 'सबूत के साथ जवाब पाएँ।',
   'home.subtitle': 'तमिल, हिंदी या अंग्रेज़ी में बोलें। पक्कम आधिकारिक योजना दस्तावेज़ पढ़कर सही पन्ना खोलकर दिखाता है। अगर दस्तावेज़ों में बात नहीं है, तो पक्कम साफ़ बता देता है।',
@@ -2296,6 +2299,49 @@ function openSchemeDrawer(item) {
   close.focus();
 }
 
+// Under the orb: "Tap. Ask. See the proof." and a real example question that types itself out,
+// one language at a time. Tapping it asks it. Still (one example) for reduced motion and easy mode.
+const SLOGAN_EXAMPLES = [
+  { tag: 'தமிழ்', q: 'மகளிர் உரிமைத் தொகை எவ்வளவு?' },
+  { tag: 'Tanglish', q: 'PM Kisan la varushathuku evlo?' },
+  { tag: 'हिंदी', q: 'अटल पेंशन किसे मिलती है?' },
+  { tag: 'English', q: 'Who gets free breakfast at school?' },
+];
+const slogan = { index: 0, chars: 0, timer: null, hold: false };
+
+function showSloganExample(full) {
+  const button = document.getElementById('slogan-example');
+  if (!button) return;
+  const item = SLOGAN_EXAMPLES[slogan.index];
+  button.querySelector('.ex-tag').textContent = item.tag;
+  const shown = full ? item.q : [...item.q].slice(0, slogan.chars).join('');
+  button.querySelector('.ex-text').textContent = shown;
+  button.setAttribute('aria-label', `${t('slogan.ask')}: ${item.q}`);
+  button.setAttribute('lang', { 'தமிழ்': 'ta', 'हिंदी': 'hi' }[item.tag] || 'en');
+}
+
+function runSlogan() {
+  clearTimeout(slogan.timer);
+  const still = reduceMotion() || document.documentElement.classList.contains('easy');
+  if (still) { showSloganExample(true); return; }
+  const tick = () => {
+    const total = [...SLOGAN_EXAMPLES[slogan.index].q].length;
+    if (slogan.hold || document.hidden) { slogan.timer = setTimeout(tick, 400); return; }
+    if (slogan.chars < total) { slogan.chars += 1; showSloganExample(false); slogan.timer = setTimeout(tick, 55); return; }
+    slogan.timer = setTimeout(() => { slogan.index = (slogan.index + 1) % SLOGAN_EXAMPLES.length; slogan.chars = 0; tick(); }, 2600);
+  };
+  tick();
+}
+
+function setupSlogan() {
+  const button = document.getElementById('slogan-example');
+  if (!button) return;
+  button.addEventListener('click', () => submitChatQuery(SLOGAN_EXAMPLES[slogan.index].q));
+  ['mouseenter', 'focus'].forEach((type) => button.addEventListener(type, () => { slogan.hold = true; slogan.chars = 999; showSloganExample(true); }));
+  ['mouseleave', 'blur'].forEach((type) => button.addEventListener(type, () => { slogan.hold = false; }));
+  runSlogan();
+}
+
 function renderHomeExamples() {
   const box = document.getElementById('home-examples');
   if (!box) return;
@@ -2776,6 +2822,7 @@ function refreshLanguageParts() {
   renderVoiceChips();
   renderHomeExamples();
   renderCredits();
+  setupSlogan();
   setupStoryPlayer();
   setupAboutTabs();
   applyShieldText();

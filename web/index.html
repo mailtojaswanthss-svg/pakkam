@@ -22,9 +22,10 @@
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Anek+Tamil:wght@600;700&family=Anek+Devanagari:wght@600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" />
   <link rel="preload" as="image" href="./assets/images/dark-orb.webp" />
   <link rel="stylesheet" href="./Styles/global.css" />
+  <link rel="stylesheet" href="./Styles/type.css" />
 </head>
 <body>
   <p id="orb-live" class="sr-only" aria-live="polite" aria-atomic="true"></p>
@@ -164,6 +165,10 @@
 
       <!-- Hero Copy & CTA -->
       <div class="hero-copy">
+        <div class="orb-slogan">
+          <p class="slogan-line"><span data-i18n="slogan.a">Tap.</span> <span data-i18n="slogan.b">Ask.</span> <span class="slogan-grad" data-i18n="slogan.c">See the proof.</span></p>
+          <button type="button" class="slogan-example" id="slogan-example"><span class="ex-tag" aria-hidden="true"></span><span class="ex-text"></span><span class="ex-caret" aria-hidden="true"></span></button>
+        </div>
         <ul class="hero-pills" role="list">
           <li class="hero-pill"><span class="pill-art" data-art="pill-lang"></span><span data-i18n="pill.lang">Your language</span></li>
           <li class="hero-pill"><span class="pill-art" data-art="pill-rights"></span><span data-i18n="pill.rights">Your rights</span></li>
