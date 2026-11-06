@@ -110,6 +110,7 @@ function setOrbState(name) {
     assembly.classList.toggle('error', name === 'error');
     assembly.setAttribute('data-state', name);
   });
+  document.body.dataset.orb = name;
 }
 
 function stopWaveformMeter() {
@@ -485,6 +486,117 @@ Object.assign(MESSAGES['hi-IN'], {
   'schemes.documents': 'आधिकारिक दस्तावेज़', 'schemes.questions': 'पक्कम से पूछें',
 });
 
+// Round 4: the orb's thought line and bubble, and the story on the About page.
+Object.assign(MESSAGES['en-IN'], {
+  'th.try': 'Try:', 'th.listen': 'Listening…', 'th.writing': 'Writing down what you said…',
+  'th.search': 'Searching the official documents…', 'th.found': 'Found in {doc}, page {page}…',
+  'th.check': 'Checking the numbers on the page…', 'th.speak': 'Speaking…', 'th.you': 'You',
+  'home.shield': 'Check a WhatsApp forward',
+  "st.eyebrow": "THE STORY BEHIND PAKKAM",
+  "st.title": "It started with someone we love.",
+  "st.p1": "We often think of technology as something that makes life easier. Faster payments, instant information, services at our fingertips.",
+  "st.p2": "But one day, I realised that not everyone experiences technology that way.",
+  "st.p3": "I love my grandparents. During one of our conversations, my grandfather spoke about something that had been troubling him. Accessing government services wasn’t easy. Understanding government messages was a struggle, and navigating mobile applications and government portals felt like an entirely different world.",
+  "st.p4": "The information existed. The services existed. But accessing them was another challenge altogether.",
+  "st.p5": "And that conversation stayed with me.",
+  "st.h2": "What if technology could speak their language?",
+  "st.p6": "A friend and I talked it through, and it came down to a simple question:",
+  "st.q1": "Why should someone struggle to understand a government document when technology could simply explain it to them?",
+  "st.p7": "What if an elderly person could ask a question in Tamil and receive an answer in Tamil, with the page of the official document shown right there?",
+  "st.p8": "What if accessing information didn’t require knowing how to navigate complicated websites or understand official language?",
+  "st.p9": "We didn’t want to build another portal that people had to learn how to use.",
+  "st.p10": "We wanted to build something people could simply talk to.",
+  "st.p11": "That’s how Pakkam was born.",
+  "st.p12": "I began building an assistant that reads official scheme documents and answers questions in people’s own languages: Tamil, Hindi and English, with Tamil-English mixed typing too.",
+  "st.p13": "An assistant that doesn’t just give an answer, but shows where that answer came from.",
+  "st.p14": "And most importantly, one that knows when the documents don’t contain an answer, and says so rather than pretending to know.",
+  "st.p15": "We started with the schemes we could check against official documents. There is more to cover, and we say so openly.",
+  "st.h3": "Why the name Pakkam?",
+  "st.p16": "A page in Tamil.",
+  "st.p17": "The name comes from the simplest part of our original idea.",
+  "st.p18": "A government document is made of pages. Each page contains information that could affect someone’s life, but understanding it shouldn’t require specialist knowledge.",
+  "st.p19": "We wanted to make every page easier to understand.",
+  "st.h4": "More than an AI assistant.",
+  "st.p20": "Pakkam is about reducing the distance between people and the information they need: between a government scheme and the person who could benefit from it.",
+  "st.p21": "Because technology should adapt to people, not the other way around.",
+  "st.tag": "Your language. Your schemes. Your access.",
+  "st.tag2": "One page at a time.",
+  "st.disclaimer": "Pakkam is an early research prototype by a student, not affiliated with any government body. Answers are for information only. Check the official source before you act.",
+});
+Object.assign(MESSAGES['ta-IN'], {
+  'th.try': 'கேட்டுப் பாருங்கள்:', 'th.listen': 'கேட்கிறேன்…', 'th.writing': 'நீங்கள் சொன்னதை எழுதுகிறேன்…',
+  'th.search': 'அதிகாரப்பூர்வ ஆவணங்களில் தேடுகிறேன்…', 'th.found': '{doc}, பக்கம் {page}-ல் கிடைத்தது…',
+  'th.check': 'பக்கத்தில் உள்ள எண்களைச் சரிபார்க்கிறேன்…', 'th.speak': 'பேசுகிறேன்…', 'th.you': 'நீங்கள்',
+  'home.shield': 'வாட்ஸ்அப் செய்தியைச் சரிபாருங்கள்',
+  'st.eyebrow': 'பக்கத்தின் பின்னால் உள்ள கதை',
+  'st.title': 'இது நாங்கள் நேசிக்கும் ஒருவரிடமிருந்து தொடங்கியது.',
+  'st.p1': 'தொழில்நுட்பம் வாழ்க்கையை எளிதாக்குகிறது என்றுதான் நாம் அடிக்கடி நினைக்கிறோம். விரைவான பணப் பரிமாற்றம், உடனடித் தகவல், விரல் நுனியில் சேவைகள்.',
+  'st.p2': 'ஆனால் ஒருநாள், எல்லோரும் தொழில்நுட்பத்தை அப்படி அனுபவிப்பதில்லை என்று எனக்குப் புரிந்தது.',
+  'st.p3': 'நான் என் தாத்தா பாட்டியை நேசிக்கிறேன். ஒருமுறை பேசிக்கொண்டிருந்தபோது, என் தாத்தா தன்னை வருத்திக்கொண்டிருந்த ஒரு விஷயத்தைப் பற்றிச் சொன்னார். அரசுச் சேவைகளை அணுகுவது எளிதாக இல்லை. அரசுச் செய்திகளைப் புரிந்துகொள்வது கடினமாக இருந்தது; மொபைல் செயலிகளும் அரசு இணையதளங்களும் முற்றிலும் வேறு உலகமாகத் தோன்றின.',
+  'st.p4': 'தகவல் இருந்தது. சேவைகள் இருந்தன. ஆனால் அவற்றை அணுகுவது முற்றிலும் வேறு சவாலாக இருந்தது.',
+  'st.p5': 'அந்த உரையாடல் என் மனதிலேயே தங்கிவிட்டது.',
+  'st.h2': 'தொழில்நுட்பம் அவர்களின் மொழியில் பேசினால் என்ன?',
+  'st.p6': 'நானும் என் நண்பரும் இதைப் பற்றிப் பேசினோம்; அது ஒரு எளிய கேள்வியில் வந்து நின்றது:',
+  'st.q1': 'தொழில்நுட்பமே எளிதாக விளக்கிவிட முடியும் போது, ஒருவர் ஏன் அரசு ஆவணத்தைப் புரிந்துகொள்ளச் சிரமப்பட வேண்டும்?',
+  'st.p7': 'ஒரு முதியவர் தமிழில் கேள்வி கேட்டு, தமிழிலேயே பதில் பெற்று, அதிகாரப்பூர்வ ஆவணத்தின் பக்கத்தையும் அங்கேயே பார்க்க முடிந்தால் என்ன?',
+  'st.p8': 'தகவலை அணுகச் சிக்கலான இணையதளங்களைக் கையாளவோ அதிகாரப்பூர்வ மொழியைப் புரிந்துகொள்ளவோ தேவையில்லை என்றால் என்ன?',
+  'st.p9': 'மக்கள் கற்றுக்கொள்ள வேண்டிய இன்னொரு இணையதளத்தை உருவாக்க நாங்கள் விரும்பவில்லை.',
+  'st.p10': 'மக்கள் எளிதாகப் பேசக்கூடிய ஒன்றை உருவாக்க விரும்பினோம்.',
+  'st.p11': 'இப்படித்தான் பக்கம் பிறந்தது.',
+  'st.p12': 'அதிகாரப்பூர்வத் திட்ட ஆவணங்களைப் படித்து, மக்களின் சொந்த மொழியில் பதில் சொல்லும் ஒரு உதவியாளரை உருவாக்கத் தொடங்கினேன்: தமிழ், இந்தி, ஆங்கிலம், தமிழ்-ஆங்கிலக் கலப்பு எழுத்தும் கூட.',
+  'st.p13': 'பதிலை மட்டும் சொல்லாமல், அந்தப் பதில் எங்கிருந்து வந்தது என்றும் காட்டும் உதவியாளர்.',
+  'st.p14': 'எல்லாவற்றுக்கும் மேலாக, ஆவணங்களில் பதில் இல்லாதபோது அதை உணர்ந்து, தெரிந்ததுபோல் நடிக்காமல் நேர்மையாகச் சொல்லும் ஒன்று.',
+  'st.p15': 'அதிகாரப்பூர்வ ஆவணங்களுடன் சரிபார்க்க முடிந்த திட்டங்களுடன் தொடங்கினோம். இன்னும் நிறைய சேர்க்க வேண்டியுள்ளது; அதை வெளிப்படையாகச் சொல்கிறோம்.',
+  'st.h3': 'ஏன் பக்கம் என்று பெயர்?',
+  'st.p16': 'தமிழில் ஒரு பக்கம்.',
+  'st.p17': 'இந்தப் பெயர் எங்கள் தொடக்க யோசனையின் மிக எளிய பகுதியிலிருந்து வருகிறது.',
+  'st.p18': 'ஒரு அரசு ஆவணம் பக்கங்களால் ஆனது. ஒவ்வொரு பக்கத்திலும் ஒருவரின் வாழ்க்கையைப் பாதிக்கக்கூடிய தகவல் இருக்கிறது; ஆனால் அதைப் புரிந்துகொள்ள நிபுணத்துவம் தேவைப்படக் கூடாது.',
+  'st.p19': 'ஒவ்வொரு பக்கத்தையும் எளிதாகப் புரியும்படி செய்ய விரும்பினோம்.',
+  'st.h4': 'ஒரு AI உதவியாளரை விட மேலானது.',
+  'st.p20': 'மக்களுக்கும் அவர்களுக்குத் தேவையான தகவலுக்கும் இடையிலான தூரத்தைக் குறைப்பதே பக்கம்: ஒரு அரசுத் திட்டத்திற்கும் அதனால் பயன்பெறக்கூடிய நபருக்கும் இடையிலான தூரம்.',
+  'st.p21': 'ஏனென்றால் தொழில்நுட்பம்தான் மக்களுக்கு ஏற்ப மாற வேண்டும்; மக்கள் தொழில்நுட்பத்துக்கு ஏற்ப அல்ல.',
+  'st.tag': 'உங்கள் மொழி. உங்கள் திட்டங்கள். உங்கள் அணுகல்.',
+  'st.tag2': 'ஒரு நேரத்தில் ஒரு பக்கம்.',
+  'st.disclaimer': 'பக்கம் ஒரு மாணவர் உருவாக்கிய தொடக்க நிலை ஆய்வு முன்மாதிரி; எந்த அரசு அமைப்புடனும் தொடர்பில்லை. பதில்கள் தகவலுக்கு மட்டுமே. செயல்படும் முன் அதிகாரப்பூர்வ மூலத்தைச் சரிபாருங்கள்.',
+});
+Object.assign(MESSAGES['hi-IN'], {
+  'th.try': 'पूछकर देखें:', 'th.listen': 'सुन रहा हूँ…', 'th.writing': 'आपने जो कहा, लिख रहा हूँ…',
+  'th.search': 'आधिकारिक दस्तावेज़ों में खोज रहा हूँ…', 'th.found': '{doc}, पन्ना {page} में मिला…',
+  'th.check': 'पन्ने पर दी गई रकम जाँच रहा हूँ…', 'th.speak': 'बोल रहा हूँ…', 'th.you': 'आप',
+  'home.shield': 'व्हाट्सऐप फ़ॉरवर्ड जाँचें',
+  'st.eyebrow': 'पक्कम के पीछे की कहानी',
+  'st.title': 'यह किसी ऐसे व्यक्ति से शुरू हुआ जिसे हम प्यार करते हैं।',
+  'st.p1': 'हम अक्सर सोचते हैं कि तकनीक ज़िंदगी आसान बनाती है। तेज़ भुगतान, तुरंत जानकारी, उँगलियों पर सेवाएँ।',
+  'st.p2': 'लेकिन एक दिन मुझे एहसास हुआ कि हर कोई तकनीक को इस तरह महसूस नहीं करता।',
+  'st.p3': 'मुझे अपने दादा-दादी से बहुत प्यार है। एक बातचीत में मेरे दादाजी ने एक ऐसी बात बताई जो उन्हें परेशान कर रही थी। सरकारी सेवाओं तक पहुँचना आसान नहीं था। सरकारी संदेश समझना मुश्किल था, और मोबाइल ऐप व सरकारी पोर्टल चलाना बिल्कुल अलग दुनिया जैसा लगता था।',
+  'st.p4': 'जानकारी मौजूद थी। सेवाएँ मौजूद थीं। लेकिन उन तक पहुँचना एक अलग ही चुनौती थी।',
+  'st.p5': 'और वह बातचीत मेरे मन में रह गई।',
+  'st.h2': 'क्या हो अगर तकनीक उनकी भाषा बोल सके?',
+  'st.p6': 'मैंने और मेरे एक दोस्त ने इस पर बात की, और बात एक सीधे सवाल पर आकर रुकी:',
+  'st.q1': 'जब तकनीक सरकारी दस्तावेज़ को आसानी से समझा सकती है, तो किसी को उसे समझने में संघर्ष क्यों करना पड़े?',
+  'st.p7': 'क्या हो अगर कोई बुज़ुर्ग तमिल में सवाल पूछे और तमिल में ही जवाब पाए, और आधिकारिक दस्तावेज़ का पन्ना वहीं दिखे?',
+  'st.p8': 'क्या हो अगर जानकारी पाने के लिए मुश्किल वेबसाइटें चलाना या सरकारी भाषा समझना ज़रूरी न हो?',
+  'st.p9': 'हम एक और पोर्टल नहीं बनाना चाहते थे जिसे लोगों को चलाना सीखना पड़े।',
+  'st.p10': 'हम कुछ ऐसा बनाना चाहते थे जिससे लोग बस बात कर सकें।',
+  'st.p11': 'इसी तरह पक्कम का जन्म हुआ।',
+  'st.p12': 'मैंने एक ऐसा सहायक बनाना शुरू किया जो आधिकारिक योजना दस्तावेज़ पढ़ता है और लोगों की अपनी भाषा में जवाब देता है: तमिल, हिंदी और अंग्रेज़ी, साथ में तमिल-अंग्रेज़ी मिली टाइपिंग भी।',
+  'st.p13': 'एक सहायक जो सिर्फ़ जवाब नहीं देता, बल्कि यह भी दिखाता है कि जवाब कहाँ से आया।',
+  'st.p14': 'और सबसे ज़रूरी, जो जानता है कि कब दस्तावेज़ों में जवाब नहीं है, और जानने का दिखावा करने के बजाय यह साफ़ कहता है।',
+  'st.p15': 'हमने उन योजनाओं से शुरुआत की जिन्हें हम आधिकारिक दस्तावेज़ों से जाँच सकते थे। अभी बहुत कुछ जोड़ना बाक़ी है, और यह हम खुलकर कहते हैं।',
+  'st.h3': 'नाम पक्कम क्यों?',
+  'st.p16': 'तमिल में एक पन्ना।',
+  'st.p17': 'यह नाम हमारे मूल विचार के सबसे सरल हिस्से से आया है।',
+  'st.p18': 'सरकारी दस्तावेज़ पन्नों से बना होता है। हर पन्ने पर ऐसी जानकारी होती है जो किसी की ज़िंदगी बदल सकती है, लेकिन उसे समझने के लिए विशेषज्ञ ज्ञान की ज़रूरत नहीं होनी चाहिए।',
+  'st.p19': 'हम हर पन्ने को समझने में आसान बनाना चाहते थे।',
+  'st.h4': 'एक AI सहायक से कहीं ज़्यादा।',
+  'st.p20': 'पक्कम का मक़सद लोगों और उनकी ज़रूरत की जानकारी के बीच की दूरी कम करना है: एक सरकारी योजना और उससे फ़ायदा पा सकने वाले व्यक्ति के बीच की दूरी।',
+  'st.p21': 'क्योंकि तकनीक को लोगों के हिसाब से ढलना चाहिए, लोगों को तकनीक के हिसाब से नहीं।',
+  'st.tag': 'आपकी भाषा। आपकी योजनाएँ। आपकी पहुँच।',
+  'st.tag2': 'एक समय में एक पन्ना।',
+  'st.disclaimer': 'पक्कम एक छात्र का शुरुआती रिसर्च प्रोटोटाइप है, किसी सरकारी संस्था से जुड़ा नहीं। जवाब केवल जानकारी के लिए हैं। कोई कदम उठाने से पहले आधिकारिक स्रोत देखें।',
+});
+
+
 // Rumour Shield and appeal texts (from the earlier chat page, web-backup/assets/chat.js).
 const SHIELD = {
   'en-IN': {
@@ -642,12 +754,49 @@ function linkChip(label, href) {
    4. ORB STATE, STATUS AND SPEECH
    ========================================================================== */
 let orbErrorTimer = null;
+const ORB_STEP = { listening: 'th.listen', processing: 'th.search', speaking: 'th.speak' };
 function orb(name) {
   setOrbState(name);
+  if (ORB_STEP[name]) thought(t(ORB_STEP[name]));
+  else thought(null);
   clearTimeout(orbErrorTimer);
   // An error ring never stays on: back to idle after 3 s.
   if (name === 'error') orbErrorTimer = setTimeout(() => { setOrbState('idle'); }, 3000);
 }
+
+/* The orb's thought: a bubble beside it and a line under it while Pakkam works; when idle the
+   line types example questions, one letter at a time (a still example in calm mode). */
+let typer = { timer: null, q: 0, pos: 0, step: null };
+function thought(text) {
+  typer.step = text;
+  document.querySelectorAll('.thought-bubble').forEach((node) => {
+    if (text) node.textContent = text;
+    node.classList.toggle('show', Boolean(text));
+  });
+  document.querySelectorAll('.thought-line').forEach((node) => { node.classList.toggle('busy', Boolean(text)); });
+  if (text) { clearTimeout(typer.timer); typer.timer = null; setThoughtLine(text); }
+  else startTyping();
+}
+function setThoughtLine(text) { document.querySelectorAll('.thought-line').forEach((node) => { node.textContent = text; }); }
+function startTyping() {
+  clearTimeout(typer.timer);
+  typer.timer = null;
+  const list = EXAMPLES[state.language] || EXAMPLES['en-IN'];
+  const calm = document.documentElement.classList.contains('calm') || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (calm || document.hidden) { setThoughtLine(`${t('th.try')} ${list[0]}`); return; }
+  setThoughtLine(`${t('th.try')} `);
+  typer.pos = 0;
+  const tick = () => {
+    if (typer.step) return;
+    const q = list[typer.q % list.length];
+    typer.pos += 1;
+    setThoughtLine(`${t('th.try')} ${q.slice(0, typer.pos)}`);
+    if (typer.pos >= q.length) { typer.pos = 0; typer.q += 1; typer.timer = setTimeout(tick, 2600); }
+    else typer.timer = setTimeout(tick, 55);
+  };
+  typer.timer = setTimeout(tick, 400);
+}
+document.addEventListener('visibilitychange', () => { if (!typer.step) startTyping(); });
 
 function setStatus(text) {
   ['voice-status-label', 'home-status'].forEach((id) => {
@@ -1063,7 +1212,7 @@ function renderAnswer(bubble, data, question) {
   if (data.sentences && data.sentences.length) {
     const actions = [];
     if (data.scheme) actions.push(chip(t('answer.docs'), () => showChecklist(data.scheme)));
-    actions.push(chip(t('answer.share'), () => shareAnswer(question, text, data.citations?.[0])));
+    actions.push(waChip(t('answer.share'), () => shareAnswer(question, text, data.citations?.[0])));
     actions.push(chip(t('answer.print'), () => printAnswer(question, data)));
     if (data.scheme && schemeNames().includes(data.scheme)) actions.push(chip(t('answer.appeal'), () => openAppeal(data.scheme)));
     bubble.append(chipRow(actions));
@@ -1175,7 +1324,10 @@ async function submitChatQuery(queryText, options = {}) {
   }
   postJson('/ask/sources', body, 15000).then((res) => res.json()).then((found) => {
     const top = found.passages?.[0];
-    if (top && bubble.classList.contains('thinking')) progress.textContent = fill(t('progress.found'), { doc: top.document, page: top.page });
+    if (top && bubble.classList.contains('thinking')) {
+      progress.textContent = fill(t('progress.found'), { doc: top.document, page: top.page });
+      thought(fill(t('th.found'), { doc: top.document, page: top.page }));
+    }
   }).catch(() => {});
   const slow = setTimeout(() => { if (bubble.classList.contains('thinking')) bubble.append(el('p', 'answer-progress', t('progress.slow'))); }, SLOW_MS);
 
@@ -1186,6 +1338,7 @@ async function submitChatQuery(queryText, options = {}) {
     replyLoading = false;
     clearTimeout(slow);
     bubble.classList.remove('thinking');
+    if (!data.refused) thought(t('th.check'));
     const text = renderAnswer(bubble, data, question);
     scrollChat();
     convo.last = { question, data, text };
@@ -1277,6 +1430,7 @@ async function finishRecording(heardSpeech) {
     return;
   }
   orb('processing');
+  thought(t('th.writing'));
   setStatus(t('status.processing'));
   let wav;
   try { wav = await current.stop(); } catch (_) { wav = null; }
@@ -1336,7 +1490,7 @@ function applyShieldText() {
   const w = shieldWords();
   const set = (selector, text, attr) => { const node = document.querySelector(selector); if (node) { if (attr) node.setAttribute(attr, text); else node.textContent = text; } };
   set('#page-shield .hero-eyebrow', w.eyebrow);
-  set('#page-shield h1', w.title);
+  set('#page-shield h1 [data-i18n="shield.title"]', w.title);
   set('#page-shield .page-intro', w.intro);
   set('#shield-input', w.placeholder, 'placeholder');
   set('#shield-example', w.example);
@@ -1375,7 +1529,7 @@ async function checkForward(message) {
     }
     if (data.scam_signs.includes('official_link')) result.append(el('p', 'proof-note', w.signs.official_link));
     correction.push('— Pakkam (பக்கம்)');
-    result.append(chip(w.share, () => window.open(`https://wa.me/?text=${encodeURIComponent(correction.join('\n'))}`, '_blank', 'noopener'), 'cta-button shield-share'));
+    result.append(waChip(w.share, () => window.open(`https://wa.me/?text=${encodeURIComponent(correction.join('\n'))}`, '_blank', 'noopener'), 'cta-button shield-share'));
   } catch (error) {
     status.textContent = error instanceof ApiError && error.status === 422 && error.message ? error.message : w.failed;
   } finally {
@@ -1457,7 +1611,7 @@ function openAppeal(schemeName) {
       note.rows = 14;
       note.value = words.template({ scheme: scheme.value, reason: why, situation: situation.value.trim(), document: cite.document, page: cite.page_start, rule });
       const copy = chip(words.copy, async () => { try { await navigator.clipboard.writeText(note.value); copy.textContent = words.copied; } catch (_) { note.select(); } });
-      const share = chip(t('answer.share'), () => window.open(`https://wa.me/?text=${encodeURIComponent(note.value)}`, '_blank', 'noopener'));
+      const share = waChip(t('answer.share'), () => window.open(`https://wa.me/?text=${encodeURIComponent(note.value)}`, '_blank', 'noopener'));
       const actions = el('div', 'citation-pills');
       actions.append(copy, share);
       result.append(note, actions, el('p', 'proof-note', words.disclaimer));
@@ -1517,29 +1671,12 @@ const SCHEME_META = [
   [/maruthuva|insurance|cmchis|health/i, 'health', 'tn'], [/hostel|backward|bc|mbc|scholar|graduate|student/i, 'education', 'tn'],
 ];
 const CATEGORY_ORDER = ['women', 'farmers', 'pension', 'gas', 'children', 'health', 'education', 'welfare'];
-// Thin line icons (24px grid), drawn with currentColor.
-const CATEGORY_ICON = {
-  women: '<circle cx="12" cy="7" r="3.5"/><path d="M5 21c.8-4 3.6-6.5 7-6.5s6.2 2.5 7 6.5"/>',
-  farmers: '<path d="M12 21V10"/><path d="M12 13c-4 0-6-2.5-6-6 3.5 0 6 2 6 6Z"/><path d="M12 11c0-4 2.5-6.5 6-6.5 0 3.8-2.4 6.5-6 6.5Z"/>',
-  pension: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
-  gas: '<path d="M12 21c-3.6 0-6-2.4-6-5.6 0-3.4 2.6-5 3.6-8.4 1.6 1.4 2.4 3 2.4 4.6 1-.8 1.6-2 1.8-3.4 2.2 1.8 4.2 4.2 4.2 7.2C18 18.6 15.6 21 12 21Z"/>',
-  children: '<path d="M4 12h16a8 8 0 0 1-16 0Z"/><path d="M9 4c0 1.5 1 1.5 1 3M13 4c0 1.5 1 1.5 1 3"/>',
-  health: '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/>',
-  education: '<path d="M2.5 9 12 4.5 21.5 9 12 13.5Z"/><path d="M6.5 11v4.5c1.5 1.3 3.4 2 5.5 2s4-.7 5.5-2V11"/>',
-  welfare: '<path d="M7 3.5h7l4 4v13H7Z"/><path d="M14 3.5v4h4M9.5 12h6M9.5 15.5h4"/>',
-};
 let activeCategory = 'all';
 
 function schemeMeta(scheme, docs) {
   const hit = SCHEME_META.find(([re]) => re.test(scheme));
   const issuer = hit ? hit[2] : (docs.some((d) => d.language === 'ta') ? 'tn' : '');
   return { category: hit ? hit[1] : 'welfare', issuer };
-}
-
-function categoryIcon(category) {
-  const span = el('span', 'cat-icon');
-  span.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CATEGORY_ICON[category] || CATEGORY_ICON.welfare}</svg>`;
-  return span;
 }
 
 function schemeQuestions(scheme) {
@@ -1563,10 +1700,11 @@ function renderSchemeFilters(items) {
   const present = CATEGORY_ORDER.filter((c) => items.some((i) => i.category === c));
   box.replaceChildren(...['all', ...present].map((cat) => {
     const count = cat === 'all' ? items.length : items.filter((i) => i.category === cat).length;
-    const button = chip(`${t(cat === 'all' ? 'schemes.all' : `cat.${cat}`)} · ${count}`, () => {
+    const button = chip('', () => {
       activeCategory = cat;
       renderSchemes(null, document.getElementById('scheme-search-input')?.value || '');
-    }, `chip-btn filter-chip${activeCategory === cat ? ' active' : ''}`);
+    }, `filter-tab${activeCategory === cat ? ' active' : ''}`);
+    button.append(document.createTextNode(t(cat === 'all' ? 'schemes.all' : `cat.${cat}`)), el('span', 'tab-count', String(count)));
     button.setAttribute('aria-pressed', String(activeCategory === cat));
     return button;
   }));
@@ -1589,22 +1727,32 @@ function renderSchemes(_unused, searchQuery = '') {
     .filter((i) => activeCategory === 'all' || i.category === activeCategory)
     .filter((i) => !query || i.scheme.toLowerCase().includes(query) || i.docs.some((d) => d.title.toLowerCase().includes(query)));
   if (!shown.length) { grid.append(el('p', 'empty-state', t('schemes.empty'))); return; }
-  grid.append(...shown.map((item, index) => {
-    const card = el('button', 'scheme-tile');
-    card.type = 'button';
-    card.style.setProperty('--i', String(index));
-    const top = el('div', 'tile-top');
-    top.append(categoryIcon(item.category), el('span', 'tile-cat', [t(`cat.${item.category}`), item.issuer ? t(`issuer.${item.issuer}`) : ''].filter(Boolean).join(' · ')));
-    card.append(top, el('h2', 'tile-name', item.scheme));
-    card.append(el('p', item.facts?.amount ? 'tile-amount' : 'tile-amount muted', item.facts?.amount || t('schemes.noAmount')));
-    if (item.facts?.who) card.append(el('p', 'tile-who', item.facts.who));
+  const list = el('div', 'scheme-list');
+  list.append(...shown.map((item) => {
+    const row = el('button', 'scheme-row');
+    row.type = 'button';
+    const main = el('div', 'row-main');
+    main.append(el('h2', 'row-name', item.scheme),
+      el('p', 'row-meta', [t(`cat.${item.category}`), item.issuer ? t(`issuer.${item.issuer}`) : '', `${item.docs.length} ${t('schemes.docCount')}`].filter(Boolean).join(' · ')));
+    if (item.facts?.who) main.append(el('p', 'row-who', item.facts.who));
+    const side = el('div', 'row-side');
     const signed = item.facts?.amount_citation?.checked_by || item.facts?.who_citation?.checked_by;
-    const foot = el('div', 'tile-foot');
-    foot.append(el('span', '', [signed ? `✓ ${t('schemes.verified')}` : '', `${item.docs.length} ${t('schemes.docCount')}`].filter(Boolean).join(' · ')), el('span', 'tile-more', `${t('schemes.details')} →`));
-    card.append(foot);
-    card.addEventListener('click', () => openSchemeDrawer(item));
-    return card;
+    side.append(el('p', item.facts?.amount ? 'row-amount' : 'row-amount muted', item.facts?.amount || t('schemes.noAmount')));
+    if (signed) side.append(el('p', 'row-signed', `✓ ${t('schemes.verified')}`));
+    row.append(main, side, el('span', 'row-chevron', '›'));
+    row.addEventListener('click', () => openSchemeDrawer(item));
+    return row;
   }));
+  grid.append(list);
+}
+
+const WA_SVG = document.querySelector('.wa-icon')?.outerHTML || '';
+/** A button with the WhatsApp mark in front of its label. */
+function waChip(label, onClick, className) {
+  const button = chip('', onClick, className);
+  button.innerHTML = WA_SVG;
+  button.append(el('span', '', label.replace(/^📤\s*/, '')));
+  return button;
 }
 
 function closeSchemeDrawer() { document.querySelector('.scheme-drawer')?.remove(); }
@@ -1620,7 +1768,6 @@ function openSchemeDrawer(item) {
   const close = chip('✕', closeSchemeDrawer, 'icon-btn drawer-close');
   close.setAttribute('aria-label', t('proof.close'));
   const head = el('div', 'drawer-head');
-  head.append(categoryIcon(item.category));
   const titles = el('div');
   titles.append(el('p', 'tile-cat', [t(`cat.${item.category}`), item.issuer ? t(`issuer.${item.issuer}`) : ''].filter(Boolean).join(' · ')), el('h2', '', item.scheme));
   head.append(titles);
@@ -1790,6 +1937,7 @@ async function aboutListen() {
    ========================================================================== */
 function refreshLanguageParts() {
   showHeard('');
+  if (!typer.step) { typer.pos = 0; startTyping(); }
   renderWelcomeChips();
   renderVoiceChips();
   renderHomeExamples();
