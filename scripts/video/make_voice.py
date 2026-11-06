@@ -36,7 +36,7 @@ def speak(text: str, language: str, path: Path) -> None:
 
 
 def narrator(raw: Path, out: Path) -> None:
-    """The narrator: the same Timbre voice, lowered and slowed slightly, so it is clearly not Pakkam."""
+    """The narrator: the same Timbre voice, lowered in pitch and a touch brisker, so it is clearly not Pakkam."""
     if not out.exists():
         subprocess.run(
             [
@@ -47,7 +47,7 @@ def narrator(raw: Path, out: Path) -> None:
                 "-i",
                 str(raw),
                 "-af",
-                "rubberband=pitch=0.82:formant=preserved:tempo=0.97,equalizer=f=180:t=q:w=1:g=3",
+                "rubberband=pitch=0.82:formant=preserved:tempo=1.06,equalizer=f=180:t=q:w=1:g=3",
                 str(out),
             ],
             check=True,

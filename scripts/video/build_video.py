@@ -22,15 +22,13 @@ M = json.loads((WORK / "marks.json").read_text())
 D = json.loads((WORK / "durations.json").read_text())
 LEAD = {n: float((WORK / f"{n}.lead.txt").read_text()) for n in ("hook", "end")}
 W, H, FPS = 1920, 1080, 30
-FONT = "/usr/share/fonts/opentype/inter/Inter-Regular.otf"
-NOTE = "Lakshmi is a fictional character. Everything shown on screen is real."
 
 
 def ffmpeg(*args: str) -> None:
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", *args], check=True)
 
 
-def still(name: str, image: Path, seconds: float, zoom_in: bool = True, note: str = "") -> Path:
+def still(name: str, image: Path, seconds: float, zoom_in: bool = True) -> Path:
     """A slow Ken Burns move over one illustration."""
     out = TMP / f"{name}.mp4"
     frames = int(seconds * FPS)
@@ -39,11 +37,6 @@ def still(name: str, image: Path, seconds: float, zoom_in: bool = True, note: st
         f"scale=3840:-2,zoompan=z='{z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={FPS},"
         "format=yuv420p"
     )
-    if note:
-        vf += (
-            f",drawtext=fontfile={FONT}:text='{note}':fontsize=30:fontcolor=white@0.92:x=(w-text_w)/2:y=h-80"
-            ":box=1:boxcolor=black@0.45:boxborderw=14"
-        )
     ffmpeg(
         "-loop",
         "1",
@@ -57,6 +50,36 @@ def still(name: str, image: Path, seconds: float, zoom_in: bool = True, note: st
         "libx264",
         "-crf",
         "18",
+        str(out),
+    )
+    return out
+
+
+def music(seconds: float) -> Path:
+    """An original ambient bed (no samples): warm chords that swell in, lift, and resolve."""
+    out = TMP / f"music_{int(seconds)}.wav"
+    chords = [
+        (110.0, 164.81, 220.0, 277.18),
+        (98.0, 146.83, 196.0, 246.94),
+        (87.31, 130.81, 174.61, 220.0),
+        (82.41, 123.47, 164.81, 207.65),
+    ]
+    bar = 4.0
+    parts = []
+    for i, ch in enumerate(chords):
+        tone = "+".join(f"0.06*sin(2*PI*{f}*t)+0.02*sin(2*PI*{2 * f}*t)" for f in ch)
+        env = f"if(between(mod(t,{4 * bar}),{i * bar},{(i + 1) * bar}),sin(PI*(mod(t,{bar}))/{bar})^0.6,0)"
+        parts.append(f"({tone})*{env}")
+    expr = "+".join(parts)
+    fade_out = max(0.0, seconds - 3)
+    ffmpeg(
+        "-f",
+        "lavfi",
+        "-i",
+        f"aevalsrc='{expr}':s=48000:d={seconds:.2f}",
+        "-af",
+        f"aecho=0.8:0.7:60|120:0.3|0.2,lowpass=f=2400,afade=t=in:d=2.5,afade=t=out:st={fade_out:.2f}:d=3,"
+        "aformat=channel_layouts=stereo,volume=0.9",
         str(out),
     )
     return out
@@ -101,11 +124,11 @@ def prepare() -> dict:
         "main": WORK / "main.webm",
         "hook": WORK / "hook.webm",
         "end": WORK / "end.webm",
-        "art1": still("art1", art / "lakshmi-1.png", 6.0, note=NOTE),
-        "art2": still("art2", art / "lakshmi-2.png", 5.5, zoom_in=False),
-        "art3": still("art3", art / "lakshmi-3.png", 3.2),
-        "art4": still("art4", art / "lakshmi-4.png", 4.0, zoom_in=False),
-        "go": go_scroll(7.5),
+        "art1": still("art1", art / "lakshmi-1.png", 4.0),
+        "art2": still("art2", art / "lakshmi-2.png", 3.5, zoom_in=False),
+        "art3": still("art3", art / "lakshmi-3.png", 2.0),
+        "art4": still("art4", art / "lakshmi-4.png", 3.0, zoom_in=False),
+        "go": go_scroll(6.5),
     }
 
 
@@ -117,66 +140,75 @@ def scene(sid: str, clips: list, audio: list, tail: float = 0.6) -> dict:
 def build_scenes() -> dict:
     s = {}
     h0, e0 = LEAD["hook"], LEAD["end"]
-    s["day"] = scene("day", [("art1", 0, 6.0, 1), ("hook", h0, h0 + 4.6, 1)], [("l1_day", 0.5)])
+    s["hook"] = scene("hook", [("hook", h0 + 0.3, h0 + 4.0, 1)], [("l0_hook", 0.15)], tail=0.2)
+    s["day"] = scene("day", [("art1", 0, 4.0, 1)], [("l1_day", 0.15)], tail=0.3)
     s["struggle"] = scene(
-        "struggle", [("art2", 0, 5.5, 1), ("go", 0, 7.5, 1)], [("l2_struggle", 0.4)]
+        "struggle", [("art2", 0, 3.5, 1), ("go", 0, 6.5, 1)], [("l2_struggle", 0.2)], tail=0.3
     )
     s["intro"] = scene(
-        "intro", [("art3", 0, 3.2, 1), ("main", M["l3"], M["l3_end"], 1)], [("l3_intro", 0.4)]
+        "intro",
+        [("art3", 0, 2.0, 1), ("main", M["l3"], M["l3"] + 2.2, 1)],
+        [("l3_intro", 0.2)],
+        tail=0.3,
     )
 
     a, mic, ans, pr, e = M["l4"], M["l4_mic"], M["l4_answer"], M["l4_proof"], M["l4_end"]
-    len1 = mic + 3.6 - a
-    len2 = pr - (ans - 0.8)
+    a = mic - 2.6
+    len1 = mic + 3.4 - a
+    len2 = pr - (ans - 0.6)
     s["ask"] = scene(
         "ask",
-        [("main", a, mic + 3.6, 1), ("main", ans - 0.8, pr, 1), ("main", pr, e, 1)],
+        [("main", a, mic + 3.4, 1), ("main", ans - 0.6, pr, 1), ("main", pr, e, 1)],
         [
-            ("l4_ask", 0.2),
+            ("l4_ask", 0.1),
             ("tamil_question", mic + 0.55 - a),
-            ("l4_ask_b", len1 + 0.6),
-            ("tamil_answer", len1 + 0.9 + D["l4_ask_b"]),
-            ("l4_ask_c", len1 + len2 + 0.5),
+            ("l4_ask_b", len1 + 0.3),
+            ("tamil_answer", len1 + 0.5 + D["l4_ask_b"]),
+            ("l4_ask_c", len1 + len2 + 0.3),
         ],
+        tail=0.3,
     )
 
     a, sent, ans = M["l5"], M["refusal_sent"], M["refusal_answer"]
-    len1 = (sent + 0.2 - a) / 2
+    len1 = (sent + 0.2 - a) / 2.5
     s["refusal"] = scene(
         "refusal",
         [
-            ("main", a, sent + 0.2, 2),
-            ("main", ans - 0.5, M["l5_end"], 1),
+            ("main", a, sent + 0.2, 2.5),
+            ("main", ans - 0.4, M["l5_end"], 1),
             ("main", M["l5b"], M["l5b_end"], 1),
         ],
-        [("l5_refusal", 0.4)],
+        [("l5_refusal", 0.2)],
+        tail=0.3,
     )
     s["refusal_short"] = scene(
         "refusal_short",
-        [("main", a, sent + 0.2, 2), ("main", ans - 0.5, M["l5_end"], 1)],
-        [("l5_refusal_short", len1 + 0.6)],
+        [("main", a, sent + 0.2, 2.5), ("main", ans - 0.4, ans + D["l5_refusal_short"] + 0.8, 1)],
+        [("l5_refusal_short", len1 + 0.3)],
+        tail=0.3,
     )
 
     s["bigger"] = scene(
         "bigger",
         [
-            ("main", M["l6_verdict"] - 0.4, M["l6_verdict_end"], 1),
-            ("main", M["l6_schemes"] + 0.8, M["l6_schemes_end"], 1),
-            ("main", M["l6_lang"] + 0.6, M["l6_lang_end"], 1),
+            ("main", M["l6_verdict"] - 0.3, M["l6_verdict"] + 2.6, 1),
+            ("main", M["l6_schemes"] + 0.8, M["l6_schemes"] + 3.0, 1),
+            ("main", M["l6_lang"] + 0.6, M["l6_lang"] + 3.0, 1),
         ],
-        [("l6_bigger", 0.4)],
+        [("l6_bigger", 0.2)],
+        tail=0.3,
     )
     s["end"] = scene(
-        "end", [("art4", 0, 4.0, 1), ("end", e0, e0 + 5.0, 1)], [("l7_end", 0.6)], tail=0.4
+        "end", [("art4", 0, 3.0, 1), ("end", e0, e0 + 3.6, 1)], [("l7_end", 0.4)], tail=0.6
     )
-    s["end_short"] = scene("end_short", [("end", e0, e0 + 5.0, 1)], [("l7_end", 0.4)], tail=0.3)
+    s["end_short"] = scene("end_short", [("end", e0, e0 + 4.0, 1)], [("l7_end", 0.3)], tail=0.6)
     return s
 
 
 CUTS = {
-    "full": ["day", "struggle", "intro", "ask", "refusal", "bigger", "end"],
-    "90s": ["day", "struggle", "intro", "ask", "refusal_short", "bigger", "end"],
-    "60s": ["day", "intro", "ask", "refusal_short", "end_short"],
+    "full": ["hook", "day", "struggle", "intro", "ask", "refusal", "bigger", "end"],
+    "90s": ["hook", "day", "struggle", "intro", "ask", "refusal_short", "bigger", "end"],
+    "60s": ["hook", "day", "intro", "ask", "refusal_short", "end_short"],
 }
 
 
@@ -273,13 +305,25 @@ def build_cut(name: str, scenes: dict, src: dict) -> None:
     joined = TMP / f"{name}_joined.mp4"
     ffmpeg("-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(joined))
     final = OUT / f"pakkam-{name}.mp4"
+    bed = music(t + 1)
+    mix = (
+        "[1:a]volume=0.5[m];[0:a]asplit[v][key];"
+        "[m][key]sidechaincompress=threshold=0.02:ratio=6:attack=30:release=600[duck];"
+        "[v][duck]amix=inputs=2:normalize=0:duration=first,loudnorm=I=-16:TP=-1.5:LRA=11[a]"
+    )
     ffmpeg(
         "-i",
         str(joined),
+        "-i",
+        str(bed),
+        "-filter_complex",
+        mix,
+        "-map",
+        "0:v",
+        "-map",
+        "[a]",
         "-c:v",
         "copy",
-        "-af",
-        "loudnorm=I=-16:TP=-1.5:LRA=11",
         "-c:a",
         "aac",
         "-b:a",

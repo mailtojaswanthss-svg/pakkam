@@ -6,8 +6,12 @@
   "tamil_answer": "கலைஞர் மகளிர் உரிமைத் திட்டத்தில் பயன்பெற குடும்பத்தின் ஆண்டு வருமானம் ரூ.2.5 இலட்சத்திற்குக் கீழ் இருக்க வேண்டும்.",
   "scenes": [
     {
+      "id": "l0_hook",
+      "vo": "Two thousand rupees a month? Share your O T P? Is it true?"
+    },
+    {
       "id": "l1_day",
-      "vo": "This is Lakshmi. A mother in Tamil Nadu. One evening, a forward arrives in the family group. Magalir Urimai is now two thousand rupees. Register today."
+      "vo": "This is Lakshmi, a mother in Tamil Nadu. And this forward just landed in her family group."
     },
     {
       "id": "l2_struggle",
