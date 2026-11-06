@@ -738,6 +738,7 @@ Object.assign(MESSAGES['hi-IN'], {
 
 // Round 7: stronger, honest copy (judge-ready), plus the Shield panel, story player and tabs.
 Object.assign(MESSAGES['en-IN'], {
+  'schemes.docCount1': 'official document', 'schemes.noAmount': 'Details on the official page',
   'home.title1': 'Ask in your language.', 'home.title2': 'Get the answer with its proof.',
   'home.subtitle': "Speak Tamil, Hindi or English. Pakkam reads the official scheme documents and opens the exact page. If the documents don't say it, Pakkam says so.",
   'home.proof1': 'Tested on 194 real questions', 'home.proof2': '98% of answers cite the correct page', 'home.proof3': '39 of 40 out-of-scope questions honestly refused',
@@ -761,6 +762,7 @@ Object.assign(MESSAGES['en-IN'], {
   'pl.prev': 'Previous chapter', 'pl.next': 'Next chapter', 'pl.play': 'Play the story', 'pl.pause': 'Pause the story', 'pl.chapter': 'Chapter {n} of {total}',
 });
 Object.assign(MESSAGES['ta-IN'], {
+  'schemes.docCount1': 'அதிகாரப்பூர்வ ஆவணம்', 'schemes.noAmount': 'விவரங்கள் அதிகாரப்பூர்வப் பக்கத்தில்',
   'home.title1': 'உங்கள் மொழியில் கேளுங்கள்.', 'home.title2': 'ஆதாரத்துடன் பதில் பெறுங்கள்.',
   'home.subtitle': 'தமிழ், இந்தி அல்லது ஆங்கிலத்தில் பேசுங்கள். பக்கம் அதிகாரப்பூர்வத் திட்ட ஆவணங்களைப் படித்து, சரியான பக்கத்தைத் திறந்து காட்டும். ஆவணங்களில் இல்லையென்றால், அதை நேர்மையாகச் சொல்லும்.',
   'home.proof1': '194 உண்மையான கேள்விகளில் சோதிக்கப்பட்டது', 'home.proof2': '98% பதில்கள் சரியான பக்கத்தைக் காட்டுகின்றன', 'home.proof3': 'வரம்புக்கு வெளியே உள்ள 40-ல் 39 கேள்விகளுக்கு நேர்மையான மறுப்பு',
@@ -784,6 +786,7 @@ Object.assign(MESSAGES['ta-IN'], {
   'pl.prev': 'முந்தைய அத்தியாயம்', 'pl.next': 'அடுத்த அத்தியாயம்', 'pl.play': 'கதையை இயக்கு', 'pl.pause': 'கதையை இடைநிறுத்து', 'pl.chapter': 'அத்தியாயம் {n} / {total}',
 });
 Object.assign(MESSAGES['hi-IN'], {
+  'schemes.docCount1': 'आधिकारिक दस्तावेज़', 'schemes.noAmount': 'विवरण आधिकारिक पन्ने पर',
   'home.title1': 'अपनी भाषा में पूछें।', 'home.title2': 'सबूत के साथ जवाब पाएँ।',
   'home.subtitle': 'तमिल, हिंदी या अंग्रेज़ी में बोलें। पक्कम आधिकारिक योजना दस्तावेज़ पढ़कर सही पन्ना खोलकर दिखाता है। अगर दस्तावेज़ों में बात नहीं है, तो पक्कम साफ़ बता देता है।',
   'home.proof1': '194 असली सवालों पर परखा गया', 'home.proof2': '98% जवाब सही पन्ना दिखाते हैं', 'home.proof3': 'दायरे से बाहर के 40 में से 39 सवालों पर ईमानदारी से मना किया',
@@ -2213,12 +2216,12 @@ function renderSchemes(_unused, searchQuery = '') {
     row.type = 'button';
     const main = el('div', 'row-main');
     main.append(el('h2', 'row-name', item.scheme),
-      el('p', 'row-meta', [t(`cat.${item.category}`), item.issuer ? t(`issuer.${item.issuer}`) : '', `${item.docs.length} ${t('schemes.docCount')}`].filter(Boolean).join(' · ')));
+      el('p', 'row-meta', [t(`cat.${item.category}`), item.issuer ? t(`issuer.${item.issuer}`) : '', `${item.docs.length} ${t(item.docs.length === 1 ? 'schemes.docCount1' : 'schemes.docCount')}`].filter(Boolean).join(' · ')));
     if (item.facts?.who) main.append(el('p', 'row-who', item.facts.who));
     const side = el('div', 'row-side');
     const signed = item.facts?.amount_citation?.checked_by || item.facts?.who_citation?.checked_by;
     side.append(el('p', item.facts?.amount ? 'row-amount' : 'row-amount muted', item.facts?.amount || t('schemes.noAmount')));
-    if (signed) side.append(el('p', 'row-signed', `✓ ${t('schemes.verified')}`));
+    if (signed) { const tick = el('p', 'row-signed', `✓ ${t('schemes.verified')}`); tick.title = signed; side.append(tick); }
     row.append(main, side, el('span', 'row-chevron', '›'));
     row.addEventListener('click', () => openSchemeDrawer(item));
     return row;

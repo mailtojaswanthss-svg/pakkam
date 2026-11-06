@@ -42,7 +42,7 @@
   const PHONE = [[4, 34, 'text', 64, -8], [96, 66, 'order', 60, 7]];
   const ORBITS = [[22, 12, 16], [74, 94, 12], [50, 6, 10]];
   const KOLAM_SPOTS = [[24, 80], [80, 16], [12, 50], [88, 82]];
-  const KEEP_CLEAR = '.page-section.active h1, .page-section.active .header-art, .page-section.active .how-checks, .page-section.active .hero-title, #hero-orb-assembly, #assistant-orb-assembly, .page-section.active button, .page-section.active a, .page-section.active input, .page-section.active textarea, .navbar-capsule, .tab-bar';
+  const KEEP_CLEAR = '.page-section.active h1, .page-section.active .header-art, .page-section.active .how-checks, .page-section.active .schemes-guide, .page-section.active .scheme-list, .page-section.active .schemes-search, .page-section.active .hero-title, #hero-orb-assembly, #assistant-orb-assembly, .page-section.active button, .page-section.active a, .page-section.active input, .page-section.active textarea, .navbar-capsule, .tab-bar, .site-footer a, .site-footer button, .site-footer p';
   const SEAL_AT = { x: 60, y: 26, r: 15 };  // where the seal ring sits on the order sheet (sheet units)
 
   let width = 0;
