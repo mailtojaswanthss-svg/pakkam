@@ -448,8 +448,13 @@ class ForwardResponse(BaseModel):
     claims: list[ForwardClaimOut]
     scam_signs: list[
         Literal[
-            "unofficial_link", "official_link", "insecure_link", "otp", "payment",
-            "personal_data", "urgency",
+            "unofficial_link",
+            "official_link",
+            "insecure_link",
+            "otp",
+            "payment",
+            "personal_data",
+            "urgency",
         ]
     ] = Field(
         default_factory=list,
