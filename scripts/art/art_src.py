@@ -213,6 +213,122 @@ CHAPTERS = {
 </svg>''',
 }
 
+# Rumour Shield "How it checks", page headers and the Home headline marks
+SHIELD_STEPS = {
+    'hc-paste': '''<svg viewBox="0 0 120 84">
+  <g class="clip s1"><rect class="paper" x="6" y="18" width="30" height="40" rx="5"/><rect class="accent-fill" x="14" y="14" width="14" height="8" rx="3"/><path class="line-soft" d="M12 32h18M12 39h14M12 46h17"/></g>
+  <path class="cyan-line dash flow" d="M40 40Q46 34 52 40"/>
+  <rect class="paper" x="56" y="3" width="52" height="78" rx="9"/>
+  <path class="line-soft" d="M76 9h12"/>
+  <g class="s2"><rect class="tint" x="61" y="16" width="34" height="17" rx="6"/><path class="line-soft" d="M66 22h22M66 27.5h15"/></g>
+  <g class="s3"><rect class="tint-cyan cyan-ring" x="68" y="38" width="35" height="22" rx="6"/><path class="cyan-line" d="M73 45h23M73 52h15"/></g>
+  <g class="s4"><rect class="accent-fill" x="85" y="66" width="18" height="9" rx="4.5"/><path class="tick" d="M90 70.5l2.5 2l4.5-4"/></g>
+</svg>''',
+    'hc-check': '''<svg viewBox="0 0 120 84">
+  <g class="s1"><rect class="tint line-thin" x="3" y="28" width="40" height="22" rx="7"/><path class="accent-line" d="M9 35h26"/><path class="line-soft" d="M9 42.5h18"/></g>
+  <path class="cyan-line dash flow" d="M45 39H56"/>
+  <path class="paper" d="M58 6h34l14 14v58H58Z"/>
+  <path class="line" d="M92 6v14h14"/>
+  <path class="line-soft" d="M65 24h22M65 33h34M65 54h30M65 63h34M65 70h20"/>
+  <rect class="mark s3" x="63" y="40" width="38" height="7" rx="2"/>
+  <g class="lens sweep"><circle class="cyan-ring tint-cyan" cx="76" cy="44" r="10"/><path class="cyan-line wide" d="M83 51l8 8"/></g>
+</svg>''',
+    'hc-verdict': '''<svg viewBox="0 0 120 84">
+  <g class="v v-good s1"><circle class="good" cx="18" cy="42" r="12"/><path class="tick" d="M12.5 42l4 4l7.5-7.5"/></g>
+  <g class="v v-bad s2"><circle class="bad" cx="46" cy="42" r="12"/><path class="tick" d="M41.5 37.5l9 9M50.5 37.5l-9 9"/></g>
+  <g class="v v-neutral s3"><circle class="unknown" cx="74" cy="42" r="12"/><path class="tick" d="M70 38.5a4.2 4.2 0 1 1 5.3 4c-1.1.4-1.3 1.2-1.3 2.4M74 49.2v.3"/></g>
+  <g class="v v-warn s4"><path class="warn" d="M102 29.5l13 23.5H89Z"/><path class="tick" d="M102 38v7M102 49v.3"/></g>
+  <path class="ground" d="M8 66h104"/>
+</svg>''',
+    'hdr-shield': '''<svg viewBox="0 0 170 120">
+  <circle class="halo" cx="96" cy="60" r="52"/>
+  <g class="tilt"><rect class="paper" x="34" y="14" width="54" height="94" rx="10"/><path class="line-soft" d="M54 21h14"/>
+  <rect class="tint" x="40" y="30" width="36" height="16" rx="6"/><path class="line-soft" d="M45 36h24M45 41h14"/>
+  <rect class="tint-cyan" x="48" y="52" width="34" height="16" rx="6"/><path class="cyan-line" d="M53 58h22M53 63h12"/>
+  <rect class="tint" x="40" y="74" width="30" height="14" rx="6"/></g>
+  <g class="anim-float"><path class="accent-fill" d="M118 30l28 10v20c0 18-12 30-28 36c-16-6-28-18-28-36V40Z"/><path class="tick wide" d="M106 60l8 8l15-16"/></g>
+  <g class="spark sp1"><path class="cyan-line" d="M150 22v8M146 26h8"/></g>
+  <g class="spark sp2"><path class="accent-line" d="M26 96v6M23 99h6"/></g>
+</svg>''',
+    'hdr-settings': '''<svg viewBox="0 0 170 120">
+  <circle class="halo" cx="86" cy="60" r="52"/>
+  <rect class="paper" x="22" y="18" width="96" height="84" rx="12"/>
+  <path class="line-soft" d="M34 40h72M34 60h72M34 80h72"/>
+  <circle class="accent-fill knob k1" cx="58" cy="40" r="6"/>
+  <circle class="cyan-fill knob k2" cx="88" cy="60" r="6"/>
+  <circle class="accent-fill knob k3" cx="48" cy="80" r="6"/>
+  <g class="aa"><path class="line" d="M126 50l7-18l7 18M128.5 44h9"/><path class="accent-line wide" d="M144 54l9-24l9 24M147.5 46h11"/><path class="accent-line" d="M164 30v8M160 34h8"/></g>
+  <g class="speaker"><path class="paper" d="M128 76h8l9-8v28l-9-8h-8Z"/><path class="cyan-line w1" d="M150 76a8 8 0 0 1 0 12"/><path class="cyan-line w2" d="M155 71a15 15 0 0 1 0 22"/></g>
+</svg>''',
+    'mark-proof': '''<svg viewBox="0 0 30 34">
+  <path class="paper" d="M3 2h16l8 8v22H3Z"/>
+  <path class="line" d="M19 2v8h8"/>
+  <path class="line-soft" d="M8 14h10M8 19h12"/>
+  <circle class="good pop" cx="22" cy="26" r="7"/><path class="tick pop" d="M18.5 26l2.3 2.3l4.4-4.4"/>
+</svg>''',
+    'arrow-orb': '''<svg viewBox="0 0 90 60">
+  <path class="accent-line draw" d="M84 52C64 56 34 50 22 32C16 22 16 14 18 8"/>
+  <path class="accent-line draw-head" d="M10 16L18 7L26 15"/>
+</svg>''',
+    'underline': '''<svg viewBox="0 0 300 16" preserveAspectRatio="none">
+  <path class="ul-1 draw" d="M3 11C70 4 150 3 297 7"/>
+  <path class="ul-2 draw" d="M40 14C120 9 200 9 270 12"/>
+</svg>''',
+    'pill-lang': '''<svg viewBox="0 0 20 20"><path class="cyan-line" d="M3 4h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path class="cyan-line" d="M5 8h7M5 11h4"/></svg>''',
+    'pill-rights': '''<svg viewBox="0 0 20 20"><path class="accent-line" d="M10 1.5l7 2.5v5c0 4.4-3 7.6-7 9c-4-1.4-7-4.6-7-9V4Z"/><path class="accent-line" d="M6.8 9.8l2.2 2.2l4.2-4.4"/></svg>''',
+    'pill-access': '''<svg viewBox="0 0 20 20"><path class="cyan-line" d="M4 18V3h9v15"/><path class="cyan-line" d="M13 4.5l4-1v14.5l-4-1"/><circle class="cyan-fill" cx="10.5" cy="11" r="1"/><path class="line" d="M2 18h16"/></svg>''',
+}
+
+# Background set: drawn to sprites by web/js/background.js (no readable words, numbers or emblems)
+BG = {
+    'order': '''<svg viewBox="0 0 120 156">
+  <path class="paper" d="M8 1h90l21 21v126a7 7 0 0 1-7 7H8a7 7 0 0 1-7-7V8a7 7 0 0 1 7-7Z"/>
+  <path class="line" d="M98 1v21h21"/>
+  <path class="accent-bar" d="M34 50h52"/>
+  <path class="ink" d="M14 64h88M14 74h80M14 84h86M14 94h72M14 104h88M14 114h60"/>
+  <path class="cyan-line" d="M66 140c8-12 18 10 30-4c4-5 8-2 12-4"/>
+</svg>''',
+    'seal': '''<svg viewBox="0 0 32 32">
+  <circle class="accent-line" cx="16" cy="16" r="13"/>
+  <circle class="accent-line" cx="16" cy="16" r="8.5" stroke-dasharray="2.4 2.4"/>
+  <path class="accent-line" d="M16 1v3M16 28v3M1 16h3M28 16h3M5.4 5.4l2.1 2.1M24.5 24.5l2.1 2.1M5.4 26.6l2.1-2.1M24.5 7.5l2.1-2.1"/>
+</svg>''',
+    'form': '''<svg viewBox="0 0 120 156">
+  <path class="paper" d="M8 1h90l21 21v126a7 7 0 0 1-7 7H8a7 7 0 0 1-7-7V8a7 7 0 0 1 7-7Z"/>
+  <path class="line" d="M98 1v21h21"/>
+  <path class="accent-bar" d="M14 16h56"/>
+  <rect class="photo" x="86" y="30" width="22" height="26" rx="3"/>
+  <circle class="ink-fill" cx="97" cy="40" r="4"/><path class="ink" d="M90 52c2-5 12-5 14 0"/>
+  <path class="ink-soft" d="M14 34h30M14 58h30M14 82h30M14 106h30"/>
+  <rect class="box" x="14" y="39" width="66" height="10" rx="2"/><rect class="box" x="14" y="63" width="94" height="10" rx="2"/><rect class="box" x="14" y="87" width="94" height="10" rx="2"/><rect class="box" x="14" y="111" width="94" height="10" rx="2"/>
+  <rect class="cyan-line" x="14" y="132" width="9" height="9" rx="2"/><path class="cyan-line" d="M16 136.5l2.5 2.5l3.5-5"/>
+  <path class="ink-soft" d="M28 137h40"/>
+</svg>''',
+    'text': '''<svg viewBox="0 0 120 156">
+  <path class="paper" d="M8 1h90l21 21v126a7 7 0 0 1-7 7H8a7 7 0 0 1-7-7V8a7 7 0 0 1 7-7Z"/>
+  <path class="line" d="M98 1v21h21"/>
+  <path class="accent-bar" d="M14 18h64"/>
+  <path class="ink" d="M14 36h92M14 46h84M14 56h92M14 66h58"/>
+  <rect class="hl" x="11" y="80" width="98" height="10" rx="3"/>
+  <path class="ink" d="M14 85h88M14 100h80M14 110h92M14 120h50"/>
+</svg>''',
+    'receipt': '''<svg viewBox="0 0 120 156">
+  <path class="paper" d="M6 1h108v142l-9-7l-9 7l-9-7l-9 7l-9-7l-9 7l-9-7l-9 7l-9-7l-9 7l-9-7l-9 7Z"/>
+  <circle class="accent-line" cx="60" cy="20" r="9"/>
+  <path class="accent-bar" d="M36 38h48"/>
+  <path class="ink-soft" d="M16 56h50M16 68h44M16 80h52M16 92h40"/>
+  <path class="ink" d="M84 56h20M88 68h16M82 80h22M90 92h14"/>
+  <path class="line" d="M14 106h92" stroke-dasharray="4 4"/>
+  <path class="accent-bar" d="M16 120h34M76 120h28"/>
+</svg>''',
+    'kolam': '''<svg viewBox="0 0 160 160">
+  <g class="kolam-dots"><circle class="dot" cx="50" cy="50" r="2.6"/><circle class="dot" cx="80" cy="50" r="2.6"/><circle class="dot" cx="110" cy="50" r="2.6"/><circle class="dot" cx="50" cy="80" r="2.6"/><circle class="dot" cx="80" cy="80" r="2.6"/><circle class="dot" cx="110" cy="80" r="2.6"/><circle class="dot" cx="50" cy="110" r="2.6"/><circle class="dot" cx="80" cy="110" r="2.6"/><circle class="dot" cx="110" cy="110" r="2.6"/></g>
+  <path class="kolam-line" d="M80 22C98 22 98 38 95 50C110 47 126 47 126 65C126 74 118 80 110 80C118 80 126 86 126 95C126 113 110 113 95 110C98 122 98 138 80 138C62 138 62 122 65 110C50 113 34 113 34 95C34 86 42 80 50 80C42 80 34 74 34 65C34 47 50 47 65 50C62 38 62 22 80 22Z"/>
+  <path class="kolam-line" d="M80 64C92 64 96 68 96 80C96 92 92 96 80 96C68 96 64 92 64 80C64 68 68 64 80 64Z"/>
+  <path class="kolam-line2" d="M65 50C70 60 72 64 80 64M95 50C90 60 88 64 80 64M110 80C100 75 96 72 96 80M110 80C100 85 96 88 96 80M95 110C90 100 88 96 80 96M65 110C70 100 72 96 80 96M50 80C60 85 64 88 64 80M50 80C60 75 64 72 64 80"/>
+</svg>''',
+}
+
 # Colours for the Figma copies (light theme), matching the site's tokens.
 FIGMA_COLORS = {
     'line': ('none', '#52617A'), 'line-thin': ('none', '#52617A'), 'line-soft': ('none', '#8A97AE'),
@@ -230,4 +346,8 @@ FIGMA_COLORS = {
     'device': ('#1F2937', 'none'), 'tangle': ('none', '#42DDEB'), 'bench': ('#D9B98C', '#8B6B3E'), 'dot': ('#8A97AE', 'none'),
     'tamil-letter': ('#079EAC', 'none'), 'tamil-word': ('#172440', 'none'), 'halo': ('#EDE6FB', 'none'),
     'pillar': ('none', '#52617A'), 'road': ('none', '#079EAC'), 'orb': ('#8B5CF6', 'none'),
+    'bad': ('#DC2626', 'none'), 'warn': ('#F59E0B', 'none'), 'unknown': ('#8A97AE', 'none'),
+    'accent-bar': ('none', '#6D28D9'), 'ink': ('none', '#52617A'), 'ink-soft': ('none', '#8A97AE'), 'ink-fill': ('#8A97AE', 'none'),
+    'box': ('none', '#8A97AE'), 'photo': ('#EDE6FB', '#8A97AE'), 'hl': ('#BFEFF3', 'none'),
+    'kolam-line': ('none', '#6D28D9'), 'kolam-line2': ('none', '#079EAC'), 'ul-1': ('none', '#079EAC'), 'ul-2': ('none', '#6D28D9'),
 }
