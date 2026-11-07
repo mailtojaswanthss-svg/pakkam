@@ -48,7 +48,15 @@ Built for the moments that actually happen at home:
 
 🎙️ Voice runs on Gnani.ai's Prisma and Timbre. Five seconds of silence feels like a crash, so Pakkam speaks straight away ("checking the government order…") while it verifies the page. Prisma handles Tanglish and scheme names in a single breath.
 
-Next stress test: out of the clean-audio lab and into the real world: a thatha speaking Tirunelveli Tamil on a budget phone, with the ceiling fan on full.
+🚀 What's next. This is where it gets serious:
+
+→ Always up to date. When a new Government Order is published, Pakkam reads it, checks it and starts answering from it. Old orders are marked as replaced, so you never get last year's rule.
+
+→ Bigger questions, same proof. Ask "What government schemes are available for unemployed youth in Tamil Nadu in 2026?" and get every scheme you may qualify for: what each one gives, who can apply and where to apply, each with its order and page. Not a list of guesses. A list of proof.
+
+→ The real world. Out of the clean-audio lab and into a thatha speaking Tirunelveli Tamil on a budget phone, with the ceiling fan on full.
+
+Our promise stays the same as Pakkam grows: no page, no answer.
 
 🎥 In the demo below, Lakshmi is a fictional mother; every answer and page you see is real, recorded live.
 
