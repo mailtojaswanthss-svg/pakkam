@@ -17,33 +17,56 @@ Lakshmi is a fictional, illustrative character (the post text says so). Everythi
 ## Post text (copy everything between the lines)
 
 ---
-A question she shouldn't have to struggle to ask.
+My AI refused to answer 39 out of 40 questions. That was the goal.
 
-Meet Lakshmi, a mother in Tamil Nadu (a fictional character, but her problem is real). A forward in the family group says Magalir Urimai is now Rs.2,000 a month. Is it true? Is she even eligible?
+I wrote 40 test questions that the official government documents don't answer. Pakkam said "I don't know" to 39 of them.
+(The 40th, "When is the next PM-Kisan installment?" asked in Hindi, it answered anyway. It shouldn't have, and we're fixing it.)
 
-The answer exists. It's buried in a 40-page Government Order. She shouldn't need to understand a 40-page document to understand her rights.
+Building Pakkam made me realise something: getting AI to answer is easy. Getting it to know when NOT to answer is much harder. And when the answer affects someone's livelihood, that difference matters.
 
-So we built **Pakkam (பக்கம், "page" in Tamil)**.
-🎙️ Ask by voice in Tamil, Tanglish, Hindi or English. Gnani Prisma listens, Gnani Timbre answers aloud.
-📄 Every answer comes with the order number and page. One tap opens the original, with the line highlighted.
-🙅 If the documents don't say it, Pakkam says so. It never guesses.
-🔎 Rumour Shield checks WhatsApp forwards against the official order and flags scam tricks.
+Why build an AI that refuses? Because when it's someone's ₹1,000 a month, a confident wrong answer is worse than no answer.
 
-We tested it live on 194 real questions: 98% cite the correct page. Of 40 questions outside the documents, it correctly refused 39. The one failure is in our public report, and it showed us where to improve.
+The real rules are often buried in 40-page Government Orders that nobody at home reads, so families trust WhatsApp forwards instead.
 
-Speak. Hear. See the proof. Because everyone deserves to know.
+Meet Pakkam (பக்கம் = "page"). You just speak:
+🗣️ "Magalir urimai ku income limit evlo?"
+🔊 "குடும்பத்தின் ஆண்டு வருமானம் ரூ.2.5 இலட்சத்திற்குக் கீழ் இருக்க வேண்டும்." (Family income must be below ₹2.5 lakh.)
+📄 On screen: G.O.(Ms) No.15, page 10. One tap opens that exact page with the line highlighted.
 
-Try it: https://pakkam-alpha.vercel.app
-Code and test report: https://github.com/mailtojaswanthss-svg/pakkam
+The most powerful thing about Pakkam isn't that it speaks Tamil.
+It's that it gives people evidence: the order number, the page, the exact line. Something they can show at a government counter, not just say.
 
-Built by Mohit K and me for the Great Indian AI Internship Challenge by Gnani.ai.
+Telling the AI "don't make things up" wasn't enough.
+Every sentence must point to a page in an official government document, and every number is checked against that page before you hear it. If the check fails, it refuses. For 26 key answers, I also checked them by hand against the printed orders and signed my name on them.
 
-#GreatIndianAIInternshipChallenge #GnaniAI #AIForBharat #VoiceAI #TamilNadu #GovTech #ResponsibleAI
+Built for the moments that actually happen at home:
+→ WhatsApp Rumour Shield: paste "Magalir Urimai is now ₹2,000, register today!" and Pakkam shows the order: it's ₹1,000. It also flags the fake link and the OTP trap.
+→ "What can my family get?" Describe your household and get the matching schemes, with what they add up to in a year.
+→ Rejected at the counter? It writes an appeal note quoting the exact rule that may support your appeal.
+
+📊 We tested it on 194 questions in Tamil, Tanglish, Hindi and English. Pakkam answered 136 of them, and 133 of those answers (98%) cited the correct government page.
+
+🎙️ Voice runs on Gnani.ai's Prisma and Timbre. Five seconds of silence feels like a crash, so Pakkam speaks straight away ("checking the government order…") while it verifies the page. Prisma handles Tanglish and scheme names in a single breath.
+
+Next stress test: out of the clean-audio lab and into the real world: a thatha speaking Tirunelveli Tamil on a budget phone, with the ceiling fan on full.
+
+🎥 In the demo below, Lakshmi is a fictional mother; every answer and page you see is real, recorded live.
+
+Built with Mohit K for the #GreatIndianAIInternshipChallenge 2026 by Gnani.ai.
+
+👇 Try to make it guess, or comment with what your family actually calls a scheme at home (like "1000 ruba scheme"). We'll test the hardest ones live.
+—
+Pakkam · பக்கம்
+No page, no answer.
+பதில் மட்டும் இல்ல, பக்கமும்.
+
+#GreatIndianAIInternshipChallenge #GnaniAI #VoiceAI #AIForBharat #TamilNadu
 ---
 
-When posting, type "@" and pick **Gnani.ai** and **Mohit K** from the list so they are real tags.
+When posting, type "@" and pick **Gnani.ai** and **Mohit K** from the list so they are real tags. If you want to thank a mentor or your college, add "Thanks to @… and @… for the support. 🙏" before the 👇 line.
 
 ## First comment (post right after the post goes live)
+> 🌐 Try it: https://pakkam-alpha.vercel.app
 > 🎬 Full version for judges, with the test results: https://github.com/mailtojaswanthss-svg/pakkam/blob/main/docs/judge/pakkam-full.mp4
 > 📊 How we tested, including the one miss: https://github.com/mailtojaswanthss-svg/pakkam/blob/main/docs/review/LIVE_BENCHMARK.md
 > Pakkam is a student research prototype, not a government service. Always check the official source before you act.
