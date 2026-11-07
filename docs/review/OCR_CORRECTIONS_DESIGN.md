@@ -10,7 +10,7 @@ numbers. To confirm an entry, check the printed page, fill in `page`, `confirmed
 
 Some Tamil and Hindi pages were read by OCR, and OCR misread digits. The worst case is Pudhumai
 Penn: the Tamil higher-education note's text reads "ரூ.4,000" a month, but the English notes say
-Rs.1,000. Claude's first pass over the PDFs on your laptop suggests the printed Tamil page (p33)
+Rs.1,000. A first read of the PDFs suggests the printed Tamil page (p33)
 also says ரூ.1,000, so the 4,000 is only in our extracted text. **No person has checked this
 yet.** The number guardrail cannot catch it, because the wrong number really is in the cited
 passage, so the answer looks fully supported.
@@ -19,9 +19,9 @@ passage, so the answer looks fully supported.
 
 | Document, page | Our text reads | Should be | Checked by a person? |
 |---|---|---|---|
-| tn-hedu-policy-note-2024-ta, p33 (Pudhumai Penn) | ரூ.4,000 | ரூ.1,000 | No (Claude first pass: 1,000) |
-| tn-swwe-policy-note-2024-ta, p11 (Pudhumai Penn) | ரூ.7000 | ரூ.1000 | No (Claude first pass: 1000) |
-| apy-brochure-hi, p1 | रु.000; "co वर्ष" | रु.1000; 60 वर्ष | No (Claude first pass: 1000) |
+| tn-hedu-policy-note-2024-ta, p33 (Pudhumai Penn) | ரூ.4,000 | ரூ.1,000 | No (first read: 1,000) |
+| tn-swwe-policy-note-2024-ta, p11 (Pudhumai Penn) | ரூ.7000 | ரூ.1000 | No (first read: 1000) |
+| apy-brochure-hi, p1 | रु.000; "co वर्ष" | रु.1000; 60 वर्ष | No (first read: 1000) |
 | tn-hfw-policy-note-2024-ta (insurance income limit) | ரூ.4,20,000 | Rs.1,20,000 | No, page not found yet |
 | Tamil note, hostel food charge | 4400 | Rs.1,400 | No, page not found yet |
 | Tamil note, senior-citizen helpline | 14167 | 14567 | No, page not found yet |
@@ -49,7 +49,7 @@ A new file, `data/corrections.json`, lists each fix:
 Ingestion applies these after OCR and before chunking. Here is how it works:
 
 - **Only person-checked rows are applied.** A row with an empty `checked_by` is refused, so a
-  Claude first pass can never change the text by itself.
+  A first read can never change the text by itself.
 - **It fails loudly.** If `ocr_reads` is not found on that page exactly once, ingestion stops with
   an error. So a re-OCR or a new PDF version can't silently skip a fix.
 - **The OCR cache is untouched.** It keeps the raw reading, and the fix is applied on top, so

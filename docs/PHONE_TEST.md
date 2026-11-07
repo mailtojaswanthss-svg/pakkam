@@ -59,5 +59,5 @@ Either one prints an `https://…` address to open on the phone.
 
 - [ ] Close the tunnel or turn off port forwarding.
 - [ ] Put `SCHEMEBOT_GNANI_MAX_CALLS_PER_DAY` back.
-- [ ] Note the credits used (from the Gnani dashboard) and any problems in STATUS.md.
+- [ ] Note the credits used (from the Gnani dashboard) and any problems.
 - [ ] Don't keep test recordings. The app doesn't save audio, but delete any screen recordings that contain other people's voices.

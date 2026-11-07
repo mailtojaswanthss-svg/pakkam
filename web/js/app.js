@@ -816,7 +816,7 @@ Object.assign(MESSAGES['hi-IN'], {
   'pl.prev': 'पिछला अध्याय', 'pl.next': 'अगला अध्याय', 'pl.play': 'कहानी चलाएँ', 'pl.pause': 'कहानी रोकें', 'pl.chapter': 'अध्याय {n} / {total}',
 });
 
-// Rumour Shield and appeal texts (from the earlier chat page, web-backup/assets/chat.js).
+// Rumour Shield and appeal texts.
 const SHIELD = {
   'en-IN': {
     eyebrow: 'RUMOUR SHIELD', title: 'Is this WhatsApp forward true?', intro: 'Paste it. Pakkam checks every claim against the official orders and points out the scam tricks.',

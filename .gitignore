@@ -48,6 +48,4 @@ data/answer-cache.tmp
 
 data/eval/answer_eval_raw/
 
-# Google Cloud bundle (holds API keys): deploy/gcp/bundle.py
-pakkam-gcp.zip
 scripts/art/figma/

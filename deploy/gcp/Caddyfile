@@ -1,4 +1,0 @@
-{$SITE} {
-	encode gzip
-	reverse_proxy pakkam:7860
-}

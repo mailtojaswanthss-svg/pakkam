@@ -13,7 +13,7 @@ Three independent checks on every money amount in data/processed/chunks.jsonl:
 
 Writes docs/review/amount_check.csv: one row per suspicious amount with the reasons, and what
 the page image shows. Check the 'check' rows against the PDF, then add each confirmed fix to
-data/corrections.json (Claude can do that from the CSV).
+data/corrections.json.
 """
 
 import argparse
@@ -122,7 +122,7 @@ def find_suspects(chunks: list[dict[str, object]]) -> list[dict[str, object]]:
 
 
 def vision_read(pdf: Path, page: int, client: object, model: str) -> list[str]:
-    """Amounts printed on one page, read from the page image by Claude."""
+    """Amounts printed on one page, read from the page image by the vision model."""
     import pymupdf  # ingest extra
 
     with pymupdf.open(pdf) as document:

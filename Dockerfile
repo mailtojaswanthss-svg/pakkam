@@ -70,7 +70,7 @@ CMD ["uvicorn", "schemebot.api.main:app", "--host", "0.0.0.0", "--port", "8000",
 # Cloud Run has no host folder to mount, so this target copies the search index, the source
 # list and the contacts into the image, and downloads both models at build time instead of
 # on every cold start (the image is about 13 GB). Build it with `--target cloudrun`; the
-# default target for `docker compose` and CI stays `runtime`. See deploy/cloudrun/README.md.
+# default target for `docker compose` and CI stays `runtime`.
 FROM builder AS models
 ARG EMBEDDING_MODEL=BAAI/bge-m3
 ARG RERANKER_MODEL=BAAI/bge-reranker-v2-m3

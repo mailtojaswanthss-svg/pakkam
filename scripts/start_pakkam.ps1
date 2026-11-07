@@ -6,7 +6,7 @@
 # the models are loaded, 3. opens a Cloudflare tunnel and reads its public link, 4. points
 # https://pakkam-alpha.vercel.app at that link and redeploys it (Vercel CLI).
 # One-time setup for step 4: `npx vercel login`, then `npx vercel link --project pakkam`
-# in this folder. Without it the script still runs and prints the link to send to Claude.
+# in this folder. Without it the script still runs and prints the tunnel link.
 # Close the backend and tunnel windows to stop.
 
 param([switch]$NoDeploy)
@@ -62,7 +62,7 @@ for ($i = 0; $i -lt 30 -and -not $url; $i++) {
 if (-not $url) { throw "No tunnel link after 60 s. Check your internet or DNS (1.1.1.1)." }
 Write-Host "    Tunnel: $url" -ForegroundColor Green
 
-if ($NoDeploy) { Write-Host "Send this link to Claude: $url"; exit 0 }
+if ($NoDeploy) { Write-Host "Tunnel link: $url"; exit 0 }
 
 Write-Host "4/4 Pointing the website at this laptop..." -ForegroundColor Cyan
 $paths = "/ask", "/ask/sources", "/sources", "/transcribe", "/speak", "/feedback", "/check-forward", "/page", "/checklist", "/officer-request", "/dashboard/stats", "/scheme-facts"
@@ -76,7 +76,7 @@ try {
     Write-Host "Done. Open https://pakkam-alpha.vercel.app/" -ForegroundColor Green
 } catch {
     Write-Host "Vercel deploy failed (run 'npx vercel login' and 'npx vercel link --project pakkam' once)." -ForegroundColor Yellow
-    Write-Host "Send this link to Claude instead: $url"
+    Write-Host "Tunnel link: $url"
 } finally {
     git checkout -- web/vercel.json  # the link changes every run; keep the repo clean
 }

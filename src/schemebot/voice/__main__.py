@@ -154,7 +154,7 @@ def tts_samples_command(cases: list[str], models: list[TimbreModel]) -> int:
     folder = settings.data_dir / "voice" / "tts-samples"
     for path, outcome in make_samples(speakers, cases, folder):
         print(f"  {path.name}: {outcome}")
-    print(f"Synthetic test audio in {folder}. Listen, then tell Claude what you heard.")
+    print(f"Synthetic test audio in {folder}. Listen, then note what you heard.")
     return 0
 
 
