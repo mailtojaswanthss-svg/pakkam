@@ -1,11 +1,11 @@
-# LinkedIn post: Pakkam (Gnani.ai Great Indian AI Internship Challenge 2026)
+# Pakkam Video & LinkedIn Submission Kit (Gnani.ai Great Indian AI Internship Challenge 2026)
 
-## Which video to post
-| File | Length | Use it for |
+## The Two Presentation Videos Ready to Submit and Share
+
+| Video File | Duration | Purpose & Strategy |
 |---|---|---|
-| `pakkam-90s.mp4` | 1:15 | **The main LinkedIn post.** Opens on the forward ("Is it true?"), then Lakshmi's story: the forward, the 40-page order, asking Pakkam in Tamil, the page as proof, the honest refusal, the wider features. |
-| `pakkam-60s.mp4` | 0:55 | Short sharing: Reels, X, WhatsApp status. |
-| `pakkam-full.mp4` | 1:24 | For judges: adds the test results (39 of 40 refused, the one failure). |
+| **`pakkam-90s-linkedin.mp4`** (or `pakkam-60s.mp4`) | **~60 s (62 s)** | **Main LinkedIn Post Video (Fast, Punchy AI Product Intro with Adaptive BGM):** Designed to hook viewers in the first 3 seconds, inspired by top modern AI product launches (Linear, Perplexity, ElevenLabs). Opens directly on the scam WhatsApp forward vs dense 40-page Government Order, reveals Pakkam, plays colloquial Tamil voice query, showcases instant G.O. verification with Page 10 highlighted, delivers the bold **"Refused 39 out of 40 unanswerable questions"** engineering flex, flags phishing traps with Rumour Shield, and finishes with an energetic brand outro. Features **adaptive multi-layer BGM with sidechain audio ducking** and **NO subtitles/captions**. |
+| **`pakkam-full-product-demo.mp4`** | **2:47 (167 s)** | **Full Product Pitch Walkthrough (For Judges & Pitching Forms):** The complete comprehensive tour of Pakkam. Shows the mission, multi-language support (English, Tamil, Hindi, Tanglish), live voice interaction with Gnani Prisma & Timbre, cited answers, interactive Proof Card, out-of-domain refusal & helpline fallback, and system architecture. Perfect for competition submission forms and the first comment. |
 
 Thumbnail: `linkedin-thumbnail.jpg`. No subtitles or captions: the narrator explains each scene, over soft original background music (generated, royalty-free).
 
