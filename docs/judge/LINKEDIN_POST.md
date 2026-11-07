@@ -5,7 +5,7 @@
 | Video File | Duration | Purpose & Strategy |
 |---|---|---|
 | **`pakkam-90s-linkedin.mp4`** (or `pakkam-60s.mp4`) | **~60 s (62 s)** | **Main LinkedIn Post Video (Fast, Punchy AI Product Intro with Adaptive BGM):** Designed to hook viewers in the first 3 seconds, inspired by top modern AI product launches (Linear, Perplexity, ElevenLabs). Opens directly on the scam WhatsApp forward vs dense 40-page Government Order, reveals Pakkam, plays colloquial Tamil voice query, showcases instant G.O. verification with Page 10 highlighted, delivers the bold **"Refused 39 out of 40 unanswerable questions"** engineering flex, flags phishing traps with Rumour Shield, and finishes with an energetic brand outro. Features **adaptive multi-layer BGM with sidechain audio ducking** and **NO subtitles/captions**. |
-| **`pakkam-full-product-demo.mp4`** | **2:47 (167 s)** | **Full Product Pitch Walkthrough (For Judges & Pitching Forms):** The complete comprehensive tour of Pakkam. Shows the mission, multi-language support (English, Tamil, Hindi, Tanglish), live voice interaction with Gnani Prisma & Timbre, cited answers, interactive Proof Card, out-of-domain refusal & helpline fallback, and system architecture. Perfect for competition submission forms and the first comment. |
+| **`pakkam-full-product-demo.mp4`** | **2:47 (167 s)** | **Full Product Pitch Walkthrough (For Judges & Pitching Forms):** The complete comprehensive tour of Pakkam. Shows the mission, multi-language support (English, Tamil, Hindi), live voice interaction with Gnani Prisma & Timbre, cited answers, interactive Proof Card, out-of-domain refusal & helpline fallback, and system architecture. Perfect for competition submission forms and the first comment. |
 
 Thumbnail: `linkedin-thumbnail.jpg`. No subtitles or captions: the narrator explains each scene, over soft original background music (generated, royalty-free).
 
@@ -44,9 +44,9 @@ Built for the moments that actually happen at home:
 → "What can my family get?" Describe your household and get the matching schemes, with what they add up to in a year.
 → Rejected at the counter? It writes an appeal note quoting the exact rule that may support your appeal.
 
-📊 We tested it on 194 questions in Tamil, Tanglish, Hindi and English. Pakkam answered 136 of them, and 133 of those answers (98%) cited the correct government page.
+📊 We tested it on 145 questions in Tamil, Hindi and English: 105 answered, 103 (98%) cited the correct government page.
 
-🎙️ Voice runs on Gnani.ai's Prisma and Timbre. Five seconds of silence feels like a crash, so Pakkam speaks straight away ("checking the government order…") while it verifies the page. Prisma handles Tanglish and scheme names in a single breath.
+🎙️ Voice runs on Gnani.ai's Prisma and Timbre. Five seconds of silence feels like a crash, so Pakkam speaks straight away ("checking the government order…") while it verifies the page. Prisma handles conversational Tamil and scheme names in a single breath.
 
 🚀 What's next. This is where it gets serious:
 
@@ -97,7 +97,7 @@ Best time: a weekday, 8–10 AM IST.
 | 0:21 | Lakshmi speaking to the orb, then Pakkam's home ("Speak. Hear. See the proof.") | What if she could simply ask? That's why we built Pakkam. |
 | 0:25 | Tap the orb, the Tamil question, the answer (Rs.2.5 lakh, G.O.15 page 10) spoken aloud, the original page opened | She taps the orb, and asks in her own words… |
 | 0:48 | "When will the next PM-KISAN instalment come?" → Not in the documents | And when the documents don't say it, Pakkam won't guess. |
-| 0:55 | Rumour Shield verdict, the scheme list, the language chips | Tamil, Tanglish, Hindi or English… |
+| 0:55 | Rumour Shield verdict, the scheme list, the language chips | Tamil, Hindi or English… |
 | 1:03 | Lakshmi and her daughter, then the end card | Pakkam. Speak. Hear. See the proof. Because everyone deserves to know. |
 
 The full cut replaces the short refusal line with: "We tested forty questions outside the documents. Pakkam correctly refused thirty nine. The one failure showed us where to improve. Lakshmi doesn't need an assistant with an answer for everything. She needs one that knows when it doesn't have one."

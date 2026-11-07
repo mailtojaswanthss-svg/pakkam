@@ -8,16 +8,13 @@ Questions sent to `https://pakkam-alpha.vercel.app` one at a time, as a visitor 
 | English | 97% (38/39) | 100% (38/38) | 100% (10/10) | 0 | 9.3 s | 28.6 s |
 | Tamil | 92% (35/38) | 94% (33/35) | 100% (10/10) | 0 | 4.8 s | 30.1 s |
 | Hindi | 84% (32/38) | 100% (32/32) | 90% (9/10) | 0 | 4.4 s | 7.9 s |
-| Tanglish | 79% (31/39) | 97% (30/31) | 100% (10/10) | 0 | 4.8 s | 6.6 s |
-| **All** | 88% (136/154) | 98% (133/136) | 98% (39/40) | 0 | 4.8 s | 19.6 s |
+| **All** | 91% (105/115) | 98% (103/105) | 97% (29/30) | 0 | 4.8 s | 28.6 s |
 
 ## To look at
 
 - `q029` (hi) **missed** unsupported number_not_in_source: अटल पेंशन योजना में कितनी पेंशन मिलती है?
 - `q031` (hi) **missed** not_in_documents: उज्ज्वला योजना में गैस कनेक्शन के लिए कौन पात्र है?
 - `q036` (hi) **answered_uncovered** : पीएम किसान की अगली किस्त कब आएगी?
-- `q039` (ta-Latn) **missed** not_in_documents: govt job la irukavanga family ku magalir urimai thogai kidaikuma
-- `q045` (ta-Latn) **missed** unsupported not_supported,not_supported: child helpline number enna
 - `q066` (ta) **missed** unsupported not_supported: முதலமைச்சரின் மருத்துவக் காப்பீட்டுத் திட்டத்தில் சேர குடும்ப ஆண்டு வருமான வரம்பு என்ன?
 - `q122` (en) **missed** not_in_documents: How much subsidy does TAHDCO give on a self-employment project?
 - `q146` (ta) **missed** unsupported number_not_in_source: பிற்படுத்தப்பட்டோருக்கு விலையில்லா வீட்டுமனை பெற ஆண்டு வருமான வரம்பு என்ன?
@@ -26,12 +23,6 @@ Questions sent to `https://pakkam-alpha.vercel.app` one at a time, as a visitor 
 - `q164` (hi) **missed** not_in_documents: टीएएचडीसीओ स्वरोजगार परियोजना पर कितनी सब्सिडी देता है?
 - `q168` (hi) **missed** not_in_documents: पिछड़े वर्ग के स्कूल छात्रावास में छात्रों के लिए मासिक भोजन शुल्क कितना है?
 - `q169` (hi) **missed** unsupported not_supported: पिछड़े वर्ग के छात्रावास के छात्रों को कितने सेट यूनिफॉर्म मिलते हैं?
-- `q174` (ta-Latn) **missed** unsupported not_supported: atal pension la subscriber iranthuttaa pension yaarukku kidaikum
-- `q176` (ta-Latn) **missed** not_in_documents: ujjwala gas connection veetla yaaru per la kudupaanga
-- `q181` (ta-Latn) **missed** not_in_documents: inter caste marriage assistance ku kalyanam aagi evlo naal kulla apply pannanum
-- `q187` (ta-Latn) **missed** low_confidence: first graduate students ku engineering fees concession irukka
-- `q190` (ta-Latn) **missed** low_confidence: BC hostel pasangalukku ethana set uniform kudupaanga
-- `q191` (ta-Latn) **missed** low_confidence: makkalai thedi maruthuvam scheme la enna service kidaikum
 
 Raw replies: `data/eval/live_benchmark.json`. Questions: `data/eval/questions.jsonl`
 (the reference answers are drafts; correctness of wording is graded separately).
