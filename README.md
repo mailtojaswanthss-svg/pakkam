@@ -12,7 +12,7 @@ Tamil · Tanglish · Hindi · English &nbsp;|&nbsp; Voice by Gnani Prisma + Timb
 ![License](https://img.shields.io/badge/code-MIT-5A36A3)
 ![Status](https://img.shields.io/badge/status-research%20prototype-E3A33B)
 
-[**Live site**](https://pakkam-alpha.vercel.app) · [Demo video](docs/judge/pakkam-90s.mp4) · [Pitch deck](docs/judge/pakkam-pitch-deck.pdf) · [Test report](docs/review/LIVE_BENCHMARK.md) · [Project report](docs/report.md)
+[**Live site**](https://pakkam-alpha.vercel.app) · [**One-page pitch**](PITCH.md) · [Demo video](docs/judge/pakkam-90s.mp4) · [Pitch deck](docs/judge/pakkam-pitch-deck.pdf) · [Test report](docs/review/LIVE_BENCHMARK.md) · [Project report](docs/report.md)
 
 </div>
 
@@ -40,6 +40,7 @@ Tamil · Tanglish · Hindi · English &nbsp;|&nbsp; Voice by Gnani Prisma + Timb
 | | |
 |---|---|
 | **Videos** (live site, narrated with Gnani Timbre) | [90 s](docs/judge/pakkam-90s.mp4) · [60 s](docs/judge/pakkam-60s.mp4) · [full, with test results](docs/judge/pakkam-full.mp4) |
+| **One-page solution pitch** | [PITCH.md](PITCH.md) · [PDF](docs/judge/pakkam-solution-pitch.pdf) |
 | **Pitch deck** | [docs/judge/pakkam-pitch-deck.pdf](docs/judge/pakkam-pitch-deck.pdf) |
 | **Try it in 60 seconds** | 1. Open *Check a forward* and paste "Magalir Urimai increased to Rs.2,000! Share OTP" → it is wrong, the order says Rs.1,000, and the scam signs are flagged. 2. Tap the orb and ask in Tamil: *"மகளிர் உரிமைத் தொகைக்கு வருமான வரம்பு எவ்வளவு?"* → Rs.2.5 lakh, G.O.(Ms) No.15, page 10. 3. Tap **Show proof**: the real page, the line highlighted. 4. Ask *"When will the next PM-KISAN installment come?"* → Pakkam says it is not in the documents and gives the official contact. |
 
