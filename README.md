@@ -204,7 +204,10 @@ Every setting is in [.env.example](.env.example). Docker: `docker compose up`.
 
 **How the live site runs.** The website is on Vercel; the backend runs on a laptop behind a
 Cloudflare tunnel. On Windows, `scripts/start_pakkam.ps1` starts the backend, opens the tunnel and
-redeploys Vercel with the new address. Voice setup: [docs/GNANI_RUNBOOK.md](docs/GNANI_RUNBOOK.md).
+redeploys Vercel with the new address. To run the backend without the laptop, publish it as a free
+Hugging Face Space (2 CPU, 16 GB RAM) with `uv run python deploy/hf-space/push.py`, then point the
+site at it: `scripts/start_pakkam.ps1 -Backend https://<user>-pakkam.hf.space`
+([deploy/hf-space/README.md](deploy/hf-space/README.md)). Voice setup: [docs/GNANI_RUNBOOK.md](docs/GNANI_RUNBOOK.md).
 Demo script: [docs/DEMO_RUNBOOK.md](docs/DEMO_RUNBOOK.md).
 
 ---
