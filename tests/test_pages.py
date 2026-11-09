@@ -64,3 +64,68 @@ def test_a_known_document_without_its_pdf_on_disk_is_404(
     monkeypatch.setenv("SCHEMEBOT_DATA_DIR", str(tmp_path))
     response = client.get("/page", params={"doc": "apy-brochure-en", "p": 1})
     assert response.status_code == 404
+
+
+# --- Scanned pages: the excerpt is found among OCR words and painted yellow ---
+
+from schemebot.api import pages as pages_module  # noqa: E402
+from schemebot.api.pages import Word, _line_boxes, _match_span, _normalise  # noqa: E402
+
+OCR_LINE = [
+    "குடும்பங்களாக",
+    "இருத்தல்\u200c",
+    "வேண்டும்\u200c.",
+    "i)",
+    "ஆண்டு",
+    "வருமானம்\u200c",
+    "e.2.5",
+    "இலட்சத்திற்குக்\u200c",
+    "கீழ்\u200c",
+    "வருமானம்\u200c",
+    "ஈட்டும்\u200c",
+    "குடும்பங்கள்\u200c.",
+]
+EXCERPT = "குடும்பத்தின் ஆண்டு வருமானம் ரூ.2.5 இலட்சத்திற்குக் கீழ் இருக்க வேண்டும்."
+
+
+def test_normalise_drops_joiners_and_compares_numbers_by_digits() -> None:
+    assert _normalise("வருமானம்‌") == "வருமானம்"
+    assert _normalise("ரூ.2.5") == _normalise("e.2.5") == "25"
+    assert _normalise("௨௫") == "25"
+
+
+def test_match_span_finds_the_cited_words_despite_ocr_noise() -> None:
+    found = [OCR_LINE[i] for i in _match_span(OCR_LINE, EXCERPT)]
+    assert found[0] == "ஆண்டு" and "e.2.5" in found and found[-1].startswith("கீழ்")
+
+
+def test_match_span_refuses_a_weak_match() -> None:
+    assert _match_span(OCR_LINE, "Atal Pension Yojana subscriber gets a monthly pension") == []
+
+
+def test_line_boxes_merge_words_on_the_same_line() -> None:
+    words = [
+        Word("a", 10, 20, 30, 10, (1, 1, 1)),
+        Word("b", 50, 22, 20, 10, (1, 1, 1)),
+        Word("c", 10, 60, 30, 10, (1, 1, 2)),
+    ]
+    boxes = _line_boxes(words, [0, 1, 2])
+    assert len(boxes) == 2 and boxes[0][0] < 10 and boxes[0][2] > 70
+
+
+def test_scanned_page_is_painted_yellow_from_ocr_words(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "scan.pdf"
+    doc = pymupdf.open()
+    doc.new_page()  # no text layer, like a scanned order
+    doc.save(path)
+    doc.close()
+    fake = [Word(w, 100 + 60 * i, 300, 50, 20, (1, 1, 1)) for i, w in enumerate(OCR_LINE)]
+    monkeypatch.setattr(pages_module, "_ocr_words", lambda *args: fake)
+    from PIL import Image
+
+    png = render_page(path, 1, EXCERPT, "ta")
+    image = Image.open(__import__("io").BytesIO(png)).convert("RGB")
+    yellow = sum(1 for r, g, b in image.getdata() if r > 240 and g > 220 and b < 160)
+    assert yellow > 100

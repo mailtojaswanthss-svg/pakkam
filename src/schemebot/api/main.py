@@ -677,14 +677,23 @@ def create_app(
 
     @app.get("/page", dependencies=[Depends(limit_pages)])
     def page_image(doc: str, p: int, mark: str = "") -> Response:
-        """The cited page of an official PDF as a PNG, the passage highlighted where the text
-        layer allows: proof a citizen can show at the office ("show the officer")."""
+        """The cited page of an official PDF as a PNG, the cited passage highlighted in yellow
+        (from the text layer, or from OCR on scanned pages): proof a citizen can show at the
+        office ("show the officer")."""
         known = {d.doc_id: d for d in load_sources()}
         source = known.get(doc)
         if source is None:  # only documents in sources.json: no paths from the request
             raise HTTPException(status_code=404, detail="Unknown document.")
         try:
-            image = render_page(get_settings().raw_dir / source.file, p, mark[:600])
+            settings = get_settings()
+            image = render_page(
+                settings.raw_dir / source.file,
+                p,
+                mark[:600],
+                source.language,
+                settings.tesseract_cmd,
+                settings.tessdata_dir,
+            )
         except PageUnavailable as error:
             logger.warning("page image unavailable: %s", error)
             raise HTTPException(status_code=404, detail="That page is not available.") from error
